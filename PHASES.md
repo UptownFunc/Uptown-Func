@@ -1011,6 +1011,9 @@ Later check (00:50), pins installed on Python 3.14.4: (cd pipeline && PYTHONUTF8
   2 skipped. The 3 failures are the Windows checkout (one CR added to coverage.geojson and contours.geojson; their git
   copies match the recorded sha256) and the licence check (needs the repo's Linux .venv). D1, D2, D12 headers, the D5
   waypoints file and the rover image checksums were re-read and match (record section 8).
+Later (00:57): the member opened Ehresmann et al. 2021 and supplied its text; 0.37 pi is in sec. 2.2 and 4, so
+  skyObstructionM12 is resolved and unresolvedCitations() is empty. vitest 289/289; tsc clean; build main 208.35 kB +
+  worker 41,530 B = ~249.9 of 250 KB. RAD's height is not stated in the paper (V-12 stays Assumed).
 Known limitations or failures (as first written): pytest and scripts/licences.py NOT run (no Python 3.11 pipeline environment on this
   computer; no pipeline or dependency file changed). Ehresmann et al. 2021 full text not read (HTTP 403), so 0.37 pi
   and RAD's height stay unverified. NASA/TP-2010-216115 is not online. Route bench not re-run.

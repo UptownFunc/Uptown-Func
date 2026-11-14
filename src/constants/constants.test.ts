@@ -12,7 +12,8 @@ describe("constants register", () => {
   });
 
   it("lists exactly the known unresolved citations, so no new constant can ship without a page", () => {
-    expect(unresolvedCitations().sort()).toEqual(["skyObstructionM12"]);
+    // REG-02: the last one (skyObstructionM12) was resolved when a team member read Ehresmann et al. 2021 in full.
+    expect(unresolvedCitations().sort()).toEqual([]);
   });
 
   it("does not present the nominal walking speed as an observation", () => {
@@ -77,9 +78,10 @@ describe("constants register", () => {
     expect(d.citation.source).toContain("p. 49");
   });
 
-  it("gives the page read for the 19 % M12 figure and keeps 0.37 pi unresolved", () => {
+  it("cites the sections read for 0.37 pi at M12 and the page read for the 19 % figure", () => {
     const m = constant("skyObstructionM12");
-    expect(m.citation.location.startsWith("UNRESOLVED")).toBe(true);
+    expect(m.value).toBe(0.185);
+    expect(m.citation.location).toContain("Ehresmann sec. 2.2 and 4");
     expect(m.citation.location).toContain("p. 6 of 10");
   });
 

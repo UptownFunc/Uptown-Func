@@ -3,6 +3,8 @@
 // A location marked UNRESOLVED means this session could not read the page; it must be filled before release.
 // REG-02 (Sun 15 Nov 2026, docs/data/reg-02-verification.md): every citation below was re-read in its source at
 // Yujin's direction. Changed: walkSpeedRange wording and pages, drillWarningDefault documents, skyObstructionM12 page.
+// skyObstructionM12: Yujin opened Ehresmann et al. 2021 on the publisher's page (free access) and supplied its text;
+// 0.37 pi is in sections 2.2 and 4. No constant is UNRESOLVED now.
 import type { ValueClass } from "../contracts";
 
 export interface Citation { readonly source: string; readonly location: string }
@@ -54,7 +56,7 @@ export const CONSTANTS = {
   },
   skyObstructionM12: {
     id: "skyObstructionM12", value: 0.185, unit: "1", valueClass: "published_observation", // fraction of the 2 pi hemisphere
-    citation: { source: "Ehresmann et al. 2021, JGR Planets, doi:10.1029/2021JE006851: 0.37 pi of the 2 pi hemisphere at Butte M12, sols 1456-1467; Guo et al. 2021, GRL, doi:10.1029/2021GL093912: about 19 %", location: "UNRESOLVED: 0.37 pi not read (Ehresmann full text). 19 %: Ehresmann abstract; Guo sec. 4, p. 6 of 10" },
+    citation: { source: "Ehresmann et al. 2021, JGR Planets, doi:10.1029/2021JE006851: 0.37 pi of the 2 pi hemisphere at Butte M12, sols 1456-1467; Guo et al. 2021, GRL, doi:10.1029/2021GL093912: about 19 %", location: "Ehresmann sec. 2.2 and 4 (publisher HTML, no page numbers); Guo sec. 4, p. 6 of 10" },
     limitation: "Geometric sky obstruction at one rover position, used only as the AC-07 benchmark; never converted into dose (plan 6.7).",
   },
   drillWarningDefault: {

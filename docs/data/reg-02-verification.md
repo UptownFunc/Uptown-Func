@@ -42,7 +42,7 @@ that need a team decision are in section 6.
 | JPL | JPL Image Use Policy, `https://www.jpl.nasa.gov/jpl-image-use-policy/` | page text | New: REG-01 could not reach it |
 
 **Not read: Ehresmann et al. (2021), JGR Planets, doi:10.1029/2021JE006851.** The publisher refused automated access
-(HTTP 403) and no repository copy was found. Only its abstract was read. See M12 in section 3.
+(HTTP 403) and no repository copy was found. Only its abstract was read. See M12 in section 3. **Superseded at 00:57: the article was read in full, section 9.**
 
 ## 3. Verdicts
 
@@ -130,7 +130,7 @@ proven. pytest and the licence check were not run (no pipeline environment here;
    the slow bound to 0.56 m/s would lower the demo's low margin from est. 92.3 min to about 77.6 min (our arithmetic:
    102.7 min of walking times 0.64 / 0.56). It would stay OK (threshold 36 min). The plan fixes the speeds, so this
    is a Data and Science decision.
-2. **0.37 pi at M12.** A person should open the Ehresmann paper in a browser (it is free to read at
+2. **0.37 pi at M12: resolved at 00:57, see section 9.** As first written: A person should open the Ehresmann paper in a browser (it is free to read at
    `https://doi.org/10.1029/2021JE006851`) and record the sentence and page that give 0.37 pi, the 11 deg average
    and RAD's height. Until then the constant stays UNRESOLVED. The verified published figure is "about 0.19".
 3. **k_v = 1 on 10-20 deg** is still an unsupported team choice. No source read in REG-01 or REG-02 can replace it.
@@ -166,3 +166,27 @@ pytest 9.2.0) on Python 3.14.4, not the pinned 3.11.18. This closes four items f
 Section 7 now reads: still not done are the Ehresmann full text, NASA/TP-2010-216115, the TM Table 1 alignment, the
 licence check, and a re-run of the AC-07 and AC-08 pipeline jobs (their inputs and committed outputs were checked;
 the jobs themselves were not run again).
+
+## 9. Addendum (Sun 15 Nov 2026, 00:57): Ehresmann et al. (2021) read in full
+
+Yujin opened the article on the publisher's page (free access, `https://doi.org/10.1029/2021JE006851`) and supplied
+its full text to the session. The text was then searched for each figure. The publisher's HTML has no page numbers,
+so the citation is by section. This closes item 2 of section 6 and the "not read" note in section 2.
+
+| Figure | Sentence in the article | Section | Verdict |
+|---|---|---|---|
+| 0.37 pi of the 2 pi hemisphere (the constant's 0.185) | "Over the whole azimuthal range (0–360°), the blocked solid angle takes up 0.37π (or ∼19%) of the whole 2π hemisphere with an average blocking angle of 11°." | 2.2 | **CONFIRMED** |
+| Same, repeated | "the Butte and the surrounding area block out ∼19%, or 0.37π, of the 2π hemisphere above RAD" | 4 | **CONFIRMED** |
+| Average blocking angle 11 deg; highest about 30 deg | As above; "shows obstructed views of up to ∼30° (from horizon)"; "While the maximum angle of obstruction is ∼30°, the average angle is only ∼11°." | 2.2, 4 | **CONFIRMED** |
+| Parking sols | "On sol 1455 (September 9, 2016), the rover was parked close to Butte M12 ... and stayed there until sol 1467 (September 22, 2016)." Analysis window "from MSL sol 1456–1467". | 2.2, 1 | **CONFIRMED**; agrees with Guo et al. and with the AC-07 observer |
+| How the horizon was derived | "From on board camera and localization data, and mission (MSL)-specific elevation models, we calculated a 'horizon mask'" | 2.2 | **CONFIRMED** (plan 6.7 wording) |
+| Dose and neutral decreases | "3.8% (±0.4%) less dose than expected"; "∼7.5% (±0.2% ...) less neutrals than expected" | 3.2, 3.3 | **CONFIRMED** (4 % and 7.5 % in the abstract) |
+| RAD's height above the ground (V-12, R-13) | **Not stated anywhere in the article.** It speaks only of "the 2π hemisphere above RAD" and refers to Hassler et al. (2012) for the instrument. | - | **No source value.** h_obs = 1 m stays an Assumed choice; the 0-2 m sweep passes at every height. |
+
+Result: `skyObstructionM12` is no longer UNRESOLVED. Its location now reads "Ehresmann sec. 2.2 and 4 (publisher
+HTML, no page numbers); Guo sec. 4, p. 6 of 10". `unresolvedCitations()` returns an empty list. The value 0.185 is
+unchanged. One more note from the article: the rover was "slightly tilted off-zenith by ∼7°" while parked; the
+benchmark does not model tilt.
+
+Checks after this change: vitest 289 of 289; `tsc --noEmit` clean; build main 208.35 kB gzip + worker 41,530 B = about
+249.9 of 250 KB.

@@ -59,13 +59,13 @@ These values were **not given by the plan**. A session or a team member chose th
 | V-09 | Stop name and task limits | name 60 chars; 10 tasks of 120 chars | Interface limit, not a science value | `src/engine/assumptions.ts` `STOP_LIMITS` | C-19, REG-01 | **KEPT** |
 | V-10 | Time-to-habitat contour display | 5-min levels (plan) up to 90 min; 4 m display grid; minimum area 400 cells | Display setting, not a science value | `src/app/App.tsx`, `src/engine/worker.ts` | R-08, REG-01 | **KEPT** |
 | V-11 | AC-08 path rule | a 2 m cell counts if the D5 line enters it (exact traversal); share over known cells | Method choice, stated in the AC-08 record | `pipeline/sharpwalk/rover_path.py` | AC-08 record, REG-01 | **KEPT** |
-| V-12 | AC-07 base observer height h_obs | 1 m (the plan sweeps 0-2 m) | RAD's reference height not found (R-13 open). The whole 0-2 m sweep passes (20.73 to 16.51 %) | `pipeline/sharpwalk/run_sky_benchmark.py` `BASE` | AC-07 record, REG-01 | **KEPT** (R-13 open) |
+| V-12 | AC-07 base observer height h_obs | 1 m (the plan sweeps 0-2 m) | Ehresmann et al. 2021 was read in full (REG-02) and states no height for RAD above the ground, so no source value exists. The whole 0-2 m sweep passes (20.73 to 16.51 %) | `pipeline/sharpwalk/run_sky_benchmark.py` `BASE` | AC-07 record, REG-01, REG-02 | **KEPT** (no source gives a height) |
 | V-13 | AC-07 sampling | D1 to 3 km (plan: to the D1 edge), 1 m steps; D12 beyond, 100 m steps | Method choice; AC-21/AC-22 convergence recorded | `pipeline/sharpwalk/run_sky_benchmark.py` | AC-07 record, REG-01 | **KEPT** |
 | V-14 | Sky layer display ramp | graphite #191B20, alpha 0 to 200 for f_obs 0 to 50 %, 4 m display pixels | Display setting; hard to see on dark imagery | `pipeline/sharpwalk/run_sky_grid.py` `RAMP_MAX` | SKY-3, REG-01 | **KEPT** (Design review still open, B-13) |
 
 **Plan values whose source is still unresolved** (the value comes from the plan; the citation or reference is missing):
 - ~~20 deg slope limit~~ **resolved by REG-01:** EVA-EXP-0042 Rev B, 4.2.1.3, p. 38 (`src/constants`). Still Assumed: a lunar suit capability applied to Mars.
-- Sky obstruction at M12: the 19 % figure is confirmed (Ehresmann et al. abstract; Guo et al. 2021, sec. 4, p. 6 of 10; REG-02). The 0.37 pi figure behind the constant's 0.185 is still not read, because the publisher refused automated access; a person must open the paper (`src/constants`; the release check lists it).
+- ~~Sky obstruction at M12~~ **resolved by REG-02:** "the blocked solid angle takes up 0.37π (or ∼19%) of the whole 2π hemisphere with an average blocking angle of 11°" (Ehresmann et al. 2021, sec. 2.2, repeated in sec. 4; read by Yujin on the publisher's page, which has no page numbers); "about 0.19" (Guo et al. 2021, sec. 4, p. 6 of 10). No constant in `src/constants` is UNRESOLVED now.
 - D1 vertical reference: unverified (D-05); shown as "vertical reference unverified".
 - REMS units read as degrees C and Pa, not labelled in the feed (REMS-01).
 

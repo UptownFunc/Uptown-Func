@@ -16,7 +16,8 @@ settings, against 0.37π of 2π = 18.5 % (Ehresmann et al. 2021; Guo et al. 2021
 | 2 m | 16.51 % | -1.99 pp |
 
 The near-exact match at 1 m is a coincidence of the chosen height: the result moves by about 2 pp per metre of
-h_obs, and RAD's observer reference height is still UNVERIFIED (plan R-13).
+h_obs, and RAD's observer reference height is still UNVERIFIED (plan R-13). REG-02 (15 Nov): Ehresmann et al. 2021 was
+read in full and states no height for RAD above the ground.
 
 **Shape.** Mean horizon angle 10.8° (published average blocking angle 11°); highest 28.9° (published: no higher than
 30°). The horizon is set by the butte, not by DEM noise at the rover's feet:
@@ -57,4 +58,5 @@ compared. The sky-obstruction layer over the demo area (plan 6.7 compute budget,
 
 **Sources.** D1 and D12 (USGS Astrogeology); D5 waypoints (NASA/JPL MMGIS, sha256 in the JSON); Ehresmann et al.
 (2021), JGR Planets, doi:10.1029/2021JE006851; Guo et al. (2021), GRL, doi:10.1029/2021GL093912 (figures as read from
-the abstracts, plan 19.6; page numbers still to be read).
+the abstracts, plan 19.6). REG-02 (15 Nov): 0.37π, the 11° average and the ∼30° maximum are in Ehresmann sec. 2.2 and 4
+(publisher's HTML, no page numbers); "about 0.19" is in Guo sec. 4, p. 6 of 10.

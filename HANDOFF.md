@@ -9,13 +9,13 @@ This file is the handoff between team members and Claude sessions. Keep it factu
 - **Branch:** `yujin/reg-02-verification`, commit `4733a4f` plus a log commit. **Not merged.** No PR opened yet.
 - **Session:** directed by Yujin, on his own computer (not the cloud container). Model: Claude Fable 5.2. Superpowers not installed, not used.
 - **Done:** every register value (V-01..V-14), science constant and README reference was checked against its source (DECISIONS REG-02; evidence `docs/data/reg-02-verification.md`).
-  - Every value confirmed in its source except two that could not be read: the 0.37 pi figure at M12 and the RAD height behind V-12. **No value changed.**
+  - Every value confirmed in its source (0.37 pi at M12 from 00:57, once the paper was read). RAD's height (V-12) has no source: the paper states none. **No value changed.**
   - Three citations corrected in `src/constants` (speed range wording and pages; drill warning documents; the M12 page), with tests.
   - Two REG-01 statements corrected: the "habitat hatch" reading of the egress/ingress hour, and the place of the TBR tag.
   - Read for the first time: NASA/TP-2010-216125, Guo et al. 2021 full text, Loewe et al. 2025, NASA/TM-20205000837, JPL's Image Use Policy, the three Curiosity blog posts.
 - **Checks at `4733a4f`:** vitest 289/289; tsc clean; build ~249.9 of 250 KB (about 94 bytes left). Playwright: 50/50 with `--workers=1`; two default parallel runs on this 4-core computer gave 48/50 and 49/50 with different specs failing each time (briefing.spec.ts:50 and conditions.spec.ts:7, then coverage.spec.ts:94), and the first two pass when run alone (6/6); read as machine load, not proven. **pytest, run later (00:50):** 79 passed, 3 failed, 2 skipped; the three failures are this Windows computer's, not data (one carriage return added to two geojson files at checkout, whose git copies match the recorded sha256; the licence check needs the repo's Linux `.venv`). The licence check itself was not run. Details: section 8 of the record.
 - **Open for people:**
-  1. **0.37 pi at M12:** open `https://doi.org/10.1029/2021JE006851` in a browser and record the sentence and page for 0.37 pi, the 11 deg average and RAD's height. The publisher refuses automated access.
+  1. ~~0.37 pi at M12~~ **Done (00:57):** Yujin opened the paper and supplied its text. 0.37 pi and the 11 deg average are in sec. 2.2 and 4. The paper states no height for RAD. No constant is UNRESOLVED now.
   2. **W-01:** two sources now give 0.56 m/s, below the app's slow bound of 0.64 m/s. Data and Science to decide.
   3. The other members review REG-01 and REG-02.
   4. A PR for this branch (`/code-review` low of the diff: 0 findings), then the CLAUDE.md step 6 checklist before any merge.
