@@ -98,7 +98,7 @@ Deadline still Sun 15 Nov 23:59 local (portal confirmation by a person still pen
 | `.venv/bin/python scripts/licences.py \| diff -q - docs/licences.md` | no difference |
 | `SHARPWALK_AREA=public/area node --experimental-strip-types bench/route-bench.ts` (twice) | **Longest route 476-585 ms: 5 of the 9 recorded runs over the 500 ms target** (first run: only the placeholder lines were kept); time field 486-593 ms (< 3 s). The 20:26 runs gave 309-436 ms. No engine code changed since then; this container had just restarted (load average 2.27, 4 cores). **Not a pass on this machine; re-measure on a laptop (G2 note "laptop timing at G5").** |
 
-## Status at handoff (Sat 14 Nov 2026, 20:27 Asia/Manila container clock; previous 17:31). Branch ccr-dbbcdd02-kqy23v = main 38839d0
+## Status at handoff (Sat 14 Nov 2026, 22:55 Asia/Manila; previous 20:27). Branch claude/optimistic-darwin-dxdct4 = main ea1fb27 (PR #17)
 
 | Part | Status | One-line reason / evidence |
 |---|---|---|
@@ -118,7 +118,7 @@ Deadline still Sun 15 Nov 23:59 local (portal confirmation by a person still pen
 | 2.4 | VERIFIED (G3-01 demo values; team to confirm) | Planned margin shown on default load from the G3-01 preset (est. 32.3 to 67.2 min, OK, for the e2e stop); values chosen by SI at the operator's direction |
 | 2.5 | VERIFIED (interim) | Grid path for calculations and display (D-04 interim) |
 | 2.6 | IN PROGRESS (code-complete) | Parts 1-5: sheet, route/stops, coverage outlines (7e7c459), Plex fonts (f329682), 10 m contours (0bf81f2), hatch aliasing fix (b40550c); reviews e4cb7f6, 1d85b36, c739bf4. Only Design review (B-13) open |
-| 2.7 | VERIFIED (cloud Xeon) | Re-run 20:26: longest route 309-319 ms (unity, used by the app), 364-436 ms (decreasing placeholder); time field 377-418 ms; laptop timing at G5 |
+| 2.7 | VERIFIED (cloud Xeon) | Re-run 20:26: longest route 309-319 ms (unity, used by the app), 364-436 ms (decreasing placeholder); time field 377-418 ms; laptop timing at G5; **22:40-22:48 rerun on a freshly restarted container: 476-585 ms, 5 of 9 recorded runs over 500 ms (no engine change); re-measure on a laptop before claiming the target (HANDOFF known failure 1)** |
 | 3.1 | IN PROGRESS | Planner + worker + seven commands (edit_stop added, C-19); C-15 route geometry outside the contract |
 | 3.2 | VERIFIED (Design review pending) | Stop name/tasks via edit_stop (C-19 option a, fdc64e7); D6 rover point of view panel (C-22) |
 | 3.3 | IN PROGRESS (core done) | Outdoor/phone daylight check needs a real phone |
@@ -128,9 +128,12 @@ Deadline still Sun 15 Nov 23:59 local (portal confirmation by a person still pen
 | 4.1 | VERIFIED (Design review pending) | Contours, drill, AC-31 done; **sky-obstruction layer built** (20 m grid, plan 6.7; self-check 0.064 pp after R-19; off by default; legend: geometry, not dose + M12 benchmark). **Per-stop "20 m sample" added (Sat 20:41-20:55, 2a65db1 + R-20 fixes 7cf23b2); merged to main by PR #11 as 99eabc7 (Sat 20:57)** |
 | 4.2 | VERIFIED at M12 (Data and Science review pending) | AC-07 PASS: f_obs 18.50 % vs 18.5 % published (h_obs 1 m); 0-2 m sweep 20.73-16.51 %, all within ±3 pp; AC-21/AC-22 converged; reference position not computed (R-13) |
 | 4.3 | VERIFIED (result recorded; Data and Science review pending) | AC-08 PASS: 83 of 2,537 known path cells excluded (3.27 % ≤ 5 % Assumed), 1 unknown; waypoints sols 4469-5073; `docs/data/ac-08-rover-path.md` |
-| 4.4 | VERIFIED (automated) | axe, keyboard and width checks pass in the 48-test Playwright run (20:26); manual checks at G5 |
-| 4.5 | VERIFIED (integrated build on main 38839d0) | PRs #2-#9 merged after checks and /code-review (R-15..R-19); deploy still missing (B-4) |
-| 5.1-5.3, 5.5 | NOT STARTED | After G4 |
+| 4.4 | VERIFIED (automated) | axe, keyboard and width checks pass: Playwright 50/50 on the local build and 50/50 against the live deploy (Sat 22:30-22:45); manual checks at G5 |
+| 4.5 | VERIFIED (integrated build on main 38839d0) | PRs #2-#9 merged after checks and /code-review (R-15..R-19); deploy done since (3.5, PRs #13-#16) |
+| 5.1 | PENDING | Freeze Sun 13:00; two-machine check moved to 5.5 (G5-DEFER); Cesium-blocked criterion trivially true (3D cut) |
+| 5.2 | PENDING | Register V-01..V-14 left to another session (REG-DEFER), all OPEN; G-08 target Sun 13:00 |
+| 5.3 | NOT STARTED | Video (Design, Sun 17:00) or the 7-slide fallback |
+| 5.5 | PENDING (last phase) | Includes the deferred two-machine check and FortiGuard request (G5-DEFER); internal submit Sun 21:00 |
 | 5.4 | IN PROGRESS | README SI use and references current (D5, D6, D12, papers); concept-origin account (B-5) and native-library licences open; D12 licence terms not read |
 
 ## Critical path
