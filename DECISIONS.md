@@ -286,7 +286,7 @@ Evidence for every row: `docs/data/reg-01-register-sources.md` (documents, URLs,
 | X-02 | Model and workflow skill in this session | The session ran on **Claude Fable 5.2** (the model the session was started with), not the primary Opus 5.5 named in CLAUDE.md. The work was sourcing science values and an audit, which CLAUDE.md lists as Fable's remit. **Superpowers is not installed in this container and was not used**; tests were written first and shown failing by hand (8 failing, then 286 passing). | Recorded |
 | B-01 | Bundle budget (update) | Main 208.32 kB + worker 41,515 B gzipped = **~249.8 of 250 KB** after REG-01 (+0.2 KB; about 165 bytes left). | **Watch - any new app code needs savings first** |
 
-## Session Sun 15 Nov 00:02-00:45 (yujin/reg-02-verification): verification REG-02
+## Session Sun 15 Nov 00:02-00:35 (yujin/reg-02-verification): verification REG-02
 
 Member instruction (Yujin, Sun 15 Nov 2026, ~00:02 and ~00:11): "Look at registers assumptions values and more in the project ... 1. Verify them 2. Citation 3. Check if they are correct and appropriate to the context"; "ALL DATA MUST HAVE BEEN VERIFIED".
 

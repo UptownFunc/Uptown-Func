@@ -42,7 +42,7 @@ These values were **not given by the plan**. A session or a team member chose th
 
 **Still to do before the G5 freeze (Sun 15 Nov 13:00 Asia/Manila):** the other team members confirm REG-01, or change a row and record it in `DECISIONS.md`. The values were picked from the documents by SI at one member's direction; that is not the whole team's review.
 
-**REG-02 (Sun 15 Nov, 00:02-00:45 Asia/Manila):** at Yujin's direction every register value, science constant and citation was read again in its source (`docs/data/reg-02-verification.md`). No value changed. Three citations in `src/constants` were corrected. The value questions left for the team are listed in section 6 of that record.
+**REG-02 (Sun 15 Nov, 00:02-00:35 Asia/Manila):** at Yujin's direction every register value, science constant and citation was read again in its source (`docs/data/reg-02-verification.md`). No value changed. Three citations in `src/constants` were corrected. The value questions left for the team are listed in section 6 of that record.
 
 **Any session that introduces a new invented or placeholder value must add a row here in the same commit.** Never present a row's value as measured or Mars-validated. Every FIXED value is a lunar planning figure applied to Mars and stays **Assumed**. Cite documents by number; never write "according to NASA" or imply NASA reviewed the project (IMG-01).
 

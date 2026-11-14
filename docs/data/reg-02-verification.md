@@ -1,6 +1,6 @@
 # REG-02: verification of every register value, constant and citation
 
-Carried out at the direction of Eugene Ibañez Jr. ("Yujin"), Sun 15 Nov 2026, 00:02-00:45 Asia/Manila.
+Carried out at the direction of Eugene Ibañez Jr. ("Yujin"), Sun 15 Nov 2026, 00:02-00:35 Asia/Manila.
 SI-assisted: the source reading, the checks and this record were done with Claude Code (Claude Fable 5.2) at his
 direction. The other team members have not reviewed it yet.
 
