@@ -98,7 +98,7 @@ the 23:59 close is only on third-party pages: **a person must confirm it on the 
 | 3.4 | IN PROGRESS (core done) | Card prints stop tasks and the three D6 rover views with credits; paper print and fixed-scale map open |
 | 3.5 | NOT STARTED | Needs Vercel access (B-4) |
 | 3.6 | IN PROGRESS | Conditions built (9ec2f70, 6e8ca00, 9608ecb); AC-09 2 of 3 dates (B-10); scenario time set by G3-01 (2026-11-15 12:00 UTC, assumed) |
-| 4.1 | VERIFIED (Design review pending) | Contours, drill, AC-31 done; **sky-obstruction layer built** (20 m grid, plan 6.7; self-check 0.064 pp after R-19; off by default; legend: geometry, not dose + M12 benchmark). **Per-stop "20 m sample" added (Sat 20:41-20:55, 2a65db1 + R-20 fixes 7cf23b2; branch claude/clever-thompson-qowa8n, not merged)** |
+| 4.1 | VERIFIED (Design review pending) | Contours, drill, AC-31 done; **sky-obstruction layer built** (20 m grid, plan 6.7; self-check 0.064 pp after R-19; off by default; legend: geometry, not dose + M12 benchmark). **Per-stop "20 m sample" added (Sat 20:41-20:55, 2a65db1 + R-20 fixes 7cf23b2); merged to main by PR #11 as 99eabc7 (Sat 20:57)** |
 | 4.2 | VERIFIED at M12 (Data and Science review pending) | AC-07 PASS: f_obs 18.50 % vs 18.5 % published (h_obs 1 m); 0-2 m sweep 20.73-16.51 %, all within ±3 pp; AC-21/AC-22 converged; reference position not computed (R-13) |
 | 4.3 | VERIFIED (result recorded; Data and Science review pending) | AC-08 PASS: 83 of 2,537 known path cells excluded (3.27 % ≤ 5 % Assumed), 1 unknown; waypoints sols 4469-5073; `docs/data/ac-08-rover-path.md` |
 | 4.4 | VERIFIED (automated) | axe, keyboard and width checks pass in the 48-test Playwright run (20:26); manual checks at G5 |
@@ -923,7 +923,8 @@ Known limitations or failures: h_obs 1 m is the session's choice (V-12); value i
   briefing card (SKY-3); ~0.4 KB of bundle headroom left.
 Review status: /code-review high R-20 of 8285658..2a65db1: 6 findings, all fixed in 7cf23b2; low review of 7cf23b2: 0 findings
 Commit SHA: 2a65db1, 7cf23b2
-Next part / blocker owner: human PR review and merge; B-4 deploy (repository owner)
+Merge: PR #11 merged as 99eabc7 (Sat 14 Nov 20:57, by the SI session at the operator's instruction "proceed. review and merge"; merge tree identical to 9ebd66e)
+Next part / blocker owner: B-4 deploy (repository owner)
 ```
 
 ## Phase-part completion record

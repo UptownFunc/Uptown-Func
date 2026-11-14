@@ -5,7 +5,7 @@ This file is the handoff between team members and Claude sessions. Keep it factu
 ## Current snapshot
 
 - **Last updated:** Sat 14 Nov 2026, 20:58 Asia/Manila (UTC+8), container clock (`TZ=Asia/Manila date`). Session `claude/clever-thompson-qowa8n` (20:41-20:58); the 20:28 snapshot below is kept where still true.
-- **This session (20:41-20:58):** branch **`claude/clever-thompson-qowa8n`** = `main` **`8285658`** (PR #10 merged the 20:28 handoff) + 3 commits: `2a65db1` per-stop sky "20 m sample" (plan 6.7, part 4.1), `7cf23b2` /code-review R-20 fixes, and the log commit (run `git log -1`). **Pushed, no PR opened, not merged** (the session request said human review and merge are required). Operator not stated; the account email does not name a team member, so no owner is assumed (G-05: no per-module roles). Claude Opus 5.5 only; Fable 5.2 not used; Superpowers not installed (not used). Checks at 7cf23b2: vitest 282/282, tsc clean, build ~249.6 of 250 KB, Playwright 50/50, pytest 82 + 2 skipped (no gdal-bin), licences current.
+- **This session (20:41-20:58):** branch **`claude/clever-thompson-qowa8n`** = `main` **`8285658`** (PR #10 merged the 20:28 handoff) + 3 commits: `2a65db1` per-stop sky "20 m sample" (plan 6.7, part 4.1), `7cf23b2` /code-review R-20 fixes, and the log commit (run `git log -1`). **Merged to `main` by PR #11 as `99eabc7`** (Sat 20:57) at the operator's instruction "proceed. review and merge", after the CLAUDE.md step 6 checklist (checks green on current main, /code-review R-20 fixed + low review 0 findings, logs, clean merge, no contract change). **`main` = `99eabc7`**; this merge-record commit follows on `claude/clever-thompson-qowa8n`. Operator not stated; the account email does not name a team member, so no owner is assumed (G-05: no per-module roles). Claude Opus 5.5 only; Fable 5.2 not used; Superpowers not installed (not used). Checks at 7cf23b2: vitest 282/282, tsc clean, build ~249.6 of 250 KB, Playwright 50/50, pytest 82 + 2 skipped (no gdal-bin), licences current.
 - **Deadline:** Sun 15 Nov 2026, 23:59 local (plan 19.3). The official Space Apps FAQ confirms the 14-15 Nov dates. The 23:59 close appears only on third-party pages: **a person must confirm it on the portal.** Remaining at 20:28: about 27 h 31 min.
 - **Current phase:** G4 work done; preparing for G5. G3 and G4 are met **except the first public deploy (B-4)**. G5 freeze: Sun 13:00.
 - **Branch:** `ccr-dbbcdd02-kqy23v`. **`main` = `38839d0`** holds all work (PRs #2-#9 merged this evening). This handoff commit sits on `ccr-dbbcdd02-kqy23v` on top of `38839d0` and is **not merged** (the handoff request said not to merge to main). Run `git log -1` for its SHA.
@@ -53,6 +53,8 @@ Team: Patrick Ezekiel A. Arcilla (parcilla13), Christian Jesus Alcazar, Eugene I
 | #7 | 40f3aef | HANDOFF 19:55 |
 | #8 | 706cc1a | Sky-obstruction layer (plan 6.7, 20 m grid, off by default); R-19 fixes |
 | #9 | 38839d0 | Merge record, HANDOFF 20:25 |
+| #10 | 8285658 | Session handoff 20:28 |
+| #11 | 99eabc7 | Per-stop sky "20 m sample" (plan 6.7), R-20 fixes (session claude/clever-thompson-qowa8n, 20:41-20:57) |
 
 ## Files changed this session (git diff 82babb6..38839d0: 34 added, 44 modified; 32 commits)
 
@@ -127,7 +129,7 @@ Resolved this session: B-1 and B-9 (G3-01), B-3 (C-22), B-7 for AC-08 and AC-07 
 
 ## Exact next task
 
-0. **Review and merge `claude/clever-thompson-qowa8n`** (per-stop sky sample, 2a65db1 + 7cf23b2 + logs) through a PR, after a human review (merge checklist in CLAUDE.md step 6). Bundle headroom after it: ~0.4 KB.
+0. ~~Merge the per-stop sky sample~~ done: PR #11, `99eabc7`. Bundle headroom now ~0.4 KB.
 1. **B-4 deploy (a person with Vercel access).** Link the repository to Vercel, or deploy `dist/` from `npm run build`. Then a session runs 3.5 (deploy opens without login) and the G5 checks (two machines; 2D with Cesium blocked is trivially true since 3D is cut).
 2. **Merge this handoff commit** from `ccr-dbbcdd02-kqy23v` to `main` through a PR, if the team wants `main`'s logs current. It changes logs only.
 3. **Team review before Sun 13:00:** G-07 authorship; register V-01..V-14; G3-02; C-22 image terms.
@@ -178,7 +180,7 @@ cd pipeline && export SSL_CERT_FILE=/root/.ccr/ca-bundle.crt
 cd ..
 ```
 
-Expected at this handoff (on `claude/clever-thompson-qowa8n`; `main` 8285658 gives vitest 274, Playwright 48):
+Expected at this handoff (`main` 99eabc7):
 - vitest 282/282;
 - tsc clean;
 - build OK (~249.1 KB);
