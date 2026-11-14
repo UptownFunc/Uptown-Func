@@ -172,6 +172,15 @@ it.
 - NASA/TM-2010-216138 (above), Tables 2-3, p. 12 (45 min of EVA per exploration site) and Table 1, p. 8.
 - Waligora, J. M., Horrigan, D. J. (1975), "Metabolism and Heat Dissipation During Apollo EVA Periods", ch. 4 in *Biomedical Results of Apollo*, NASA SP-368 (NTRS 19760005584), Table 4, p. 125: Apollo 14 walking rates and net slopes, used only to show that no slope factor can be derived (DECISIONS REG-01 / V-06).
 - NASA, "Images and Media" usage guidelines, `https://www.nasa.gov/nasa-brand-center/images-and-media/`, read 14 Nov 2026 (terms for the D6 images; DECISIONS IMG-01).
+- **Verification sources (REG-02), read only to check values; none adds a number to the app:**
+  - NASA/JPL Solar System Dynamics, Horizons System, API 1.2 (ephemeris DE441), `https://ssd.jpl.nasa.gov/api/horizons.api`, queried 15 Nov 2026: sun elevation at the site, as an independent check of the Mars24 method.
+  - NASA GISS, Mars24 Sunclock 8.3.1 (application), `https://www.giss.nasa.gov/tools/mars24/`, run by a team member 15 Nov 2026 for the third AC-09 date (`docs/data/ac-09-mars24-third-date.png`).
+  - IERS, Bulletin C 72, 6 July 2026, `https://datacenter.iers.org/data/latestVersion/bulletinC.txt` (no leap second at the end of December 2026).
+  - PROJ (OSGeo, MIT licence), IAU 2015 coordinate system table, `https://raw.githubusercontent.com/OSGeo/PROJ/master/data/sql/iau.sql` (Mars radii for IAU_2015:49900 and 49902).
+  - NASA Science, "Curiosity Science Instruments", `https://science.nasa.gov/mission/msl-curiosity/science-instruments/` (RAD is on the rover deck); NASA/JPL-Caltech, PIA11438, "Wheels and Suspension on Mars Science Laboratory Rover", caption (deck 1.1 m above the ground); PDS Geosciences Node, Analyst's Notebook, "MSL instrument host (Curiosity rover)".
+  - NASA, MSL weather page script, `https://mars.nasa.gov/js/general/weather/msl-weather.js` (the D7 feed's temperatures are degrees C).
+  - Gernhardt, M. L., Norcross, J. R., Vos, J. R. (2008), "Integrated Suit Test 1 - A Study to Evaluate Effects of Suit Weight, Pressure, and Kinematics on Human Performance During Lunar Ambulation", SAE paper 2008-01-1951 (NTRS 20080013604), Table 2, p. 3.
+  - NASA/JPL, *Mars Science Laboratory Landing* press kit, July 2012, `https://www.jpl.nasa.gov/news/press_kits/MSLLanding.pdf` (read for the rover's dimensions; it gives no deck height).
 
 ### Software
 
