@@ -8,7 +8,9 @@ import ImageLayer from "ol/layer/Image";
 import Static from "ol/source/ImageStatic";
 import ScaleLine from "ol/control/ScaleLine";
 import Zoom from "ol/control/Zoom";
-import { f1ToF7 } from "../geo";
+import { f1ToF7, f7ToF1 } from "../geo";
+import type { LatLon, PlanOutput } from "../engine/planner";
+import { createPlanLayer, drawPlan } from "./planLayer";
 import { F7_PROJECTION } from "./f7";
 import { loadArea, type LoadedArea } from "./loadArea";
 import { gridFrame, readoutAt, type Readout } from "./readout";
@@ -19,9 +21,22 @@ function fmt(q: Quantity): string {
   return q.value === null ? "unknown" : `${q.value.toFixed(1)} ${q.unit}`;
 }
 
-export function AreaSheet({ dataUrl }: { dataUrl: string }) {
+export interface AreaSheetProps {
+  readonly dataUrl: string;
+  /** The engine's latest plan (a copy); the sheet only draws it. */
+  readonly plan?: PlanOutput | null;
+  /** Called with the F1 position of a click; the console turns it into a Command for the engine. */
+  readonly onPick?: (p: LatLon) => void;
+}
+
+export function AreaSheet({ dataUrl, plan = null, onPick }: AreaSheetProps) {
   const target = useRef<HTMLDivElement>(null);
   const area = useRef<LoadedArea | null>(null);
+  const planLayer = useRef(createPlanLayer());
+  const planRef = useRef(plan);
+  planRef.current = plan;
+  const pickRef = useRef(onPick);
+  pickRef.current = onPick;
   const [readout, setReadout] = useState<Readout | null>(null);
   const [legend, setLegend] = useState<LoadedArea["display"]["layers"]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -42,13 +57,18 @@ export function AreaSheet({ dataUrl }: { dataUrl: string }) {
       const o = f1ToF7(a.grid.origin);
       map = new OlMap({
         target: target.current,
-        layers: [image("d2", "layer-d2"), image("hillshade", "layer-hillshade"), image("terrain", "layer-terrain")],
+        layers: [image("d2", "layer-d2"), image("hillshade", "layer-hillshade"), image("terrain", "layer-terrain"), planLayer.current],
         controls: [new Zoom(), new ScaleLine({ units: "metric" })],
         view: new View({
           projection: F7_PROJECTION, center: [o.x, o.y], resolution: 4,
           // Honest zoom: stop at twice the native 1 m display pixel.
           minResolution: a.display.pixel_m / 2, maxResolution: 16, extent, constrainOnlyCenter: true,
         }),
+      });
+      drawPlan(planLayer.current, planRef.current, a.grid);
+      map.on("singleclick", (e) => {
+        const p = f7ToF1({ frame: "F7", x: e.coordinate[0]!, y: e.coordinate[1]! }, 0);
+        pickRef.current?.({ lat: p.lat, lon: p.lon });
       });
       // The frame is computed once; readouts are throttled to one per animation frame.
       const frame = gridFrame(a.grid);
@@ -64,6 +84,10 @@ export function AreaSheet({ dataUrl }: { dataUrl: string }) {
     }).catch((e: unknown) => setError(e instanceof Error ? e.message : String(e)));
     return () => { cancelled = true; map?.setTarget(undefined); };
   }, [dataUrl]);
+
+  useEffect(() => {
+    if (area.current) drawPlan(planLayer.current, plan, area.current.grid);
+  }, [plan]);
 
   if (error) return <div className="error" role="alert">Area data could not be loaded: {error}</div>;
   return (
