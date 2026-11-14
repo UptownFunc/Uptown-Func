@@ -113,6 +113,13 @@ All ten findings fixed, test-first where possible. Each of the three key tests w
 - **Display sources:** `run_display` asserts that D1 and D2 are in F7 and cover the extent (a test shows it rejects a different `lat_ts` and a short extent).
 - **Performance:** the readout frame is computed once and throttled to one per animation frame; `plannedMarginProfile` accepts a precomputed habitat field.
 
+## Handoff notes (Sat 14 Nov, 12:20)
+
+| ID | Topic | Status |
+|---|---|---|
+| G-04 | Authorship wording | The handoff request asked to "preserve the user's sole authorship", but CLAUDE.md on `main` (G-01, PR #1) credits the concept and plan to the whole four-member team. The session followed the merged repo rule. The team should confirm which wording is right; the session changed nothing. |
+| R-01 | G2 latency | At the handoff re-run, the longest route took 521-552 ms with decreasing placeholder factors (target < 500 ms). First try: reuse search buffers. Fallback: a 4 m grid (D-08). Re-measure with the real K-01 values on a mid-range laptop, in a Worker. |
+
 ## Governance decisions
 
 | ID | Topic | Decision | Decided by | Date/time (Asia/Manila) | Evidence |

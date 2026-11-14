@@ -33,6 +33,29 @@ This file is the live execution record. Update it **after every phase part**, no
 
 The plan freezes at Sun 13:00, leaving 10 h 59 min for validation, video and submission, plus a 2 h 59 min buffer after the internal submit target. Verify the portal in case the event's actual deadline differs.
 
+## Status at handoff (Sat 14 Nov 2026, 12:20 Asia/Manila)
+
+| Part | Status | One-line reason |
+|---|---|---|
+| 0.1 | VERIFIED | Official closing time still to be confirmed on the portal (Captain) |
+| 0.2 | VERIFIED | |
+| 0.3 | IN PROGRESS | G0 fallback applied: contracts frozen as drafted and **unagreed** (C-01..C-13) |
+| 0.4 | BLOCKED | No Local Lead answers (D-01, D-02) |
+| 1.1 | IN PROGRESS | Evidence recorded; Data and Science sign-off and plan section 19 pending |
+| 1.2 | IN PROGRESS | Pipeline built and reproducible; GDAL 3.12.3 rerun (P-03) and owner review pending |
+| 1.3 | BLOCKED | Manifest cannot be written without invented residuals (C-12) |
+| 1.4 | IN PROGRESS | Seam candidates listed; alignment inconclusive; trust-grid method undecided |
+| 1.5 | NOT STARTED | Needs 8+ control points with Cesium picks (human + 3D owner) |
+| 1.6 | NOT STARTED | Optional 3D feasibility; depends on D-02 |
+| 2.1 | IN PROGRESS | Code done; 2 citations UNRESOLVED (plan 19.5) |
+| 2.2 | IN PROGRESS | Engine done; k_v values missing (K-01) |
+| 2.3 | IN PROGRESS | Leg metrics done; k_v missing; L-01/L-02 to confirm |
+| 2.4 | IN PROGRESS | Margin functions done (AC-19 on the grid metric); stores and UI not yet |
+| 2.5 | NOT STARTED | Smoothing decision D-04 due at G2 (Route Engine + Data and Science) |
+| 2.6 | IN PROGRESS | Part 1 done (sheet, layers, readout); stops and route not drawn yet |
+| 2.7 | IN PROGRESS | **Latency target not met reliably** with non-unity factors |
+| 3.x-5.x | NOT STARTED | |
+
 ## Critical path
 
 **Contracts -> data pipeline and frame checks (G1) -> route engine (G2) -> Tier 1 integration (G3) -> Tier 2 and benchmarks (G4) -> freeze (G5) -> video -> submission.**
@@ -73,7 +96,7 @@ Work on optional features only when it does not endanger this path. The AREA 2D 
 | 2.4 | Implement planned margin and the manual-entry field-margin calculations without conflating `MissionPlan` and `MissionExecution`. | Route Engine + Design | IN PROGRESS (engine functions done; stores and UI not yet) | `src/engine/margin.ts`: plan 6.6 planned margin at every route cell (slow bound walk + stops before x + t_ops + t_return from the habitat field + t_cont), with arrive/depart values at each stop; states OK (>= 10% of T_EVA) / NEAR_LIMIT (0 to < 10%) / OVER (< 0), no SAFE; field margins (continue, return-now). **AC-19 on the grid metric:** 30 random-grid property tests (all 30 exercise the assertions) check that the margin never rises, the lowest is at the end and the state never improves. A deliberate mutation (outbound walk at nominal speed) failed 32 tests, then was reverted. **Not yet:** MissionPlan/MissionExecution stores (3.1/3.3); D-04 smoothing decision. | see 2.3/2.4 record |
 | 2.5 | Resolve route smoothing at G2 with Route Engine owner and Data and Science agreement. Record the selected option in `DECISIONS.md`, plan log and O-22. | Route Engine | UNVERIFIED | Written option and matching tests; until decided, calculations use grid paths only | - |
 | 2.6 | Build the OpenLayers **AREA-level 2D sheet** by G2. It is the permanent fallback and is never cut. | Design + Data and Science | IN PROGRESS (part 1 done: sheet, layers, readout; stops and route not yet drawn) | Pipeline `run_display` writes F7 layers (D2 luminance 2.6 MB, D1 hillshade 1.7 MB, terrain overlay 0.56 MB, `layers.json` with sha256). The app (Vite 8.3.7, React 19.3.1, OpenLayers 10.11.0) registers F7 as its own projection (true scale bar), draws D2 + multiplied hillshade + class overlay, stops zoom at twice the native pixel, and shows a status line (F1 to 5 decimals, F6 E/N, elevation from the F6 grid, source, "vertical reference unverified") and the NASA footer. Checks: vitest 88/88; tsc clean; `vite build` JS 130.7 KB gzipped (budget 250); `npx playwright test` 2/2, including a check that no Cesium request is made and an error state when data is missing. **Not yet:** stops, route and habitat symbols (need 2.3/2.4 and the worker); D1/D2 coverage outlines; 10 m contours; the hatch aliases at coarse zoom (Design to review); fonts not bundled (S-02). | see 2.6 record |
-| 2.7 | Run the complete G2 engine test and latency gate; record all speed inputs as cited or Assumed. | Route Engine | IN PROGRESS (latency measured; not yet on the target hardware) | `bench/route-bench.ts` on the real 1,500 x 1,500 grid, Node 22.23.4, Xeon 2.1 GHz, main thread, placeholder factors: longest route in the main region 365-402 ms with unity placeholder factors and **447-478 ms with decreasing placeholder factors [1, 0.8, 0.6, 0.4]** (target < 500; thin margin); habitat time field over 1,307,532 cells 448-494 ms (target < 3 s). Risk: on a mid-range laptop or in a Worker the longest leg may exceed 500 ms; the G2 fallback is a 4 m grid (D-08), and reusing scratch buffers is the first optimisation to try. The A* route time equals the Dijkstra field time. **Not yet:** a mid-range laptop, in a Web Worker, with the real k_v values. | see 2.2 record |
+| 2.7 | Run the complete G2 engine test and latency gate; record all speed inputs as cited or Assumed. | Route Engine | IN PROGRESS: **latency target NOT met reliably** | `bench/route-bench.ts` on the real 1,500 x 1,500 grid, Node 22.23.4, shared cloud Xeon 2.1 GHz, main thread. First runs (11:26): longest route 365-402 ms with unity placeholder factors, 447-478 ms with decreasing placeholders. **Handoff re-run (12:18): unity 421-431 ms; decreasing placeholders 521-552 ms, over the 500 ms target.** Time field 474-542 ms (target < 3 s, met). The results vary with machine load, so the G2 latency criterion is not met with non-unity factors. Options: reuse search buffers (first try), then the plan's G2 fallback of a 4 m grid (D-08). Not yet on a mid-range laptop or in a Worker; real k_v values missing (K-01). | see handoff record |
 
 **G2 acceptance:** all listed engine tests pass and route is under 500 ms. If missed, move to a 4 m grid and show a visible Assumed-input banner. Do not turn on kJ workload without cited rates.
 
@@ -286,6 +309,24 @@ Known limitations: k_v placeholders in tests only; margins on the grid metric on
   full from the first step (plan 6.6, conservative)
 Commit SHA: see the 2.3/2.4 commit on claude/kind-ptolemy-1wdqf5
 Next: /code-review; then the engine worker (3.1, Comlink) and stops/route on the sheet (2.6 part 2)
+```
+
+```text
+Part: Session handoff (Yujin's session, 09:49-12:20 across two account turns)
+Status: checkpoint only; no part marked VERIFIED beyond 0.1/0.2
+Correction: from commit 3ec10e0 until the handoff commit, `npx vitest run` also collected e2e/area-sheet.spec.ts (a
+  Playwright file) and reported "1 failed" test file, although every test passed. Earlier records quoted only the test
+  counts. Fixed in the handoff commit by excluding e2e/ in vite.config.ts.
+Checks run at handoff (exact commands, results):
+  npm ci                                                        -> exit 0
+  npx vitest run                                                -> 8 files, 143/143 pass (after the e2e exclusion)
+  npx tsc --noEmit                                              -> exit 0
+  npx vite build                                                -> OK; JS 130.99 KB gzipped
+  cd pipeline && python -m pytest -q -W error                   -> 39 passed
+  PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome npx playwright test --trace off -> 2 passed
+  SHARPWALK_AREA=<area> node --experimental-strip-types bench/route-bench.ts -> see the 2.7 row (target missed with
+    decreasing placeholders)
+Commit SHA: see the handoff commit on claude/kind-ptolemy-1wdqf5
 ```
 
 ## Phase-part completion record

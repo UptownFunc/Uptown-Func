@@ -14,3 +14,4 @@ __pycache__/
 public/area/
 test-results/
 playwright-report/
+.venv/

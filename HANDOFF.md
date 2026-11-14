@@ -4,58 +4,119 @@ This file is the handoff between team members and Claude sessions. Keep it factu
 
 ## Current snapshot
 
-- Last updated: **Sat 14 Nov 2026, 11:32 Asia/Manila**
-- Current local time / time zone: **Sat 14 Nov 2026, ~10:30, Asia/Manila (UTC+8)**
-- Actual challenge deadline: **Sun 15 Nov 2026, 23:59 local.** The official Space Apps FAQ confirms the 14-15 Nov dates; the 23:59 closing time is from third-party pages only. Captain to confirm on the portal.
-- Remaining time: **about 37 h 29 min to the deadline; 30 min to G0 (11:00); 3 h 30 min to G1 (14:00)**
-- Current gate: **G0 passed at 11:00 under its fallback: contracts frozen as drafted and unagreed. Next gate is G1 at Sat 14:00.**
-- Active branches: **`claude/kind-ptolemy-1wdqf5`** (this session; fast-forwarded onto `claude/lucid-ptolemy-nz6qpw` at 8986d70, then adds the review follow-up commit). `claude/lucid-ptolemy-nz6qpw` is unchanged at 8986d70. A human merges to `main`.
-- Last verified commit: **the review follow-up commit after 8986d70 on `claude/kind-ptolemy-1wdqf5`** (tests 44/44, typecheck clean)
-- Current owner / member: **parcilla13 (Captain); this session is operated by Yujin. The project concept and plan belong to the whole team.**
-- Repository state: **`main` = 393723e (logs only). The G0 branches add the package scaffold, `src/contracts`, LICENSE and the log updates.**
-- Active phase part: **1.1, 1.2 and 1.4 IN PROGRESS (evidence and code done; owner sign-off, GDAL 3.12.3 rerun and plan section 19 pending); 1.3 blocked by C-12; 2.1 and 2.2 IN PROGRESS (code and tests done; citations and k_v values missing, K-01); 2.7 latency measured on this machine only**
+- Last updated: **Sat 14 Nov 2026, 12:20 Asia/Manila (UTC+8)**
+- Deadline: **Sun 15 Nov 2026, 23:59 local.** The official Space Apps FAQ confirms the 14-15 Nov dates; the 23:59 closing time comes from third-party pages only. **Captain: confirm it on the portal.**
+- Remaining: **about 35 h 39 min to the deadline; G1 (14:00) in 1 h 40 min; G2 (19:00) in 6 h 40 min.**
+- Gate: **G0 passed under its fallback** (contracts frozen as drafted, unagreed). **G1 will not fully pass on time:** control points (1.5) and the manifest (1.3, blocked by C-12) are not done. Apply the G1 fallback per plan: overlays in 2D only.
+- Working branch: **`claude/kind-ptolemy-1wdqf5`**, pushed, **0 ahead / 0 behind origin**, working tree clean after the handoff commit. It is **ahead of `main` by the G0 and G1/G2 work** and has `main` (PR #1) merged in.
+- `main`: **bb473b7** (PR parcilla13/Uptown-Func#1 merged: team attribution and the AI-merge completeness checklist). **No open PRs.**
+- Other branches: `claude/lucid-ptolemy-nz6qpw` (old G0 work, already contained in this branch); `claude/team-attribution` (merged).
+- Session operator: **Yujin** (git author `Yujin <eibanezjri@gmail.com>`). Model: Claude Opus 5.5. Fable 5.2 not used.
+- Authorship: the SharpWalk concept, framing, direction, requirements and plan belong to **the four-member team** (CLAUDE.md, merged). SI assistance is recorded in SI_LOG.md only.
 
 Do not interpret blank fields as proof that no work exists. Inspect GitHub and the working tree.
 
 ## Team and module ownership
 
-Assign one human owner to each module. Names and assignments are intentionally left blank until the team fills them in.
+**Still unassigned. Every pending decision below needs these names first.**
 
 | Module / responsibility | Human owner | Working branch | Backup / reviewer |
 |---|---|---|---|
-| Captain / integration / deploy / submission | parcilla13 | `claude/lucid-ptolemy-nz6qpw` (this session) | TBA |
+| Captain / integration / deploy / submission | parcilla13 | `claude/kind-ptolemy-1wdqf5` (this session's work) | TBA |
 | Data pipeline / data provenance / geo / contracts | TBA | TBA | TBA |
 | Route and safety engine / worker | TBA | TBA | TBA |
 | Design / console / field view / briefing card | TBA | TBA | TBA |
 | 3D console (if retained) | Assign within the team; do not create a fifth owner | TBA | TBA |
 
-Avoid simultaneous edits to the same files. Agree on shared contract changes before implementation.
-
 ## Current work
 
-- **Verified complete:** 0.1 repo/toolchain audit (deadline partly confirmed); 0.2 logs and LICENSE; G0 /code-review with the non-contract fixes applied.
-- **In progress:** 0.3. Contracts are frozen as drafted under the G0 fallback; C-01..C-11 await owner agreement (DECISIONS.md). Owner names are still TBA.
-- **Blocked:** 0.4 (Local Lead answers for D-01 and D-02; none recorded, defaults kept). 1.1: the plan PDF is not readable by this session, and the egress proxy refused the HiRISE, Mars Trek and USGS hosts. QGIS is absent. rasterio 1.4.4 bundles its own GDAL, which is not confirmed to be the pinned 3.12.3.
-- **Cut:** none.
-- **Next action:** Route Engine supplies the k_v values and source (K-01) and confirms K-02. Data and Science sign off 1.1/D-03 and agree P-01/P-02/C-12/C-13. Someone reads plan section 19. Code next: 2.3 leg distance/time ranges, then 2.6 the OpenLayers AREA sheet (needs the app scaffold: Vite/React/OpenLayers at the pinned versions).
+**What exists and passes its tests (none of it signed off by a human owner):**
+- `src/contracts`: nine Zod contracts (frozen as drafted, unagreed).
+- `pipeline/sharpwalk`: D1 -> 2 m F6 grid (ortho on the sphere, averaging), Horn slope, terrain classes, quantised grids with sha256, F7 display layers. Read-only checks in `pipeline/checks`. Audit: `docs/data/phase-1.1-source-audit.md`.
+- `src/geo`: F1/F5/F6/F7 conversions; `src/constants`: cited register (2 citations UNRESOLVED).
+- `src/engine`: A* route, time field, shared `edgeCost`, leg metrics and ranges, plan 6.6 margins with AC-19 property tests.
+- `src/map` + `src/app`: OpenLayers AREA sheet (D2 base, D1 hillshade, class overlay, scale bar, Quantity readout, NASA footer). No stops or route drawn yet.
+
+**In progress / blocked:** see the "Status at handoff" table in PHASES.md.
+
+**Known failures and risks:**
+1. **G2 latency (2.7) not met reliably:** the longest route took 521-552 ms with decreasing placeholder factors at the handoff re-run (target < 500 ms). Try buffer reuse first; the fallback is a 4 m grid (D-08).
+2. GDAL is 3.10.3 (bundled with rasterio), not the pinned 3.12.3 (P-03). The pipeline outputs must be re-run and checksums compared on a machine with 3.12.3.
+3. At 2 m the demo area splits into 5,441 routable regions; the main one covers 58.1% of the area and **does not contain the area centre**. Habitat and stops must sit in the main region.
+4. D1/D2 raster alignment by image matching was inconclusive; residuals still need control points (1.5).
+5. The hatch patterns alias at coarse zoom (Design to review).
+6. Plan **part 2 (section 19) has not been read by any session.** Anything it changes is unchecked.
+
+**Cut:** none.
+
+## Decisions awaiting human approval (all in DECISIONS.md)
+
+| Who | IDs |
+|---|---|
+| Captain | Portal closing time; owner names; C-14 (area data delivery); S-01 (@types/react); S-04 (no geotiff in browser) |
+| Local Lead (via Captain) | D-01 wireframes; D-02 GSAP / Cesium Mars |
+| Data and Science | 1.1 sign-off; D-03 area and case A; D-05 vertical reference lead; D-06; P-01 quantisation; P-02 class codes; P-03 GDAL rerun; C-01..C-13 (with the contracts owner); trust-grid method for 1.4; G-03 plan vector note |
+| Route Engine | **K-01 slope factor values and source (blocks real times)**; K-02 bin edges; L-01/L-02; C-03 command payloads; D-04 smoothing (due at G2) |
+| Design | S-02 fonts; hatch aliasing; whether to show the route with an ASSUMED-factors banner before K-01 arrives |
+| Team | Fill the "Concept origin" section of SI_LOG.md (human-only) |
+
+## Exact next task
+
+**Next code task (2.6 part 2 + 3.1):** draw the habitat, stops and engine route on the AREA sheet through a Comlink worker. **First get a decision on the speed factors (K-01):** either the Route Engine owner supplies the four values and their source, or Design and Route Engine approve using equal factors for the route shape under a visible "ASSUMED" banner, with times and margins shown as unknown. In parallel, optimise the route search (buffer reuse) and re-run the 2.7 benchmark.
+
+## Exact commands for the next session
+
+```bash
+git fetch origin && git checkout claude/kind-ptolemy-1wdqf5 && git pull
+```
+
+```bash
+npm ci && npx vitest run && npx tsc --noEmit && npx vite build
+```
+
+```bash
+python3.11 -m venv .venv && .venv/bin/pip install -r pipeline/requirements.txt && (cd pipeline && ../.venv/bin/python -m pytest -q)
+```
+
+```bash
+cd pipeline && ../.venv/bin/python -m sharpwalk.run_d1 ../public/area && ../.venv/bin/python -m sharpwalk.run_display ../public/area && cd ..
+```
+
+```bash
+npx playwright test --trace off
+```
+
+```bash
+SHARPWALK_AREA=public/area node --experimental-strip-types bench/route-bench.ts
+```
+
+The pipeline needs HTTPS access to `asc-pds-services.s3.us-west-2.amazonaws.com` (USGS data). In a cloud session, the environment "Uptown-Func" allows the Mars data hosts. In this cloud container only, Playwright needs `PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome`.
+
+Expected results: vitest 143/143 in 8 files; tsc clean; pytest 39 passed; playwright 2 passed; real build checksums elevation `a93aa209...99a3ef`, slope `aa366e6f...18bdc0`, terrain_class `c9c06b3e...58ae21` (GDAL 3.10.3; compare under 3.12.3).
 
 ## Last session report
 
 ```text
-Session / member: Yujin (operator) for parcilla13 (Captain); Claude Code cloud session, Claude Opus 5.5
-Start and end time (Asia/Manila): Sat 14 Nov 10:21 - 10:30
+Session / member: Yujin (operator); Claude Code cloud session, Claude Opus 5.5
+Start and end time (Asia/Manila): Sat 14 Nov 10:21 - 12:20
 Branch: claude/kind-ptolemy-1wdqf5
 Starting commit: 8986d70 (fast-forward from 393723e)
-Ending commit: review follow-up commit (see git log -1 on the branch)
-Phase parts: G0 /code-review done; 0.3 frozen as drafted; 0.4 BLOCKED; 1.1 BLOCKED
-Files changed: .gitignore, src/contracts/* (header comment only), DECISIONS.md, PHASES.md, SI_LOG.md, HANDOFF.md
-Checks run: npm ci (exit 0); npx vitest run (44/44); npx tsc --noEmit (exit 0)
-Failures / limitations: plan PDF unavailable; data hosts blocked by egress proxy; QGIS absent
-Decisions made: none by humans. C-06..C-11 logged; G0 fallback freeze recorded as not consent
-SI_LOG.md entries added: 1
+Ending commit: the handoff commit after d4154de (see git log -1)
+Phase parts touched: G0 review; 1.1, 1.2, 1.4, 2.1, 2.2, 2.3, 2.4, 2.6 (part 1), 2.7 - all IN PROGRESS, none VERIFIED
+Merged: PR parcilla13/Uptown-Func#1 (docs only) into main as bb473b7, at Yujin's direction, under the new checklist
+Files changed (whole session): src/{contracts headers,geo,constants,engine,map,app,raw.d.ts}, pipeline/{sharpwalk,tests,
+  checks,requirements.txt,pytest.ini}, docs/data/phase-1.1-source-audit.md, bench/route-bench.ts, e2e/area-sheet.spec.ts,
+  index.html, vite.config.ts, playwright.config.ts, package.json, package-lock.json, tsconfig.json, .gitignore,
+  CLAUDE.md (via PR #1), PHASES.md, HANDOFF.md, DECISIONS.md, SI_LOG.md, SESSION_PROMPTS.md (via PR #1)
+Checks run at handoff: see the PHASES.md handoff record (all green except the 2.7 latency target)
+Failures / limitations: 2.7 latency target missed with non-unity factors; GDAL 3.10.3; plan section 19 unread; vitest
+  had been collecting the Playwright spec (fixed at handoff)
+Decisions made by humans this session: G-01 (team attribution) and G-02 (AI merges under the checklist), both by Yujin
+SI_LOG.md entries added: 9 rows for this session
 Uncommitted changes left: none
-Next exact commands (team machine): git fetch origin && git checkout claude/kind-ptolemy-1wdqf5 && npm ci && npx vitest run && npx tsc --noEmit
-Next owner: Data and Science (1.1); Captain (portal deadline, Local Lead, owner names, merge review)
+Environment: personal cloud environment "Uptown-Func" (Mars data hosts); local reference files and the
+  data crops live only in the session scratch area and are never committed (.gitignore blocks *.pdf, *.zip, work/, public/area/)
+Next owner: Route Engine (K-01) and Data and Science (sign-offs); Captain (portal, owners, C-14)
 ```
 
 ## Outgoing handoff checklist
