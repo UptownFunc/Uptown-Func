@@ -805,7 +805,7 @@ Review status: /code-review medium of PR #3 (R-16): 10 findings; 6 fixed, 2 reso
 R-16 fix checks (Sat 14 Nov ~19:18-19:22): npx vitest run 274/274 (28 files); npx tsc --noEmit clean; npm run build OK
   (main 206.69 kB gzip + worker 41,242 B, ~247.9 of 250 KB); pytest 62 passed; Playwright 46/46. Tests written first and
   seen failing: add_stop name rule (accepted a blank name), parseTasks (module missing)
-Commit SHA: 34ccda0 (G3-01 preset), fdc64e7 (C-19), c72157d (D6), aecf8d5 + 56b261b (R-16). **Merged: PR #3 merge commit a761afd (Sat 14 Nov ~19:28)**
+Commit SHA: 34ccda0 (G3-01 preset), fdc64e7 (C-19), c72157d (D6), aecf8d5 + 56b261b (R-16). **Merged: PR #3 merge commit a761afd (Sat 14 Nov 19:27)**
 Next part / blocker owner: B-4 deploy (human); then G4 items (B-7 rover positions for AC-07/AC-08)
 ```
 

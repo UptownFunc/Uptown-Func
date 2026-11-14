@@ -24,7 +24,7 @@ Do not interpret blank fields as proof that no work exists. Inspect GitHub and t
 - No code, data, contract or decision changed. No PR opened, nothing merged. Open PRs: none (PR #1 merged earlier).
 - **Resolved 18:52:** G-07 restores team credit (G-01). Contracts accepted as drafted for the merge (C-AGREE). The operator authorised the merge of the branch work into `main` and delegated the G3 input choices to the session.
 
-## Session update 19:30 (both PRs merged)
+## Session update 19:27 (both PRs merged)
 
 - **`main` = a761afd** (PR #3 merge: G3 inputs + R-16 fixes), on top of 1da70b5 (PR #2). Checks at 56b261b: vitest 274/274, tsc clean, build OK (~247.9 of 250 KB), pytest 62, Playwright 46/46.
 - Operator approvals recorded: G-07 (team credit), C-AGREE (contracts as drafted), G3-02 (edit_stop contract change; SI-chosen defaults load by default, labelled).
