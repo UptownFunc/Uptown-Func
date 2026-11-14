@@ -143,5 +143,7 @@ test("AC-05: every displayed quantity carries its class and sources, and opens i
   const datasets = page.getByTestId("datasets-in-view");
   await expect(datasets).toContainText("MSL_Gale_DEM_Mosaic_1m_v3");
   await expect(datasets).toContainText("vertical reference unknown");
-  await expect(datasets).toContainText("D2 - No provenance record");
+  await expect(datasets).toContainText("D2: MSL_Gale_HiRISE-LRGB_78quads_sharp_cog");
+  await expect(datasets).toContainText("vertical reference not applicable (orthophoto, no heights)");
+  await expect(datasets).not.toContainText("No provenance record");
 });

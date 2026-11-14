@@ -5,7 +5,7 @@ Products (plan 7.7/7.8/9.2): D2 luminance JPEG at 1 m (linear stretch only), D1 
 pixels, no resampling), terrain-class overlay PNG (F6 classes warped to F7 by nearest neighbour), layers.json.
 """
 import datetime as dt
-import json, math, sys
+import hashlib, json, math, sys
 from pathlib import Path
 import numpy as np
 import rasterio
@@ -17,7 +17,7 @@ from rasterio.windows import from_bounds
 from .display import F7_CRS, class_overlay_rgba, f7_bounds_of_f6_grid, hillshade_u8, linear_stretch_u8
 from .geo import ortho_crs
 from .grids import dequantise
-from .outputs import sha256_file
+from .outputs import merge_provenance, sha256_file
 from .run_d1 import D1_URL
 
 D2_URL = "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Mars/MSL/MSL_Gale_HiRISE-LRGB_78quads_sharp_cog.tif"
@@ -62,7 +62,9 @@ def main(area_dir: str) -> None:
         with rasterio.open("/vsicurl/" + D2_URL) as d2:
             _require_f7(d2, "D2", x0, y0, x1, y1)
             wd = from_bounds(x0, y0, x1, y1, d2.transform)
-            rgb = d2.read(window=wd, out_shape=(3, rows, cols), resampling=Resampling.average).astype(np.float64)
+            rgb_u8 = d2.read(window=wd, out_shape=(3, rows, cols), resampling=Resampling.average)
+            d2_crs_wkt = d2.crs.to_wkt()
+            rgb = rgb_u8.astype(np.float64)
     lum = 0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2]
     lo, hi = np.percentile(lum, [0.5, 99.5])
     base = linear_stretch_u8(lum, lo, hi)
@@ -109,6 +111,19 @@ def main(area_dir: str) -> None:
     for L in layers["layers"]:
         L["sha256"] = sha256_file(out / L["path"])
     (out / "layers.json").write_text(json.dumps(layers, indent=2))
+    # P-04: D2 is shown on the sheet, so it gets a provenance record (facts from docs/data/phase-1.1-source-audit.md).
+    d2_record = {
+        "id": "D2", "productId": "MSL_Gale_HiRISE-LRGB_78quads_sharp_cog", "url": D2_URL,
+        "licence": "USGS Astrogeology orthophoto: Use Constraints None; please credit authors (T. J. Parker, F. J. Calef III)",
+        "crs": d2_crs_wkt, "latitudeType": "planetocentric", "longitudeDirection": "east",
+        "verticalReference": "not applicable (orthophoto, no heights)", "resolution_m": 0.25,
+        "valueClass": "directly_measured", "retrievedOn": today,
+        # Scope as for D1 (C-13): sha256 of the window actually read (3 x uint8 after averaging to the 1 m display grid).
+        "sha256": hashlib.sha256(np.ascontiguousarray(rgb_u8).tobytes()).hexdigest(),
+    }
+    prov_path = out / "provenance.json"
+    existing = json.loads(prov_path.read_text()) if prov_path.exists() else []
+    prov_path.write_text(json.dumps(merge_provenance(existing, d2_record), indent=2))
     print(json.dumps({"extentF7": layers["extentF7"], "size": [cols, rows]}))
     for L in layers["layers"]:
         print(L["id"], (out / L["path"]).stat().st_size, L["sha256"][:12])

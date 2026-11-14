@@ -44,9 +44,11 @@ export interface AreaSheetProps {
   /** Index into plan.geometry.profile under the pointer (shared with the profile chart, UX-06). */
   readonly hoverIndex?: number | null;
   readonly onHoverIndex?: (i: number | null) => void;
+  /** Dataset ids of the layers drawn on the sheet (from layers.json), for the sources panel (UX-15). */
+  readonly onDatasets?: (ids: string[]) => void;
 }
 
-export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hoverIndex = null, onHoverIndex }: AreaSheetProps) {
+export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hoverIndex = null, onHoverIndex, onDatasets }: AreaSheetProps) {
   const target = useRef<HTMLDivElement>(null);
   const area = useRef<LoadedArea | null>(null);
   const planLayerRef = useRef<ReturnType<typeof createPlanLayer> | null>(null);
@@ -76,6 +78,7 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
       if (cancelled || !target.current) return;
       area.current = a;
       setLegend(a.display.layers);
+      onDatasets?.([...new Set(a.display.layers.map((l) => l.source))]);
       const extent = a.display.extentF7;
       const image = (id: string, className: string) => {
         const L = a.display.layers.find((l) => l.id === id)!;

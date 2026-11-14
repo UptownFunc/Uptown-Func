@@ -14,3 +14,12 @@ def test_write_grid_little_endian_with_checksum(tmp_path):
     assert meta["dtype"] == "uint16" and meta["name"] == "elevation"
     assert meta["sha256"] == hashlib.sha256(raw).hexdigest() == sha256_file(tmp_path / meta["path"])
     assert set(meta) >= {"name", "unit", "dtype", "noData", "scale", "offset", "valueClass", "path"}
+
+
+def test_merge_provenance_replaces_by_id_and_keeps_others():
+    from sharpwalk.outputs import merge_provenance
+    d1 = {"id": "D1", "productId": "a"}
+    old_d2, new_d2 = {"id": "D2", "productId": "old"}, {"id": "D2", "productId": "new"}
+    assert merge_provenance([d1, old_d2], new_d2) == [d1, new_d2]
+    assert merge_provenance([d1], new_d2) == [d1, new_d2]
+    assert merge_provenance([], d1) == [d1]

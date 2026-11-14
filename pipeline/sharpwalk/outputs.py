@@ -25,3 +25,10 @@ def write_grid(out_dir, name: str, array: np.ndarray, *, unit: str, noData, scal
     path.write_bytes(np.ascontiguousarray(array).astype(_LE[dtype]).tobytes())
     return {"name": name, "unit": unit, "dtype": dtype, "noData": noData, "scale": scale, "offset": offset,
             "valueClass": valueClass, "path": rel, "sha256": sha256_file(path)}
+
+
+def merge_provenance(records: list, record: dict) -> list:
+    """Provenance list with `record` replacing any record of the same dataset id; other records are kept in order."""
+    out = [r for r in records if r.get("id") != record["id"]]
+    out.append(record)
+    return sorted(out, key=lambda r: int(r["id"][1:]))
