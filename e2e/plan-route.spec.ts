@@ -4,19 +4,7 @@
 // Test points were found on the real D1 grid (PHASES.md 3.1 record): STOP is slope-screened and reachable from the
 // habitat; EXCLUDED is in a block of excluded cells at the area centre.
 import { expect, test, type Page } from "@playwright/test";
-
-const K = (Math.PI * 3_396_190) / 180; // F7 metres per degree (src/geo)
-const ORIGIN = { lat: -4.815, lon: 137.39 }; // view centre at load (AreaSheet)
-const RES = 4; // view resolution at load, F7 units per pixel
-const STOP = { lat: -4.815118, lon: 137.390728 };
-const EXCLUDED = { lat: -4.815017, lon: 137.390017 };
-
-async function clickAt(page: Page, p: { lat: number; lon: number }) {
-  const box = (await page.getByTestId("area-map").boundingBox())!;
-  const x = box.x + box.width / 2 + (K * (p.lon - ORIGIN.lon)) / RES;
-  const y = box.y + box.height / 2 - (K * (p.lat - ORIGIN.lat)) / RES;
-  await page.mouse.click(x, y);
-}
+import { EXCLUDED, STOP, clickAt, pixelAt } from "./helpers";
 
 test("a click adds a stop through the engine worker and the route is drawn and listed", async ({ page }) => {
   await page.goto("/");
@@ -104,8 +92,8 @@ test("profile scrubs both ways with the map, and margin ticks appear when the pl
   // Map -> profile: hovering the route at the stop selects a profile sample.
   await page.mouse.move(0, 0);
   await expect(readout).toContainText("Hover the profile");
-  const map = (await page.getByTestId("area-map").boundingBox())!;
-  await page.mouse.move(map.x + map.width / 2 + (K * (STOP.lon - ORIGIN.lon)) / RES, map.y + map.height / 2 - (K * (STOP.lat - ORIGIN.lat)) / RES);
+  const atStop = await pixelAt(page, STOP);
+  await page.mouse.move(atStop.x, atStop.y);
   await expect(readout).toContainText(/s \d+ m/);
 
   // A per-stop duration overrides; a short T_EVA makes the plan run over and draws both ticks.

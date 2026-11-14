@@ -2,6 +2,7 @@
 // AC-31 (G4): missing data and network failure give a labelled state each time, no uncaught error, and the 2D sheet
 // stays usable. 3D is cut (DECISIONS D-10), so its imagery case does not apply.
 import { expect, test, type Page } from "@playwright/test";
+import { STOP, clickAt } from "./helpers";
 
 function trackErrors(page: Page) {
   const errors: string[] = [];
@@ -22,7 +23,7 @@ test("a display layer that fails to load leaves the sheet usable, with no uncaug
   // The legend, the sources panel and the briefing card do not claim the missing layer.
   await expect(page.getByLabel("Layers")).toContainText("Orthophoto (D2 colour mosaic, luminance) - not loaded");
   await expect(page.getByTestId("datasets-in-view")).not.toContainText("D2:");
-  await page.mouse.click(box.x + box.width / 2 + (59274.7 * 0.000728) / 4, box.y + box.height / 2 + (59274.7 * 0.000118) / 4);
+  await clickAt(page, STOP);
   await expect(page.getByTestId("legs")).toBeVisible({ timeout: 20_000 });
   await page.getByRole("button", { name: "Briefing" }).click();
   await page.getByRole("button", { name: "Generate card from current plan" }).click();

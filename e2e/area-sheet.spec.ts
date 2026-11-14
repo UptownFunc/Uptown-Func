@@ -1,6 +1,7 @@
 // SI-assisted: drafted with Claude Code (Claude Opus 5.5); human Design review pending.
 // Phase 2.6: the AREA sheet loads local grids, shows the layers and readout, and works without Cesium.
 import { expect, test } from "@playwright/test";
+import { STOP, pixelAt } from "./helpers";
 
 test("AREA sheet loads, reads out F1/F6/elevation and carries the footer", async ({ page }) => {
   const cesium: string[] = [];
@@ -37,4 +38,18 @@ test("the map does not change size when the pointer moves over it or a stop is a
   await page.mouse.move(before.x + before.width / 2, before.y + before.height / 2);
   await expect(page.getByTestId("status-line")).toContainText("elev");
   expect((await map.boundingBox())!.height).toBe(before.height);
+});
+
+test("the shared e2e helper maps an F1 test point to the pixel the sheet reads back (R-02 item 10)", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
+  const p = await pixelAt(page, STOP);
+  await page.mouse.move(p.x, p.y);
+  const status = page.getByTestId("status-line");
+  await expect(status).toContainText("elev");
+  const text = (await status.textContent())!;
+  const lat = Number(/lat (-?\d+\.\d+)/.exec(text)![1]), lon = Number(/lon (-?\d+\.\d+)/.exec(text)![1]);
+  // One screen pixel at the load view is 4 m, about 6.7e-5 deg; 1e-4 deg allows pixel rounding only.
+  expect(Math.abs(lat - STOP.lat)).toBeLessThanOrEqual(1e-4);
+  expect(Math.abs(lon - STOP.lon)).toBeLessThanOrEqual(1e-4);
 });

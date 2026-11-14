@@ -2,15 +2,7 @@
 // Tier 2: time-to-habitat contour lines and the simulated drill (plan 6.9): SIMULATION banner, the drill line label,
 // stops outside the line named, stress cases 20 and 10 min; never "safe" or "shelter".
 import { expect, test, type Page } from "@playwright/test";
-
-const K = (Math.PI * 3_396_190) / 180;
-const ORIGIN = { lat: -4.815, lon: 137.39 };
-const STOP = { lat: -4.815118, lon: 137.390728 }; // about 51 min back at the slow bound (PHASES 2.6/3.1 records)
-
-async function clickAt(page: Page, p: { lat: number; lon: number }) {
-  const box = (await page.getByTestId("area-map").boundingBox())!;
-  await page.mouse.click(box.x + box.width / 2 + (K * (p.lon - ORIGIN.lon)) / 4, box.y + box.height / 2 - (K * (p.lat - ORIGIN.lat)) / 4);
-}
+import { STOP, clickAt } from "./helpers";
 
 test("contour lines and the simulated drill", async ({ page }) => {
   await page.goto("/");

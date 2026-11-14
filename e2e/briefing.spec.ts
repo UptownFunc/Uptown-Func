@@ -2,15 +2,7 @@
 // Phase 3.4: the briefing card is built from the current plan (UX-10), stamped with its version, carries the
 // assumption list, limits and footer, and is marked STALE within 1 s of a plan change with printing blocked (UX-11, AC-06).
 import { expect, test, type Page } from "@playwright/test";
-
-const K = (Math.PI * 3_396_190) / 180;
-const ORIGIN = { lat: -4.815, lon: 137.39 };
-const STOP = { lat: -4.815118, lon: 137.390728 }; // slope-screened and reachable (PHASES 3.1 record)
-
-async function clickAt(page: Page, p: { lat: number; lon: number }) {
-  const box = (await page.getByTestId("area-map").boundingBox())!;
-  await page.mouse.click(box.x + box.width / 2 + (K * (p.lon - ORIGIN.lon)) / 4, box.y + box.height / 2 - (K * (p.lat - ORIGIN.lat)) / 4);
-}
+import { STOP, clickAt } from "./helpers";
 
 test("briefing card: built from the current plan, then STALE and unprintable after a change", async ({ page }) => {
   await page.goto("/");

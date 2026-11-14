@@ -4,6 +4,7 @@
 // projection. Every value is a Quantity (CLAUDE.md); unknown elevation stays unknown, never zero.
 import type { Quantity } from "../contracts";
 import { f1, f1ToF5, f5ToF6, f7ToF1, localFrame, type F1Point, type LocalFrame } from "../geo";
+import { f1ToCell } from "../geo/grid";
 
 export interface AreaGrid {
   readonly origin: F1Point;
@@ -34,14 +35,10 @@ export const gridFrame = (grid: AreaGrid): LocalFrame => localFrame(f1(grid.orig
 export function readoutAt(coordF7: readonly number[], grid: AreaGrid, frame: LocalFrame = gridFrame(grid)): Readout {
   const p = f7ToF1({ frame: "F7", x: coordF7[0]!, y: coordF7[1]! }, 0);
   const enu = f5ToF6(f1ToF5(p), frame);
-  const halfE = (grid.cols * grid.cell_m) / 2, halfN = (grid.rows * grid.cell_m) / 2;
-  const col = Math.floor((enu.e + halfE) / grid.cell_m);
-  const row = Math.floor((halfN - enu.n) / grid.cell_m);
-  let z: number | null = null;
-  if (row >= 0 && col >= 0 && row < grid.rows && col < grid.cols) {
-    const v = grid.elevation[row * grid.cols + col]!;
-    z = Number.isFinite(v) ? v : null;
-  }
+  // The same cell lookup as the engine (src/geo/grid), so the readout and the planner never disagree (R-02 item 8).
+  const cell = f1ToCell(p, grid);
+  const v = cell ? grid.elevation[cell.r * grid.cols + cell.c]! : NaN;
+  const z = Number.isFinite(v) ? v : null;
   const elevation: Quantity = z === null
     ? { value: null, unit: "m", valueClass: "unknown", methodId: "pipeline:f6-grid", assumptionIds: [], sourceIds: ["D1"] }
     : { value: z, unit: "m", valueClass: "directly_measured", methodId: "pipeline:f6-grid", assumptionIds: [], sourceIds: ["D1"] };

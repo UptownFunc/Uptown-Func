@@ -2,16 +2,12 @@
 // Phase 4.4 / AC (accessible): no serious or critical axe violations on the three experiences.
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
-
-const K = (Math.PI * 3_396_190) / 180;
-const ORIGIN = { lat: -4.815, lon: 137.39 };
-const STOP = { lat: -4.815118, lon: 137.390728 };
+import { STOP, clickAt } from "./helpers";
 
 async function setup(page: Page) {
   await page.goto("/");
   await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
-  const box = (await page.getByTestId("area-map").boundingBox())!;
-  await page.mouse.click(box.x + box.width / 2 + (K * (STOP.lon - ORIGIN.lon)) / 4, box.y + box.height / 2 - (K * (STOP.lat - ORIGIN.lat)) / 4);
+  await clickAt(page, STOP);
   await expect(page.getByTestId("legs")).toBeVisible({ timeout: 20_000 });
 }
 

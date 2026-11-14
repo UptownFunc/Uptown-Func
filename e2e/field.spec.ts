@@ -3,15 +3,8 @@
 // margins as est. ranges labelled "from manual entries, last tick at", and never changes the plan.
 // Plan times here are labelled e2e fixtures, not plan values (DECISIONS T-01).
 import { expect, test, type Page } from "@playwright/test";
+import { STOP, clickAt } from "./helpers";
 
-const K = (Math.PI * 3_396_190) / 180;
-const ORIGIN = { lat: -4.815, lon: 137.39 };
-const STOP = { lat: -4.815118, lon: 137.390728 };
-
-async function clickAt(page: Page, p: { lat: number; lon: number }) {
-  const box = (await page.getByTestId("area-map").boundingBox())!;
-  await page.mouse.click(box.x + box.width / 2 + (K * (p.lon - ORIGIN.lon)) / 4, box.y + box.height / 2 - (K * (p.lat - ORIGIN.lat)) / 4);
-}
 async function setTime(page: Page, label: string, minutes: string) {
   await page.getByLabel(`${label}, minutes`).fill(minutes);
   await page.getByLabel(`${label}, rationale`).fill("e2e test fixture, not a plan value");

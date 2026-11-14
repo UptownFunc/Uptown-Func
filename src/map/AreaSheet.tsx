@@ -20,6 +20,7 @@ import type { LatLon, PlanOutput } from "../engine/planner";
 import { createContourLayer, createMarkerLayer, createPlanLayer, drawContours, drawMarker, drawPlan, type ContourDisplay } from "./planLayer";
 import { snapshotMap, type MapSnapshot } from "./snapshot";
 import { F7_PROJECTION } from "./f7";
+import { INITIAL_RESOLUTION_F7 } from "./view";
 import { loadArea, type LoadedArea } from "./loadArea";
 import { gridFrame, readoutAt, type Readout } from "./readout";
 import type { Quantity } from "../contracts";
@@ -131,7 +132,7 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
         layers: [image("d2", "layer-d2"), image("hillshade", "layer-hillshade"), image("terrain", "layer-terrain"), contourLayer.current!, planLayer.current, markerLayerRef.current!, cursorLayer.current!],
         controls: [new Zoom(), new ScaleLine({ units: "metric" })],
         view: new View({
-          projection: F7_PROJECTION, center: [o.x, o.y], resolution: 4,
+          projection: F7_PROJECTION, center: [o.x, o.y], resolution: INITIAL_RESOLUTION_F7,
           // Honest zoom: stop at twice the native 1 m display pixel.
           minResolution: a.display.pixel_m / 2, maxResolution: 16, extent, constrainOnlyCenter: true,
         }),
