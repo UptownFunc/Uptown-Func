@@ -402,6 +402,7 @@ details[open] > :not(summary) { animation: unfold 0.4s var(--ease) both; }
 .ready { font: 12px var(--mono); color: var(--ink-2); display: inline-flex; align-items: center; gap: 8px; }
 .ready::before { content: ""; width: 8px; height: 8px; border: 1.5px solid var(--ink-2); }
 .ready[data-ready="true"]::before { background: var(--ok); border-color: var(--ok); }
+.ready[data-ready="null"]::before { background: var(--over); border-color: var(--over); }
 .ready[data-ready="false"]::before { animation: blink 1s steps(2) infinite; }
 
 /* ---- Source drawer and engine messages ---- */

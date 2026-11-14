@@ -156,6 +156,6 @@ There are no decorative loops: the only repeating animations are the busy scan a
 ## 5. Open for the team
 
 - Approve or change UI-01, UI-02, UI-03 and MOT-01.
-- **B-01:** the bundle is about 3.9 kB over the 250 KB budget (see DECISIONS B-01 for the options).
+- **B-01:** the bundle is about 4.1 kB over the 250 KB budget (see DECISIONS B-01 for the options).
 - **Contrast:** recheck every pair with a contrast tool on the final build (axe passes in e2e; plan 9.1 asks for a tool check).
 - **Paper print:** recheck the A5 print on paper (3.4).

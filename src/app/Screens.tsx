@@ -15,7 +15,8 @@ type OnSet = (id: string, value_s: number, rationale: string, stopId?: string) =
 /** The terrain plate: the real D2 orthoimage under the D1 hillshade (the sheet's own files), display only. */
 const PLATE = { backgroundImage: "url(area/d1_hillshade.jpg), url(area/d2_luminance.jpg)" };
 
-export function Welcome({ onBegin, ready }: { onBegin: () => void; ready: boolean }) {
+/** ready: true when the engine is up, null when it could not start, false while loading. */
+export function Welcome({ onBegin, ready }: { onBegin: () => void; ready: boolean | null }) {
   return (
     <section className="welcome" aria-labelledby="w-title">
       <p className="kicker rise">SharpWalk · a planner for one crewed walk in Gale crater, Mars</p>
@@ -34,7 +35,7 @@ export function Welcome({ onBegin, ready }: { onBegin: () => void; ready: boolea
       </ol>
       <div className="welcome-go">
         <button type="button" className="go big" onClick={onBegin}>Begin mission setup <span aria-hidden="true">→</span></button>
-        <span className="ready" data-ready={ready}>{ready ? "Terrain and route engine ready" : "Loading terrain and route engine…"}</span>
+        <span className="ready" data-ready={String(ready)} role="status">{ready ? "Terrain and route engine ready" : ready === null ? "The route engine could not start; the map still opens" : "Loading terrain and route engine…"}</span>
       </div>
     </section>
   );
@@ -69,11 +70,21 @@ export function SetupScreen({ output, rems, rover, onSet, onOpenSource, preset, 
             <strong>Demonstration scenario</strong>
             <span>Plan times and scenario time picked from cited planning documents (REG-01). Lunar figures applied to Mars: all Assumed, all editable.</span>
           </button>
-          <a className="tile" aria-current={!demo || undefined} href="?preset=none#setup">
-            <span className="tile-mark" aria-hidden="true" />
-            <strong>Blank scenario</strong>
-            <span>Every time starts “not set” until you enter it with a rationale. Opens a fresh planner.</span>
-          </a>
+          {demo ? (
+            // Switching to blank needs a fresh engine (an Assumed time cannot be unset), so it reloads, after a confirm.
+            <a className="tile" href="?preset=none#setup"
+              onClick={(e) => { if (!confirm("Start a blank scenario? The planner reloads and the current plan is cleared.")) e.preventDefault(); }}>
+              <span className="tile-mark" aria-hidden="true" />
+              <strong>Blank scenario</strong>
+              <span>Every time starts “not set” until you enter it with a rationale. Opens a fresh planner.</span>
+            </a>
+          ) : (
+            <div className="tile" aria-current="true">
+              <span className="tile-mark" aria-hidden="true" />
+              <strong>Blank scenario</strong>
+              <span>In use: every time starts “not set” until you enter it with a rationale.</span>
+            </div>
+          )}
         </div>
         <ConditionsPanel output={output} onSet={(id, v, r) => onSet(id, v, r)} onOpenSource={onOpenSource} rems={rems} />
       </div>
@@ -96,6 +107,7 @@ export function PlannerScreen({ output, onSet, next }: { output: PlanOutput | nu
     { k: "stops", label: `Stops (${plan?.stops.length ?? 0})`, v: stopSum },
   ];
   const used = parts.reduce((a, p) => a + (p.v ?? 0), 0);
+  const scale = T ? Math.max(T, used) : 1; // over budget: draw the parts to fit and say so in words
   return (
     <section className="screen planner" aria-labelledby="h-02">
       <Head n="02" kicker="Mission planner" title="Set the time budget">
@@ -110,12 +122,13 @@ export function PlannerScreen({ output, onSet, next }: { output: PlanOutput | nu
         {T ? (
           <div className="budget-bar">
             {parts.map((p) => p.v !== undefined && p.v > 0 &&
-              <span key={p.k} className={`seg ${p.k}`} style={{ flexBasis: `${Math.min(100, (p.v / T) * 100)}%` }}>{p.label}</span>)}
-            <span className="seg walk">{used >= T ? "Nothing left for walking" : "Left for walking and margin"}</span>
+              <span key={p.k} className={`seg ${p.k}`} style={{ flexBasis: `${(p.v / scale) * 100}%` }}>{p.label}</span>)}
+            {used < T && <span className="seg walk">Left for walking and margin</span>}
           </div>
         ) : <div className="budget-bar empty">Set the EVA duration to see how it divides.</div>}
         <p className="note">Proportions only, from the Assumed inputs below; walking times come from the route on the Map step.
           {parts.some((p) => p.v === undefined) && " Unset parts are not drawn."}</p>
+        {T !== undefined && used >= T && <p className="problem" role="status">Tasks, contingency and stops alone fill the EVA duration: nothing is left for walking.</p>}
       </figure>
       {plan ? <PlanTimes assumptions={plan.assumptions} onSet={onSet} /> : <p className="unknown">Engine loading…</p>}
       <div className="screen-foot">{next}</div>

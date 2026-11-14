@@ -2,7 +2,7 @@
 // Briefing (plan 3.3, UX-10/11, AC-06, module 04C): one action builds the card from the engine's current plan copy and
 // stamps it with that plan version. When the plan changes the card shows STALE at once and cannot be printed until it
 // is regenerated. Print layout: A5 portrait, two columns, 12 mm margins, black on white (plan 9.2).
-import { useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { PlanOutput } from "../engine/planner";
 import type { MapSnapshot } from "../map/snapshot";
 import { MarginState } from "../app/MarginState";
@@ -39,6 +39,9 @@ export function BriefingView({ output, snapshot, hidden = false, rover = null, c
   currentRef.current = current;
   const stale = card ? isStale(card.model.versionHash, current) : false;
   const isConfirmed = !!card && !stale && confirmed === card.model.versionHash;
+  // Acknowledgements belong to one card: a new card (a new plan version) asks for them again.
+  const cardVersion = card?.model.versionHash;
+  useEffect(() => { setAcks(ACKS.map(() => false)); }, [cardVersion]);
 
   // The class is removed on afterprint only: in browsers where print() returns before printing (Safari, mobile),
   // removing it earlier would print the whole console instead of the card.

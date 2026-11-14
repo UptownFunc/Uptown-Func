@@ -59,10 +59,9 @@ export function FieldView({ output, hidden = false, briefed = false, next }: { o
         </p>
       )}
       {plan.stops.length === 0 ? <p className="hud-next">No stops in the plan.</p> : <>
-        <h1 className="hud-next" data-testid="field-next">
-          <span className="field-label">Next</span>
+        <div data-testid="field-next"><span className="field-label">Next</span><h1 className="hud-next">
           {next0 ? <>{next0.kind === "arrive" ? "Arrive at" : "Depart from"} <strong>{stopOf(next0.stopId)?.letter}</strong> {stopOf(next0.stopId)?.name}</> : "All stops ticked: walk back to the habitat"}
-        </h1>
+        </h1></div>
         {leg && (
           <div className="hud-leg" data-testid="field-leg">
             <span className="field-label">Leg</span>

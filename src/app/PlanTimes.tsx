@@ -21,7 +21,7 @@ export function TimeRow({ id, label, current, onSet, stopId, inherited }: {
   const n = Number(minutes);
   const valid = minutes.trim() !== "" && Number.isFinite(n) && n >= 0 && why.trim() !== "";
   return (
-    <form className="time-row" onSubmit={(e) => { e.preventDefault(); if (valid) { onSet(id, n * 60, why.trim(), stopId); setMinutes(""); setWhy(""); } }}>
+    <form className="time-row" onSubmit={(e) => { e.preventDefault(); if (valid) onSet(id, n * 60, why.trim(), stopId); }}>
       <div className="time-what">
         <span className="time-label">{label}</span>
         <span data-testid={`current-${id}${stopId ? `-${stopId}` : ""}`} key={current?.value} className={current ? "assumed flash" : "unknown"}>

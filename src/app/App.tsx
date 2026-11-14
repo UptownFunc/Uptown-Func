@@ -45,6 +45,7 @@ export function App() {
   const [message, setMessage] = useState<{ text: string; n: number } | null>(null);
   const say = (text: string) => setMessage((m) => ({ text, n: (m?.n ?? 0) + 1 }));
   const [pending, setPending] = useState(0);
+  const [engineFailed, setEngineFailed] = useState(false);
   const [hover, setHover] = useState<number | null>(null);
   const [selected, setSelected] = useState<Quantity | null>(null);
   const [drawer, setDrawer] = useState(false);
@@ -135,7 +136,7 @@ export function App() {
         setOutput(o);
         if (presetEnabled(location.search)) applyPreset(); // skipped with ?preset=none
       })
-      .catch((err: unknown) => { if (live) say(`Engine could not start: ${errText(err)}`); });
+      .catch((err: unknown) => { if (live) { setEngineFailed(true); say(`Engine could not start: ${errText(err)}`); } });
     return () => { live = false; e.terminate(); engine.current = null; };
   }, []);
 
@@ -168,11 +169,12 @@ export function App() {
 
   // Click feedback on the sheet: a survey ring where the pointer went down (cause), then the stop or the refusal (effect).
   const [ping, setPing] = useState<{ x: number; y: number; n: number } | null>(null);
+  const down = useRef<{ x: number; y: number } | null>(null);
   const plan = output?.plan;
   const next = (s: StepId, label: string) => <button type="button" className="go" onClick={() => go(s)}>{label} <span aria-hidden="true">→</span></button>;
 
   return (
-    <div className="app" data-step={step} data-busy={pending > 0 || !output || contourBusy}>
+    <div className="app" data-step={step} data-busy={pending > 0 || (!output && !engineFailed) || contourBusy}>
       <header className="masthead" inert={step === "welcome"}>
         <button type="button" className="wordmark" onClick={() => go("welcome")} aria-label="SharpWalk, start screen">SharpWalk</button>
         <span className="edition">Mars walk planner · Gale crater</span>
@@ -190,10 +192,13 @@ export function App() {
         <button type="button" className="textbtn" aria-expanded={drawer} onClick={() => setDrawer((o) => !o)}>Sources</button>
         <span className="progress" aria-hidden="true" />
       </header>
-      {step === "welcome" && <Welcome onBegin={() => go("setup")} ready={!!output} />}
+      {step === "welcome" && <Welcome onBegin={() => go("setup")} ready={output ? true : engineFailed ? null : false} />}
       <main className="work" inert={step === "welcome"}>
         <div className="plate" inert={!onMap} aria-hidden={!onMap || undefined}
-          onPointerDown={(e) => { if (step !== "map" || (e.target as HTMLElement).closest("button, .legend, a")) return;
+          onPointerDown={(e) => { down.current = e.button === 0 && step === "map" && (e.target as HTMLElement).closest(".map") ? { x: e.clientX, y: e.clientY } : null; }}
+          onPointerUp={(e) => { // a click, not a pan: the ring marks where the pick went (the engine then answers)
+            const d = down.current; down.current = null;
+            if (!d || Math.hypot(e.clientX - d.x, e.clientY - d.y) > 4) return;
             const r = e.currentTarget.getBoundingClientRect(); setPing((p) => ({ x: e.clientX - r.left, y: e.clientY - r.top, n: (p?.n ?? 0) + 1 })); }}>
           <AreaSheet dataUrl={AREA_URL} plan={output} onPick={step === "map" ? (p) => send("add_stop", { lat: p.lat, lon: p.lon }) : undefined}
             onSnapshotReady={(fn) => setSnapshot(() => fn)} hoverIndex={hover} onHoverIndex={setHover} onDatasets={setLayerDatasets} onCursor={setCursor}
