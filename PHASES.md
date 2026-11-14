@@ -136,6 +136,41 @@ Deadline still Sun 15 Nov 23:59 local (portal confirmation by a person still pen
 | 5.5 | PENDING (last phase) | Includes the deferred two-machine check and FortiGuard request (G5-DEFER); internal submit Sun 21:00 |
 | 5.4 | IN PROGRESS | README SI use and references current (D5, D6, D12, papers); concept-origin account (B-5) and native-library licences open; D12 licence terms not read |
 
+## Design branch `design/sharpwalk-ui-ux` (Sun 15 Nov 2026, 00:58-01:55 Asia/Manila; NOT merged, no PR)
+
+A UI/UX redesign done on an isolated branch at the operator's request. It is outside the plan's phase list and changes no phase status on `main`.
+
+```text
+Part: UI redesign (UI-01..UI-06, MOT-01; docs/design/visual-system.md)
+Owner: session run from parcilla13's account (member identity not otherwise stated, G-05); Design to review
+Status: IMPLEMENTED AND CHECKED; NOT VERIFIED FOR MERGE (B-01 bundle overrun; team approval pending)
+Base: main 1ad41f6 (latest merged and deployed state; the open PR #21 branch yujin/reg-02-verification was not included)
+Scope completed:
+  - guided flow Welcome -> Setup -> Planner -> Map -> HUD -> Assess -> Brief;
+  - Geologic Folio visual system and new fonts;
+  - CSS-only motion and view transitions;
+  - briefing confirmation;
+  - e2e specs moved to step navigation, plus a new flow.spec.ts.
+Files changed: src/app/{App,Screens,AssessPanel,PlanPanel,PlanTimes,DrillPanel,ConditionsPanel,RouteProfile,RoverView,SourcePanel}.tsx,
+  src/app/{steps.ts,steps.test.ts,styles.css,fonts.css}, src/briefing/BriefingView.tsx, src/field/FieldView.tsx,
+  src/map/{AreaSheet.tsx,planLayer.ts,elevationLayer.ts}, vite.config.ts, package.json, package-lock.json, e2e/*,
+  docs/design/visual-system.md, docs/licences.md, CLAUDE.md (visual line), DECISIONS.md, SI_LOG.md, README.md, PHASES.md, HANDOFF.md
+Engine, contracts, pipeline, data and constants: unchanged
+Checks run (exact commands, at dbfdd6d's tree):
+  npx vitest run                                   -> 29 files, 290/290 passed
+  npx tsc --noEmit                                 -> clean
+  rm -rf dist && npm run build                     -> OK; main 212.60 kB gzip (Vite); worker 41,515 B (gzip -9)
+  PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome npx playwright test --trace off  -> 56/56 passed
+  (cd pipeline && ../.venv/bin/python -m pytest)   -> 82 passed, 2 skipped (gdal_contour not installed)
+  .venv/bin/python scripts/licences.py | diff -q - docs/licences.md   -> no difference
+  /code-review high on main...2b5f515              -> 10 findings, 8 fixed in dbfdd6d, 2 kept (R-22)
+Results: all pass except AC-12: about 254.1 kB of app JavaScript against 250 KB (B-01)
+Known limitations: B-01 overrun; MOT-01 conflict with the CLAUDE.md Motion rule; contrast pairs to recheck with a tool; paper print not rechecked; phone daylight check not done
+Review status: /code-review done; human Design and team review pending
+Commit SHA: 2b5f515 (redesign), dbfdd6d (review fixes and records), plus the logs commit
+Next: the team reviews the branch (UI-01..UI-06, MOT-01) and decides B-01 before any PR
+```
+
 ## Critical path
 
 **Contracts -> data pipeline and frame checks (G1) -> route engine (G2) -> Tier 1 integration (G3) -> Tier 2 and benchmarks (G4) -> freeze (G5) -> video -> submission.**

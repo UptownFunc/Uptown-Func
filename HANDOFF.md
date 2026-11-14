@@ -2,6 +2,31 @@
 
 This file is the handoff between team members and Claude sessions. Keep it factual and current. A new session must read this file before touching code.
 
+## Latest session (Sun 15 Nov 2026, 00:58-01:55 Asia/Manila): UI/UX redesign on an isolated branch, NOT merged
+
+**Read this first if you work on the interface.** `main` is untouched by this session.
+
+- **Branch:** `design/sharpwalk-ui-ux`, from `main` 1ad41f6. Commits 2b5f515 (redesign), dbfdd6d (review fixes and records), plus a logs commit. Pushed to that branch only.
+  - The operator said: no merge and no PR until the team approves.
+  - `main`, `claude/ecstatic-keller-k9idte` and every other branch were not touched.
+- **Session:** run from parcilla13's account (member identity not otherwise stated).
+  - Model: Claude Opus 5.5. Superpowers loaded; the frontend-design skill used; Higgsfield used for 18 exploration images (none shipped).
+  - The cloud environment "Space App" gained the allowed host `d8j0ntlcm91z4.cloudfront.net` (Higgsfield's image host), with the operator's approval in the prompt.
+- **What changed:**
+  - A guided flow (Welcome -> Setup -> Planner -> Map -> HUD -> Assess -> Brief) with the step in the URL hash.
+  - The "Geologic Folio" visual system (paper, ink, cobalt interaction, the map as a framed plate).
+  - Newsreader, Instrument Sans and DM Mono replace IBM Plex.
+  - CSS and view-transition motion; a briefing confirmation.
+  - Design record: `docs/design/visual-system.md`. Decisions: UI-01..UI-06, MOT-01, R-22, E2E-02 in `DECISIONS.md`.
+- **Checks:**
+  - vitest 290/290; tsc clean; build OK; Playwright 56/56; pytest 82 + 2 skipped; licences current.
+  - /code-review high: 10 findings, 8 fixed.
+- **Blockers before any PR:**
+  1. **B-01:** app JavaScript about 254.1 kB against the 250 KB AC-12 budget (about 4.1 kB over); options are in DECISIONS B-01.
+  2. **MOT-01:** the CLAUDE.md "Motion owns all motion" rule versus CSS-only motion (Motion was never installed).
+  3. The team must approve UI-01..UI-06; the visual revision came from one member's authorisation.
+- **To look at it:** `git fetch origin design/sharpwalk-ui-ux && git checkout design/sharpwalk-ui-ux && npm ci && npm run build && npx vite preview`; open `/` (welcome) or `/#map`.
+
 ## Latest session (Sat 14 Nov 2026, 23:07-23:59 Asia/Manila): register cleared, REG-01
 
 **Read this first; the older snapshot below is from 22:50 and is otherwise still valid.**
