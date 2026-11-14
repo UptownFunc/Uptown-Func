@@ -12,7 +12,7 @@ describe("constants register", () => {
   });
 
   it("lists exactly the known unresolved citations, so no new constant can ship without a page", () => {
-    expect(unresolvedCitations().sort()).toEqual(["slopeLimit", "walkSpeedRange"]);
+    expect(unresolvedCitations().sort()).toEqual(["slopeLimit"]);
   });
 
   it("does not present the nominal walking speed as an observation", () => {
@@ -38,6 +38,14 @@ describe("constants register", () => {
     expect(r.valueClass).toBe("estimated");
     expect([r.low, r.high]).toEqual([0.64, 0.97]);
     expect(r.limitation).toMatch(/lunar/i);
+    // Plan 19.5: IST-1 suited walking range 2.3-3.5 km/h, NASA/TM-2010-216138, Table 4, p. 13.
+    expect(r.citation.source).toContain("NASA/TM-2010-216138");
+    expect(r.citation.location).toBe("Table 4, p. 13");
+  });
+
+  it("states that walking speeds are along the surface (plan 19.11, weakness 58)", () => {
+    expect(constant("walkSpeedNominal").limitation).toMatch(/along the surface/i);
+    expect(constant("walkSpeedRange").limitation).toMatch(/along the surface/i);
   });
 
   it("does not hold a workload rate (kJ workload is off)", () => {

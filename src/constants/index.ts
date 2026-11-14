@@ -33,16 +33,16 @@ export const CONSTANTS = {
   walkSpeedNominal: {
     id: "walkSpeedNominal", value: 0.83, unit: "m/s", valueClass: "assumed",
     citation: { source: "NASA/TM-2010-216138 (planning walking speed, 3.0 km/h)", location: "Table 4, p. 13" },
-    limitation: "Planning value for suited walking; not validated at Mars gravity on natural terrain.",
+    limitation: "Planning value for suited walking; not validated at Mars gravity on natural terrain. Speeds are along the surface (treadmill belt speed), so edge time divides the 3D edge length by speed (plan 19.11, weakness 58).",
   },
   walkSpeedRange: {
     id: "walkSpeedRange", value: 0.83, low: 0.64, high: 0.97, unit: "m/s", valueClass: "estimated",
-    citation: { source: "Estimated from lunar-gravity suited tests (plan 19.5)", location: "UNRESOLVED: plan section 19.5 not read by this session" },
-    limitation: "Estimated from lunar-gravity (1/6 g) treadmill tests; no suited Mars-gravity data exists (plan 6.5).",
+    citation: { source: "NASA/TM-2010-216138, suited walking range in IST-1, 2.3-3.5 km/h (plan 19.5)", location: "Table 4, p. 13" },
+    limitation: "Estimated from lunar-gravity treadmill tests (0.12-0.32 g, six male subjects, one 121 kg MKIII suit, no downhill data; NASA/TP-2010-216125, pp. 2-3, 10, 83-86, via plan 19.5); no suited Mars-gravity data exists. The 15-20 deg bin is beyond tested grades. Speeds are along the surface (plan 19.11, weakness 58).",
   },
   slopeLimit: {
     id: "slopeLimit", value: 20, unit: "deg", valueClass: "assumed",
-    citation: { source: "xEVA requirement to walk up, down and across 20 deg slopes (NASA presentation; plan 6.4)", location: "UNRESOLVED: presentation slide not cited in plan part 1" },
+    citation: { source: "xEVA requirement to walk up, down and across 20 deg slopes (NASA presentation; plan 6.4)", location: "UNRESOLVED: the plan's reference list (both parts, read 14 Nov 13:10) names only 'xEVA 20 deg slope requirement (NASA presentation)', with no title, date or slide" },
     limitation: "A lunar requirement applied to Mars; Assumed, not Mars-validated.",
   },
 } as const satisfies Record<string, Constant>;
