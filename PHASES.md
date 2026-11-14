@@ -55,7 +55,7 @@ rule; values and approvals the plan leaves to people were not invented (DECISION
   worked example as test oracle); rover point-of-view images (D6: 3-5 images picked by people); first public deploy
   (Vercel account, R-17); D-01/D-02 Local Lead answers; contract changes C-12/C-16/C-17.
 
-## Status at handoff (Sat 14 Nov 2026, 14:15 Asia/Manila container clock; previous 12:20)
+## Status at handoff (Sat 14 Nov 2026, 14:30 Asia/Manila container clock; previous 12:20)
 
 | Part | Status | One-line reason |
 |---|---|---|
@@ -78,6 +78,8 @@ rule; values and approvals the plan leaves to people were not invented (DECISION
 | 2.7 | VERIFIED (Node, cloud Xeon) | k_v = 1: longest route 354-395 ms, field 426-470 ms; worker command 261 ms for 2 legs |
 | 3.1 | IN PROGRESS | Planner (only MissionPlan writer) + Comlink worker + all six commands; C-15 route geometry outside the contract |
 | 3.3 | IN PROGRESS (core done) | Field View: manual ticks, est. margins, stale guard (edf9492, 0acf9e7); phone width checked (b68dec1); outdoor daylight check needs a real phone |
+| 4.1 | IN PROGRESS | Tier 2: contours + simulated drill done (10ec506, 48e2774); sky obstruction (pipeline, D12) and AC-07/AC-08 not started |
+| 4.4 | VERIFIED (automated) | 0 serious/critical axe on 3 views; AC-32 keyboard place/move/delete; 1280/1920 px (6bdb98e, 48e2774); manual checks (projector, outdoors) at G5 |
 | 3.4 | IN PROGRESS (core done) | Card + STALE + print; Chromium PDF = one A5 page (b68dec1, a7cb260); paper print and fixed-scale map open |
 | 3.2 | IN PROGRESS (nearly done) | + sources panel (UX-15) and AC-05 quantity labelling (66c373e, 0acf9e7); remaining: stop renaming/tasks, datasets-in-view derived from layers |
 | 3.x-5.x | NOT STARTED | |
@@ -142,10 +144,10 @@ Work on optional features only when it does not endanger this path. The AREA 2D 
 
 | Part | Task | Owner | Status | Checks / evidence | Commit |
 |---|---|---|---|---|---|
-| 4.1 | Complete Tier 2 features that do not threaten Tier 1. Contour display is optional; sky-obstruction grid runs after G1 and stays off the critical path. | Assigned module owners | UNVERIFIED | Each feature has its own test and provenance | - |
+| 4.1 | Complete Tier 2 features that do not threaten Tier 1. Contour display is optional; sky-obstruction grid runs after G1 and stays off the critical path. | Assigned module owners | IN PROGRESS (contours and drill done; sky obstruction not started) | **14:27:** time-to-habitat contour lines (d3-contour 4.0.3 in the worker; slow-bound field on a 4 m display grid by block minimum; lines only, labelled "est. N min"; no lines along the grid border or unreachable ground) and the simulated solar-event drill (plan 6.9: 30 min Assumed default in the constants register, 20/10 min stress cases, hatched SIMULATION banner, labelled drill line, stops outside named; no dose, no shelter wording). e2e `drill.spec.ts`. **Not started:** sky-obstruction grid (pipeline, needs D12) and its AC-07 benchmark. | 10ec506, 48e2774 |
 | 4.2 | Run AC-07 sky-obstruction benchmark and preserve the interpretation “geometry, not dose.” | Data and Science | UNVERIFIED | Benchmark results, assumptions, source IDs and limits recorded | - |
 | 4.3 | Run AC-08 rover-path consistency checks and document results. | Data and Science + Route Engine | UNVERIFIED | Reproducible results and limitations | - |
-| 4.4 | Run accessibility checks, including serious axe violations and keyboard/reduced-motion behaviour. | Design | UNVERIFIED | No serious axe violations; evidence recorded | - |
+| 4.4 | Run accessibility checks, including serious axe violations and keyboard/reduced-motion behaviour. | Design | VERIFIED (automated checks); manual checks due at G5 | @axe-core/playwright 4.14.0: 0 serious/critical violations on Planning, Briefing (with card) and Field View (AC-11). AC-32: place, move and delete a stop by keyboard alone (map cursor: arrows 10 m, Shift 100 m, Enter adds; "Move stop X to the map cursor"; Delete), leg table as the non-map equivalent, console at 1280 and 1920 px without sideways scroll. No animations exist yet, so reduced motion has nothing to reduce. Manual projector/outdoor/slow-network checks are a G5 item. | 6bdb98e, 48e2774 |
 | 4.5 | Merge only passing Tier 2 items and produce the integrated G4 build. | Captain | UNVERIFIED | Merged commit SHAs; benchmark and accessibility results | - |
 
 **G4 acceptance:** Tier 2 merged; AC-07 and AC-08 results recorded; no serious axe violations. If missed, ship Tier 1 plus only Tier 2 items that passed.
@@ -458,6 +460,22 @@ Known limitations: PDF checked in Chromium only, not on paper or in Safari/Firef
 Review status: /code-review high on 7539a4f...bfa4189: 5 findings; 4 fixed (a7cb260); 1 deferred (R-07)
 Commit SHA: b68dec1, bfa4189, a7cb260 (+ log commit)
 Next part / blocker owner: team: T-01, D-04 (19:00), C-14, 3D cut decision; then 3.5 first deploy
+```
+
+```text
+Part: 4.4 accessibility (automated) and 4.1 tier 2 contours + drill, after "do what is needed based on the plan" / "proceed"
+Owner: no per-module roles (G-04)
+Status: 4.4 VERIFIED (automated); 4.1 IN PROGRESS (sky obstruction not started)
+Files changed: package.json, package-lock.json, src/geo/{index,geo.test}.ts, src/engine/{contours,contours.test,planner,planner.test,worker}.ts,
+  src/constants/{index,constants.test}.ts, src/map/{AreaSheet.tsx,planLayer.ts}, src/app/{App,PlanPanel,DrillPanel}.tsx,
+  src/app/styles.css, e2e/{a11y,drill}.spec.ts
+Checks run (exact commands): npx vitest run; npx tsc --noEmit; npm run build;
+  PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome npx playwright test --trace off
+Results: vitest 209/209; tsc clean; build OK, JS 196 KB main + 39 KB worker gzipped = 235 KB (budget 250); playwright 20/20
+Known limitations: contours cached for the session (habitat and k_v fixed now; R-08 item 5); 15 KB budget headroom
+Review status: /code-review high on c7b2512...10ec506: 6 findings; 5 fixed (48e2774); 1 deferred (R-08)
+Commit SHA: 6bdb98e, 10ec506, 48e2774 (+ log commit)
+Next part / blocker owner: team (T-01, rover images, deploy account); network for Conditions (D7, D10); sky obstruction (D12)
 ```
 
 ## Phase-part completion record
