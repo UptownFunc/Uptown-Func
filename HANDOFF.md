@@ -4,11 +4,11 @@ This file is the handoff between team members and Claude sessions. Keep it factu
 
 ## Current snapshot
 
-- Last updated: **Sat 14 Nov 2026, 13:26 Asia/Manila (UTC+8)** (container clock, `TZ=Asia/Manila date`; an earlier "13:25" written at 89b08a7 was ahead of the clock)
+- Last updated: **Sat 14 Nov 2026, 13:37 Asia/Manila (UTC+8)** (container clock, `TZ=Asia/Manila date`)
 - Deadline: **Sun 15 Nov 2026, 23:59 local** (plan 19.3, Project Submission Guide dated 12 Nov). The official portal time is still to be confirmed by a human.
-- Remaining: **about 34 h 33 min to the deadline; G1 (14:00) in 34 min; G2 (19:00) in 5 h 34 min; G3 (Sun 01:00) in 11 h 34 min.**
+- Remaining: **about 34 h 22 min to the deadline; G1 (14:00) in 23 min; G2 (19:00) in 5 h 23 min; G3 (Sun 01:00) in 11 h 23 min.**
 - Gate: G0 passed under its fallback. **G1 will not fully pass:** control points (1.5) and manifest (1.3, C-12) not done -> plan fallback, overlays in 2D only. **G2 engine criteria now met on this machine** (tests pass, route < 500 ms, speeds cited or Assumed, workload off) except the D-04 smoothing decision.
-- Working branch: **`claude/trusting-fermi-c5pc0s`**, pushed. It is `claude/kind-ptolemy-1wdqf5` (204a9c4, previous handoff) **plus** this session's commits 3d0e68c, 9e9496c, 88f8b9a, 19b7c68, 89b08a7, bf0524b, 4420678, 16fb661, 05cc50e, 0ff9423 and the log commit. `kind-ptolemy` is unchanged; continue from `trusting-fermi`.
+- Working branch: **`claude/trusting-fermi-c5pc0s`**, pushed. It is `claude/kind-ptolemy-1wdqf5` (204a9c4, previous handoff) **plus** this session's commits 3d0e68c, 9e9496c, 88f8b9a, 19b7c68, 89b08a7, bf0524b, 4420678, 16fb661, 05cc50e, 0ff9423, db1109d, f07094f, 0aaae81 and the log commit. `kind-ptolemy` is unchanged; continue from `trusting-fermi`.
 - `main`: **bb473b7**. **No open PRs.** Nothing merged this session (operator instruction: do not merge).
 - Session operator this session: the account owner of the cloud session (no per-module role). Model: Claude Opus 5.5. Fable 5.2 not used. **Superpowers skill was not installed** in this session (X-01).
 - Authorship: the SharpWalk concept, framing, direction, requirements and plan belong to **the four-member team**. SI assistance is recorded in SI_LOG.md only.
@@ -27,10 +27,11 @@ Do not interpret blank fields as proof that no work exists. Inspect GitHub and t
 - `src/geo`: F1/F5/F6/F7 conversions and **grid cell <-> F1** (`grid.ts`). `src/constants`: cited register; only the 20 deg source is UNRESOLVED.
 - `src/engine`: A* route, time field, leg metrics, plan 6.6 margins; **planner (only MissionPlan writer, Commands, version hash)**, **Comlink worker**, **K-01 placeholder k_v = 1**.
 - `src/map` + `src/app`: AREA sheet with **habitat, lettered stops and the grid-path route**; click adds a stop; console panel with the **ASSUMED banner**, leg lengths/climb, est. time ranges in SI minutes, **Assumed plan-time inputs** (empty until a person enters minutes + rationale); once all four are set, **end margin est. range + OK / NEAR LIMIT / OVER state** (word + shape + colour).
+- Analysis: **elevation profile** with two-way scrub to the map, **margin ticks** ("margin 10% here" / "margin 0 here") on map and profile, route past 0 in the over colour, **per-stop durations**, value-class badges.
 - `src/briefing`: **briefing card** (Briefing view): built from the current plan, version-stamped, STALE + print blocked after any change, sheet map crop, legs, stops with blanks, assumptions with rationales, limits, NASA footer; A5 print CSS.
 
 **Known failures and risks:**
-1. **T-01 (blocks the G3 demo):** no values exist for T_EVA, t_ops, t_cont, stop duration. The machinery works (enter them in the console); the team must choose the values and whether the demo ships with them pre-set. One duration applies to every stop (R-03).
+1. **T-01 (blocks the G3 demo):** no values exist for T_EVA, t_ops, t_cont, stop duration. The machinery works (enter them in the console); the team must choose the values and whether the demo ships with them pre-set. Per-stop durations are supported.
 2. D-04 smoothing undecided (due G2, 19:00). The map draws the grid path; calculations use it.
 3. GDAL 3.10.3, not 3.12.3 (P-03): re-run on a team machine and compare checksums.
 4. Control points (1.5) not done; G1 fallback: overlays 2D only.
@@ -56,9 +57,9 @@ Do not interpret blank fields as proof that no work exists. Inspect GitHub and t
 
 1. **T-01 values from the team** (T_EVA, t_ops, t_cont, stop duration, each with a one-line rationale). Enter them in the console, or record them in DECISIONS.md so a session can pre-set them as logged Assumptions.
 2. **D-04** smoothing decision before 19:00 (G2); record it. Then decide 2.5 and mark G2.
-3. 3.4 remaining: check the print/PDF output on A5; map at a fixed scale; R-04 follow-ups. Then 3.2 profile/provenance, per-stop durations (R-03 item 1). 3.3 field view is Tier 1 but moves to Tier 3 if G3 slips (plan fallback).
+3. 3.4 remaining: check the print/PDF output on A5; map at a fixed scale; R-04 follow-ups. 3.2 remaining: provenance/source panel, AC-05 DOM scan. Then 3.3 field view (Tier 1; moves to Tier 3 if G3 slips, plan fallback).
 4. **3.5**: E2E + first public deploy; needs C-14 (how area data ships) decided first.
-5. Review follow-ups R-02 (7, 8, 10), R-03 (1, 5), R-04 (4-7).
+5. Review follow-ups R-02 (7, 8, 10), R-03 (5), R-04 (4-7), R-05 (5, 6).
 
 ## Exact commands for the next session
 
@@ -88,13 +89,13 @@ SHARPWALK_AREA=public/area node --experimental-strip-types bench/route-bench.ts
 
 The pipeline needs HTTPS access to `asc-pds-services.s3.us-west-2.amazonaws.com` (USGS data). In a cloud session, the environment "Uptown-Func" allows the Mars data hosts. In this cloud container only, Playwright needs `PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome`.
 
-Expected results: vitest 182/182 in 13 files; tsc clean; pytest 39 passed; playwright 8 passed; real build checksums elevation `a93aa209...99a3ef`, slope `aa366e6f...18bdc0`, terrain_class `c9c06b3e...58ae21` (GDAL 3.10.3; compare under 3.12.3).
+Expected results: vitest 187/187 in 13 files; tsc clean; pytest 39 passed; playwright 10 passed; real build checksums elevation `a93aa209...99a3ef`, slope `aa366e6f...18bdc0`, terrain_class `c9c06b3e...58ae21` (GDAL 3.10.3; compare under 3.12.3).
 
 ## Last session report
 
 ```text
 Session / member: session operator of cloud session_018Xnznho5hoLyC49RJSn7oD (no per-module role, G-04); Claude Opus 5.5
-Start and end time (Asia/Manila, container clock): Sat 14 Nov 12:57 - 13:26
+Start and end time (Asia/Manila, container clock): Sat 14 Nov 12:57 - 13:37
 Branch: claude/trusting-fermi-c5pc0s (fast-forwarded from claude/kind-ptolemy-1wdqf5 at 204a9c4; nothing overwritten)
 Starting commit: 204a9c4
 Ending commit: the log commit after 19b7c68 (see git log -1)
@@ -106,7 +107,7 @@ Checks run: see the PHASES.md completion record (all green)
 Failures / limitations: margins unknown (T-01); Superpowers not installed; plan PDFs live only on
   claude/lucid-ptolemy-nz6qpw (docs/plan); *.pdf is git-ignored on this line of work
 Decisions made by humans this session: G-04 (no roles), K-01 (k_v = 1 placeholder + banner)
-SI_LOG.md entries added: 3 rows
+SI_LOG.md entries added: 4 rows
 Uncommitted changes left: none (public/area/, .venv/, work/, dist/ are git-ignored build outputs)
 Next owner: next session, from "Exact next task" above
 ```
