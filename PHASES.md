@@ -846,7 +846,8 @@ Checks run (exact commands), Sat 14 Nov 2026 19:43-19:46 Asia/Manila:
 Results: PASS at M12 for every h_obs in the 0-2 m sweep. Benchmark only: geometry, not dose, not validation.
 Known limitations: RAD observer height UNVERIFIED (about 2 pp per metre); reference period not computed (R-13); D1 used
   to 3 km only (V-13); paper page numbers not read; the 20 m obstruction layer over the area is not built
-Commit SHA: the commit that adds this record
+Review: /code-review medium R-18 (10 findings, all fixed; re-run unchanged at 18.50 %; 0 of 1,080,000 near samples from D12)
+Commit SHA: 903d7ff (AC-07), 8df1f80 (R-18)
 Next part / blocker owner: sky-obstruction layer (Tier 2, plan 6.7 budget) if the bundle allows; B-4 deploy (human)
 ```
 
