@@ -1,0 +1,30 @@
+[
+  {
+    "id": "D1",
+    "productId": "MSL_Gale_DEM_Mosaic_1m_v3",
+    "url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Mars/MSL/MSL_Gale_DEM_Mosaic_1m_v3.tif",
+    "licence": "USGS Astrogeology: Use Constraints None; Access Constraints: please credit authors",
+    "crs": "PROJCS[\"Mars_Equirectangular_clon0\",GEOGCS[\"GCS_Mars_2000_Sphere\",DATUM[\"Mars_2000_(Sphere)\",SPHEROID[\"Mars_2000_Sphere_IAU_IAG\",3396190,0],AUTHORITY[\"ESRI\",\"106971\"]],PRIMEM[\"Reference_Meridian\",0],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]]],PROJECTION[\"Equirectangular\"],PARAMETER[\"standard_parallel_1\",0],PARAMETER[\"central_meridian\",0],PARAMETER[\"false_easting\",0],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH]]",
+    "latitudeType": "planetocentric",
+    "longitudeDirection": "east",
+    "verticalReference": "unknown",
+    "resolution_m": 1.0,
+    "valueClass": "directly_measured",
+    "retrievedOn": "2026-11-14",
+    "sha256": "cc9dbcf286b6028a70186e37f4c22524d838808e5f1561fc577ee394b16d2b1e"
+  },
+  {
+    "id": "D2",
+    "productId": "MSL_Gale_HiRISE-LRGB_78quads_sharp_cog",
+    "url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Mars/MSL/MSL_Gale_HiRISE-LRGB_78quads_sharp_cog.tif",
+    "licence": "USGS Astrogeology orthophoto: Use Constraints None; please credit authors (T. J. Parker, F. J. Calef III)",
+    "crs": "PROJCS[\"GCS_INTERPLANETARY,_MARS_2000_SPHERE\",GEOGCS[\"unknown\",DATUM[\"unnamed\",SPHEROID[\"unnamed\",3396190,0]],PRIMEM[\"Reference meridian\",0],UNIT[\"degree\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9122\"]]],PROJECTION[\"Equirectangular\"],PARAMETER[\"standard_parallel_1\",0],PARAMETER[\"central_meridian\",0],PARAMETER[\"false_easting\",0],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH]]",
+    "latitudeType": "planetocentric",
+    "longitudeDirection": "east",
+    "verticalReference": "not applicable (orthophoto, no heights)",
+    "resolution_m": 0.25,
+    "valueClass": "directly_measured",
+    "retrievedOn": "2026-11-14",
+    "sha256": "3514c10d406d6aac6ee827cadad1ef3c4bac9fdc34568ec83deee390bf9c181d"
+  }
+]
