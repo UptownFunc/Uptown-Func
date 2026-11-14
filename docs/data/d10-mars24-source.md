@@ -29,11 +29,11 @@ AC-09 (plan, acceptance table): sun elevation within 0.1 deg (Assumed) of Mars24
 |---|---|---|---|---|---|
 | 2000-01-06 00:00:00 | 0 W, 0 N | 154.26182 | every step A-5..D-6 within 1e-4 of the table | < 1e-4 deg | Yes |
 | 2004-01-03 13:46:31 (MER-A Spirit) | 184.702 W, -14.640 N | 151.93895 | 151.93960 | 0.00065 deg | Yes |
-| Third date | - | - | - | - | **Not done: needs the Mars24 app (human)** |
+| 2026-11-15 12:00:00 (the demo scenario time) | 137.39 E, -4.815 N planetocentric (4.8719 S planetographic, 222.61 W) | Mars24 8.3.1 app: elevation 43.5 deg, 09:28 LMST | elevation 43.467 deg (shown as 43.5), LMST 9.47 h | at most 0.08 deg | Yes (run by Yujin, Sun 15 Nov 2026 01:43; `ac-09-mars24-third-date.png`) |
 
 Spirit example: every step to L_s agrees within 1e-4. D-1 applied to the table's own L_s (327.32416) gives -13.42040 deg, not the tabulated -13.42065, and D-5 with the tabulated declination gives 151.93935, not 151.93895. The table's last digits cannot be reproduced from the published equations (DECISIONS SUN-02); the gap is 150 times inside the AC-09 tolerance.
 
-**AC-09 status: 2 of 3 dates pass.** The third date must be checked by a person running the Mars24 app (GISS, Java) for the area centre (4.8719 S planetographic, 222.61 W) at a date of the team's choice, then compared with the console's value for the same scenario time.
+**AC-09 status (updated Sun 15 Nov 2026, 01:45): 3 of 3 dates pass.** A team member ran the Mars24 app for the third date (row above). Earlier text: 2 of 3 dates pass. The third date must be checked by a person running the Mars24 app (GISS, Java) for the area centre (4.8719 S planetographic, 222.61 W) at a date of the team's choice, then compared with the console's value for the same scenario time.
 
 ## Independent plausibility check
 

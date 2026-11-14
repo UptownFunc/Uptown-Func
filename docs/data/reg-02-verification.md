@@ -230,3 +230,23 @@ At Yujin's direction the SI session then chose on the two open value questions o
 pace of EVA-EXP-0042 Rev B, p. 40. The slope factors stay 1, because no source gives a value. These are choices, not
 verification results, and they wait for the other members. They are kept apart from this record's branch, which
 changes no value.
+
+## 12. AC-09 third date, with the Mars24 app (Sun 15 Nov 2026, 01:38-01:45)
+
+Yujin ran NASA GISS Mars24 8.3.1 and read the values; the screenshot is `ac-09-mars24-third-date.png`. The SI
+session fetched the app and a Java 17 runtime, checked both checksums (Mars24J-8.3.1.zip sha256
+`99702b419132cc31`, the value GISS publishes), and started the app. Nothing was installed on the computer.
+
+Settings he entered: "Fixed UT date and time", 12:00:00 on 2026-11-15; panorama location "Lon-Lat Location",
+137.39 E, -4.815 N. Mars24 takes planetocentric, east-positive values (its User's Guide), and shows the site as
+137.39 E, -4.82 N.
+
+| Quantity at 2026-11-15 12:00 UT | Mars24 8.3.1 | SharpWalk | Difference |
+|---|---|---|---|
+| Local mean solar time | 09:28 LMST | 9.47 h, which is 09:28 | none at the minute shown |
+| Sun elevation | 43.5 deg | 43.5 deg (43.467 before rounding) | at most 0.08 deg, inside the 0.1 deg rule |
+| Sun azimuth | 72.2 deg | not shown by the app (JPL Horizons gives 72.3 deg) | - |
+| Highest sun of the day | 75.7 deg at 12:26 LMST, 15:02 UT | 75.7 deg at 15:00 UT | none at the digit shown |
+
+**AC-09: 3 of 3 dates pass.** Mars24 shows one decimal, so the comparison is to 0.1 deg: its 43.5 means 43.45 to
+43.55, and the app's unrounded 43.467 is within 0.1 deg of every value in that range. B-10 is closed.
