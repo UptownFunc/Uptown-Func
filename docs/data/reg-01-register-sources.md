@@ -3,6 +3,11 @@
 SI-assisted: drafted with Claude Code (Claude Fable 5.2) at a team member's direction, Sat 14 Nov 2026, about
 23:10-23:59 Asia/Manila. Human Data and Science review pending.
 
+**Checked by REG-02 (Sun 15 Nov 2026):** every quotation, page and number below was read again in the sources;
+see `reg-02-verification.md`. Two statements here are corrected there: the "habitat hatch" reading of the
+egress/ingress hour (section 2; the sentence describes rover-based sustained missions) and the place of the TBR
+tag (section 4; it is on the rover walk-back sentence).
+
 This record holds the evidence behind DECISIONS REG-01. Every quotation below was read in the PDF itself in this
 session (text extracted with `pdftotext -layout`; the Apollo table was read from a rendered page image). Page numbers
 are the documents' own printed page numbers. Nothing here is a measurement made by this project.
