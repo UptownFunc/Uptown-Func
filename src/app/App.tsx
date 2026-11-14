@@ -10,6 +10,7 @@ import { RouteProfile } from "./RouteProfile";
 import { SourcePanel } from "./SourcePanel";
 import { Provenance, type Quantity } from "../contracts";
 import { BriefingView } from "../briefing/BriefingView";
+import { FieldView } from "../field/FieldView";
 import type { MapSnapshot } from "../map/snapshot";
 
 const AREA_URL = "area/";
@@ -37,7 +38,7 @@ export function App() {
       .then((j: unknown) => { const p = Provenance.array().safeParse(j); setProvenance(p.success ? p.data : []); })
       .catch(() => setProvenance([]));
   }, []);
-  const [view, setView] = useState<"planning" | "briefing">("planning");
+  const [view, setView] = useState<"planning" | "briefing" | "field">("planning");
   const [snapshot, setSnapshot] = useState<(() => Promise<MapSnapshot | null>) | null>(null);
   const outputRef = useRef(output);
   outputRef.current = output;
@@ -83,8 +84,8 @@ export function App() {
         <span className="wordmark">SharpWalk</span>
         <span className="muted">AREA sheet - slope-screened only, no rock detection</span>
         <nav className="nav" aria-label="Views">
-          {(["planning", "briefing"] as const).map((v) => (
-            <button key={v} type="button" aria-pressed={view === v} onClick={() => setView(v)}>{v === "planning" ? "Planning" : "Briefing"}</button>
+          {(["planning", "briefing", "field"] as const).map((v) => (
+            <button key={v} type="button" aria-pressed={view === v} onClick={() => setView(v)}>{{ planning: "Planning", briefing: "Briefing", field: "Field View" }[v]}</button>
           ))}
         </nav>
       </header>
@@ -94,6 +95,8 @@ export function App() {
         <RouteProfile output={output} hoverIndex={hover} onHoverIndex={setHover} />
         {/* Kept mounted so a built card keeps its version stamp and shows STALE after a plan change. */}
         <BriefingView output={output} snapshot={snapshot} hidden={view !== "briefing"} />
+        {/* Kept mounted: the field view alone holds MissionExecution, so ticks survive switching views. */}
+        <FieldView output={output} hidden={view !== "field"} />
         <PlanPanel output={output} message={message} onDeleteStop={(id) => send("delete_stop", { stopId: id })}
           onSetTime={(id, value_s, rationale, stopId) => send("set_assumption", { id, value_s, rationale, ...(stopId ? { stopId } : {}) })}
           onOpenSource={setSelected}>

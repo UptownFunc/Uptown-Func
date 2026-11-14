@@ -38,6 +38,8 @@ export interface PlanGeometry {
   readonly unreachable: { fromId: string; toId: string }[];
   readonly profile: ProfileSample[];
   readonly marginTicks: MarginTick[];
+  /** Slow-bound time from each stop back to the habitat (plan 6.6 t_return), seconds; empty while margins are unknown. */
+  readonly stopReturn_s: Record<string, number>;
 }
 export interface PlanOutput { readonly plan: MissionPlan; readonly geometry: PlanGeometry; readonly kvPlaceholder: boolean }
 export type ApplyResult = { ok: true; versionHash: string } | { ok: false; reason: string };
@@ -235,13 +237,13 @@ export class Planner {
     return {
       plan, kvPlaceholder: KV_PLACEHOLDER.isPlaceholder,
       geometry: { habitatCell: this.habitat, stopCells: Object.fromEntries(this.stops.map((s) => [s.id, s.cell])), legs: geomLegs, unreachable,
-        profile, marginTicks },
+        profile, marginTicks, stopReturn_s: margins?.stopReturn_s ?? {} },
     };
   }
 
   /** Plan 6.6 margins at the slow, nominal and fast speed bounds, or null while any plan time is unset.
    *  The profile and the state use the slow bound (conservative, AC-19); the end margin is an est. range. */
-  private margins(legCells: number[][], durA: (Assumption | null)[]): { profile: PlannedMargin[]; samples: MarginSample[]; end: Quantity } | null {
+  private margins(legCells: number[][], durA: (Assumption | null)[]): { profile: PlannedMargin[]; samples: MarginSample[]; end: Quantity; stopReturn_s: Record<string, number> } | null {
     const t = this.planTimes;
     if (!t.T_EVA || !t.t_ops || !t.t_cont || durA.some((a) => !a)) return null;
     const times = { tEva_s: t.T_EVA.value, tOps_s: t.t_ops.value, tCont_s: t.t_cont.value };
@@ -263,6 +265,7 @@ export class Planner {
     return {
       profile: slow.map((m) => ({ s_m: m.s_m, margin_min: m.margin_s / 60, state: m.state })),
       samples: slow,
+      stopReturn_s: Object.fromEntries(this.stops.map((s) => [s.id, this.slowField!.field[s.cell]!])),
       end: { value: nominal, low, high, unit: "s", valueClass: "estimated", methodId: "engine:margin-6.6-grid-metric",
         assumptionIds: [...new Set([KV_PLACEHOLDER.assumption.id, SLOPE_LIMIT_ASSUMPTION.id, "A-T_EVA", "A-t_ops", "A-t_cont", ...durA.map((a) => a!.id)])],
         sourceIds: ["D1", "walkSpeedNominal", "walkSpeedRange"] },
