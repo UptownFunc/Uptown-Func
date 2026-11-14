@@ -25,11 +25,13 @@ export function BriefingView({ output, snapshot, hidden = false }: BriefingViewP
   currentRef.current = current;
   const stale = card ? isStale(card.model.versionHash, current) : false;
 
+  // The class is removed on afterprint only: in browsers where print() returns before printing (Safari, mobile),
+  // removing it earlier would print the whole console instead of the card.
   const printCard = () => {
     document.body.classList.add("print-card");
     const done = () => { document.body.classList.remove("print-card"); window.removeEventListener("afterprint", done); };
     window.addEventListener("afterprint", done);
-    try { window.print(); } finally { setTimeout(done, 0); }
+    window.print();
   };
 
   const generate = async () => {

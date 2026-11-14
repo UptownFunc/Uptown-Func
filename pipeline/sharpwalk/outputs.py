@@ -31,4 +31,7 @@ def merge_provenance(records: list, record: dict) -> list:
     """Provenance list with `record` replacing any record of the same dataset id; other records are kept in order."""
     out = [r for r in records if r.get("id") != record["id"]]
     out.append(record)
-    return sorted(out, key=lambda r: int(r["id"][1:]))
+    def key(r):
+        i = str(r.get("id", ""))
+        return (0, int(i[1:]), i) if i[:1] == "D" and i[1:].isdigit() else (1, 0, i)
+    return sorted(out, key=key)

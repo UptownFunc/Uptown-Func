@@ -23,3 +23,5 @@ def test_merge_provenance_replaces_by_id_and_keeps_others():
     assert merge_provenance([d1, old_d2], new_d2) == [d1, new_d2]
     assert merge_provenance([d1], new_d2) == [d1, new_d2]
     assert merge_provenance([], d1) == [d1]
+    other = {"id": "curiosity-path"}
+    assert merge_provenance([other, {"id": "D10"}], d1) == [d1, {"id": "D10"}, other]

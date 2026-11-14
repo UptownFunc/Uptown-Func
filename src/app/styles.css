@@ -170,8 +170,9 @@ body { background: var(--housing); color: var(--text); font-family: var(--sans);
 .field-error { color: #b3261e; font-size: 16px; width: 100%; }
 .field-warning { font-size: 16px; background: #fff; border: 2px solid #b3261e; padding: 8px; }
 
-/* Phone width (UX-12; field use outdoors): no horizontal scroll, every view reachable, the page scrolls vertically. */
-@media (max-width: 800px) {
+/* Phone width (UX-12; field use outdoors): no horizontal scroll, every view reachable, the page scrolls vertically.
+   Screen only, so an A5 print page never picks up the phone layout. */
+@media screen and (max-width: 800px) {
   html, body, #root { height: auto; }
   .housing { height: auto; min-height: 100%; }
   .titlebar { flex-wrap: wrap; gap: 6px 12px; }

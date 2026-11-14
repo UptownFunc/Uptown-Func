@@ -80,6 +80,13 @@ test("the printed card is one A5 page; printing from Planning is not blank", asy
   await page.getByRole("button", { name: "Briefing" }).click();
   await page.getByRole("button", { name: "Generate card from current plan" }).click();
   await expect(page.getByTestId("briefing-card").locator(".card-map img")).toBeVisible({ timeout: 20_000 });
+  // The Print briefing button sets the card-only print state while print() runs.
+  await page.evaluate(() => { (window as unknown as { __printed: boolean[] }).__printed = [];
+    window.print = () => { (window as unknown as { __printed: boolean[] }).__printed.push(document.body.classList.contains("print-card")); }; });
+  await page.getByRole("button", { name: "Print briefing" }).click();
+  expect(await page.evaluate(() => (window as unknown as { __printed: boolean[] }).__printed)).toEqual([true]);
+  await page.evaluate(() => window.dispatchEvent(new Event("afterprint")));
+  expect(await page.evaluate(() => document.body.classList.contains("print-card"))).toBe(false);
   await page.emulateMedia({ media: "print" });
   const pages = (pdf: Buffer) => (pdf.toString("latin1").match(/\/Type\s*\/Page[^s]/g) ?? []).length;
   const plain = await page.pdf({ preferCSSPageSize: true });
