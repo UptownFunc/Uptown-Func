@@ -789,7 +789,7 @@ Scope completed: src/app/demoPreset.ts (start-up set_assumption Commands; ?prese
   D6 in the sources panel and on the card; existing e2e specs moved to ?preset=none; new e2e g3-preset, stop-tasks, rover
 Tests written first and seen failing: preset unit + planner tests (module missing); contract "seven command types" and
   edit_stop planner test (unknown type). The rover manifest schema and its tests were written together.
-Checks run (exact commands), Sat 14 Nov 2026 ~19:05-19:25 Asia/Manila:
+Checks run (exact commands), Sat 14 Nov 2026 ~19:01-19:15 Asia/Manila (from commit times):
   npx vitest run                                   -> 271 passed / 271, 27 files
   npx tsc --noEmit                                 -> clean
   rm -rf dist && npm run build                     -> OK; main 206.55 kB gzip + worker 41,176 B (~247.7 of 250 KB, B-01)

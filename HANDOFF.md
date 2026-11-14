@@ -24,6 +24,14 @@ Do not interpret blank fields as proof that no work exists. Inspect GitHub and t
 - No code, data, contract or decision changed. No PR opened, nothing merged. Open PRs: none (PR #1 merged earlier).
 - **Resolved 18:52:** G-07 restores team credit (G-01). Contracts accepted as drafted for the merge (C-AGREE). The operator authorised the merge of the branch work into `main` and delegated the G3 input choices to the session.
 
+## Session update 19:15 (G3 inputs)
+
+- **PR #2 merged into `main` at 19:00: merge commit `1da70b5`** (all branch work + G-07 + C-AGREE + R-15 fixes).
+- G3 inputs chosen by SI at the operator's direction (G3-01, C-19, C-22): plan times T_EVA 240 / t_ops 30 / t_cont 30 / stop 45 min and scenario 2026-11-15 12:00 UTC sent as start-up Commands (`?preset=none` skips them); `edit_stop` for stop names and tasks; three Curiosity Navcam frames as the D6 rover point of view. All marked as SI choices for the team to confirm.
+- Checks at c72157d: vitest 271/271, tsc clean, build OK (~247.7 of 250 KB), pytest 62, Playwright 46/46.
+- **G3 remaining: first public deploy (B-4, Vercel access, a human).** Everything else for Tier 1 is in.
+- Next: PR #3 (G3 inputs) with /code-review, then merge; B-4 deploy; G4 needs B-7 rover positions (AC-07/AC-08).
+
 ## Session update 19:00 (merge, PR #2)
 
 - PR parcilla13/Uptown-Func#2 (ccr-dbbcdd02-kqy23v -> main) carries all branch work plus G-07, C-AGREE and the R-15 review fixes. Checks at the merge head: vitest 262/262, tsc clean, build OK (~246.4 KB), pytest 61, Playwright 43/43. Merge commit: see PHASES and the PR once merged.
