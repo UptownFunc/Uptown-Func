@@ -10,7 +10,7 @@ This file is the handoff between team members and Claude sessions. Keep it factu
   - Model: Claude Code with Claude Opus 5.5. Fable 5.2 not used. **Superpowers is not installed in this container and was not used.**
 - **Deadline:** Sun 15 Nov 2026, 23:59 local (plan 19.3). **A person must still confirm it on the portal.** About 25 h 9 min remained at 22:50.
 - **Current phase:** G3 and G4 are **met**. The public deploy (3.5) was VERIFIED at ~22:30. Next gate: **G5 freeze, Sun 13:00**.
-- **`main` = `d5488de`** (PR #16). This branch was equal to `main` before this handoff commit. **The handoff commit is on `claude/optimistic-darwin-dxdct4` only and is not merged**: the handoff request said not to merge to main. Run `git log -1` for its SHA.
+- **`main`:** was `d5488de` (PR #16) when the handoff was written. The handoff commit was first left unmerged, as the handoff request said; the operator then asked to merge it, and it went to `main` through **PR #17** (merge SHA: run `git log --merges -1 origin/main`).
 - **Working tree:** clean after the handoff commit. No stashes. Only git-ignored items remain: `node_modules/`, `.venv/` (created this session), `dist/`, `test-results/`, `__pycache__/`.
 - **Open PRs:** none (GitHub API, 22:45).
 - **Live app:** **https://uptown-func.vercel.app**. Vercel team Kauhla, project `uptown-func`.
@@ -55,7 +55,7 @@ Team: Patrick Ezekiel A. Arcilla (parcilla13), Christian Jesus Alcazar, Eugene I
 | #14 | 1c7201c | Merge record for #13 |
 | #15 | f48697e | First deploy record |
 | #16 | d5488de | 3.5 VERIFIED: live deploy opens without login; Playwright 50/50 against it |
-| (not merged) | this handoff commit | `DECISIONS.md`, `PHASES.md`, `HANDOFF.md`, `SI_LOG.md` only |
+| #17 | `git log --merges -1` | This session handoff (logs only), merged at the operator's later instruction |
 
 Earlier sessions' PRs #2-#12 and their merges are listed in `PHASES.md` and `git log --merges`.
 
@@ -140,7 +140,7 @@ Earlier sessions' PRs #2-#12 and their merges are listed in `PHASES.md` and `git
    - the two-machine check (steps in `docs/DEPLOY.md` "Verify the deploy");
    - the FortiGuard classification request for https://uptown-func.vercel.app (plan 19.3);
    - every submission field; links open without login; submit.
-6. **Optional:** merge this handoff commit to `main` through a PR, if the team wants `main`'s logs current. It changes logs only and triggers a redeploy with no app change.
+6. ~~Optional: merge this handoff to `main`~~ done: PR #17. Merging it redeployed the live site with no app change.
 7. **Do not:**
    - fabricate any value, benchmark, approval or test result;
    - add an invented value without a CLAUDE.md register row;
@@ -205,7 +205,7 @@ Session / member: cloud session, branch claude/optimistic-darwin-dxdct4; operato
 Model / tools: Claude Code, Claude Opus 5.5; Fable 5.2 not used; Superpowers NOT installed (not used);
   /code-review high on the deploy PR (R-21); Vercel REST API through the session proxy (token entered by a person)
 Times (Asia/Manila): Sat 14 Nov ~21:30-22:50
-Starting commit: main 030534c. Ending: main d5488de + this handoff commit (not merged)
+Starting commit: main 030534c. Ending: main = PR #17 merge of this handoff (logs only)
 Phase parts: 3.5 VERIFIED (deploy config, deploy, live e2e 50/50). Deferred by the operator: two-machine check and
   FortiGuard to 5.5 (G5-DEFER); register V-01..V-14 to another session (REG-DEFER)
 Files changed: see "Files changed this session"
@@ -220,7 +220,7 @@ Next owner: the team (register session, G-07); any member with a laptop (latency
 
 - [x] Stop before the account/member rotation deadline; do not abandon an unrecorded worktree.
 - [x] Finish and verify the current phase part where feasible (3.5 VERIFIED; nothing left half-done).
-- [x] Commit verified work on the working branch. Do not push directly to shared `main`. (This session's earlier work reached `main` only through PRs #13-#16 at the operator's instruction; this handoff commit is not merged.)
+- [x] Commit verified work on the working branch. Do not push directly to shared `main`. (This session's earlier work reached `main` only through PRs #13-#16 at the operator's instruction; the handoff commit was merged later through PR #17 at the operator's instruction.)
 - [x] Update `PHASES.md` with exact checks, results, limitations and commit SHA.
 - [x] Update `DECISIONS.md` for any changed decision or newly discovered blocker.
 - [x] Update `SI_LOG.md` for SI contributions during the session.
