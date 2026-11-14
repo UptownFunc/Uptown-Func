@@ -61,6 +61,6 @@ function summarise(plan: MissionPlan, letter: (id: string) => string): BriefingM
     returnWalk: back ? formatDuration(back.time) : { text: "unknown", estimated: false, unknown: true },
     distance: formatLength(legs.reduce((a, l) => a + l.distance_m, 0)),
     climb: `${Math.round(legs.reduce((a, l) => a + l.climb_m, 0))} m`,
-    concern: `Largest climb: ${letter(steepest.fromId)} → ${letter(steepest.toId)}, ${Math.round(steepest.climb_m)} m over ${formatLength(steepest.distance_m)}`,
+    concern: steepest.climb_m <= 0 ? null : `Largest climb: ${letter(steepest.fromId)} → ${letter(steepest.toId)}, ${Math.round(steepest.climb_m)} m over ${formatLength(steepest.distance_m)}`,
   };
 }

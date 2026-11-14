@@ -116,8 +116,8 @@ export function BriefingView({ output, snapshot, hidden = false, rover = null, c
           </div>
           <dl className="card-kpis">
             <div><dt>Return walk</dt><dd className={card.model.summary.returnWalk.unknown ? "unknown" : "est"}>{card.model.summary.returnWalk.text}</dd></div>
-            <div><dt>Distance</dt><dd>{card.model.summary.distance}</dd></div>
-            <div><dt>Elevation gain</dt><dd>{card.model.summary.climb}</dd></div>
+            <div><dt>Distance · D1 model</dt><dd>{card.model.summary.distance}</dd></div>
+            <div><dt>Elevation gain · D1 model</dt><dd>{card.model.summary.climb}</dd></div>
             <div><dt>Stops</dt><dd>{card.model.stops.length}</dd></div>
           </dl>
           {card.model.summary.concern && <p className="card-concern"><Mountain size={14} strokeWidth={2} aria-hidden="true" />

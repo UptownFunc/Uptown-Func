@@ -2,6 +2,25 @@
 
 This file is the handoff between team members and Claude sessions. Keep it factual and current. A new session must read this file before touching code.
 
+## Latest session (Sun 15 Nov 2026, 01:58-02:40 Asia/Manila): "Frosted terrain" redesign, design branch, NOT merged
+
+**Read this first if you work on the interface.** `main` is untouched.
+
+- **Branch:** `design/sharpwalk-ui-ux`. `main` ca2504a was merged in (46218f4), then the redesign (0a00683) and the review fixes and logs. Pushed to that branch only; no PR, as the operator asked.
+- **What changed:**
+  - The real terrain is the stage on all seven steps, with frosted glass panels over it and an oxide accent.
+  - Geist and Geist Mono, Lucide icons, design tokens.
+  - CSS-only motion per emil-design-eng, with view transitions removed.
+  - A decision-first briefing card with expandable details.
+  - Records: `docs/design/visual-system.md`, `docs/design/screenshots/`. Decisions: UI-07..UI-10, MOT-02, PRINT-02, R-23, B-01 in `DECISIONS.md`.
+- **Checks:** vitest 296/296; tsc clean; build OK; Playwright 55/55; pytest 82 + 2 skipped; licences current.
+- **Blockers before any PR:**
+  1. **B-01:** about 258.5 kB of app JavaScript against 250 KB.
+  2. **MOT-01:** the CLAUDE.md Motion rule.
+  3. The team approves UI-07..UI-10.
+  4. **PRINT-02:** the demo-preset card prints on two pages.
+- **To look at it:** `git checkout design/sharpwalk-ui-ux && npm ci && npm run build && npx vite preview`; open `/` (Welcome) or `/#map`.
+
 ## Latest session (Sun 15 Nov 2026, 00:58-01:55 Asia/Manila): UI/UX redesign on an isolated branch, NOT merged
 
 **Read this first if you work on the interface.** `main` is untouched by this session.

@@ -150,8 +150,8 @@ details[open] > :not(summary) { animation: reveal 220ms var(--ease-out); }
 /* Full-page steps: the static frosted backdrop below shows instead of the live map (cheap; the map is not re-blurred). */
 .app:is([data-step="setup"], [data-step="planner"], [data-step="brief"]) .plate { visibility: hidden; }
 /* Ambient backdrop beside the map: the same orbital image, blurred past recognition (decoration, not data). */
-.app::before { content: ""; position: fixed; inset: -60px; z-index: 0; pointer-events: none; opacity: 0.45;
-  background: url("/area/d2_luminance.jpg") center / cover no-repeat; filter: blur(60px) brightness(0.6) sepia(0.5) saturate(1.4); }
+.ambient { position: fixed; inset: -60px; z-index: 0; pointer-events: none; opacity: 0.45;
+  background: center / cover no-repeat; filter: blur(60px) brightness(0.6) sepia(0.5) saturate(1.4); }
 
 .masthead { position: fixed; z-index: 30; top: var(--gap); left: var(--gap); right: var(--gap); height: 56px; display: flex; align-items: center; gap: var(--s4);
   padding: 0 8px 0 18px; border-radius: var(--r-pill); }
@@ -531,6 +531,7 @@ details[open] > :not(summary) { animation: reveal 220ms var(--ease-out); }
 .app:not([data-step="map"]):not([data-step="hud"]):not([data-step="assess"]) .toast { top: auto; bottom: calc(var(--bottom) + var(--s3)); }
 .app:is([data-step="map"], [data-step="assess"]) .toast { left: calc(50% + (var(--panel) + 2 * var(--gap)) / 2); }
 .app[data-step="hud"] .toast { left: calc(50% + (480px + 2 * var(--gap)) / 2); }
+@media screen and (max-width: 1180px) { .app[data-step="hud"] .toast { left: calc(50% + (420px + 2 * var(--gap)) / 2); } }
 
 /* ---------- Motion vocabulary ---------- */
 @keyframes reveal { from { opacity: 0; transform: translateY(-4px); } }
@@ -618,7 +619,7 @@ details[open] > :not(summary) { animation: reveal 220ms var(--ease-out); }
     backdrop-filter: none; -webkit-backdrop-filter: none; }
   /* Only the card takes space on the page: everything else leaves the layout, so no blank second sheet. */
   body.print-card :is(html, body, #root, .app) { height: auto; min-height: 0; }
-  body.print-card .app::before, body.print-card .app > :not(main), body.print-card main > :not(.briefing),
+  body.print-card .app > :not(main), body.print-card main > :not(.briefing),
   body.print-card .briefing :is(.screen-head, .briefing-actions, .confirm) { display: none !important; }
   body.print-card .card, body.print-card .card * { visibility: visible; }
   body.print-card .card { position: absolute; left: 0; top: 0; width: 100%; padding: 0; background: #fff; box-shadow: none; border-radius: 0; font-size: 8pt; }

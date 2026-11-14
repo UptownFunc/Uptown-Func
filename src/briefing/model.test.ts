@@ -81,4 +81,9 @@ describe("briefing card: scenario time assumption (Conditions, plan 19.11 weakne
     expect(m.summary.climb).toBe("unknown");
     expect(m.summary.concern).toBeNull();
   });
+
+  it("names no terrain concern for a route with no climb", () => {
+    const flat = plan.legs.map((l) => ({ ...l, climb_m: 0 }));
+    expect(briefingModel({ ...plan, legs: flat }).summary.concern).toBeNull();
+  });
 });

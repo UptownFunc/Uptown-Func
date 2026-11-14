@@ -23,7 +23,7 @@ import { BriefingView } from "../briefing/BriefingView";
 import { FieldView } from "../field/FieldView";
 import type { MapSnapshot } from "../map/snapshot";
 import { DEMO_PRESET, presetEnabled } from "./demoPreset";
-import { STEPS, stepFromHash, stepIndex, type StepId } from "./steps";
+import { STEPS, stepFromHash, type StepId } from "./steps";
 import { ArrowRight, BookOpen, ClipboardCheck, Gauge, LoaderCircle, Map as MapIcon, Navigation, SlidersHorizontal, Timer } from "lucide-react";
 import { ICON } from "./icons";
 
@@ -73,7 +73,6 @@ export function App() {
   stepRef.current = step;
   const show = useCallback((next: StepId, push: boolean) => {
     if (next === stepRef.current) return;
-    document.documentElement.dataset.dir = stepIndex(next) < stepIndex(stepRef.current) ? "back" : "fwd";
     const apply = () => {
       setStep(next);
       setDrawer(false); // a new step starts uncovered; the drawer opens again from any number or the masthead
@@ -180,6 +179,8 @@ export function App() {
 
   return (
     <div className="app" data-step={step} data-busy={pending > 0 || (!output && !engineFailed) || contourBusy}>
+      {/* Ambient backdrop: the same orbital image, blurred past recognition (decoration, not data); path relative to the page. */}
+      <div className="ambient" style={{ backgroundImage: `url(${AREA_URL}d2_luminance.jpg)` }} aria-hidden="true" />
       <header className="masthead" inert={step === "welcome"}>
         <button type="button" className="wordmark" onClick={() => go("welcome")} aria-label="SharpWalk, start screen">
           <span className="mark" aria-hidden="true" />SharpWalk
@@ -219,7 +220,7 @@ export function App() {
           {ping && <span key={ping.n} className="ping" style={{ left: ping.x, top: ping.y }} aria-hidden="true" />}
           {/* Route recalculation feedback: shown while a Command is with the engine (route search, margins). */}
           <p className="recalc" data-on={recalculating} aria-hidden={!recalculating}>
-            <LoaderCircle {...ICON} aria-hidden="true" />Recalculating route and margins
+            <LoaderCircle {...ICON} aria-hidden="true" />Engine updating the plan
           </p>
         </div>
         <RouteProfile output={output} hoverIndex={hover} onHoverIndex={setHover} />

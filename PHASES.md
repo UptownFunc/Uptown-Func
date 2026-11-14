@@ -136,6 +136,30 @@ Deadline still Sun 15 Nov 23:59 local (portal confirmation by a person still pen
 | 5.5 | PENDING (last phase) | Includes the deferred two-machine check and FortiGuard request (G5-DEFER); internal submit Sun 21:00 |
 | 5.4 | IN PROGRESS | README SI use and references current (D5, D6, D12, papers); concept-origin account (B-5) and native-library licences open; D12 licence terms not read |
 
+## Design branch, second redesign "Frosted terrain" (Sun 15 Nov 2026, 01:58-02:40 Asia/Manila; NOT merged, no PR)
+
+Outside the plan's phase list. Phases D1-D5, each followed by `npx vitest run`, `npx tsc --noEmit`, `npm run build` and a screenshot or e2e check.
+
+| Part | Scope | Checks after the part | Result |
+|---|---|---|---|
+| D0 | Merge `main` ca2504a (REG-02) into the branch | vitest, tsc | 293/293; clean (46218f4) |
+| D1 | Tokens, Geist fonts, Lucide icons, glass shell over the full-bleed terrain | tsc, build, desktop screenshots of all steps | clean; built; issues found and fixed (Welcome chrome, figure wrap, footer contrast) |
+| D2 | Welcome, Setup, Planner | same, plus screenshots | OK |
+| D3 | Map, HUD, Assess; recalculation pill, click ring, empty and loading states | vitest, tsc, build, full Playwright | 295/295; clean; 51/55: STALE 1.3 s, print 2 pages, coverage point under the panel, sky drawer |
+| D3 fixes | Map beside the panel; no re-blurred canvas; drawer closes on a step change | targeted e2e | 15/17, then 10/10 |
+| D4 | Decision-focused card (`src/briefing/model.ts` summary tests first: 2 failing, then 8/8); print opens every section; print layout | e2e briefing; PDF rendered | one A5 page (blank scenario); two with the demo preset (PRINT-02) |
+| D4 fix | View transitions removed (STALE 1.09-1.18 s) | briefing STALE test x3 | 3/3 pass |
+| D5 | Full verification, /code-review R-23 (6 of 8 fixed), screenshots, logs | see below | all pass except AC-12 |
+
+Final checks (after the R-23 fixes):
+- `npx vitest run`: 29 files, 296/296 passed.
+- `npx tsc --noEmit`: clean.
+- `rm -rf dist && npm run build`: OK; main 216.92 kB gzip (Vite), worker 41,530 B (`gzip -9`), about 258.5 kB in all (AC-12: **not met**, B-01).
+- `PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome npx playwright test --trace off`: **55/55 passed**.
+- `(cd pipeline && ../.venv/bin/python -m pytest)`: 82 passed, 2 skipped (gdal_contour not installed).
+- `.venv/bin/python scripts/licences.py | diff -q - docs/licences.md`: no difference.
+- Screenshots: `docs/design/screenshots/` (7 desktop at 1440 x 900, 7 mobile at iPhone 13 width; real app, real data).
+
 ## Design branch `design/sharpwalk-ui-ux` (Sun 15 Nov 2026, 00:58-01:55 Asia/Manila; NOT merged, no PR)
 
 A UI/UX redesign done on an isolated branch at the operator's request. It is outside the plan's phase list and changes no phase status on `main`.
