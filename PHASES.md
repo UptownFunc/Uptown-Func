@@ -825,7 +825,7 @@ Results: PASS. Sanity check, not validation (plan weakness 64). After /code-revi
   upper-inclusive bins, geo F1->F5->F6 mapping, grid checksums, MultiLineString): re-run 11:36 UTC -> 83 / 2,537 known
   cells excluded (3.27 %), 1 unknown; same D5 sha256 c22752254772...; pytest 68 passed
 Known limitations: D5 localisation error UNVERIFIED (O-17); the line-through-cell rule is a session choice (V-11)
-Commit SHA: the commit that adds this record
+Commit SHA: 33927f6, c058dea (R-17), 1eddcba. **Merged: PR #5 merge commit 31270cf (Sat 14 Nov 19:38)**; PR #4 (register) merge 304d87c
 Next part / blocker owner: 4.2 AC-07 (sky-obstruction run; reference-period sols need the papers' full text, R-13)
 ```
 
