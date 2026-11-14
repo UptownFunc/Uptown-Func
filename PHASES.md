@@ -98,7 +98,7 @@ the 23:59 close is only on third-party pages: **a person must confirm it on the 
 | 3.4 | IN PROGRESS (core done) | Card prints stop tasks and the three D6 rover views with credits; paper print and fixed-scale map open |
 | 3.5 | NOT STARTED | Needs Vercel access (B-4) |
 | 3.6 | IN PROGRESS | Conditions built (9ec2f70, 6e8ca00, 9608ecb); AC-09 2 of 3 dates (B-10); scenario time set by G3-01 (2026-11-15 12:00 UTC, assumed) |
-| 4.1 | VERIFIED (Design review pending) | Contours, drill, AC-31 done; **sky-obstruction layer built** (20 m grid, plan 6.7; self-check 0.064 pp after R-19; off by default; legend: geometry, not dose + M12 benchmark). Per-stop sky value not shown (bundle, V-14 note) |
+| 4.1 | VERIFIED (Design review pending) | Contours, drill, AC-31 done; **sky-obstruction layer built** (20 m grid, plan 6.7; self-check 0.064 pp after R-19; off by default; legend: geometry, not dose + M12 benchmark). **Per-stop "20 m sample" added (Sat 20:41-20:55, 2a65db1 + R-20 fixes 7cf23b2; branch claude/clever-thompson-qowa8n, not merged)** |
 | 4.2 | VERIFIED at M12 (Data and Science review pending) | AC-07 PASS: f_obs 18.50 % vs 18.5 % published (h_obs 1 m); 0-2 m sweep 20.73-16.51 %, all within ±3 pp; AC-21/AC-22 converged; reference position not computed (R-13) |
 | 4.3 | VERIFIED (result recorded; Data and Science review pending) | AC-08 PASS: 83 of 2,537 known path cells excluded (3.27 % ≤ 5 % Assumed), 1 unknown; waypoints sols 4469-5073; `docs/data/ac-08-rover-path.md` |
 | 4.4 | VERIFIED (automated) | axe, keyboard and width checks pass in the 48-test Playwright run (20:26); manual checks at G5 |
@@ -167,7 +167,7 @@ Work on optional features only when it does not endanger this path. The AREA 2D 
 
 | Part | Task | Owner | Status | Checks / evidence | Commit |
 |---|---|---|---|---|---|
-| 4.1 | Complete Tier 2 features that do not threaten Tier 1. Contour display is optional; sky-obstruction grid runs after G1 and stays off the critical path. | Assigned module owners | IN PROGRESS (contours and drill done; sky obstruction not started) | **14:27:** time-to-habitat contour lines (d3-contour 4.0.3 in the worker; slow-bound field on a 4 m display grid by block minimum; lines only, labelled "est. N min"; no lines along the grid border or unreachable ground) and the simulated solar-event drill (plan 6.9: 30 min Assumed default in the constants register, 20/10 min stress cases, hatched SIMULATION banner, labelled drill line, stops outside named; no dose, no shelter wording). e2e `drill.spec.ts`. **Not started:** sky-obstruction grid (pipeline, needs D12) and its AC-07 benchmark. | 10ec506, 48e2774 |
+| 4.1 | Complete Tier 2 features that do not threaten Tier 1. Contour display is optional; sky-obstruction grid runs after G1 and stays off the critical path. | Assigned module owners | IN PROGRESS (contours and drill done; sky obstruction not started) | **14:27:** time-to-habitat contour lines (d3-contour 4.0.3 in the worker; slow-bound field on a 4 m display grid by block minimum; lines only, labelled "est. N min"; no lines along the grid border or unreachable ground) and the simulated solar-event drill (plan 6.9: 30 min Assumed default in the constants register, 20/10 min stress cases, hatched SIMULATION banner, labelled drill line, stops outside named; no dose, no shelter wording). e2e `drill.spec.ts`. **Not started:** sky-obstruction grid (pipeline, needs D12) and its AC-07 benchmark. **Sat 20:41-20:55 (claude/clever-thompson-qowa8n):** per-stop sky "20 m sample" (plan 6.7: "a stop reads the nearest grid value, labelled as a 20 m sample"); shown in each stop row only while the sky layer is on; model-derived %, sources D1 D12, assumption V-12; unknown outside the grid, on no-data or when the grid fails (named in the legend). Python oracle 11.6 % at the e2e stop matches the app. vitest 282/282, tsc clean, build ~249.6 of 250 KB, Playwright 50/50, pytest 82 + 2 skipped (no gdal-bin). /code-review R-20: 6 findings, all fixed. | 10ec506, 48e2774, 2a65db1, 7cf23b2 |
 | 4.2 | Run AC-07 sky-obstruction benchmark and preserve the interpretation “geometry, not dose.” | Data and Science | VERIFIED at M12 (Sat 19:46; review pending) | **AC-07 PASS at M12: f_obs 18.50 % vs 0.37π/2π = 18.5 %** (h_obs 1 m, Assumed); h_obs 0/1/2 m: 20.73/18.50/16.51 %, all within ±3 pp (Assumed); AC-21 (2°/1°/0.5°) and AC-22 (50/100/150 km) converged within 0.03 pp; horizon set 46 % of azimuths at 10-100 m (the butte), 36 % at 3-50 km. Reference position (about 10 %) NOT computed: sols UNVERIFIED (R-13). Sky-obstruction layer over the area not built. `docs/data/ac-07-sky-m12.md` | see completion record (AC-07) |
 | 4.3 | Run AC-08 rover-path consistency checks and document results. | Data and Science + Route Engine | VERIFIED (Sat 19:33; review pending) | **PASS: 83 / 2,537 known path cells excluded = 3.27 % (≤ 5 %, Assumed; after review R-17)**; slope median 8.8°, 83 cells > 20°; 157 D5 drives, sols 4469-5073; D5 frame check 3 mm. Sanity check only (weakness 64). Report `docs/data/ac-08-rover-path.md`; offline reproduction test in `pipeline/tests/test_rover_path.py`. Reproducible results and limitations | - |
 | 4.4 | Run accessibility checks, including serious axe violations and keyboard/reduced-motion behaviour. | Design | VERIFIED (automated checks); manual checks due at G5 | @axe-core/playwright 4.14.0: 0 serious/critical violations on Planning, Briefing (with card) and Field View (AC-11). AC-32: place, move and delete a stop by keyboard alone (map cursor: arrows 10 m, Shift 100 m, Enter adds; "Move stop X to the map cursor"; Delete), leg table as the non-map equivalent, console at 1280 and 1920 px without sideways scroll. No animations exist yet, so reduced motion has nothing to reduce. Manual projector/outdoor/slow-network checks are a G5 item. | 6bdb98e, 48e2774 |
@@ -899,6 +899,31 @@ Results: all green.
 Known limitations: no public deploy (B-4); bundle ~0.9 KB from the 250 KB budget; see HANDOFF "Known failures"
 Commit SHA: the handoff commit on ccr-dbbcdd02-kqy23v (not merged; main stays 38839d0)
 Next part / blocker owner: B-4 deploy (a person); register review V-01..V-14 (team)
+```
+
+```text
+Part: 4.1 per-stop sky-obstruction "20 m sample" (plan 6.7)
+Owner: no per-module roles (G-05); session operator not stated (claude/clever-thompson-qowa8n)
+Status: VERIFIED (Data and Science + Design review pending)
+Scope completed: src/map/skySample.ts (decode the committed 20 m grid, refuse a grid not centred on the area origin,
+  nearest-observer lookup through src/geo/grid); loadArea loads it in parallel as an Optional with a named reason;
+  AreaSheet hands a sampler to the console; PlanPanel shows the value per stop only while the sky layer is on;
+  format.ts shows % to 0.1 percentage points. No pipeline or contract change.
+Files changed: src/map/{skySample.ts, skySample.test.ts, loadArea.ts, AreaSheet.tsx}, src/app/{App.tsx, PlanPanel.tsx,
+  format.ts, format.test.ts}, e2e/sky.spec.ts
+Checks run (exact commands): npx vitest run ; npx tsc --noEmit ; rm -rf dist && npm run build ;
+  gzip -9 -c dist/assets/worker-*.js | wc -c ;
+  PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome npx playwright test --trace off ;
+  (cd pipeline && ../.venv/bin/python -m pytest) ; .venv/bin/python scripts/licences.py | diff -q - docs/licences.md
+Results: vitest 282/282 (28 files); tsc clean; build OK, main 208.16 kB gzip + worker 41,460 B = ~249.6 of 250 KB (B-01);
+  Playwright 50/50 (two new sky specs); pytest 82 passed, 2 skipped (gdal-bin not installed; pipeline unchanged);
+  licences current. Oracle: plain-Python F1 -> F6 puts the e2e STOP 43.0 m E, 7.0 m S of the origin, cell r75 c77,
+  raw 1164 -> 11.6 %; the app shows 11.6 %.
+Known limitations or failures: h_obs 1 m is the session's choice (V-12); value is geometry, not dose; kept off the
+  briefing card (SKY-3); ~0.4 KB of bundle headroom left.
+Review status: /code-review high R-20 of 8285658..2a65db1: 6 findings, all fixed in 7cf23b2
+Commit SHA: 2a65db1, 7cf23b2
+Next part / blocker owner: human PR review and merge; B-4 deploy (repository owner)
 ```
 
 ## Phase-part completion record
