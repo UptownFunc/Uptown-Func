@@ -67,7 +67,7 @@ Work on optional features only when it does not endanger this path. The AREA 2D 
 
 | Part | Task | Owner | Status | Checks / evidence | Commit |
 |---|---|---|---|---|---|
-| 2.1 | Implement and test the approved `src/geo` frame conversions and typed scientific constants with citations/pages. | Data and Science | UNVERIFIED | Frame/unit tests; constants register; no bypass conversions | - |
+| 2.1 | Implement and test the approved `src/geo` frame conversions and typed scientific constants with citations/pages. | Data and Science | IN PROGRESS (code and tests done; 2 citations UNRESOLVED) | `src/geo`: frame-tagged F1/F5/F6 points, F1 range checks, F1<->F5 and F5<->F6 on the F1 sphere. `src/constants`: register with citation and location per constant. `npx vitest run` 60/60 (16 new); `npx tsc --noEmit` clean. The TS F1->F5 reproduces the Python pipeline origin to 1 mm. **Open:** page for the 0.64-0.97 m/s range (plan 19.5, not read) and the source slide for the 20 deg limit; owner review. | see 2.1 record |
 | 2.2 | Implement admissible grid costs and route search. Exclude unknown terrain; apply slope screening; forbid diagonal corner cutting when either orthogonal neighbour is blocked. | Route Engine | UNVERIFIED | Synthetic and property tests; slope oracle; AC-01 family; unknown-cell tests | - |
 | 2.3 | Implement leg distance/time ranges and habitat time field. Keep seconds in the engine and display SI minutes. | Route Engine | UNVERIFIED | Known-grid oracle tests; range and unit tests; benchmark under 500 ms | - |
 | 2.4 | Implement planned margin and the manual-entry field-margin calculations without conflating `MissionPlan` and `MissionExecution`. | Route Engine + Design | UNVERIFIED | Margin boundary tests; stop arrival/departure tests; AC-19 on the grid metric | - |
@@ -230,6 +230,18 @@ Known limitations: matching a DEM hillshade to an albedo image is illumination-s
 Commit SHA: see the 1.4 commit on claude/kind-ptolemy-1wdqf5
 Next: owner inspects the north-south segments (cols ~158-166, 719-721, 238-242 and the vertical line near col 720);
   decide the trust-grid method; control points (1.5)
+```
+
+```text
+Part: 2.1 (not VERIFIED: two citations unresolved)
+Owner: Data and Science (TBA); written in Yujin's session
+Files changed: src/geo/index.ts, src/geo/geo.test.ts, src/constants/index.ts, src/constants/constants.test.ts
+Checks run: npx vitest run ; npx tsc --noEmit
+Results: 4 files, 60/60 pass; typecheck clean
+Known limitations: walkSpeedRange and slopeLimit citation locations UNRESOLVED; F1 heights are sphere-relative per
+  plan step 1 while D1 is probably areoid-relative (D-05)
+Commit SHA: see the 2.1 commit on claude/kind-ptolemy-1wdqf5
+Next: fill the citations from plan section 19.5; Route Engine starts 2.2 against src/geo and the 1.2 grids
 ```
 
 ## Phase-part completion record
