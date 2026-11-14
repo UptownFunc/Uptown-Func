@@ -11,16 +11,24 @@ import { SYMBOLS, maskRect, patternPhase, tileInk, type SymbolKind } from "./ter
 
 const KINDS: SymbolKind[] = ["excluded", "steep", "unknown"];
 
+/** Tiles are built once per pixel ratio and reused for every render. */
+const tiles = new Map<string, HTMLCanvasElement>();
 function tile(kind: SymbolKind, pixelRatio: number): HTMLCanvasElement {
+  const key = `${kind}@${pixelRatio}`, hit = tiles.get(key);
+  if (hit) return hit;
   const p = SYMBOLS[kind].period, c = document.createElement("canvas");
   c.width = c.height = p * pixelRatio;
   const ctx = c.getContext("2d")!;
   ctx.fillStyle = SYMBOLS[kind].colour;
   for (const [x, y] of tileInk(kind)) ctx.fillRect(x * pixelRatio, y * pixelRatio, pixelRatio, pixelRatio);
+  tiles.set(key, c);
   return c;
 }
 
-export function createTerrainLayer(urls: Record<SymbolKind, string>, maskExtent: Extent, className: string, onError: () => void): ImageLayer<ImageCanvas> {
+/** `maskExtent`: the masks' own F7 extent (whole 2 m cells); `displayExtent`: the sheet's data extent, which the layer is
+ *  clipped to so it never reaches past the other display layers (the mask grid can overhang it by up to 1 m). */
+export function createTerrainLayer(urls: Record<SymbolKind, string>, maskExtent: Extent, displayExtent: Extent, className: string,
+  onError: () => void): ImageLayer<ImageCanvas> {
   const images = new Map<SymbolKind, HTMLImageElement>();
   let failed = false, pending = KINDS.length;
   const scratch = document.createElement("canvas");
@@ -33,7 +41,10 @@ export function createTerrainLayer(urls: Record<SymbolKind, string>, maskExtent:
       const ctx = out.getContext("2d")!, s = scratch;
       s.width = out.width; s.height = out.height;
       const sc = s.getContext("2d")!;
-      const m = maskRect(maskExtent, extent, resolution, pixelRatio);
+      const m = maskRect(maskExtent, extent, resolution, pixelRatio), clip = maskRect(displayExtent, extent, resolution, pixelRatio);
+      ctx.beginPath();
+      ctx.rect(clip.x, clip.y, clip.w, clip.h);
+      ctx.clip();
       for (const kind of KINDS) {
         sc.globalCompositeOperation = "copy";
         const pattern = sc.createPattern(tile(kind, pixelRatio), "repeat")!;
@@ -51,6 +62,9 @@ export function createTerrainLayer(urls: Record<SymbolKind, string>, maskExtent:
   });
   for (const kind of KINDS) {
     const img = new Image();
+    // Same-origin today (area/ is relative); "anonymous" keeps the canvas exportable (briefing card) if area data is
+    // ever served from another origin with CORS, instead of silently tainting it.
+    img.crossOrigin = "anonymous";
     img.onload = () => { images.set(kind, img); if (--pending === 0 && !failed) source.changed(); };
     img.onerror = () => { if (!failed) { failed = true; onError(); source.changed(); } };
     img.src = urls[kind];

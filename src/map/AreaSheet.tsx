@@ -146,7 +146,7 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
         if (L.kind !== "masks" || !L.masks || !L.maskExtentF7) throw new Error("terrain layer: masks missing from layers.json");
         const m = L.masks;
         return createTerrainLayer({ steep: dataUrl + m.steep.path, excluded: dataUrl + m.excluded.path, unknown: dataUrl + m.unknown.path },
-          L.maskExtentF7, "layer-terrain", () => fail(L));
+          L.maskExtentF7, extent, "layer-terrain", () => fail(L));
       };
       const image = (id: string, className: string) => {
         const L = a.display.layers.find((l) => l.id === id)!;

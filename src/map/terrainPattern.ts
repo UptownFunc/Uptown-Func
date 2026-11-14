@@ -7,10 +7,10 @@
 
 export type SymbolKind = "steep" | "excluded" | "unknown";
 
-export const SYMBOLS: Record<SymbolKind, { colour: string; period: number; label: string }> = {
-  steep: { colour: "#e8b341", period: 6, label: "amber diagonal hatch: slope 15-20 deg, steep but allowed" },   // plan 9.2
-  excluded: { colour: "#aeb5b3", period: 6, label: "neutral cross-hatch: excluded (slope over 20 deg)" },       // plan 9.2
-  unknown: { colour: "#e8e1d5", period: 4, label: "stipple: unknown or low confidence" },                       // plan 9.1
+export const SYMBOLS: Record<SymbolKind, { colour: string; period: number }> = {
+  steep: { colour: "#e8b341", period: 6 },     // plan 9.2: amber diagonal hatch, slope 15-20 deg (steep but allowed)
+  excluded: { colour: "#aeb5b3", period: 6 },  // plan 9.2: neutral cross-hatch, known exclusion (slope over 20 deg)
+  unknown: { colour: "#e8e1d5", period: 4 },   // plan 9.1: stipple, unknown or low confidence
 };
 
 const mod = (v: number, m: number) => ((v % m) + m) % m;
