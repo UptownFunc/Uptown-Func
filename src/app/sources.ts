@@ -18,6 +18,7 @@ export function describeSource(id: string, provenance: readonly Provenance[]): S
     const c = CONSTANTS[id as ConstantId];
     return { id, kind: "constant", title: `Constant ${id}`, detail: `${c.citation.source}, ${c.citation.location}${"limitation" in c && c.limitation ? `. Limits: ${c.limitation}` : ""}` };
   }
+  if (id === "manual entries") return { id, kind: "other", title: "Manual entries", detail: "Arrival and departure times ticked by the crew in the Field View." };
   if (id === "team choice") return { id, kind: "team", title: "Team choice", detail: "An Assumed value set by the team, with its rationale; not a measurement." };
   if (/^plan-/.test(id)) return { id, kind: "plan", title: `SharpWalk plan ${id.slice(5)}`, detail: "Formula or rule in the team's project plan." };
   return { id, kind: "other", title: id, detail: "" };

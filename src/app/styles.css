@@ -140,7 +140,9 @@ body { background: var(--housing); color: var(--text); font-family: var(--sans);
 
 /* Quantities are buttons that open their source (AC-05, demo beat 5). */
 .qty { background: none; border: 0; padding: 0; color: inherit; font: inherit; cursor: pointer; text-decoration: underline dotted; text-underline-offset: 3px; }
-.qty.est { font-style: italic; }
+.qty.est, .qty-static.est { font-style: italic; }
+.field .qty-static { font-size: 26px; }
+.qty-static.unknown { font-style: italic; }
 .qty.unknown { font-style: italic; color: var(--text-muted); }
 .qty:focus-visible, .link:focus-visible { outline: 2px solid var(--plan-hi); outline-offset: 2px; }
 .sources { border-top: 1px solid var(--border); margin-top: 10px; }

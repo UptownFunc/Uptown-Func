@@ -32,7 +32,8 @@ export function FieldView({ output, hidden = false }: { output: PlanOutput | nul
   const tEva = plan.assumptions.find((a) => a.id === "A-T_EVA")?.value;
   const last = ex.ticks[ex.ticks.length - 1];
   const q = (r: Range, method: string): Quantity => ({ value: r.low, low: r.low, high: r.high, unit: "s", valueClass: "estimated", methodId: method,
-    assumptionIds: ["A-kv", "A-T_EVA", "A-t_ops", "A-t_cont"], sourceIds: ["manual entries", "D1", "walkSpeedRange"] });
+    assumptionIds: [...new Set(["A-kv", "A-T_EVA", "A-t_ops", "A-t_cont", ...plan.stops.flatMap((s) => s.duration.assumptionIds)])],
+    sourceIds: ["manual entries", "D1", "walkSpeedRange"] });
 
   const tick = () => {
     try {
@@ -74,7 +75,8 @@ export function FieldView({ output, hidden = false }: { output: PlanOutput | nul
         </div>
         <form className="field-item field-tick" onSubmit={(ev) => { ev.preventDefault(); tick(); }}>
           <label>Elapsed EVA time, min <input inputMode="decimal" value={minutes} onChange={(ev) => setMinutes(ev.target.value)} aria-label="Elapsed EVA time, minutes" /></label>
-          <button type="submit" className="primary" disabled={!next}>
+          {/* While ticks from an older plan exist, ticking is blocked until the crew explicitly starts over. */}
+          <button type="submit" className="primary" disabled={!next || stale}>
             {next ? `Tick: ${next.kind} ${stopOf(next.stopId)?.letter}` : "All ticked"}
           </button>
           <div className="field-note" data-testid="field-provenance">

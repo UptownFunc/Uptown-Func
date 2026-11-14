@@ -62,4 +62,8 @@ test("field view: manual ticks drive est. field margins; the plan is never chang
   await setTime(page, "Contingency (t_cont)", "25");
   await page.getByRole("button", { name: "Field View" }).click();
   await expect(field.getByRole("alert")).toContainText(`belong to plan ${version}`);
+  // Ticking is blocked until the crew explicitly starts over, so old ticks are never discarded silently.
+  await expect(page.getByRole("button", { name: /^Tick: / })).toBeDisabled();
+  await page.getByRole("button", { name: "Start ticks for the current plan" }).click();
+  await expect(page.getByRole("button", { name: "Tick: arrive A" })).toBeEnabled();
 });
