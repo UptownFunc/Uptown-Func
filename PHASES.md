@@ -823,7 +823,7 @@ Checks run (exact commands), Sat 14 Nov 2026 19:30-19:33 Asia/Manila:
   (cd pipeline && ../.venv/bin/python -m pytest)   -> 69 passed
 Results: PASS. Sanity check, not validation (plan weakness 64). After /code-review R-17 (exact traversal, known-cell share,
   upper-inclusive bins, geo F1->F5->F6 mapping, grid checksums, MultiLineString): re-run 11:36 UTC -> 83 / 2,537 known
-  cells excluded (3.27 %), 1 unknown; same D5 sha256 c22752254772...; pytest 70 passed
+  cells excluded (3.27 %), 1 unknown; same D5 sha256 c22752254772...; pytest 68 passed
 Known limitations: D5 localisation error UNVERIFIED (O-17); the line-through-cell rule is a session choice (V-11)
 Commit SHA: the commit that adds this record
 Next part / blocker owner: 4.2 AC-07 (sky-obstruction run; reference-period sols need the papers' full text, R-13)
