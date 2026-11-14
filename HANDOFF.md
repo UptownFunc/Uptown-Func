@@ -6,7 +6,7 @@ This file is the handoff between team members and Claude sessions. Keep it factu
 
 **Read this first; the older snapshot below is from 22:50 and is otherwise still valid.**
 
-- **Branch:** `claude/amazing-hypatia-f808mz`, commit `29830fd` plus a log commit. **Not merged and no PR opened** (no instruction to). `main` is still `b1e0ff8`, so **the live site still shows the old 240/30/30 values.**
+- **Branch:** `claude/amazing-hypatia-f808mz`, commits `29830fd` and `3039376`. **Merged to `main` as `08ed600` through PR #19** at the operator's instruction ("merge it to main"), after the CLAUDE.md step 6 checklist (recorded on the PR). **Live site checked (~23:40):** https://uptown-func.vercel.app serves `assets/index-D-8LoYh9.js`, byte-identical to the build tested here; `e2e/g3-preset.spec.ts` and `e2e/plan-route.spec.ts` pass 7/7 against the live URL (T_EVA shows 360.0 min).
 - **Session:** operator not stated. Model: Claude Fable 5.2 (the session's configured model; CLAUDE.md names Opus 5.5 as primary). Superpowers not installed, not used.
 - **Done:** register V-01..V-14 cleared (DECISIONS REG-01; evidence `docs/data/reg-01-register-sources.md`).
   - FIXED: T_EVA 360 min, t_ops 60 min, t_cont 60 min (EVA-EXP-0042 Rev B, pp. 29-30); stop 45 min (NASA/TM-2010-216138, Tables 2-3, p. 12); V-08 image terms.
@@ -19,7 +19,7 @@ This file is the handoff between team members and Claude sessions. Keep it factu
   3. **IMG-01:** confirm the citation wording with the Local Lead (never "according to NASA").
   4. k_v = 1 is unsupported for 10-20 deg; R-13 (RAD height) and the M12 page numbers stay unresolved.
 - **Environment:** the session moved to the "Uptown-Func" cloud environment and added `ntrs.nasa.gov` and `www.nasa.gov` to its allowed hosts (operator approved).
-- **Next:** open a PR for this branch and merge it under CLAUDE.md step 6 once the team agrees; then check the live site shows 360.0 min.
+- **Next:** the other members confirm REG-01; decide W-01; then the G5 freeze at Sun 13:00.
 
 ## Current snapshot
 
@@ -146,7 +146,7 @@ Earlier sessions' PRs #2-#12 and their merges are listed in `PHASES.md` and `git
 | B-11 | REMS units and outreach terms | Data and Science | Sun 13:00 |
 | B-13 | Design confirmations incl. V-14 | Design | Sun 13:00 |
 | R-13 | AC-07 reference-period sols, RAD observer height, page numbers | Data and Science | Sun 13:00 (else reported as not computed) |
-| G-08 / REG-01 | Register cleared on branch `claude/amazing-hypatia-f808mz` (29830fd); needs the other members' confirmation and a merge | Team | Sun 13:00 |
+| G-08 / REG-01 | Register cleared and merged (PR #19, 08ed600); needs the other members' confirmation | Team | Sun 13:00 |
 | BENCH | Laptop route-latency measurement (< 500 ms) | Any member with a laptop | Sun 13:00 |
 
 ## Exact next task
