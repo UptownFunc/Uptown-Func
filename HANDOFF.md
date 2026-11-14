@@ -4,10 +4,10 @@ This file is the handoff between team members and Claude sessions. Keep it factu
 
 ## Current snapshot
 
-- Last updated: **Sat 14 Nov 2026, ~18:45 Asia/Manila (UTC+8)** (container clock). Previous full handoff: 17:31 (session on `claude/wizardly-lovelace-i2i0wa`); this session only appended RUN-01 (see "Session update 18:45" below).
-- Deadline: **Sun 15 Nov 2026, 23:59 local** (plan 19.3). Re-checked 18:40: the official Space Apps FAQ confirms the 14-15 Nov 2026 dates; the 23:59 local close is still only on third-party pages. **A person must confirm it on the live portal.** Remaining at 18:45: about 29 h 14 min.
-- Gates: G0 and G1 expired and passed only under their fallbacks (2D only; 3D cut). G2 (Sat 19:00): criteria met at 14:48; latency margin thinner on this machine at 17:30 (see Known failures 2). **G3 (Sun 01:00, about 7 h 29 min away): at risk on human inputs only** (B-1, B-3, B-4, B-9, B-12).
-- **Branch `ccr-dbbcdd02-kqy23v`** (this session's designated branch), fast-forwarded from `claude/wizardly-lovelace-i2i0wa` at 82babb6 (nothing overwritten) plus this session's log commit. `claude/wizardly-lovelace-i2i0wa` itself is unchanged at 82babb6. Working tree clean after the commit.
+- Last updated: **Sat 14 Nov 2026, 19:55 Asia/Manila (UTC+8)** (container clock), session on `ccr-dbbcdd02-kqy23v`. See "Session update" blocks below, newest first.
+- Deadline: **Sun 15 Nov 2026, 23:59 local** (plan 19.3; official FAQ confirms 14-15 Nov; the 23:59 close is only on third-party pages: **a person must confirm it on the portal**). Remaining at 19:55: about 28 h 4 min.
+- Gates: G0/G1 passed under fallbacks (2D only; 3D cut). G2 met. **G3: Tier 1 e2e green incl. planned margin; first public deploy NOT done (B-4).** **G4 (Sun 10:00): AC-07 and AC-08 recorded (both PASS), Tier 2 merged, no serious axe violations; deploy still missing.** G5 freeze Sun 13:00.
+- **Branch `ccr-dbbcdd02-kqy23v` = `main` = 234d0cf** (PR #6 merge) plus this handoff commit. All work of this and earlier sessions is on `main`; no open PRs.
 - History: `claude/trusting-fermi-c5pc0s` at 091866a (previous handoff) fast-forwarded, nothing overwritten, **plus 18 commits** from this session (17 before this handoff commit). `main` is **bb473b7**, unchanged. **No open PRs; nothing merged** (operator instruction: no merge, no PR without authorization).
 - Session: operated from **parcilla13's account**; Claude Code with **Claude Opus 5.5** throughout; Fable 5.2 not used; the Superpowers skill was installed and its test-driven-development workflow used.
 - Environment ("Space App", personal): allows `www.giss.nasa.gov` and `mars.nasa.gov` (added with the user's approval at 15:21); the USGS bucket and package registries were reachable. **`gdal-bin` 3.8.4 was installed in this container only** (P-05); a new container needs it again for contour rebuilds.
@@ -23,6 +23,14 @@ Do not interpret blank fields as proof that no work exists. Inspect GitHub and t
 - **RUN-01 (1.2):** full rebuild from the USGS sources reproduces all 13 committed area outputs (PHASES completion record). P-03 is still open.
 - No code, data, contract or decision changed. No PR opened, nothing merged. Open PRs: none (PR #1 merged earlier).
 - **Resolved 18:52:** G-07 restores team credit (G-01). Contracts accepted as drafted for the merge (C-AGREE). The operator authorised the merge of the branch work into `main` and delegated the G3 input choices to the session.
+
+## Session update 19:55 (register, AC-08, AC-07; all merged)
+
+- **`main` = 234d0cf.** Merged this evening: PR #2 1da70b5 (branch work, G-07, R-15), PR #3 a761afd (G3 inputs, R-16), PR #4 304d87c (CLAUDE.md placeholder register, G-08), PR #5 31270cf (AC-08, R-17), PR #6 234d0cf (AC-07, R-18).
+- **AC-08 PASS:** 83 of 2,537 known Curiosity path cells excluded (3.27 % <= 5 %); `docs/data/ac-08-rover-path.md`.
+- **AC-07 PASS at Butte M12:** f_obs 18.50 % vs 18.5 % (h_obs 1 m); 20.73-16.51 % over 0-2 m; AC-21/AC-22 converged; reference position not computed (R-13); `docs/data/ac-07-sky-m12.md`.
+- Checks at 234d0cf: vitest 274/274, tsc clean, build OK (~247.9 of 250 KB), pytest 77, Playwright 46/46 (last run at 56b261b; later PRs changed pipeline and docs only).
+- Superpowers is not installed in this container (not used); Fable 5.2 not used.
 
 ## Session update 19:27 (both PRs merged)
 
@@ -150,17 +158,16 @@ B-2 (NASA host access) was resolved at 15:21 for the "Space App" environment.
 
 ## Exact next task
 
-1. **Human inputs for G3, smallest first:** B-9 scenario time and B-1 plan times (a value + one-line rationale each, in the console or recorded under T-02 / T-01 so a session can pre-set them as logged team choices); B-12 stop-tasks option; B-3 images; B-4 Vercel. Do not invent any of them.
-2. **Next code-only work (no approval needed):** G5 preparation that does not add bundle weight: measure route latency, contour load (CON-02) and frame pacing (HATCH-04) on a mid-range laptop (needs a person's machine). The end-to-end pipeline rerun is DONE (RUN-01, 18:35). P-03 needs a machine with GDAL 3.12.3.
-3. **When B-12 is decided:** implement stop name/tasks in the planner, the plan panel and the card (contract change recorded first).
-4. **When B-3 images arrive:** rover point of view in the stop panel and the card, labelled "similar terrain", with sol, camera and credit.
-5. **When B-4 arrives:** 3.5 first public deploy, then G5 checks; re-take the REMS snapshot at build time.
-6. **Do not:** touch the shared elevation decoder before P-01; change contract files before agreement (C-18..C-21); build the sky-obstruction layer before AC-07 (SKY-1); fabricate any position, benchmark, plan time, scenario time, image or AC-09 date.
+1. **B-4 deploy (a person with Vercel access):** link the repository to Vercel (or deploy `dist/` from `npm run build`), then run 3.5 and the G5 checks (two machines, Cesium blocked). Only blocker left for G3.
+2. **Team review before the G5 freeze (Sun 13:00):** clear the CLAUDE.md register V-01..V-13 (each FIXED or KEPT, G-08); confirm G-07 (team credit; Patrick's account had stated otherwise), G3-02 (edit_stop, SI-chosen defaults), C-22 image picks and image-use terms, H-01, REMS-01/02.
+3. **Code-only, optional (Tier 2):** sky-obstruction layer over the demo area (plan 6.7: 20 m grid, "geometry, not dose" label; allowed now that AC-07 has a result). Mind the JS budget (~2.1 KB headroom): the layer should be a pipeline raster drawn like the terrain masks, with little new app code.
+4. **Human:** AC-09 third date with the Mars24 app (B-10); P-03 rerun on a machine with GDAL 3.12.3; 1.5 control points; reference-period sols for AC-07 (R-13, needs the papers' full text).
+5. **Do not:** touch the shared elevation decoder before P-01; fabricate any position, benchmark, plan time, image or AC-09 date; add an invented value without a CLAUDE.md register row.
 
 ## Exact commands for the next session
 
 ```bash
-git fetch origin && git checkout ccr-dbbcdd02-kqy23v && git pull   # or claude/wizardly-lovelace-i2i0wa (82babb6) + the RUN-01 log commit
+git fetch origin && git checkout main && git pull   # all work is on main (234d0cf at 19:55)
 ```
 
 ```bash
