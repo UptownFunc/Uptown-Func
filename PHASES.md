@@ -73,7 +73,7 @@ Remaining: 33 h 11 min.
 | Video | Sun 17:00 | Not started (Design, human) | Video or 7-slide fallback | Unchanged |
 | Internal submit | Sun 21:00 | Not started | Every field; links open without login | Unchanged |
 
-## Status at handoff (Sat 14 Nov 2026, 14:48 Asia/Manila container clock; previous 12:20)
+## Status at handoff (Sat 14 Nov 2026, 14:58 Asia/Manila container clock; previous 12:20). Full per-part table: HANDOFF.md "Current phase and status"
 
 | Part | Status | One-line reason |
 |---|---|---|
@@ -527,6 +527,25 @@ Results: vitest 209/209; tsc clean; build OK; playwright 23/23; pytest 44 passed
 Review status: /code-review high on 10ec506...40ff5a1: 6 findings; 6 addressed (c3277b2 code; f38f824 docs and logs)
 Commit SHA: c3277b2, f38f824 (+ log commit)
 Next part / blocker owner: see the HANDOFF blocker register
+```
+
+```text
+Part: session handoff (Sat 14 Nov 14:53-14:58), operator John Malubay
+Owner: no per-module roles (G-05)
+Status: checkpoint; no part newly marked VERIFIED
+Scope completed: full check run; e2e cold-cache failure diagnosed and fixed (E2E now runs on the production build via
+  vite preview); HANDOFF rewritten (snapshot, status, files, tests, failures, decisions, blockers, next task, commands)
+Files changed: playwright.config.ts, HANDOFF.md, PHASES.md, DECISIONS.md, SI_LOG.md
+Checks run (exact commands): npm ci; npx vitest run; npx tsc --noEmit; npm run build;
+  (cd pipeline && ../.venv/bin/python -m pytest -q);
+  PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome npx playwright test --trace off (before and after the fix;
+  cold run after rm -rf node_modules/.vite dist)
+Results: vitest 209/209 (16 files); tsc clean; build OK (235 KB gzipped JS); pytest 44 passed; playwright 2 failed / 21 passed
+  on the first run after npm ci (reproduced with a cold Vite cache), 23/23 cold and 23/23 warm after cb7e24c
+Known limitations or failures: none failing; see HANDOFF "Known failures and limitations"
+Review status: the one-line config change was not separately /code-reviewed (diagnosis and fix recorded above)
+Commit SHA: cb7e24c (+ handoff log commit)
+Next part / blocker owner: B-1 (team) is the smallest human action; code-only: R-02 item 10 / R-04 item 6
 ```
 
 ## Phase-part completion record
