@@ -65,7 +65,21 @@ def test_m12_position_is_the_last_drive_before_the_parking_and_refuses_a_drive_d
     f = lambda sol, drive: {"properties": {"sol": sol, "site": 57, "drive": drive}}
     assert m12_position([f(1452, 1), f(1455, 2), f(1468, 3)])["drive"] == 2
     with pytest.raises(ValueError):
-        m12_position([f(1455, 2), f(1460, 3)])
+        m12_position([f(1455, 2), f(1460, 3)])          # a drive during the parking
+    with pytest.raises(ValueError):
+        m12_position([f(1440, 1), f(1468, 3)])          # last waypoint too long before sol 1456 (a log gap)
+    with pytest.raises(ValueError):
+        m12_position([f(1452, 1), f(1455, 2)])          # nothing logged after the parking
+
+
+def test_raster_frames_are_checked_before_use():
+    from rasterio.crs import CRS
+    from sharpwalk.run_sky_benchmark import check_d12_crs
+    check_d12_crs(CRS.from_proj4(f"+proj=longlat +R={R_F1:.0f} +no_defs"))
+    with pytest.raises(ValueError):
+        check_d12_crs(CRS.from_proj4(f"+proj=eqc +lat_ts=0 +lat_0=0 +lon_0=0 +R={R_F1:.0f} +units=m +no_defs"))
+    with pytest.raises(ValueError):
+        check_d12_crs(CRS.from_epsg(4326))  # Earth ellipsoid, not the F1 sphere
 
 
 def test_horizon_reports_the_range_that_sets_each_angle():

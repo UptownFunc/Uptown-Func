@@ -57,6 +57,10 @@
    "f_obs_part": 0.0
   }
  },
+ "nearField": {
+  "samples": 1080000,
+  "fromD12WhereD1Missing": 0
+ },
  "publishedShape": "average blocking angle 11 deg, obstructions no higher than 30 deg (Ehresmann et al. 2021, via plan 6.7)",
  "sensitivity": [
   {
@@ -68,6 +72,7 @@
    "f_obs": 0.20725862100084053,
    "meanGamma_deg": 12.21223507314042,
    "maxGamma_deg": 32.43818788154102,
+   "nearSamplesFromD12": 0,
    "settingRangeShare": {
     "0-10 m": {
      "azimuths": 0.0,
@@ -108,6 +113,7 @@
    "f_obs": 0.1850098373119806,
    "meanGamma_deg": 10.833954481253812,
    "maxGamma_deg": 28.908414734565703,
+   "nearSamplesFromD12": 0,
    "settingRangeShare": {
     "0-10 m": {
      "azimuths": 0.0,
@@ -148,6 +154,7 @@
    "f_obs": 0.16508925934292035,
    "meanGamma_deg": 9.61087355926393,
    "maxGamma_deg": 25.12131511146249,
+   "nearSamplesFromD12": 0,
    "settingRangeShare": {
     "0-10 m": {
      "azimuths": 0.0,
@@ -188,6 +195,7 @@
    "f_obs": 0.18508036027128208,
    "meanGamma_deg": 10.838079064994195,
    "maxGamma_deg": 28.908414734565703,
+   "nearSamplesFromD12": 0,
    "settingRangeShare": {
     "0-10 m": {
      "azimuths": 0.0,
@@ -228,6 +236,7 @@
    "f_obs": 0.1850098373119806,
    "meanGamma_deg": 10.833954481253812,
    "maxGamma_deg": 28.908414734565703,
+   "nearSamplesFromD12": 0,
    "settingRangeShare": {
     "0-10 m": {
      "azimuths": 0.0,
@@ -268,6 +277,7 @@
    "f_obs": 0.18502808826544254,
    "meanGamma_deg": 10.835012926990162,
    "maxGamma_deg": 28.933840931463617,
+   "nearSamplesFromD12": 0,
    "settingRangeShare": {
     "0-10 m": {
      "azimuths": 0.0,
@@ -308,6 +318,7 @@
    "f_obs": 0.18467457499324816,
    "meanGamma_deg": 10.814733468343547,
    "maxGamma_deg": 28.908414734565703,
+   "nearSamplesFromD12": 0,
    "settingRangeShare": {
     "0-10 m": {
      "azimuths": 0.0,
@@ -348,6 +359,7 @@
    "f_obs": 0.1850098373119806,
    "meanGamma_deg": 10.833954481253812,
    "maxGamma_deg": 28.908414734565703,
+   "nearSamplesFromD12": 0,
    "settingRangeShare": {
     "0-10 m": {
      "azimuths": 0.0,
@@ -388,6 +400,7 @@
    "f_obs": 0.1850098373119806,
    "meanGamma_deg": 10.833954481253812,
    "maxGamma_deg": 28.908414734565703,
+   "nearSamplesFromD12": 0,
    "settingRangeShare": {
     "0-10 m": {
      "azimuths": 0.0,
@@ -428,6 +441,7 @@
    "f_obs": 0.1850098373119806,
    "meanGamma_deg": 10.833954481253812,
    "maxGamma_deg": 28.908414734565703,
+   "nearSamplesFromD12": 0,
    "settingRangeShare": {
     "0-10 m": {
      "azimuths": 0.0,
@@ -468,6 +482,7 @@
    "f_obs": 0.1850098373119806,
    "meanGamma_deg": 10.833954481253812,
    "maxGamma_deg": 28.908414734565703,
+   "nearSamplesFromD12": 0,
    "settingRangeShare": {
     "0-10 m": {
      "azimuths": 0.0,
@@ -504,6 +519,16 @@
   "mean": -5.338852137124486,
   "std": 14.308003072192733,
   "samples": 841
+ },
+ "frames": {
+  "D1": {
+   "crs": "+proj=eqc +lat_ts=0 +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 +R=3396190 +units=m +no_defs=True",
+   "AREA_OR_POINT": "Point"
+  },
+  "D12": {
+   "AREA_OR_POINT": "Area",
+   "check": "geographic, F1 sphere"
+  }
  },
  "referencePosition": "not computed: the reference-period sols are UNVERIFIED (plan R-13); the about 10 % figure is not compared",
  "horizonBase_deg": [
@@ -1237,6 +1262,6 @@
    "url": "https://mars.nasa.gov/mmgis-maps/MSL/Layers/json/MSL_waypoints.json",
    "sha256": "5a32324f4b8ba22ebdfac50a503e195f47ccdc876ad4c15b19e29dc7cef15a09"
   },
-  "retrievedAt": "2026-11-14T11:46:34Z"
+  "retrievedAt": "2026-11-14T11:53:50Z"
  }
 }

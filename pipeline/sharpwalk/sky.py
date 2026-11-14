@@ -12,12 +12,7 @@ from .geo import R_F1
 
 def horizon_angles(height_fn, z_obs: float, az_deg: np.ndarray, ranges_m: np.ndarray, radius_m: float = R_F1) -> np.ndarray:
     """Horizon angle gamma (radians, >= 0) per azimuth. height_fn(r, az) takes and returns arrays of shape (N, M)."""
-    az = np.asarray(az_deg, float)[:, None] * np.ones((1, len(ranges_m)))
-    r = np.ones((len(az_deg), 1)) * np.asarray(ranges_m, float)[None, :]
-    z = np.asarray(height_fn(r, az), float)
-    ang = np.arctan((z - z_obs - r * r / (2 * radius_m)) / r)
-    ang = np.where(np.isnan(ang), -np.inf, ang)
-    return np.maximum(0.0, ang.max(axis=1))
+    return horizon_with_range(height_fn, z_obs, az_deg, ranges_m, radius_m)[0]
 
 
 def f_obs(gamma_rad: np.ndarray) -> float:
