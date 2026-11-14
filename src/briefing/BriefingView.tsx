@@ -6,6 +6,8 @@ import { useRef, useState } from "react";
 import type { PlanOutput } from "../engine/planner";
 import type { MapSnapshot } from "../map/snapshot";
 import { MarginState } from "../app/MarginState";
+import { RoverView } from "../app/RoverView";
+import type { RoverImages } from "../app/rover";
 import { briefingModel, isStale, type BriefingModel } from "./model";
 
 interface Card { model: BriefingModel; map: MapSnapshot | null; builtAt: string }
@@ -14,9 +16,10 @@ export interface BriefingViewProps {
   readonly output: PlanOutput | null;
   readonly snapshot: (() => Promise<MapSnapshot | null>) | null;
   readonly hidden?: boolean;
+  readonly rover?: RoverImages | "failed" | null;
 }
 
-export function BriefingView({ output, snapshot, hidden = false }: BriefingViewProps) {
+export function BriefingView({ output, snapshot, hidden = false, rover = null }: BriefingViewProps) {
   const [card, setCard] = useState<Card | null>(null);
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<string | null>(null);
@@ -109,6 +112,7 @@ export function BriefingView({ output, snapshot, hidden = false }: BriefingViewP
               Estimates under stated assumptions, not guarantees. Slope-screened, not validated terrain; no rock detection.
               Walking speeds from lunar-gravity tests. Suit life support not modelled. No dose and no safe zones.
             </p>
+            <RoverView data={rover} compact />
             <footer className="small">Independent student project; not affiliated with or endorsed by NASA.</footer>
           </div>
         </article>

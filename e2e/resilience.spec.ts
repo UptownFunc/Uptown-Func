@@ -27,7 +27,7 @@ test("a display layer that fails to load leaves the sheet usable, with no uncaug
   await expect(page.getByTestId("legs")).toBeVisible({ timeout: 20_000 });
   await page.getByRole("button", { name: "Briefing" }).click();
   await page.getByRole("button", { name: "Generate card from current plan" }).click();
-  const caption = page.getByTestId("briefing-card").locator("figcaption");
+  const caption = page.getByTestId("briefing-card").locator(".card-map figcaption");
   await expect(caption).toBeVisible({ timeout: 20_000 });
   await expect(caption).not.toContainText("Orthophoto");
   await expect(caption).toContainText("Hillshade (D1)");

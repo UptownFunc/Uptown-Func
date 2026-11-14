@@ -90,16 +90,16 @@ Remaining: 33 h 11 min.
 | 2.1 | IN PROGRESS | 20 deg slope-limit source UNRESOLVED (plan names only "NASA presentation") |
 | 2.2 | VERIFIED (human review pending) | K-01: k_v = 1 placeholder with ASSUMED banner |
 | 2.3 | VERIFIED (human review pending) | L-01/L-02 conventions to confirm |
-| 2.4 | IN PROGRESS | Planned margin built; values wait for T-01 (B-1) |
+| 2.4 | VERIFIED (G3-01 demo values; team to confirm) | Planned margin shown on default load from the G3-01 preset (est. 32.3 to 67.2 min, OK, for the e2e stop); values chosen by SI at the operator's direction |
 | 2.5 | VERIFIED (interim) | Grid path for calculations and display (D-04 interim) |
 | 2.6 | IN PROGRESS (code-complete) | Parts 1-5: sheet, route/stops, coverage outlines (7e7c459), Plex fonts (f329682), 10 m contours (0bf81f2), hatch aliasing fix (b40550c); reviews e4cb7f6, 1d85b36, c739bf4. Only Design review (B-13) open |
 | 2.7 | VERIFIED (cloud Xeon) | Unity factors under 500 ms; at handoff one placeholder run hit 523 ms under load (HANDOFF Known failures 2); laptop timing at G5 |
 | 3.1 | IN PROGRESS | Planner + worker + six commands; C-15 route geometry outside the contract |
-| 3.2 | IN PROGRESS | Console complete apart from stop renaming/tasks, which wait for C-19 (B-12) |
+| 3.2 | VERIFIED (Design review pending) | Stop name/tasks via edit_stop (C-19 option a, fdc64e7); D6 rover point of view panel (C-22) |
 | 3.3 | IN PROGRESS (core done) | Outdoor/phone daylight check needs a real phone |
-| 3.4 | IN PROGRESS (core done) | Paper print and fixed-scale map open; card lists contours |
+| 3.4 | IN PROGRESS (core done) | Card prints stop tasks and the three D6 rover views with credits; paper print and fixed-scale map open |
 | 3.5 | NOT STARTED | Needs Vercel access (B-4) |
-| 3.6 | IN PROGRESS | Conditions built (9ec2f70, 6e8ca00, 9608ecb); AC-09 2 of 3 dates (B-10); scenario time T-02 unset (B-9) |
+| 3.6 | IN PROGRESS | Conditions built (9ec2f70, 6e8ca00, 9608ecb); AC-09 2 of 3 dates (B-10); scenario time set by G3-01 (2026-11-15 12:00 UTC, assumed) |
 | 4.1 | IN PROGRESS | Contours, drill, AC-31 done; sky obstruction deferred (SKY-1) |
 | 4.2 | BLOCKED | AC-07 needs D5 positions (B-7) |
 | 4.3 | BLOCKED | AC-08 needs D5 (B-7) |
@@ -777,6 +777,33 @@ Known limitations or failures: R-15 items 2, 6, 7, 9 recorded, not fixed; P-03 o
 Review status: /code-review medium (whole PR diff) + low (fix commit), all findings fixed or recorded (R-15)
 Commit SHA: d3330cb (G-07), 5e4e5d2 + follow-up (R-15); merge commit recorded in HANDOFF after the merge
 Next part / blocker owner: G3 inputs (T-01, T-02, C-19, B-3) chosen by the session at the operator's direction; B-4 human
+```
+
+```text
+Part: G3 inputs chosen by SI at the operator's direction (G3-01): T-01 plan times, T-02 scenario time, C-19 stop
+  name/tasks (option a), B-3 rover views (D6, C-22). B-4 deploy stays with a human.
+Owner: the team (G-05); operator of ccr-dbbcdd02-kqy23v delegated the choices ("for g3 needed you choose")
+Status: VERIFIED for this scope (values and picks are SI choices for the team to confirm)
+Scope completed: src/app/demoPreset.ts (start-up set_assumption Commands; ?preset=none skips them); edit_stop in
+  CommandType + planner + Plan panel editor; public/rover (3 Navcam frames + manifest), src/app/{rover.ts,RoverView.tsx},
+  D6 in the sources panel and on the card; existing e2e specs moved to ?preset=none; new e2e g3-preset, stop-tasks, rover
+Tests written first and seen failing: preset unit + planner tests (module missing); contract "seven command types" and
+  edit_stop planner test (unknown type). The rover manifest schema and its tests were written together.
+Checks run (exact commands), Sat 14 Nov 2026 ~19:05-19:25 Asia/Manila:
+  npx vitest run                                   -> 271 passed / 271, 27 files
+  npx tsc --noEmit                                 -> clean
+  rm -rf dist && npm run build                     -> OK; main 206.55 kB gzip + worker 41,176 B (~247.7 of 250 KB, B-01)
+  (cd pipeline && ../.venv/bin/python -m pytest)   -> 62 passed (new: rover image checksums)
+  PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome npx playwright test --trace off -> 46 passed / 46
+  .venv/bin/python scripts/licences.py | diff -q - docs/licences.md -> no difference (no new dependency)
+Results: all green. First run of the rover change failed 3 e2e specs (card caption selectors matched the new
+  figcaptions; muted text on the card failed axe colour contrast); fixed, then 46/46.
+G3 status: Tier 1 e2e green including planned margin. **First public deploy not done (B-4, Vercel access).**
+Known limitations or failures: bundle headroom ~2.3 KB; values and image picks need team confirmation; image-use terms
+  to confirm (C-22); AC-09 2 of 3 dates (B-10)
+Review status: see the PR for this work (/code-review before merge)
+Commit SHA: 34ccda0 (G3-01 preset), fdc64e7 (C-19), and the D6 commit that adds this record
+Next part / blocker owner: B-4 deploy (human); then G4 items (B-7 rover positions for AC-07/AC-08)
 ```
 
 ## Phase-part completion record

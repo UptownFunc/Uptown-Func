@@ -219,3 +219,9 @@ body { background: var(--housing); color: var(--text); font-family: var(--sans);
 .stop-edit textarea, .stop-edit input { font: inherit; width: 100%; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 4px; padding: 3px 6px; }
 .stop-edit button { justify-self: start; background: var(--plan); color: var(--paper); border: 0; border-radius: 4px; padding: 3px 10px; cursor: pointer; font: inherit; }
 .stop-edit button:disabled { opacity: 0.45; cursor: not-allowed; }
+/* D6 rover point of view */
+.rover-strip { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.rover figure { margin: 0; }
+.rover img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; border-radius: 4px; }
+.rover figcaption { margin-top: 2px; }
+.rover-compact figcaption { font-size: 9px; }

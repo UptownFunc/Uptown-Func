@@ -1,0 +1,53 @@
+{
+ "datasetId": "D6",
+ "label": "Curiosity's view of similar terrain in the Mount Sharp boxwork unit; not the demo stops, not a route check",
+ "selectedBy": "G3-01: chosen by SI (Claude Code, Claude Opus 5.5) at a team member's direction, Sat 14 Nov 2026",
+ "processing": "downscaled to 480 px and metadata stripped (ImageMagick); no other change; raw, uncalibrated images",
+ "images": [
+  {
+   "file": "sol4602_navcam_left.jpg",
+   "sha256": "2e1c6ce2d16d474b16c1f15859e961cc585dba1744e6cde5349766f368b21d88",
+   "imageId": "NLB_806042016EDR_F1172490NCAM00259M_",
+   "sol": 4602,
+   "camera": "Left Navigation Camera (Navcam), raw",
+   "dateTakenUtc": "2025-07-17T17:40:00.000Z",
+   "credit": "NASA/JPL-Caltech",
+   "sourceUrl": "https://mars.nasa.gov/msl-raw-images/proj/msl/redops/ods/surface/sol/04602/opgs/edr/ncam/NLB_806042016EDR_F1172490NCAM00259M_.JPG",
+   "rawImagePage": "https://mars.nasa.gov/raw_images/1490606",
+   "terrainEvidence": {
+    "title": "Curiosity Blog, Sols 4602-4603: On Top of the Ridge",
+    "url": "https://science.nasa.gov/blog/curiosity-blog-sols-4602-4603-on-top-of-the-ridge/"
+   }
+  },
+  {
+   "file": "sol4628_navcam_left.jpg",
+   "sha256": "e91d660a5442b3ca170cde933f75efd83ce51e0590284dbd537b2be37399876b",
+   "imageId": "NLB_808343392EDR_F1180924NCAM00292M_",
+   "sol": 4628,
+   "camera": "Left Navigation Camera (Navcam), raw",
+   "dateTakenUtc": "2025-08-13T08:56:37.000Z",
+   "credit": "NASA/JPL-Caltech",
+   "sourceUrl": "https://mars.nasa.gov/msl-raw-images/proj/msl/redops/ods/surface/sol/04628/opgs/edr/ncam/NLB_808343392EDR_F1180924NCAM00292M_.JPG",
+   "rawImagePage": "https://mars.nasa.gov/raw_images/1500450",
+   "terrainEvidence": {
+    "title": "Curiosity Blog, Sols 4627-4628: A Ridge Stop in the Boxworks",
+    "url": "https://science.nasa.gov/blog/curiosity-blog-sols-4627-4628-a-ridge-stop-in-the-boxworks/"
+   }
+  },
+  {
+   "file": "sol4650_navcam_left.jpg",
+   "sha256": "49de7acc348be34cc88450ecf18645d74e6bf7cd9f2d0c95f1bef6f609fbc5ad",
+   "imageId": "NLB_810299631EDR_F1182304NCAM00271M_",
+   "sol": 4650,
+   "camera": "Left Navigation Camera (Navcam), raw",
+   "dateTakenUtc": "2025-09-05T00:20:55.000Z",
+   "credit": "NASA/JPL-Caltech",
+   "sourceUrl": "https://mars.nasa.gov/msl-raw-images/proj/msl/redops/ods/surface/sol/04650/opgs/edr/ncam/NLB_810299631EDR_F1182304NCAM00271M_.JPG",
+   "rawImagePage": "https://mars.nasa.gov/raw_images/1509388",
+   "terrainEvidence": {
+    "title": "Curiosity Blog, Sols 4649-4654: Ridges, Hollows and Nodules, Oh My",
+    "url": "https://science.nasa.gov/blog/curiosity-blog-sols-4649-4654-ridges-hollows-and-nodules-oh-my"
+   }
+  }
+ ]
+}

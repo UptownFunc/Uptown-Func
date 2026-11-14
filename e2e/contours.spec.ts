@@ -77,7 +77,7 @@ test("the briefing card's layer list names the contours", async ({ page }) => {
   await expect(page.getByTestId("legs")).toBeVisible({ timeout: 20_000 });
   await page.getByRole("navigation", { name: "Views" }).getByRole("button", { name: "Briefing" }).click();
   await page.getByRole("button", { name: "Generate card from current plan" }).click();
-  await expect(page.getByTestId("briefing-card").locator("figcaption")).toContainText("Contours (D1), 10 m interval", { timeout: 20_000 });
+  await expect(page.getByTestId("briefing-card").locator(".card-map figcaption")).toContainText("Contours (D1), 10 m interval", { timeout: 20_000 });
 });
 
 test("a missing contour file is labelled and the sheet still works", async ({ page }) => {
