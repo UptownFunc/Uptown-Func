@@ -12,7 +12,7 @@ The plan is the project authority. **Section 19 overrides earlier sections where
 
 ## Authorship and attribution
 
-- The user is the originator and owner of the SharpWalk project concept, challenge framing, solution direction, requirements, and project plan. Attribute these to the user only.
+- The SharpWalk team (all four members) originated and owns the project concept, challenge framing, solution direction, requirements and project plan. Attribute these to the team only.
 - Do not credit Claude or another SI tool with originating the concept, framing, solution approach, or user/team decisions. Do not present SI as the source of the project idea.
 - Record actual SI assistance transparently where required by the challenge, using `SI_LOG.md` and the submission disclosure. This operational disclosure does not transfer authorship or ownership of the project concept to an SI tool. Never invent, omit, or misstate what a tool contributed.
 
@@ -79,7 +79,15 @@ The AREA 2D sheet is never cut. Preserve the working route, planned margin, and 
 3. Work in small, independently verifiable parts: `Phase 1.1 -> checks -> PHASES.md`, then `1.2 -> checks -> PHASES.md`, and so on. Keep the plan's gates and dependencies intact. A phase part is complete only after its relevant checks pass and the exact results are logged.
 4. Before each part, inspect its module and dependencies. Implement only that scope. Run targeted tests plus relevant typecheck/lint/build checks from the repository's actual scripts. Fix failures before marking VERIFIED. Record exact commands, results, commit SHA, and follow-up work in `PHASES.md`.
 5. At every gate, run the gate acceptance criteria. If a gate slips or fails, apply the plan's fallback, record the consequence, and rebase scope immediately. Never conceal a failed or skipped criterion.
-6. One human owner per module. Work only in the assigned module/branch. Never overwrite another member's uncommitted work, reset another member's changes, or force-push shared history. Use separate branches for parallel work. Every PR must pass tests, then `/code-review`, then a **human merge**. Do not merge your own PR on behalf of the team.
+6. One human owner per module. Work only in the assigned module/branch. Never overwrite another member's uncommitted work, reset another member's changes, or force-push shared history. Use separate branches for parallel work. A PR may be merged by a human or by the AI agent, with no human approval needed. Either way, merge only when the PR is complete:
+   - **Checks green:** every check defined in the PR branch's package scripts passes (at minimum `npx vitest run` and `npx tsc --noEmit` once they exist), with the branch rebased on or merged with current `main`. If a docs-only PR has no package scripts, record "no checks defined" in the PR rather than skipping silently.
+   - **Reviewed:** `/code-review` has run on the final diff. Every valid finding is fixed, or recorded in `DECISIONS.md` with its reason.
+   - **Logged:** `PHASES.md` records the exact commands, results and commit SHA for the work in the PR, and `SI_LOG.md` records any SI assistance.
+   - **Clean merge:** GitHub reports the PR mergeable with no conflicts, and no other member's uncommitted or unpushed work is overwritten.
+   - **Agreed contracts:** any change to `src/contracts` has both responsible owners' agreement recorded in `DECISIONS.md`. A frozen-as-drafted contract counts as unagreed.
+   - **No open blockers:** no unresolved science, eligibility or Local Lead decision that the PR depends on.
+
+   If any item fails, do not merge. Record the reason on the PR and in `HANDOFF.md`. After merging, record the merge commit SHA in `PHASES.md` and `HANDOFF.md`. Never force-push or rewrite `main`.
 7. After every verified phase part, update `PHASES.md`. Before each five-hour/account handoff, commit verified work on the working branch, update `HANDOFF.md`, and record exact changed files, tests, failures, blockers, and next commands. Incoming sessions read the logs before touching code.
 8. Be autonomous on routine implementation and verification. Escalate only blocking scientific/eligibility decisions, irreversible actions, or decisions the plan reserves for the Local Lead/team.
 

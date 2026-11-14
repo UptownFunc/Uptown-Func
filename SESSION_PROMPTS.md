@@ -11,7 +11,7 @@ Read CLAUDE.md, HANDOFF.md, PHASES.md, DECISIONS.md and SI_LOG.md. Load the Supe
 ## Five-hour / account-limit handoff
 
 ```text
-Prepare a SharpWalk handoff. Read CLAUDE.md and the live logs, inspect git status and branches, and finish or safely checkpoint the current phase part. Run and record its relevant checks. Commit verified work on the working branch; do not merge or push to shared main. Update PHASES.md, HANDOFF.md, DECISIONS.md and SI_LOG.md with exact files, commands, results, failures, blockers, decisions, commit SHA and the next exact action. Leave no ambiguous uncommitted state. The incoming session must be able to resume from GitHub and these files without chat history.
+Prepare a SharpWalk handoff. Read CLAUDE.md and the live logs, inspect git status and branches, and finish or safely checkpoint the current phase part. Run and record its relevant checks. Commit verified work on the working branch; do not push directly to shared main. Merge a PR only when it meets the completeness checklist in CLAUDE.md step 6. Update PHASES.md, HANDOFF.md, DECISIONS.md and SI_LOG.md with exact files, commands, results, failures, blockers, decisions, commit SHA and the next exact action. Leave no ambiguous uncommitted state. The incoming session must be able to resume from GitHub and these files without chat history.
 ```
 
 ## Incoming member / new account

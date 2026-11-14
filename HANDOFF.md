@@ -63,7 +63,7 @@ Next owner:
 
 - [ ] Stop before the account/member rotation deadline; do not abandon an unrecorded worktree.
 - [ ] Finish and verify the current phase part where feasible. Otherwise mark it `IN PROGRESS` or `BLOCKED`, never `VERIFIED`.
-- [ ] Commit verified work on the working branch. Do not push directly to shared `main` or merge your own PR.
+- [ ] Commit verified work on the working branch. Do not push directly to shared `main`. Merge a PR (human or AI) only when it meets the completeness checklist in `CLAUDE.md` step 6.
 - [ ] Update `PHASES.md` with exact checks, results, limitations and commit SHA.
 - [ ] Update `DECISIONS.md` for any changed decision or newly discovered blocker.
 - [ ] Update `SI_LOG.md` for SI contributions during the session.
@@ -86,4 +86,4 @@ Next owner:
 - Rotation target: approximately every five hours, or sooner if the Claude Pro account reaches its usage limit.
 - GitHub and these files are the source of continuity; prior chat messages are not.
 - Use a separate branch per owner/workstream. Share commits before handoff, not uncommitted local state alone.
-- No human owner should merge a PR without tests passing and `/code-review` completed.
+- No one, human or AI, merges a PR until it meets the completeness checklist in `CLAUDE.md` step 6.

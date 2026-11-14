@@ -19,6 +19,7 @@ Add one row for every meaningful SI-assisted contribution, including code, data 
 | Date/time (Asia/Manila) | Human member | Tool / model | Task and inputs | SI contribution | What the team kept / changed / rejected | Human review / verification | Files and commit SHA | Required marker / disclosure |
 |---|---|---|---|---|---|---|---|---|
 | NOT YET RECORDED | TBA | TBA | TBA | TBA | TBA | TBA | TBA | TBA |
+| Sat 14 Nov 2026, ~10:35 | Yujin | Claude Code (Anthropic), Claude Opus 5.5 | Change the attribution and merge rules in CLAUDE.md at Yujin's direction | Drafted the team-attribution wording and the AI-merge completeness checklist; ran /code-review and fixed 2 findings | Wording and the decision to allow AI merges came from Yujin; the tool drafted the checklist text | /code-review low; docs only, no package scripts on main | CLAUDE.md, DECISIONS.md, HANDOFF.md, SESSION_PROMPTS.md, PHASES.md, SI_LOG.md; PR parcilla13/Uptown-Func#1 | `SI-assisted:` commit trailer |
 
 ## Local Lead / G0 answers
 

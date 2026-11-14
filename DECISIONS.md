@@ -17,6 +17,13 @@ Record decisions that affect science, eligibility, architecture, scope or delive
 | D-09 | kJ workload | Off. Do not compute or display workload unless validated cited rates are supplied. | Captain + Route Engine | Before any implementation | DEFAULT LOCKED - off |
 | D-10 | 3D fallback and feature cuts | No-ion default. AREA 2D sheet is never cut. Under no-ion default, cut whole 3D view after PLANET and SITE, before 3D rasters. Draped Cesium overlays only after G1 residuals pass and are the first overlay cut. | Captain + 3D owner | G0/G1 | DEFAULT - verify Local Lead response to D-02 |
 
+## Governance decisions
+
+| ID | Topic | Decision | Decided by | Date/time (Asia/Manila) | Evidence |
+|---|---|---|---|---|---|
+| G-01 | Attribution | The project concept, challenge framing, solution direction, requirements and plan are credited to the whole four-member team. | Team member Yujin, in the Claude Code session | Sat 14 Nov 2026 | `CLAUDE.md` Authorship section; PR parcilla13/Uptown-Func#1 |
+| G-02 | Merging | Human approval is no longer required to merge. A human or the AI agent may merge a PR only when it meets the completeness checklist in `CLAUDE.md` step 6. | Team member Yujin, in the Claude Code session | Sat 14 Nov 2026 | `CLAUDE.md` step 6; PR parcilla13/Uptown-Func#1 |
+
 ## Fixed technical / presentation constraints
 
 - `MissionPlan` is written only by the engine; `MissionExecution` only by the field view. Console changes the plan by Commands.
