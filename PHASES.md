@@ -55,7 +55,25 @@ rule; values and approvals the plan leaves to people were not invented (DECISION
   worked example as test oracle); rover point-of-view images (D6: 3-5 images picked by people); first public deploy
   (Vercel account, R-17); D-01/D-02 Local Lead answers; contract changes C-12/C-16/C-17.
 
-## Status at handoff (Sat 14 Nov 2026, 14:40 Asia/Manila container clock; previous 12:20)
+## Schedule reconciliation (Sat 14 Nov 2026, 14:48 Asia/Manila, container clock)
+
+**Deadline:** Sun 15 Nov 2026, 23:59 local time, from the plan's reading of the 2026 Project Submission Guide (plan
+19.3: "Submit before Sun 15 Nov 23:59 local time ... projects saved or submitted after the deadline are not
+eligible"). The live portal could not be opened from this session; **a person must confirm it on the portal.**
+Remaining: 33 h 11 min.
+
+| Gate | Planned | Status now | What is incomplete | Rebaselined plan |
+|---|---|---|---|---|
+| G0 | Sat 11:00 | Passed under fallback (expired) | Contracts frozen as drafted, unagreed (C-01..C-17); no Local Lead answers (D-01, D-02) | Not rescheduled; open items carried as blockers |
+| G1 | Sat 14:00 | **Passed under fallback (expired)**: overlays 2D only, 3D cut | (1) area manifest not written, so the grids are not Zod-valid as an AreaManifest (C-12); (2) no control-point residuals (1.5); (3) DEM checks partial: trust grid undecided, D1/D2 alignment inconclusive (1.4); (4) outputs built with GDAL 3.10.3, not the pinned 3.12.3 (P-03) | Not rescheduled. Items 1-4 stay open; none blocks G2/G3 under the 2D-only fallback |
+| G2 | Sat 19:00 | **Criteria met at 14:48** on the cloud machine | Mid-range laptop timing not measured; smoothing kept at the plan's interim rule (D-04) | Declare at 19:00 if nothing regresses; laptop timing at G5 |
+| G3 | Sun 01:00 | **At risk** | Tier 1 Musts missing: Conditions (D7, D10), rover point of view (D6); planned margin needs T-01 values; no public deploy (Vercel) | Inputs needed by the "needed by" times in the blocker register below; acceptance not weakened. If they miss, the team decides cuts (the plan's G3 fallback covers only the field view) |
+| G4 | Sun 10:00 | Partly met | Tier 2 not merged (human PR merge); AC-07 and AC-08 blocked on D5; sky-obstruction layer hidden (SKY-1) | Merge after review; AC-07/AC-08 only if D5 arrives |
+| G5 | Sun 13:00 | Not started | Two-machine demo from the public deploy; 2D with Cesium blocked (trivially true: 3D cut) | Unchanged |
+| Video | Sun 17:00 | Not started (Design, human) | Video or 7-slide fallback | Unchanged |
+| Internal submit | Sun 21:00 | Not started | Every field; links open without login | Unchanged |
+
+## Status at handoff (Sat 14 Nov 2026, 14:48 Asia/Manila container clock; previous 12:20)
 
 | Part | Status | One-line reason |
 |---|---|---|
@@ -80,8 +98,8 @@ rule; values and approvals the plan leaves to people were not invented (DECISION
 | 3.3 | IN PROGRESS (core done) | Field View: manual ticks, est. margins, stale guard (edf9492, 0acf9e7); phone width checked (b68dec1); outdoor daylight check needs a real phone |
 | 4.1 | IN PROGRESS | Contours + drill done; AC-31 resilience done (a1e9173); sky obstruction deferred (plan hides the layer while AC-07 is off; AC-07 needs D5) |
 | 4.4 | VERIFIED (automated) | 0 serious/critical axe on 3 views; AC-32 keyboard place/move/delete; 1280/1920 px (6bdb98e, 48e2774); manual checks (projector, outdoors) at G5 |
-| 4.2 | BLOCKED | AC-07 needs the M12 rover position (D5, UNVERIFIED, host not reachable); D1/D12 are 1-row strips, no overviews |
-| 5.4 | IN PROGRESS (draft) | README with SI use and references (bdb889e); team to add concept origin and review |
+| 4.2 | BLOCKED | AC-07 needs the M12 rover position (D5); layer stays hidden (SKY-1); nothing fabricated |
+| 5.4 | IN PROGRESS | README authorship per G-06, audited SI use, generated licence inventory (f38f824); native-library licences and Patrick's concept account pending |
 | 3.4 | IN PROGRESS (core done) | Card + STALE + print; Chromium PDF = one A5 page (b68dec1, a7cb260); paper print and fixed-scale map open |
 | 3.2 | IN PROGRESS (nearly done) | + sources panel (UX-15) and AC-05 quantity labelling (66c373e, 0acf9e7); remaining: stop renaming/tasks, datasets-in-view derived from layers |
 | 3.x-5.x | NOT STARTED | |
@@ -126,7 +144,7 @@ Work on optional features only when it does not endanger this path. The AREA 2D 
 | 2.4 | Implement planned margin and the manual-entry field-margin calculations without conflating `MissionPlan` and `MissionExecution`. | Route Engine + Design | IN PROGRESS (planned margin wired end to end; field-margin UI and per-stop durations open) | **13:15 (this session):** `set_assumption` { id: T_EVA, t_ops, t_cont, stop_duration; value_s; rationale } records team-choice Assumptions with no defaults (T-01). With all set and every leg reachable, the planner fills `plannedMargins` (slow bound, minutes, state) and `endMargin` (est. range slow..fast, nominal value). 8 new planner tests incl. exact end margins at all three bounds, AC-19 monotone profile, OVER state, unreachable leg -> unknown. Habitat field cached by its inputs; other bounds derived as 1/v (review R-03). **Open:** one duration applies to every stop (per-stop durations not yet); field margins UI belongs to 3.3. | bf0524b, 4420678 |
 | 2.5 | Resolve route smoothing at G2 with Route Engine owner and Data and Science agreement. Record the selected option in `DECISIONS.md`, plan log and O-22. | Route Engine | VERIFIED (interim rule kept) | At G2 no smoothing is implemented: calculations and the drawn line both use the grid path, which is the plan's stated interim rule (6.6 / D-04); AC-19 property tests hold on the grid metric (30 random grids). Options 1-3 remain open if the team wants smoothing later; any change needs matching tests. | 9e9496c (engine), 2.4 tests |
 | 2.6 | Build the OpenLayers **AREA-level 2D sheet** by G2. It is the permanent fallback and is never cut. | Design + Data and Science | IN PROGRESS (parts 1 and 2 done) | **Part 2 (13:10):** `src/map/planLayer.ts` draws grid-path legs, habitat (H) and lettered stops via cell -> F1 -> F7 (`src/geo/grid.ts`); a click sends `add_stop` to the engine worker; refused clicks are reported. `npx playwright test` 4/4 (2 new: route drawn and listed with italic est. ranges; excluded ground refused). Screenshot `test-results/plan-route.png`. **Still open:** D1/D2 coverage outlines, 10 m contours, fonts (S-02), hatch aliasing. | 88f8b9a, 19b7c68 |
-| 2.7 | Run the complete G2 engine test and latency gate; record all speed inputs as cited or Assumed. | Route Engine | VERIFIED on this machine (Node 22.23.4, cloud Xeon 2.1 GHz, 4 cores) | **13:00 re-run, k_v = 1 (K-01):** longest route 395/354/377 ms (< 500); time field 470/462/426 ms (< 3 s); A* equals the field every run. The decreasing placeholder also passed this run (349-429 ms) but is not used. In the browser worker, one `add_stop` (two A* legs, ~1.95 km each) took 261 ms. Not yet measured on a mid-range laptop. Workload off. | 9e9496c |
+| 2.7 | Run the complete G2 engine test and latency gate; record all speed inputs as cited or Assumed. | Route Engine | VERIFIED on this machine (Node 22.23.4, cloud Xeon 2.1 GHz, 4 cores) | **13:00 re-run, k_v = 1 (K-01):** longest route 395/354/377 ms (< 500); time field 470/462/426 ms (< 3 s); A* equals the field every run. The decreasing placeholder also passed this run (349-429 ms) but is not used. In the browser worker, one `add_stop` (two A* legs, ~1.95 km each) took 261 ms. Not yet measured on a mid-range laptop. Workload off. **14:48 re-run (k_v = 1):** longest route 393/316/359 ms; time field 438/431/382 ms; A* equals the field each run. | 9e9496c |
 
 **G2 acceptance:** all listed engine tests pass and route is under 500 ms. If missed, move to a 4 m grid and show a visible Assumed-input banner. Do not turn on kJ workload without cited rates.
 
@@ -161,7 +179,7 @@ Work on optional features only when it does not endanger this path. The AREA 2D 
 | 5.1 | Freeze features. Run the demo from public deploy on two machines and verify the AREA 2D map with Cesium blocked. | Captain + all owners | UNVERIFIED | Two-machine evidence; Cesium-blocked fallback works; known defects logged | - |
 | 5.2 | After freeze, allow bug fixes only. Re-run core tests and validate all displayed quantities, citations, assumptions and warnings. | Module owners | UNVERIFIED | Regression suite; provenance review; no new feature scope | - |
 | 5.3 | Lock the <=30-second subtitled video with every on-screen claim sourced and limitation caption present. If not ready by the video gate, switch to the 7-slide format. | Design | UNVERIFIED | Final asset reviewed; SI watermark if applicable; sources captured | - |
-| 5.4 | Complete README `SI use`, dependency/dataset/image licences, submission references and SI form data from `SI_LOG.md`. | Captain | IN PROGRESS (draft written; team review and concept-origin text pending) | **14:39:** README.md: summary and limits, dataset-to-number table (19.3), run/check commands, "SI use" reconciled with SI_LOG.md, references with exact versions and licences for every bundled, dev and pipeline package (read from installed metadata), datasets with credit, cited publications, images. **Pending:** the team's concept-origin account in SI_LOG.md, then the submission SI field from the same facts; human review of the disclosure. | bdb889e |
+| 5.4 | Complete README `SI use`, dependency/dataset/image licences, submission references and SI form data from `SI_LOG.md`. | Captain | IN PROGRESS (draft written; team review and concept-origin text pending) | **14:39:** README.md: summary and limits, dataset-to-number table (19.3), run/check commands, "SI use" reconciled with SI_LOG.md, references with exact versions and licences for every bundled, dev and pipeline package (read from installed metadata), datasets with credit, cited publications, images. **Pending:** the team's concept-origin account in SI_LOG.md, then the submission SI field from the same facts; human review of the disclosure. **14:47:** authorship per G-06 (concept and plan: Patrick Ezekiel A. Arcilla; team credited only for recorded contributions); "SI use" audited against SI_LOG; `docs/licences.md` generated by `scripts/licences.py` (130 lockfile entries: 31 production, 99 development-only including @axe-core/playwright MPL-2.0; 16 pipeline distributions; 31 bundled native libraries marked NOT VERIFIED), cross-checked with `npm ls --omit=dev` (31) and kept current by `pipeline/tests/test_licences.py`. | bdb889e, f38f824 |
 | 5.5 | Verify every submission field; public app and repository links open without login; submit the frozen version by the internal target. | Captain | UNVERIFIED | Link checks; submission receipt or confirmation captured | - |
 
 **G5 acceptance:** demo runs from public deploy on two machines and the 2D map works with Cesium blocked. From G5 onward, bug fixes only.
@@ -492,6 +510,23 @@ Results: vitest 209/209; tsc clean; build OK; playwright 23/23
 Commit SHA: a1e9173, bdb889e (+ log commit)
 Next part / blocker owner: team (T-01 values, rover image picks, deploy account, concept origin, contract agreement);
   network for D7/D10 (Conditions) and D5 (AC-07, AC-08)
+```
+
+```text
+Part: review of 10ec506...40ff5a1, G-06 authorship, SI-use audit, licence inventory, schedule reconciliation
+Owner: John Malubay (session operator; no per-module roles, G-05)
+Status: review fixes VERIFIED; 5.4 IN PROGRESS; schedule rebaselined (above)
+Files changed: src/map/{AreaSheet.tsx,snapshot.ts}, src/briefing/BriefingView.tsx, e2e/resilience.spec.ts, README.md, CLAUDE.md,
+  docs/licences.md, scripts/licences.py, pipeline/tests/test_licences.py, DECISIONS.md, SI_LOG.md, HANDOFF.md, PHASES.md
+Checks run (exact commands): npx vitest run; npx tsc --noEmit; npm run build;
+  PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome npx playwright test --trace off;
+  (cd pipeline && ../.venv/bin/python -m pytest -q); npm ls --omit=dev --all --parseable;
+  SHARPWALK_AREA=public/area node --experimental-strip-types bench/route-bench.ts
+Results: vitest 209/209; tsc clean; build OK; playwright 23/23; pytest 44 passed; npm production packages 31 = lockfile
+  non-dev 31 = inventory; bench as in 2.7
+Review status: /code-review high on 10ec506...40ff5a1: 6 findings; 6 addressed (c3277b2 code; f38f824 docs and logs)
+Commit SHA: c3277b2, f38f824 (+ log commit)
+Next part / blocker owner: see the HANDOFF blocker register
 ```
 
 ## Phase-part completion record

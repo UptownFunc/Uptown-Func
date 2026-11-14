@@ -4,14 +4,14 @@ This file is the handoff between team members and Claude sessions. Keep it factu
 
 ## Current snapshot
 
-- Last updated: **Sat 14 Nov 2026, 14:40 Asia/Manila (UTC+8)** (container clock, `TZ=Asia/Manila date`)
-- Deadline: **Sun 15 Nov 2026, 23:59 local** (plan 19.3, Project Submission Guide dated 12 Nov). The official portal time is still to be confirmed by a human.
-- Remaining: **about 33 h 19 min to the deadline. G1 passed under its fallback (2D only; 3D cut). G2 (19:00) in 4 h 20 min: engine criteria met. G3 (Sun 01:00) in 10 h 20 min. G4 (Sun 10:00): accessibility, contours, drill, AC-31 done; AC-07/AC-08 blocked on D5.**
+- Last updated: **Sat 14 Nov 2026, 14:48 Asia/Manila (UTC+8)** (container clock, `TZ=Asia/Manila date`)
+- Deadline: **Sun 15 Nov 2026, 23:59 local** (plan 19.3 reading of the Project Submission Guide; **not verified on the live portal from this session**).
+- Remaining: **33 h 11 min.** G0 (11:00) and G1 (14:00) expired and passed only under fallback (see PHASES "Schedule reconciliation"). G2 (19:00): criteria met at 14:48. G3 (Sun 01:00): **at risk**, see the blocker register.
 - Gate: G0 passed under its fallback. **G1 will not fully pass:** control points (1.5) and manifest (1.3, C-12) not done -> plan fallback, overlays in 2D only. **G2 engine criteria now met on this machine** (tests pass, route < 500 ms, speeds cited or Assumed, workload off) except the D-04 smoothing decision.
-- Working branch: **`claude/trusting-fermi-c5pc0s`**, pushed. It is `claude/kind-ptolemy-1wdqf5` (204a9c4, previous handoff) **plus** this session's commits 3d0e68c, 9e9496c, 88f8b9a, 19b7c68, 89b08a7, bf0524b, 4420678, 16fb661, 05cc50e, 0ff9423, db1109d, f07094f, 0aaae81, 088a272, 66c373e, edf9492, 0acf9e7, 7539a4f, b68dec1, bfa4189, a7cb260, 30e1d26, db7c103, c7b2512, 6bdb98e, 10ec506, 48e2774, 3578e39, a1e9173, bdb889e and the log commit. `kind-ptolemy` is unchanged; continue from `trusting-fermi`.
+- Working branch: **`claude/trusting-fermi-c5pc0s`**, pushed. It is `claude/kind-ptolemy-1wdqf5` (204a9c4, previous handoff) **plus** this session's commits 3d0e68c, 9e9496c, 88f8b9a, 19b7c68, 89b08a7, bf0524b, 4420678, 16fb661, 05cc50e, 0ff9423, db1109d, f07094f, 0aaae81, 088a272, 66c373e, edf9492, 0acf9e7, 7539a4f, b68dec1, bfa4189, a7cb260, 30e1d26, db7c103, c7b2512, 6bdb98e, 10ec506, 48e2774, 3578e39, a1e9173, bdb889e, 40ff5a1, c3277b2, f38f824 and the log commit. `kind-ptolemy` is unchanged; continue from `trusting-fermi`.
 - `main`: **bb473b7**. **No open PRs.** Nothing merged this session (operator instruction: do not merge).
 - Session operator this session: the account owner of the cloud session (no per-module role). Model: Claude Opus 5.5. Fable 5.2 not used. **Superpowers skill was not installed** in this session (X-01).
-- Authorship: the SharpWalk concept, framing, direction, requirements and plan belong to **the four-member team**. SI assistance is recorded in SI_LOG.md only.
+- Authorship: SharpWalk's concept and plan originated with **Patrick Ezekiel A. Arcilla (parcilla13)** (G-06, supersedes G-01; flag for team review before merge). SI assistance is recorded in SI_LOG.md only.
 
 Do not interpret blank fields as proof that no work exists. Inspect GitHub and the working tree.
 
@@ -56,6 +56,22 @@ Do not interpret blank fields as proof that no work exists. Inspect GitHub and t
 | Local Lead | D-01 wireframes; D-02 GSAP / Cesium Mars |
 | Team | SI_LOG "Concept origin" section (human-only); portal closing time |
 
+## External blocker register (Sat 14 Nov 2026, 14:48 Asia/Manila)
+
+Nothing below is marked approved or filled in by SI. "Needed by" times are the latest that still leave time to build
+and check the dependent work before G3 (Sun 01:00).
+
+| # | Blocker | Owner | Input required | Impact if missing | Needed by |
+|---|---|---|---|---|---|
+| B-1 | EVA, task, contingency and stop durations (T-01) | Team (decided together; G-05) | T_EVA, t_ops, t_cont, default stop duration (and any per-stop values), each with a one-line rationale; enter in the console or record in DECISIONS | Planned margin and field margins show "unknown"; G3 acceptance "including planned margin" fails | Sat 22:00 |
+| B-2 | NASA Mars24 and MSL weather access (D10, D7) | John Malubay (environment owner) | Start a session on the "Uptown-Func" environment (allows www.giss.nasa.gov, mars.nasa.gov) or allow the download in this session | Tier 1 Conditions panel (sun elevation, LMST label, dated REMS reading) cannot be built or checked against the Mars24 worked example (AC-09) | Sat 20:00 (about 3 h of build and checks) |
+| B-3 | 3-5 Curiosity images and metadata (D6) | Team | Image IDs or URLs with sol, camera, credit line; which stop or terrain each illustrates ("similar terrain") | Tier 1 rover point-of-view feature missing at G3 | Sat 22:00 |
+| B-4 | Vercel deployment access (R-17) | Patrick Ezekiel A. Arcilla (repository owner) | Vercel project linked to the repository, or a deploy done by a member; then the FortiGuard classification request (plan 19.3) | No public deploy: G3 and G5 acceptance fail; judges cannot open the app | Sun 00:00 |
+| B-5 | Concept-formation account (SI_LOG, README) | Patrick Ezekiel A. Arcilla | How and when the concept was formed, pre-event research, confirmation and date | SI disclosure incomplete; submission SI field cannot be prepared truthfully | Sun 17:00 |
+| B-6 | Contract agreement C-12, C-16, C-17 | Team (all members) | Agree or reject: nullable manifest residuals (C-12); Quantity fields for leg length and climb (C-16); nullable field margins (C-17) | No AreaManifest (G1 item 1 stays open); leg length/climb shown without Quantity metadata; stored field margins cannot be "unknown" | Sat 22:00 |
+| B-7 | D5 rover positions | Team, plus John Malubay for network access | Curiosity positions for sols 1456-1467 (Butte M12) and the reference period, from D5, with the host allowed | AC-07 and AC-08 cannot run; sky-obstruction layer stays hidden (SKY-1) | Sun 06:00 (G4) |
+| B-8 | Merge of this branch | Any human (CLAUDE.md step 6) | Review including G-06 (supersedes the merged G-01) | Work stays off `main`; G4 "Tier 2 merged" fails | Sun 10:00 |
+
 ## Exact next task
 
 Plan defaults were applied at 14:15 (DECISIONS "Plan defaults applied"). Remaining G3 (Tier 1) gaps, in order:
@@ -97,13 +113,13 @@ SHARPWALK_AREA=public/area node --experimental-strip-types bench/route-bench.ts
 
 The pipeline needs HTTPS access to `asc-pds-services.s3.us-west-2.amazonaws.com` (USGS data). In a cloud session, the environment "Uptown-Func" allows the Mars data hosts. In this cloud container only, Playwright needs `PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome`.
 
-Expected results: vitest 209/209 in 16 files; tsc clean; pytest 43 passed; playwright 23 passed; real build checksums elevation `a93aa209...99a3ef`, slope `aa366e6f...18bdc0`, terrain_class `c9c06b3e...58ae21` (GDAL 3.10.3; compare under 3.12.3).
+Expected results: vitest 209/209 in 16 files; tsc clean; pytest 44 passed; playwright 23 passed; real build checksums elevation `a93aa209...99a3ef`, slope `aa366e6f...18bdc0`, terrain_class `c9c06b3e...58ae21` (GDAL 3.10.3; compare under 3.12.3).
 
 ## Last session report
 
 ```text
-Session / member: session operator of cloud session_018Xnznho5hoLyC49RJSn7oD (no per-module role, G-04); Claude Opus 5.5
-Start and end time (Asia/Manila, container clock): Sat 14 Nov 12:57 - 14:40
+Session / member: John Malubay (operator) in cloud session_018Xnznho5hoLyC49RJSn7oD (no per-module role, G-04); Claude Opus 5.5
+Start and end time (Asia/Manila, container clock): Sat 14 Nov 12:57 - 14:48
 Branch: claude/trusting-fermi-c5pc0s (fast-forwarded from claude/kind-ptolemy-1wdqf5 at 204a9c4; nothing overwritten)
 Starting commit: 204a9c4
 Ending commit: the log commit after 19b7c68 (see git log -1)
@@ -114,8 +130,8 @@ Files changed: src/constants/*, src/geo/grid*, src/engine/{assumptions,planner*,
 Checks run: see the PHASES.md completion record (all green)
 Failures / limitations: margins unknown (T-01); Superpowers not installed; plan PDFs live only on
   claude/lucid-ptolemy-nz6qpw (docs/plan); *.pdf is git-ignored on this line of work
-Decisions made by humans this session: G-05 (no roles), K-01 (k_v = 1 placeholder + banner)
-SI_LOG.md entries added: 9 rows
+Decisions made by humans this session: G-05 (no roles), K-01 (k_v = 1 placeholder + banner), "apply the plan's defaults", G-06 (authorship), network environment "Uptown-Func"
+SI_LOG.md entries added: 10 rows
 Uncommitted changes left: none (public/area/, .venv/, work/, dist/ are git-ignored build outputs)
 Next owner: next session, from "Exact next task" above
 ```
