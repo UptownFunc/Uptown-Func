@@ -44,11 +44,20 @@ describe("constants register", () => {
   it("keeps the speed range estimated, as a range, with its limitation stated", () => {
     const r = constant("walkSpeedRange");
     expect(r.valueClass).toBe("estimated");
-    expect([r.low, r.high]).toEqual([0.64, 0.97]);
+    // W-01 decided (DECISIONS, Sun 15 Nov 2026): the slow bound is the 2 km/h planning pace of EVA-EXP-0042 Rev B,
+    // 4.2.1.3.1.1, p. 40 (0.56 m/s), not the 2.3 km/h lower edge of the IST-1 treadmill window (0.64 m/s).
+    expect([r.low, r.high]).toEqual([0.56, 0.97]);
     expect(r.limitation).toMatch(/lunar/i);
-    // Plan 19.5: IST-1 suited walking range 2.3-3.5 km/h, NASA/TM-2010-216138, Table 4, p. 13.
+    // Plan 19.5: IST-1 treadmill window 2.3-3.5 km/h, NASA/TM-2010-216138, Table 4, p. 13 (the fast bound).
     expect(r.citation.source).toContain("NASA/TM-2010-216138");
-    expect(r.citation.location).toBe("Table 4, p. 13");
+    expect(r.citation.source).toContain("EVA-EXP-0042 Rev B");
+    expect(r.citation.location).toBe("Table 4, p. 13; 4.2.1.3.1.1, p. 40");
+  });
+
+  it("keeps the slow bound at or below every planning pace found in the cited documents (W-01)", () => {
+    const kmh = (mps: number) => mps * 3.6;
+    expect(kmh(constant("walkSpeedRange").low!)).toBeLessThanOrEqual(2.0 + 0.02); // 2 km/h, EVA-EXP-0042 Rev B, p. 40
+    expect(constant("walkSpeedRange").low!).toBeLessThan(constant("walkSpeedNominal").value);
   });
 
   it("states that walking speeds are along the surface (plan 19.11, weakness 58)", () => {

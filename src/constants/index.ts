@@ -45,8 +45,8 @@ export const CONSTANTS = {
     limitation: "Planning value for suited walking; not validated at Mars gravity on natural terrain. Speeds are along the surface (treadmill belt speed), so edge time divides the 3D edge length by speed (plan 19.11, weakness 58).",
   },
   walkSpeedRange: {
-    id: "walkSpeedRange", value: 0.83, low: 0.64, high: 0.97, unit: "m/s", valueClass: "estimated",
-    citation: { source: "NASA/TM-2010-216138, IST-1 treadmill speeds, 2.3-3.5 km/h (plan 19.5)", location: "Table 4, p. 13" },
+    id: "walkSpeedRange", value: 0.83, low: 0.56, high: 0.97, unit: "m/s", valueClass: "estimated",
+    citation: { source: "Fast: NASA/TM-2010-216138, IST-1 treadmill speeds, 2.3-3.5 km/h. Slow: 2 km/h, EVA-EXP-0042 Rev B (W-01)", location: "Table 4, p. 13; 4.2.1.3.1.1, p. 40" },
     limitation: "A lunar-gravity treadmill speed window, not a measured range on terrain. Incline tests (NASA/TP-2010-216125, pp. 2, 5, 10, 70): 0.12-0.32 g, six male subjects, one 121 kg MKIII suit, speed fixed by protocol, no downhill data. No suited Mars-gravity data exists. The 15-20 deg bin is beyond tested grades. Speeds are along the surface (plan 19.11, weakness 58).",
   },
   slopeLimit: {

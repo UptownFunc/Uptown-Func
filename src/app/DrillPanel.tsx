@@ -31,7 +31,7 @@ export function DrillPanel({ output, showContours, onShowContours, showSky, onSh
       <h2>Time to habitat <span className="muted">tier 2</span></h2>
       <label className="check">
         <input type="checkbox" checked={showContours} onChange={(e) => onShowContours(e.target.checked)} />
-        5-minute contour lines (est., slow bound 0.64 m/s, 2 m grid path; unknown and excluded ground not crossed)
+        5-minute contour lines (est., slow bound {CONSTANTS.walkSpeedRange.low} m/s, 2 m grid path; unknown and excluded ground not crossed)
       </label>
       {skyAvailable && <label className="check">
         <input type="checkbox" checked={showSky} onChange={(e) => onShowSky(e.target.checked)} />
