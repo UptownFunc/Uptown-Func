@@ -33,6 +33,8 @@ export function plannedMarginProfile(g: RouteGrid, legs: readonly (readonly numb
     throw new RangeError("plan times must be finite and non-negative, and T_EVA positive");
   if (legs.length < 2) throw new RangeError("a plan needs at least an outbound and a return leg");
   if (stopDurations_s.length !== legs.length - 1) throw new RangeError("one stop duration is needed between each pair of legs");
+  // A one-cell leg (two stops in one cell, or a stop on the habitat) has no edge, so its stop would never be counted.
+  if (legs.some((l) => l.length < 2)) throw new RangeError("every leg needs at least two cells");
   for (let i = 1; i < legs.length; i++)
     if (legs[i - 1]![legs[i - 1]!.length - 1] !== legs[i]![0]) throw new RangeError(`legs ${i - 1} and ${i} do not chain`);
   const home = legs[0]![0]!;

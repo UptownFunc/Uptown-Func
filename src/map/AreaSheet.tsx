@@ -126,6 +126,7 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
     setContourEntry(null);
     failed.current = new Set();
     let cancelled = false;
+    let raf = 0; // pending pointermove frame, cancelled on unmount (R-15 finding 10)
     loadArea(dataUrl).then((a) => {
       if (cancelled || !target.current) return;
       area.current = a;
@@ -201,7 +202,7 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
         pickRef.current?.({ lat: p.lat, lon: p.lon });
       });
       // Readouts are throttled to one per animation frame; the grid frame is cached in src/geo/grid.
-      let pending: number[] | null = null, raf = 0;
+      let pending: number[] | null = null;
       map.on("pointermove", (e) => {
         pending = e.coordinate;
         if (raf) return;
@@ -221,7 +222,7 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
         });
       });
     }).catch((e: unknown) => setError(e instanceof Error ? e.message : String(e)));
-    return () => { cancelled = true; map?.setTarget(undefined); };
+    return () => { cancelled = true; if (raf) cancelAnimationFrame(raf); map?.setTarget(undefined); };
   }, [dataUrl]);
 
   useEffect(() => {

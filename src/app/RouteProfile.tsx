@@ -4,6 +4,7 @@
 // vertical reference unverified). The margin shown on hover is the slow-bound planned margin, an estimate.
 import type { PlanOutput } from "../engine/planner";
 import { estRange } from "./format";
+import { stopProfilePositions } from "./profile";
 
 const W = 1000, H = 120, PAD = 6;
 
@@ -28,11 +29,9 @@ export function RouteProfile({ output, hoverIndex, onHoverIndex }: RouteProfileP
   const over = ticks.find((t) => t.kind === "OVER");
   const pts = (from: number, to: number) => prof.slice(from, to + 1).map((p) => `${x(p.s_m).toFixed(1)},${y(p.z_m).toFixed(1)}`).join(" ");
   const overAt = over ? prof.findIndex((p) => p.s_m >= over.s_m) : -1;
-  const stops = output!.plan.stops.map((s) => {
-    const cell = output!.geometry.stopCells[s.id];
-    const at = prof.find((p) => p.cell === cell);
-    return at ? { letter: s.letter, s: at.s_m } : null;
-  }).filter((v): v is { letter: string; s: number } => v !== null);
+  const stopS = stopProfilePositions(prof, output!.plan.stops.map((s) => output!.geometry.stopCells[s.id]));
+  const stops = output!.plan.stops.map((s, i) => (stopS[i] === null ? null : { letter: s.letter, s: stopS[i]! }))
+    .filter((v): v is { letter: string; s: number } => v !== null);
   const h = hoverIndex !== null ? prof[hoverIndex] : undefined;
 
   const onMove = (e: React.MouseEvent<SVGSVGElement>) => {

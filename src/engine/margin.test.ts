@@ -120,3 +120,12 @@ describe("margin validation", () => {
     expect(b.map((x) => x.margin_s)).toEqual(a.map((x) => x.margin_s));
   });
 });
+
+describe("single-cell legs (R-15 review finding 1)", () => {
+  it("refuses a leg of one cell, whose stop would otherwise be left out of the margin", () => {
+    const g = flat(1, 6);
+    const times: PlanTimes = { tEva_s: 3600, tOps_s: 600, tCont_s: 300 };
+    // Habitat 0 -> stop at 3 -> second stop in the same cell 3 -> habitat.
+    expect(() => plannedMarginProfile(g, [[0, 1, 2, 3], [3], [3, 2, 1, 0]], [300, 300], times, speeds)).toThrow(/at least two cells/);
+  });
+});

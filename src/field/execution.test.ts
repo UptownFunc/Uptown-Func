@@ -103,3 +103,14 @@ describe("stored fieldMargins (contract C-17)", () => {
     expect(e.fieldMargins.lastTickAt).toBe(at);
   });
 });
+
+describe("field-margin provenance (R-15 review finding 8)", () => {
+  it("cites the assumptions every leg time carries, plus the plan times and stop durations", async () => {
+    const { fieldMarginAssumptionIds } = await import("./execution");
+    const plan = {
+      legs: [{ time: { assumptionIds: ["A-kv", "A-slope-limit"] } }, { time: { assumptionIds: ["A-kv-new"] } }],
+      stops: [{ duration: { assumptionIds: ["A-stop_duration"] } }],
+    } as never;
+    expect(fieldMarginAssumptionIds(plan)).toEqual(["A-kv", "A-slope-limit", "A-kv-new", "A-T_EVA", "A-t_ops", "A-t_cont", "A-stop_duration"]);
+  });
+});

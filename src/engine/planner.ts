@@ -122,6 +122,13 @@ export class Planner {
   }
 
   /** The cell under an F1 position, or the reason it cannot hold a habitat or stop. */
+  /** Refuses the habitat cell and other stops' cells: a one-cell leg would drop that stop's time from the margin. */
+  private cellTaken(cell: number, exceptId?: string): string | null {
+    if (cell === this.habitat) return "a stop cannot be on the habitat cell";
+    const other = this.stops.find((s) => s.cell === cell && s.id !== exceptId);
+    return other ? `${other.name} is already in that 2 m cell` : null;
+  }
+
   private cellAt(p: LatLon): number | string {
     if (!num(p.lat) || !num(p.lon)) return "position must have finite lat and lon";
     let cell;
@@ -157,6 +164,8 @@ export class Planner {
       case "add_stop": {
         const cell = this.cellAt(p as unknown as LatLon);
         if (typeof cell === "string") return { ok: false, reason: cell };
+        const taken = this.cellTaken(cell);
+        if (taken) return { ok: false, reason: taken };
         if (this.stops.length >= LETTERS.length) return { ok: false, reason: "too many stops" };
         const id = `S${this.nextStop++}`;
         this.stops.push({ id, name: str(p.name) ? p.name : `Stop ${id}`, cell });
@@ -167,6 +176,8 @@ export class Planner {
         if (k < 0) return { ok: false, reason: `no stop ${String(p.stopId)}` };
         const cell = this.cellAt(p as unknown as LatLon);
         if (typeof cell === "string") return { ok: false, reason: cell };
+        const taken = this.cellTaken(cell, this.stops[k]!.id);
+        if (taken) return { ok: false, reason: taken };
         this.stops[k] = { ...this.stops[k]!, cell };
         break;
       }
@@ -192,6 +203,7 @@ export class Planner {
           const v = p.value_s;
           if (p.stopId !== undefined) return { ok: false, reason: "the scenario time applies to the whole plan, not one stop" };
           if (!num(v)) return { ok: false, reason: "scenario time must be a finite number of seconds since 1970-01-01 UTC" };
+          if (!Number.isFinite(new Date(v * 1000).getTime())) return { ok: false, reason: "scenario time is outside the representable date range" };
           try { ttMinusUtc_s(v * 1000); } catch (e) { return { ok: false, reason: (e as Error).message }; }
           if (!str(p.rationale) || !p.rationale.trim()) return { ok: false, reason: "every Assumed value needs a one-line rationale" };
           this.scenario = { id: `A-${SCENARIO_ID}`, name: "Scenario date and time (UTC)", value: v, unit: SCENARIO_UNIT, rationale: p.rationale.trim(), source: "team choice" };
@@ -350,9 +362,10 @@ export class Planner {
         withMargin.push({ ...p, margin_min: m.margin_s / 60, marginHigh_min: (fixed - (travelSlow * sp.low_mps) / sp.high_mps) / 60 });
       }
       out.splice(0, out.length, ...withMargin);
+      // A tick marks where the walk crosses a threshold, so none is drawn when the habitat sample is already past it.
       for (const kind of ["NEAR_LIMIT", "OVER"] as const) {
-        const hit = samples.find((m) => (kind === "OVER" ? m.state === "OVER" : m.state !== "OK"));
-        if (hit) ticks.push({ kind, cell: hit.cell, s_m: hit.s_m });
+        const i = samples.findIndex((m) => (kind === "OVER" ? m.state === "OVER" : m.state !== "OK"));
+        if (i > 0) ticks.push({ kind, cell: samples[i]!.cell, s_m: samples[i]!.s_m });
       }
     }
     return { profile: out, marginTicks: ticks };

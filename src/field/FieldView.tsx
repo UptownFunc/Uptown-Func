@@ -10,7 +10,7 @@ import { marginState } from "../engine/margin";
 import { MarginState } from "../app/MarginState";
 import { QuantityText } from "../app/QuantityText";
 import { formatLength } from "../app/format";
-import { addTick, fieldMarginRanges, newExecution, nextEvent, type Range } from "./execution";
+import { addTick, fieldMarginAssumptionIds, fieldMarginRanges, newExecution, nextEvent, type Range } from "./execution";
 
 const SPEED_RATIO = CONSTANTS.walkSpeedRange.low / CONSTANTS.walkSpeedRange.high;
 
@@ -32,7 +32,7 @@ export function FieldView({ output, hidden = false }: { output: PlanOutput | nul
   const tEva = plan.assumptions.find((a) => a.id === "A-T_EVA")?.value;
   const last = ex.ticks[ex.ticks.length - 1];
   const q = (r: Range, method: string): Quantity => ({ value: r.low, low: r.low, high: r.high, unit: "s", valueClass: "estimated", methodId: method,
-    assumptionIds: [...new Set(["A-kv", "A-T_EVA", "A-t_ops", "A-t_cont", ...plan.stops.flatMap((s) => s.duration.assumptionIds)])],
+    assumptionIds: fieldMarginAssumptionIds(plan),
     sourceIds: ["manual entries", "D1", "walkSpeedRange"] });
 
   const tick = () => {

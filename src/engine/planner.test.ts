@@ -399,3 +399,41 @@ describe("Conditions: scenario date and time (Assumed, plan 19.11 weakness 27) a
     expect(p.current().conditions.scenario).toBeNull();
   });
 });
+
+describe("review R-15 follow-ups", () => {
+  const ALL = { T_EVA: 4 * 3600, t_ops: 1200, t_cont: 1800, stop_duration: 900 };
+  const setAll = (p: Planner, v: Record<string, number>) => {
+    for (const [id, value_s] of Object.entries(v))
+      expect(p.apply(cmd("set_assumption", { id, value_s, rationale: "test" }, p.current().plan.versionHash)).ok).toBe(true);
+  };
+
+  it("refuses a stop on the habitat cell or on another stop's cell (a stop's time would drop out of the margin)", () => {
+    const { g, p } = plannerWithHabitat();
+    const v = () => p.current().plan.versionHash;
+    expect(p.apply(cmd("add_stop", { ...at(g, 2, 2), name: "On habitat" }, v()))).toMatchObject({ ok: false });
+    expect(p.apply(cmd("add_stop", { ...at(g, 2, 10), name: "A" }, v())).ok).toBe(true);
+    expect(p.apply(cmd("add_stop", { ...at(g, 2, 10), name: "Same cell" }, v()))).toMatchObject({ ok: false });
+    expect(p.apply(cmd("add_stop", { ...at(g, 4, 10), name: "B" }, v())).ok).toBe(true);
+    const [a, b] = p.current().plan.stops;
+    expect(p.apply(cmd("move_stop", { stopId: b!.id, ...at(g, 2, 10) }, v()))).toMatchObject({ ok: false });
+    expect(p.apply(cmd("move_stop", { stopId: a!.id, ...at(g, 2, 2) }, v()))).toMatchObject({ ok: false });
+    // Moving a stop within its own cell is allowed.
+    expect(p.apply(cmd("move_stop", { stopId: a!.id, ...at(g, 2, 10) }, v())).ok).toBe(true);
+    expect(p.current().plan.stops.length).toBe(2);
+  });
+
+  it("refuses a scenario time outside the JavaScript date range instead of crashing the display", () => {
+    const { p } = plannerWithHabitat();
+    expect(p.apply(cmd("set_assumption", { id: "scenario_utc", value_s: 1e13, rationale: "x" }, p.current().plan.versionHash)).ok).toBe(false);
+    expect(p.current().conditions.scenario).toBeNull();
+  });
+
+  it("draws no threshold tick when the margin is already past it at the habitat", () => {
+    const { g, p } = plannerWithHabitat();
+    p.apply(cmd("add_stop", { ...at(g, 2, 38), name: "Far" }, p.current().plan.versionHash));
+    setAll(p, { ...ALL, T_EVA: 1200 + 1800 - 60 }); // below t_ops + t_cont: OVER from the start
+    const { geometry, plan } = p.current();
+    expect(plan.endMargin.valueClass).not.toBe("unknown");
+    expect(geometry.marginTicks).toEqual([]);
+  });
+});

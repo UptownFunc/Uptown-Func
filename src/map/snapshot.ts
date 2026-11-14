@@ -40,8 +40,9 @@ function capture(map: OlMap, plan: VectorLayer<VectorSource>, latDeg: number, re
       el.querySelectorAll<HTMLCanvasElement>(".ol-layers canvas").forEach((c) => {
         if (c.width === 0) return;
         const container = c.parentElement;
-        // The coverage outline belongs to the on-screen layer list (plan 7.8), which the card does not carry.
-        if (container?.classList.contains("layer-coverage")) return;
+        // The coverage outline belongs to the on-screen layer list (plan 7.8), which the card does not carry; the
+        // keyboard cursor and the hover scrub marker are interaction state, not plan features (R-15 finding 10).
+        if (["layer-coverage", "layer-cursor", "layer-marker"].some((k) => container?.classList.contains(k))) return;
         const opacity = container?.style.opacity || c.style.opacity;
         ctx.globalAlpha = opacity === "" || opacity === undefined ? 1 : Number(opacity);
         ctx.globalCompositeOperation = container?.classList.contains("layer-hillshade") ? "multiply" : "source-over";

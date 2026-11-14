@@ -14,6 +14,12 @@ export function newExecution(plan: MissionPlan): MissionExecution {
   return { planVersion: plan.versionHash, ticks: [], fieldMargins: { continue_min: 0, returnNow_min: 0, lastTickAt: null } };
 }
 
+/** Assumptions a field margin rests on: those of every leg time (k_v, slope limit), the plan times and the stops. */
+export function fieldMarginAssumptionIds(plan: MissionPlan): string[] {
+  return [...new Set([...plan.legs.flatMap((l) => l.time.assumptionIds ?? []), "A-T_EVA", "A-t_ops", "A-t_cont",
+    ...plan.stops.flatMap((s) => s.duration.assumptionIds ?? [])])];
+}
+
 /** The next tick the plan expects, in order: arrive A, depart A, arrive B, ...; null after the last stop. */
 export function nextEvent(plan: MissionPlan, e: MissionExecution): { stopId: string; kind: Tick["kind"] } | null {
   const k = e.ticks.length, stop = plan.stops[Math.floor(k / 2)];
