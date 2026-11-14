@@ -775,7 +775,7 @@ Checks run (exact commands), Sat 14 Nov 2026 ~18:53-18:59 Asia/Manila, at the R-
 Results: all green. main (bb473b7) is an ancestor of the branch: fast-forward, no conflicts.
 Known limitations or failures: R-15 items 2, 6, 7, 9 recorded, not fixed; P-03 open; bundle headroom ~3.6 KB
 Review status: /code-review medium (whole PR diff) + low (fix commit), all findings fixed or recorded (R-15)
-Commit SHA: d3330cb (G-07), 5e4e5d2 + follow-up (R-15); merge commit recorded in HANDOFF after the merge
+Commit SHA: d3330cb (G-07), 5e4e5d2 + 7eff389 (R-15). **Merged: PR #2 merge commit 1da70b5 (Sat 14 Nov 19:00)**
 Next part / blocker owner: G3 inputs (T-01, T-02, C-19, B-3) chosen by the session at the operator's direction; B-4 human
 ```
 
@@ -805,7 +805,7 @@ Review status: /code-review medium of PR #3 (R-16): 10 findings; 6 fixed, 2 reso
 R-16 fix checks (Sat 14 Nov ~19:18-19:22): npx vitest run 274/274 (28 files); npx tsc --noEmit clean; npm run build OK
   (main 206.69 kB gzip + worker 41,242 B, ~247.9 of 250 KB); pytest 62 passed; Playwright 46/46. Tests written first and
   seen failing: add_stop name rule (accepted a blank name), parseTasks (module missing)
-Commit SHA: 34ccda0 (G3-01 preset), fdc64e7 (C-19), and the D6 commit that adds this record
+Commit SHA: 34ccda0 (G3-01 preset), fdc64e7 (C-19), c72157d (D6), aecf8d5 + 56b261b (R-16). **Merged: PR #3 merge commit a761afd (Sat 14 Nov ~19:28)**
 Next part / blocker owner: B-4 deploy (human); then G4 items (B-7 rover positions for AC-07/AC-08)
 ```
 
