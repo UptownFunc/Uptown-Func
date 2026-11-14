@@ -72,6 +72,7 @@ Mars; they load by default, show an "assumed" badge with this rationale, stay ed
 | Default stop duration | 45 min | 45 min of EVA per exploration site: NASA/TM-2010-216138, Tables 2-3, p. 12 |
 | Slope limit | 20 deg | "Walking up/down/across a slope of up to 20°": EVA-EXP-0042 Rev B, 4.2.1.3, p. 38 |
 | Scenario time | 2026-11-15 12:00 UTC | A scenario input with no possible source; a 6 h EVA from this start stays in daylight |
+| Walking speed | 0.56 to 0.97 m/s, nominal 0.83 m/s | Nominal and fast bound: NASA/TM-2010-216138, Table 4, p. 13 (3.0 km/h; IST-1 treadmill window to 3.5 km/h). Slow bound: the 2 km/h planning pace of EVA-EXP-0042 Rev B, 4.2.1.3.1.1, p. 40 (DECISIONS W-01; the team plan had 0.64 m/s) |
 | Slope factors k_v | 1 in every bin | No sourced speed-versus-slope value exists (EVA-EXP-0042 Rev B, p. 40; NASA SP-368, ch. 4, Table 4, p. 125 reaches only 7.9 deg); probably optimistic on 10-20 deg slopes |
 | Default habitat | 4.795211 S, 137.391845 E | Scenario input from the team plan and the D1 slope screen; not a proposed base site |
 

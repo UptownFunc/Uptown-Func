@@ -222,3 +222,11 @@ app's implementation, which reproduces the published worked examples.
 
 Still open after this section: a library copy of NASA/TP-2010-216115 (item 3); the Mars24 app's third date (item 6);
 the plan's control-point test (item 4).
+
+## 11. After the check: two decisions, on a separate branch
+
+At Yujin's direction the SI session then chose on the two open value questions of section 6 (branch
+`yujin/w-01-slow-bound`, DECISIONS W-01 and K-01). The slow walking bound goes from 0.64 to 0.56 m/s, the planning
+pace of EVA-EXP-0042 Rev B, p. 40. The slope factors stay 1, because no source gives a value. These are choices, not
+verification results, and they wait for the other members. They are kept apart from this record's branch, which
+changes no value.
