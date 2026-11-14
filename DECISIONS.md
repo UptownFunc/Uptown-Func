@@ -144,6 +144,7 @@ All ten findings fixed, test-first where possible. Each of the three key tests w
 | R-08 | /code-review high of `c7b2512...10ec506` (4.4, 4.1) | 6 findings: fixed 1 (contour request restarted on plan changes), 2 (contour labels now "est. N min"), 3 (dead filter), 4 (empty levels), 6 (arrow keys on zoom buttons) in 48e2774. Deferred: 5 contours cached for the session (inputs fixed in this build; invalidate when habitat or k_v become editable). | Follow-up |
 | S-05 | `@types/d3-contour` 3.0.6, `@axe-core/playwright` 4.14.0 (dev only) | Types for the plan's d3-contour 4.0.3; axe pinned "from the first lockfile" (plan 11.2) | DONE; team to confirm |
 | B-01 | Bundle budget | JS 235 KB gzipped of the 250 KB budget (plan AC). Zod in the main bundle comes from the field view's MissionExecution validation. | Watch |
+| SKY-1 | Sky-obstruction layer | Deferred: the plan hides the layer while AC-07 is off, and AC-07 needs the M12 rover position from D5 (UNVERIFIED, unreachable). D1/D12 are 1-row strips without overviews (near-field reads about 1 GB); the pipeline must build its own max-aggregated overview when this resumes. | Waiting on D5 |
 | X-01 | Superpowers skill | Not installed in this cloud session (no skill or plugin present). Its test-first and verify-before-marking practice was followed manually; the skill is not claimed as used. | Install for future sessions if required |
 | D-04 note | Smoothing | Still undecided; the map draws the grid path itself (option 3 behaviour by default). Decide by G2 (19:00). | PENDING |
 

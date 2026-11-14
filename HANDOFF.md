@@ -4,11 +4,11 @@ This file is the handoff between team members and Claude sessions. Keep it factu
 
 ## Current snapshot
 
-- Last updated: **Sat 14 Nov 2026, 14:30 Asia/Manila (UTC+8)** (container clock, `TZ=Asia/Manila date`)
+- Last updated: **Sat 14 Nov 2026, 14:40 Asia/Manila (UTC+8)** (container clock, `TZ=Asia/Manila date`)
 - Deadline: **Sun 15 Nov 2026, 23:59 local** (plan 19.3, Project Submission Guide dated 12 Nov). The official portal time is still to be confirmed by a human.
-- Remaining: **about 33 h 29 min to the deadline. G1 passed under its fallback (2D only; 3D cut). G2 (19:00) in 4 h 30 min: engine criteria met. G3 (Sun 01:00) in 10 h 30 min. G4 (Sun 10:00): accessibility automated checks pass; contours and drill done.**
+- Remaining: **about 33 h 19 min to the deadline. G1 passed under its fallback (2D only; 3D cut). G2 (19:00) in 4 h 20 min: engine criteria met. G3 (Sun 01:00) in 10 h 20 min. G4 (Sun 10:00): accessibility, contours, drill, AC-31 done; AC-07/AC-08 blocked on D5.**
 - Gate: G0 passed under its fallback. **G1 will not fully pass:** control points (1.5) and manifest (1.3, C-12) not done -> plan fallback, overlays in 2D only. **G2 engine criteria now met on this machine** (tests pass, route < 500 ms, speeds cited or Assumed, workload off) except the D-04 smoothing decision.
-- Working branch: **`claude/trusting-fermi-c5pc0s`**, pushed. It is `claude/kind-ptolemy-1wdqf5` (204a9c4, previous handoff) **plus** this session's commits 3d0e68c, 9e9496c, 88f8b9a, 19b7c68, 89b08a7, bf0524b, 4420678, 16fb661, 05cc50e, 0ff9423, db1109d, f07094f, 0aaae81, 088a272, 66c373e, edf9492, 0acf9e7, 7539a4f, b68dec1, bfa4189, a7cb260, 30e1d26, db7c103, c7b2512, 6bdb98e, 10ec506, 48e2774 and the log commit. `kind-ptolemy` is unchanged; continue from `trusting-fermi`.
+- Working branch: **`claude/trusting-fermi-c5pc0s`**, pushed. It is `claude/kind-ptolemy-1wdqf5` (204a9c4, previous handoff) **plus** this session's commits 3d0e68c, 9e9496c, 88f8b9a, 19b7c68, 89b08a7, bf0524b, 4420678, 16fb661, 05cc50e, 0ff9423, db1109d, f07094f, 0aaae81, 088a272, 66c373e, edf9492, 0acf9e7, 7539a4f, b68dec1, bfa4189, a7cb260, 30e1d26, db7c103, c7b2512, 6bdb98e, 10ec506, 48e2774, 3578e39, a1e9173, bdb889e and the log commit. `kind-ptolemy` is unchanged; continue from `trusting-fermi`.
 - `main`: **bb473b7**. **No open PRs.** Nothing merged this session (operator instruction: do not merge).
 - Session operator this session: the account owner of the cloud session (no per-module role). Model: Claude Opus 5.5. Fable 5.2 not used. **Superpowers skill was not installed** in this session (X-01).
 - Authorship: the SharpWalk concept, framing, direction, requirements and plan belong to **the four-member team**. SI assistance is recorded in SI_LOG.md only.
@@ -63,8 +63,9 @@ Plan defaults were applied at 14:15 (DECISIONS "Plan defaults applied"). Remaini
 2. **Conditions panel (Tier 1 Must):** D10 Mars24 (solar longitude, LMST clock label, sun elevation at the area centre; no terrain shadowing; check against the Mars24 app, AC-09) and a dated D7 REMS snapshot. Needs www.giss.nasa.gov and mars.nasa.gov: start the next session on the **"Uptown-Func"** environment, which allows them.
 3. **Rover point of view (Tier 1 Must):** the team picks 3-5 Curiosity raw images (D6) of boxwork-like terrain and records sol, camera and credit; then a session adds them to the card and stop panel, labelled "similar terrain".
 4. **3.5 first public deploy** (Vercel account, R-17); area data is now committed. Then request the FortiGuard classification (plan 19.3).
-5. G4 remaining: sky-obstruction grid (pipeline, D12) and the AC-07 benchmark; AC-08 rover-path check (needs D5, host not allowed).
-6. Follow-ups: R-02 (7, 8, 10), R-03 (5), R-04 (5-7), R-05 (5, 6), R-06 (5), R-07 (3), R-08 (5); contracts C-12/C-16/C-17; P-03 GDAL 3.12.3 rerun.
+5. G4 remaining: AC-07 and AC-08 need D5 (rover positions; host not reachable). The sky-obstruction layer is deferred by the plan's own rule until AC-07 can run (SKY-1).
+6. 5.4: the team writes the concept-origin account in SI_LOG.md and reviews README "SI use"; then the submission SI field.
+7. Follow-ups: R-02 (7, 8, 10), R-03 (5), R-04 (5-7), R-05 (5, 6), R-06 (5), R-07 (3), R-08 (5); contracts C-12/C-16/C-17; P-03 GDAL 3.12.3 rerun.
 
 ## Exact commands for the next session
 
@@ -96,13 +97,13 @@ SHARPWALK_AREA=public/area node --experimental-strip-types bench/route-bench.ts
 
 The pipeline needs HTTPS access to `asc-pds-services.s3.us-west-2.amazonaws.com` (USGS data). In a cloud session, the environment "Uptown-Func" allows the Mars data hosts. In this cloud container only, Playwright needs `PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome`.
 
-Expected results: vitest 209/209 in 16 files; tsc clean; pytest 43 passed; playwright 20 passed; real build checksums elevation `a93aa209...99a3ef`, slope `aa366e6f...18bdc0`, terrain_class `c9c06b3e...58ae21` (GDAL 3.10.3; compare under 3.12.3).
+Expected results: vitest 209/209 in 16 files; tsc clean; pytest 43 passed; playwright 23 passed; real build checksums elevation `a93aa209...99a3ef`, slope `aa366e6f...18bdc0`, terrain_class `c9c06b3e...58ae21` (GDAL 3.10.3; compare under 3.12.3).
 
 ## Last session report
 
 ```text
 Session / member: session operator of cloud session_018Xnznho5hoLyC49RJSn7oD (no per-module role, G-04); Claude Opus 5.5
-Start and end time (Asia/Manila, container clock): Sat 14 Nov 12:57 - 14:30
+Start and end time (Asia/Manila, container clock): Sat 14 Nov 12:57 - 14:40
 Branch: claude/trusting-fermi-c5pc0s (fast-forwarded from claude/kind-ptolemy-1wdqf5 at 204a9c4; nothing overwritten)
 Starting commit: 204a9c4
 Ending commit: the log commit after 19b7c68 (see git log -1)
@@ -114,7 +115,7 @@ Checks run: see the PHASES.md completion record (all green)
 Failures / limitations: margins unknown (T-01); Superpowers not installed; plan PDFs live only on
   claude/lucid-ptolemy-nz6qpw (docs/plan); *.pdf is git-ignored on this line of work
 Decisions made by humans this session: G-04 (no roles), K-01 (k_v = 1 placeholder + banner)
-SI_LOG.md entries added: 8 rows
+SI_LOG.md entries added: 9 rows
 Uncommitted changes left: none (public/area/, .venv/, work/, dist/ are git-ignored build outputs)
 Next owner: next session, from "Exact next task" above
 ```

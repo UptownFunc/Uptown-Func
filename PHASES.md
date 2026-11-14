@@ -55,7 +55,7 @@ rule; values and approvals the plan leaves to people were not invented (DECISION
   worked example as test oracle); rover point-of-view images (D6: 3-5 images picked by people); first public deploy
   (Vercel account, R-17); D-01/D-02 Local Lead answers; contract changes C-12/C-16/C-17.
 
-## Status at handoff (Sat 14 Nov 2026, 14:30 Asia/Manila container clock; previous 12:20)
+## Status at handoff (Sat 14 Nov 2026, 14:40 Asia/Manila container clock; previous 12:20)
 
 | Part | Status | One-line reason |
 |---|---|---|
@@ -78,8 +78,10 @@ rule; values and approvals the plan leaves to people were not invented (DECISION
 | 2.7 | VERIFIED (Node, cloud Xeon) | k_v = 1: longest route 354-395 ms, field 426-470 ms; worker command 261 ms for 2 legs |
 | 3.1 | IN PROGRESS | Planner (only MissionPlan writer) + Comlink worker + all six commands; C-15 route geometry outside the contract |
 | 3.3 | IN PROGRESS (core done) | Field View: manual ticks, est. margins, stale guard (edf9492, 0acf9e7); phone width checked (b68dec1); outdoor daylight check needs a real phone |
-| 4.1 | IN PROGRESS | Tier 2: contours + simulated drill done (10ec506, 48e2774); sky obstruction (pipeline, D12) and AC-07/AC-08 not started |
+| 4.1 | IN PROGRESS | Contours + drill done; AC-31 resilience done (a1e9173); sky obstruction deferred (plan hides the layer while AC-07 is off; AC-07 needs D5) |
 | 4.4 | VERIFIED (automated) | 0 serious/critical axe on 3 views; AC-32 keyboard place/move/delete; 1280/1920 px (6bdb98e, 48e2774); manual checks (projector, outdoors) at G5 |
+| 4.2 | BLOCKED | AC-07 needs the M12 rover position (D5, UNVERIFIED, host not reachable); D1/D12 are 1-row strips, no overviews |
+| 5.4 | IN PROGRESS (draft) | README with SI use and references (bdb889e); team to add concept origin and review |
 | 3.4 | IN PROGRESS (core done) | Card + STALE + print; Chromium PDF = one A5 page (b68dec1, a7cb260); paper print and fixed-scale map open |
 | 3.2 | IN PROGRESS (nearly done) | + sources panel (UX-15) and AC-05 quantity labelling (66c373e, 0acf9e7); remaining: stop renaming/tasks, datasets-in-view derived from layers |
 | 3.x-5.x | NOT STARTED | |
@@ -145,7 +147,7 @@ Work on optional features only when it does not endanger this path. The AREA 2D 
 | Part | Task | Owner | Status | Checks / evidence | Commit |
 |---|---|---|---|---|---|
 | 4.1 | Complete Tier 2 features that do not threaten Tier 1. Contour display is optional; sky-obstruction grid runs after G1 and stays off the critical path. | Assigned module owners | IN PROGRESS (contours and drill done; sky obstruction not started) | **14:27:** time-to-habitat contour lines (d3-contour 4.0.3 in the worker; slow-bound field on a 4 m display grid by block minimum; lines only, labelled "est. N min"; no lines along the grid border or unreachable ground) and the simulated solar-event drill (plan 6.9: 30 min Assumed default in the constants register, 20/10 min stress cases, hatched SIMULATION banner, labelled drill line, stops outside named; no dose, no shelter wording). e2e `drill.spec.ts`. **Not started:** sky-obstruction grid (pipeline, needs D12) and its AC-07 benchmark. | 10ec506, 48e2774 |
-| 4.2 | Run AC-07 sky-obstruction benchmark and preserve the interpretation “geometry, not dose.” | Data and Science | UNVERIFIED | Benchmark results, assumptions, source IDs and limits recorded | - |
+| 4.2 | Run AC-07 sky-obstruction benchmark and preserve the interpretation “geometry, not dose.” | Data and Science | BLOCKED (input missing) / layer deferred by plan rule | **14:35:** AC-07 needs Curiosity's position at Butte M12 for sols 1456-1467 from D5, which the plan marks UNVERIFIED; the D5 host is not reachable from this session. The plan says "AC-07 off -> Hide the layer" and the layer enters the video only with a recorded AC-07 result, so the sky-obstruction layer is deferred rather than built hidden. Feasibility evidence: D1 (32,980 x 57,440, float32) and D12 (106,694 x 53,347, int16) are 1-row strips with **no overviews**, so a near-field D1 read costs whole 33 km rows (about 1 GB for +-4 km); the plan's max-aggregated overview must be built by the pipeline itself. Method (plan 6.7) unchanged when the input arrives. | - |
 | 4.3 | Run AC-08 rover-path consistency checks and document results. | Data and Science + Route Engine | UNVERIFIED | Reproducible results and limitations | - |
 | 4.4 | Run accessibility checks, including serious axe violations and keyboard/reduced-motion behaviour. | Design | VERIFIED (automated checks); manual checks due at G5 | @axe-core/playwright 4.14.0: 0 serious/critical violations on Planning, Briefing (with card) and Field View (AC-11). AC-32: place, move and delete a stop by keyboard alone (map cursor: arrows 10 m, Shift 100 m, Enter adds; "Move stop X to the map cursor"; Delete), leg table as the non-map equivalent, console at 1280 and 1920 px without sideways scroll. No animations exist yet, so reduced motion has nothing to reduce. Manual projector/outdoor/slow-network checks are a G5 item. | 6bdb98e, 48e2774 |
 | 4.5 | Merge only passing Tier 2 items and produce the integrated G4 build. | Captain | UNVERIFIED | Merged commit SHAs; benchmark and accessibility results | - |
@@ -159,7 +161,7 @@ Work on optional features only when it does not endanger this path. The AREA 2D 
 | 5.1 | Freeze features. Run the demo from public deploy on two machines and verify the AREA 2D map with Cesium blocked. | Captain + all owners | UNVERIFIED | Two-machine evidence; Cesium-blocked fallback works; known defects logged | - |
 | 5.2 | After freeze, allow bug fixes only. Re-run core tests and validate all displayed quantities, citations, assumptions and warnings. | Module owners | UNVERIFIED | Regression suite; provenance review; no new feature scope | - |
 | 5.3 | Lock the <=30-second subtitled video with every on-screen claim sourced and limitation caption present. If not ready by the video gate, switch to the 7-slide format. | Design | UNVERIFIED | Final asset reviewed; SI watermark if applicable; sources captured | - |
-| 5.4 | Complete README `SI use`, dependency/dataset/image licences, submission references and SI form data from `SI_LOG.md`. | Captain | UNVERIFIED | All SI and source disclosures reconciled | - |
+| 5.4 | Complete README `SI use`, dependency/dataset/image licences, submission references and SI form data from `SI_LOG.md`. | Captain | IN PROGRESS (draft written; team review and concept-origin text pending) | **14:39:** README.md: summary and limits, dataset-to-number table (19.3), run/check commands, "SI use" reconciled with SI_LOG.md, references with exact versions and licences for every bundled, dev and pipeline package (read from installed metadata), datasets with credit, cited publications, images. **Pending:** the team's concept-origin account in SI_LOG.md, then the submission SI field from the same facts; human review of the disclosure. | bdb889e |
 | 5.5 | Verify every submission field; public app and repository links open without login; submit the frozen version by the internal target. | Captain | UNVERIFIED | Link checks; submission receipt or confirmation captured | - |
 
 **G5 acceptance:** demo runs from public deploy on two machines and the 2D map works with Cesium blocked. From G5 onward, bug fixes only.
@@ -476,6 +478,20 @@ Known limitations: contours cached for the session (habitat and k_v fixed now; R
 Review status: /code-review high on c7b2512...10ec506: 6 findings; 5 fixed (48e2774); 1 deferred (R-08)
 Commit SHA: 6bdb98e, 10ec506, 48e2774 (+ log commit)
 Next part / blocker owner: team (T-01, rover images, deploy account); network for Conditions (D7, D10); sky obstruction (D12)
+```
+
+```text
+Part: AC-31 resilience (4.1/G4), 4.2 assessment, 5.4 README draft, after another "proceed"
+Owner: no per-module roles (G-04)
+Status: AC-31 done; 4.2 BLOCKED (D5); 5.4 IN PROGRESS (draft)
+Files changed: src/map/AreaSheet.tsx, src/app/styles.css, e2e/resilience.spec.ts, README.md, logs
+Checks run (exact commands): npx vitest run; npx tsc --noEmit; npm run build;
+  PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome npx playwright test --trace off;
+  rasterio metadata read of D1 and D12 (see 4.2); npm ls --omit=dev --all (licences)
+Results: vitest 209/209; tsc clean; build OK; playwright 23/23
+Commit SHA: a1e9173, bdb889e (+ log commit)
+Next part / blocker owner: team (T-01 values, rover image picks, deploy account, concept origin, contract agreement);
+  network for D7/D10 (Conditions) and D5 (AC-07, AC-08)
 ```
 
 ## Phase-part completion record
