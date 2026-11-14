@@ -70,6 +70,15 @@ Ten findings. Eight were fixed, test-first where code was involved. One was fixe
 | K-02 | Bin-edge convention | The code uses lower-inclusive bins: [0,5), [5,10), [10,15), [15, limit]. Edges exactly at the limit are allowed. Route Engine to confirm. |
 | D-03 note | Connectivity of the demo area at 2 m | The main routable region covers 58.1% of the area; the area centre is not in it. Habitat and stops must be placed in the main region. Recorded for the D-03 sign-off. |
 
+## /code-review of 2.2 (Sat 14 Nov, ~12:15), medium, `225e3e3...29e5a71`
+
+Ten findings: seven fixed, two partly fixed, one skipped.
+- **Fixed, test-first:** out-of-grid cells are refused instead of wrapping to the next row; the grid shape and cell size are validated; bin edges use the same relative tolerance as the limit, so an edge designed at exactly 5, 10 or 15 deg goes to the upper bin (a real rounding miss, reproduced across 400 cell sizes); the heuristic has one implementation, used by both search and the export; a cross-language test checks that the engine's class codes equal the pipeline's (proven by changing a pipeline code and watching the test fail).
+- **Fixed in the benchmark:** separate rows and cols; guards for no seed and an unreachable route; the level speed read from `src/constants`; two labelled placeholder factor sets.
+- **Partly fixed:** the time field no longer builds `prev`; per-call buffers are still allocated each route (about 29 MB on the full grid). The latency is within budget on this machine, so buffer reuse is left as the first optimisation if the Worker or laptop run exceeds 500 ms.
+- **Partly fixed:** the class codes are still defined in `src/engine` rather than `src/contracts`, because moving them is a contract change (P-02, both owners). The cross-language test guards against drift until then.
+- **Skipped:** `bench/` is not type-checked, because doing so needs `@types/node`, which is not in the plan's pinned stack. Adding a dependency needs a documented decision.
+
 ## Governance decisions
 
 | ID | Topic | Decision | Decided by | Date/time (Asia/Manila) | Evidence |

@@ -2,6 +2,7 @@
 // Plan 6.4 routing model: A* on an 8-connected grid of slope-screened cells; time-optimal; admissible heuristic.
 // Slope factors k_v per bin are inputs: their values are Assumed and not yet supplied (plan 6.5 / 19).
 import { describe, expect, it } from "vitest";
+import gridsPy from "../../pipeline/sharpwalk/grids.py?raw";
 import { CLASS, type RouteGrid, type SpeedModel, routeAStar, routeDijkstra, heuristicSeconds, timeField } from "./route";
 
 const unitSpeed: SpeedModel = { vLevel_mps: 1, kBins: [1, 1, 1, 1], slopeLimit_deg: 20 };
@@ -147,5 +148,46 @@ describe("optimality and admissibility (property tests)", () => {
         expect(Math.max(Math.abs(Math.floor(a / g.cols) - Math.floor(b / g.cols)), Math.abs((a % g.cols) - (b % g.cols)))).toBe(1);
       }
     }
+  });
+});
+
+describe("input validation", () => {
+  it("refuses cells outside the grid instead of wrapping to the next row", () => {
+    const g = grid(3, 3);
+    expect(() => routeAStar(g, { r: 0, c: 0 }, { r: 1, c: 3 }, unitSpeed)).toThrow(/outside/);
+    expect(() => routeAStar(g, { r: -1, c: 0 }, { r: 1, c: 1 }, unitSpeed)).toThrow(/outside/);
+    expect(() => routeAStar(g, { r: 0.5, c: 0 }, { r: 1, c: 1 }, unitSpeed)).toThrow(/outside/);
+    expect(() => timeField(g, { r: 3, c: 0 }, unitSpeed)).toThrow(/outside/);
+  });
+
+  it("refuses a grid whose arrays do not match rows x cols or whose cell size is not positive", () => {
+    const g = grid(3, 3);
+    expect(() => routeAStar({ ...g, elevation: new Float64Array(8) }, { r: 0, c: 0 }, { r: 1, c: 1 }, unitSpeed)).toThrow(/grid/);
+    expect(() => routeAStar({ ...g, classes: new Uint8Array(10).fill(1) }, { r: 0, c: 0 }, { r: 1, c: 1 }, unitSpeed)).toThrow(/grid/);
+    expect(() => routeAStar({ ...g, cell_m: 0 }, { r: 0, c: 0 }, { r: 1, c: 1 }, unitSpeed)).toThrow(/grid/);
+  });
+});
+
+describe("bin edges", () => {
+  it("puts an edge designed at exactly 5, 10 and 15 deg into the upper bin (lower-inclusive, K-02)", () => {
+    const k: SpeedModel = { vLevel_mps: 1, kBins: [1, 0.8, 0.6, 0.4], slopeLimit_deg: 20 };
+    for (const [deg, kv] of [[5, 0.8], [10, 0.6], [15, 0.4]] as const) {
+      for (let i = 1; i <= 400; i++) {
+        const s = i * 0.05;
+        const dz = s * Math.tan((deg * Math.PI) / 180);
+        const r = routeAStar(grid(1, 2, { s, z: (_r, c) => c * dz }), { r: 0, c: 0 }, { r: 0, c: 1 }, k)!;
+        close(r.time_s, Math.hypot(s, dz) / kv, 1e-9);
+      }
+    }
+  });
+});
+
+describe("shared codes", () => {
+  it("uses the same terrain class codes as the pipeline (pipeline/sharpwalk/grids.py)", () => {
+    const py = gridsPy;
+    const code = (name: string) => Number(new RegExp(`^${name} = (\\d+)$`, "m").exec(py)![1]);
+    expect(code("CLASS_UNKNOWN")).toBe(CLASS.UNKNOWN);
+    expect(code("CLASS_CANDIDATE")).toBe(CLASS.CANDIDATE);
+    expect(code("CLASS_EXCLUDED")).toBe(CLASS.EXCLUDED);
   });
 });

@@ -33,7 +33,10 @@ function checkModel(m: SpeedModel): void {
   if (!(m.slopeLimit_deg > 0 && m.slopeLimit_deg < 90)) throw new RangeError("slopeLimit_deg must be in (0, 90)");
 }
 
-const TAN_BIN_EDGES = BIN_EDGES_DEG.map((d) => Math.tan((d * Math.PI) / 180));
+/** Relative tolerance so a slope designed exactly on an edge is not lost to rounding (same for bins and limit). */
+const REL_TOL = 1e-12;
+// Lower-inclusive bins (K-02): a ratio within REL_TOL below an edge counts as on the edge, i.e. the upper bin.
+const TAN_BIN_EDGES = BIN_EDGES_DEG.map((d) => Math.tan((d * Math.PI) / 180) * (1 - REL_TOL));
 
 /** Factor for an edge with |dz| / horizontal length = ratio (bin edges compared as tangents, so no atan per edge). */
 function kForRatio(ratio: number, m: SpeedModel): number {
@@ -45,10 +48,28 @@ function kForRatio(ratio: number, m: SpeedModel): number {
 
 const routable = (g: RouteGrid, i: number) => g.classes[i] === CLASS.CANDIDATE;
 
+function checkGrid(g: RouteGrid): void {
+  const ok = Number.isInteger(g.rows) && Number.isInteger(g.cols) && g.rows > 0 && g.cols > 0 &&
+    g.elevation.length === g.rows * g.cols && g.classes.length === g.rows * g.cols &&
+    Number.isFinite(g.cell_m) && g.cell_m > 0;
+  if (!ok) throw new RangeError("grid shape is invalid: arrays must hold rows x cols values and cell_m must be positive");
+}
+
+function indexOf(g: RouteGrid, p: Cell, what: string): number {
+  if (!Number.isInteger(p.r) || !Number.isInteger(p.c) || p.r < 0 || p.c < 0 || p.r >= g.rows || p.c >= g.cols)
+    throw new RangeError(`${what} cell (${p.r}, ${p.c}) is outside the ${g.rows} x ${g.cols} grid`);
+  return p.r * g.cols + p.c;
+}
+
+const OCTILE_D2 = Math.SQRT2 - 1;
+/** Octile cell distance times seconds-per-cell at the fastest bin. The single implementation used by search. */
+function octileSeconds(di: number, dj: number, secondsPerCell: number): number {
+  return secondsPerCell * (di > dj ? di + OCTILE_D2 * dj : dj + OCTILE_D2 * di);
+}
+
 /** Octile distance over the fastest bin: a lower bound on the remaining time (plan 6.4). */
 export function heuristicSeconds(from: Cell, to: Cell, cell_m: number, m: SpeedModel): number {
-  const di = Math.abs(from.r - to.r), dj = Math.abs(from.c - to.c);
-  return (cell_m * (Math.max(di, dj) + (Math.SQRT2 - 1) * Math.min(di, dj))) / (m.vLevel_mps * Math.max(...m.kBins));
+  return octileSeconds(Math.abs(from.r - to.r), Math.abs(from.c - to.c), cell_m / (m.vLevel_mps * Math.max(...m.kBins)));
 }
 
 class MinHeap {
@@ -88,24 +109,19 @@ class MinHeap {
 }
 
 /** Generic search. If goal < 0 it runs to exhaustion and returns the full time field. */
-function search(g: RouteGrid, start: number, goal: number, m: SpeedModel, useHeuristic: boolean) {
+function search(g: RouteGrid, start: number, goal: number, m: SpeedModel, useHeuristic: boolean, keepPrev = true) {
   checkModel(m);
   const n = g.rows * g.cols;
   const dist = new Float64Array(n).fill(Infinity);
-  const prev = new Int32Array(n).fill(-1);
+  const prev = keepPrev ? new Int32Array(n).fill(-1) : new Int32Array(0);
   const done = new Uint8Array(n);
-  const tanLimitTol = Math.tan((m.slopeLimit_deg * Math.PI) / 180) * (1 + 1e-12);
+  const tanLimitTol = Math.tan((m.slopeLimit_deg * Math.PI) / 180) * (1 + REL_TOL);
   const rows = g.rows, el = g.elevation, cls = g.classes, CANDIDATE = CLASS.CANDIDATE;
   const lenO = g.cell_m, lenD = g.cell_m * Math.SQRT2;
   const cols = g.cols, gr = goal >= 0 ? Math.floor(goal / cols) : 0, gc = goal >= 0 ? goal % cols : 0;
-  const hScale = g.cell_m / (m.vLevel_mps * Math.max(...m.kBins)), D2 = Math.SQRT2 - 1;
+  const hScale = g.cell_m / (m.vLevel_mps * Math.max(...m.kBins));
   const heur = useHeuristic && goal >= 0;
-  // Same bound as heuristicSeconds(), inlined to avoid allocating per node.
-  const h = (r: number, c: number) => {
-    if (!heur) return 0;
-    const di = Math.abs(r - gr), dj = Math.abs(c - gc);
-    return hScale * (di > dj ? di + D2 * dj : dj + D2 * di);
-  };
+  const h = (r: number, c: number) => (heur ? octileSeconds(Math.abs(r - gr), Math.abs(c - gc), hScale) : 0);
   const heap = new MinHeap();
   dist[start] = 0;
   heap.push(h(Math.floor(start / cols), start % cols), start);
@@ -130,14 +146,15 @@ function search(g: RouteGrid, start: number, goal: number, m: SpeedModel, useHeu
       const ratio = Math.abs(dz) / len;
       if (!(ratio <= tanLimitTol)) continue; // also rejects NaN heights
       const nd = di + Math.sqrt(len * len + dz * dz) / (m.vLevel_mps * kForRatio(ratio, m));
-      if (nd < dist[j]!) { dist[j] = nd; prev[j] = i; heap.push(nd + h(rr, cc), j); }
+      if (nd < dist[j]!) { dist[j] = nd; if (keepPrev) prev[j] = i; heap.push(nd + h(rr, cc), j); }
     }
   }
   return { dist, prev };
 }
 
 function endpoints(g: RouteGrid, start: Cell, goal: Cell) {
-  const s = start.r * g.cols + start.c, t = goal.r * g.cols + goal.c;
+  checkGrid(g);
+  const s = indexOf(g, start, "start"), t = indexOf(g, goal, "goal");
   if (!routable(g, s)) throw new RangeError("start cell is not slope-screened");
   if (!routable(g, t)) throw new RangeError("goal cell is not slope-screened");
   return [s, t] as const;
@@ -163,7 +180,8 @@ export const routeDijkstra = (g: RouteGrid, start: Cell, goal: Cell, m: SpeedMod
 
 /** Time in seconds from every cell to `source` (edges are symmetric in |dz|, plan 6.4). Infinity where unreachable. */
 export function timeField(g: RouteGrid, source: Cell, m: SpeedModel): Float64Array {
-  const s = source.r * g.cols + source.c;
+  checkGrid(g);
+  const s = indexOf(g, source, "source");
   if (!routable(g, s)) throw new RangeError("source cell is not slope-screened");
-  return search(g, s, -1, m, false).dist;
+  return search(g, s, -1, m, false, false).dist;
 }
