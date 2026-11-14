@@ -8,3 +8,5 @@ coverage/
 *.zip
 reference/
 work/
+__pycache__/
+*.pyc
