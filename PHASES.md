@@ -124,14 +124,14 @@ Deadline still Sun 15 Nov 23:59 local (portal confirmation by a person still pen
 | 3.3 | IN PROGRESS (core done) | Outdoor/phone daylight check needs a real phone |
 | 3.4 | IN PROGRESS (core done) | Card prints stop tasks and the three D6 rover views with credits; paper print and fixed-scale map open |
 | 3.5 | VERIFIED (deploy public; G5 two-machine check pending) | **Sat 22:34: VERIFIED from this session.** Vercel Authentication turned off by a person (API shows ssoProtection and passwordProtection null). `curl` without credentials: `/` 200 text/html, no login redirect; `area/provenance.json`, `area/slope.uint16.bin`, `conditions/rems.json`, `rover/images.json` all 200; `x-content-type-options: nosniff` present. `npx playwright test` (all 50 specs, temporary config with baseURL https://uptown-func.vercel.app, deleted after) **50/50 passed (57.3 s)** against the live deploy of `main` f48697e. Still for people: the G5 two-machine check and the FortiGuard classification request (plan 19.3). Earlier: **Sat 21:57 production deploy READY** of `main` 1c7201c: Vercel project `uptown-func` (team Kauhla), linked to GitHub `UptownFunc/Uptown-Func`, production branch `main`, domain **https://uptown-func.vercel.app**. Build log: `.vercelignore` applied, `npm ci`, `tsc --noEmit && vite build` OK, same asset hashes as the local build. Project Node set to 22.x (22:10). **Vercel Authentication is still on (all except custom domains): the deploy does not yet open without a login; a person must turn it off.** Not opened in a browser by this session (sandbox cannot reach vercel.app). `vercel.json`, `.vercelignore`, `docs/DEPLOY.md` (DEP-01), PR #13; the deploy itself needs a person with Vercel access (B-4) |
-| 3.6 | IN PROGRESS | Conditions built (9ec2f70, 6e8ca00, 9608ecb); AC-09 2 of 3 dates (B-10); scenario time set by G3-01 (2026-11-15 12:00 UTC, assumed) |
+| 3.6 | IN PROGRESS | Conditions built (9ec2f70, 6e8ca00, 9608ecb); AC-09 **3 of 3 dates** (third date run in the Mars24 app by Yujin, Sun 01:43; B-10 closed); scenario time set by G3-01 (2026-11-15 12:00 UTC, assumed) |
 | 4.1 | VERIFIED (Design review pending) | Contours, drill, AC-31 done; **sky-obstruction layer built** (20 m grid, plan 6.7; self-check 0.064 pp after R-19; off by default; legend: geometry, not dose + M12 benchmark). **Per-stop "20 m sample" added (Sat 20:41-20:55, 2a65db1 + R-20 fixes 7cf23b2); merged to main by PR #11 as 99eabc7 (Sat 20:57)** |
 | 4.2 | VERIFIED at M12 (Data and Science review pending) | AC-07 PASS: f_obs 18.50 % vs 18.5 % published (h_obs 1 m); 0-2 m sweep 20.73-16.51 %, all within ±3 pp; AC-21/AC-22 converged; reference position not computed (R-13) |
 | 4.3 | VERIFIED (result recorded; Data and Science review pending) | AC-08 PASS: 83 of 2,537 known path cells excluded (3.27 % ≤ 5 % Assumed), 1 unknown; waypoints sols 4469-5073; `docs/data/ac-08-rover-path.md` |
 | 4.4 | VERIFIED (automated) | axe, keyboard and width checks pass: Playwright 50/50 on the local build and 50/50 against the live deploy (Sat 22:30-22:45); manual checks at G5 |
 | 4.5 | VERIFIED (integrated build on main 38839d0) | PRs #2-#9 merged after checks and /code-review (R-15..R-19); deploy done since (3.5, PRs #13-#16) |
 | 5.1 | PENDING | Freeze Sun 13:00; two-machine check moved to 5.5 (G5-DEFER); Cesium-blocked criterion trivially true (3D cut) |
-| 5.2 | IN PROGRESS (register cleared, REG-01, 29830fd; other members' confirmation and the post-freeze regression pending) | **Sat 23:59:** V-01..V-14 each FIXED or KEPT; T_EVA 360, t_ops 60, t_cont 60, stop 45 min cited; 20 deg citation resolved; **merged to `main` as 08ed600 (PR #19)** |
+| 5.2 | IN PROGRESS (register cleared, REG-01, 29830fd; other members' confirmation and the post-freeze regression pending) | **Sat 23:59:** V-01..V-14 each FIXED or KEPT; T_EVA 360, t_ops 60, t_cont 60, stop 45 min cited; 20 deg citation resolved; **merged to `main` as 08ed600 (PR #19)**. **Sun 00:35: REG-02** checked every value, constant and citation against its source: all confirmed except the unread 0.37 pi at M12 and the RAD height (V-12); none changed; three citations corrected (`docs/data/reg-02-verification.md`); **merged to `main` as 4d24d53 (PR #21), Sun 01:51; live site checked** |
 | 5.3 | NOT STARTED | Video (Design, Sun 17:00) or the 7-slide fallback |
 | 5.5 | PENDING (last phase) | Includes the deferred two-machine check and FortiGuard request (G5-DEFER); internal submit Sun 21:00 |
 | 5.4 | IN PROGRESS | README SI use and references current (D5, D6, D12, papers); concept-origin account (B-5) and native-library licences open; D12 licence terms not read |
@@ -1023,6 +1023,44 @@ Live deploy after the merge (~23:40): https://uptown-func.vercel.app serves asse
   locally tested build; e2e/g3-preset.spec.ts + e2e/plan-route.spec.ts against the live URL (temporary config, deleted): 7 passed / 7.
   The full 50-spec suite was not re-run against the live URL.
 Next part / blocker owner: the other members confirm REG-01; W-01 Data and Science; IMG-01 Local Lead
+```
+
+```text
+Part: 5.2 verification (REG-02): every register value, science constant and citation checked against its source
+Owner: Yujin (directed the session and set the scope); SI-assisted (Claude Code, Claude Fable 5.2)
+Status: VERIFIED for the check itself; 5.2 stays IN PROGRESS (other members' review; 0.37 pi at M12 not read)
+Scope completed: sources downloaded again and compared by sha256; each quotation located on its page; four new
+  documents read (NASA/TP-2010-216125, Guo et al. 2021, Loewe et al. 2025, NASA/TM-20205000837) plus JPL's policy
+  and the three Curiosity blog posts; sun table, Apollo pooling and demo margin recomputed; three citations
+  corrected in src/constants. No value, unit or value class changed.
+Files changed: src/constants/index.ts, src/constants/constants.test.ts, docs/data/reg-02-verification.md (new),
+  docs/data/reg-01-register-sources.md (pointer), CLAUDE.md, README.md, DECISIONS.md, PHASES.md, HANDOFF.md, SI_LOG.md
+Checks run (exact commands), on a team member's Windows computer, Node 24.16.0 (repo pins 22.x):
+  npm ci ; npx vitest run ; npx tsc --noEmit ; rm -rf dist && npm run build ;
+  gzip -9 -c dist/assets/worker-*.js | wc -c ; npx playwright install chromium ; npx playwright test --trace off
+Results: vitest 289/289 (28 files; 3 new tests, first shown failing 3 of 14); tsc clean; build OK, main 208.36 kB gzip
+  + worker 41,546 B = ~249.9 of 250 KB (B-01, about 94 bytes left). Before the change the build reproduced
+  assets/index-D-8LoYh9.js, the file the live site serves.
+  Playwright: 50/50 with `--workers=1`; two default parallel runs on this 4-core computer gave 48/50 and 49/50 with different specs failing each time (briefing.spec.ts:50 and conditions.spec.ts:7, then coverage.spec.ts:94), and the first two pass when run alone (6/6); read as machine load, not proven.
+Later check (00:50), pins installed on Python 3.14.4: (cd pipeline && PYTHONUTF8=1 python -m pytest) -> 79 passed, 3 failed,
+  2 skipped. The 3 failures are the Windows checkout (one CR added to coverage.geojson and contours.geojson; their git
+  copies match the recorded sha256) and the licence check (needs the repo's Linux .venv). D1, D2, D12 headers, the D5
+  waypoints file and the rover image checksums were re-read and match (record section 8).
+Later (00:57): the member opened Ehresmann et al. 2021 and supplied its text; 0.37 pi is in sec. 2.2 and 4, so
+  skyObstructionM12 is resolved and unresolvedCitations() is empty. vitest 289/289; tsc clean; build main 208.35 kB +
+  worker 41,530 B = ~249.9 of 250 KB. RAD's height is not stated in the paper (V-12 stays Assumed).
+Known limitations or failures (as first written): pytest and scripts/licences.py NOT run (no Python 3.11 pipeline environment on this
+  computer; no pipeline or dependency file changed). Ehresmann et al. 2021 full text not read (HTTP 403), so 0.37 pi
+  and RAD's height stay unverified. NASA/TP-2010-216115 is not online. Route bench not re-run.
+Review status: /code-review low of origin/main...4733a4f plus the log changes: 0 findings
+Commit SHA: 4733a4f
+Merge: PR #21 merged as 4d24d53 (Sun 15 Nov 01:51 Asia/Manila, by the SI session at the member's instruction "Do it";
+  GitHub reported mergeable, state clean; head d898fe3). vitest 289/289 and tsc clean at 13506af; later commits are docs.
+Live deploy after the merge (01:52): https://uptown-func.vercel.app serves assets/index-D6_LSyTq.js, byte-identical (cmp)
+  to the local build; the full 50-spec Playwright suite against the live URL (temporary config, deleted, --workers=1):
+  50 passed / 50.
+Next part / blocker owner: the other members review REG-01 and REG-02; a person opens the Ehresmann paper (M12);
+  W-01 Data and Science
 ```
 
 ## Phase-part completion record

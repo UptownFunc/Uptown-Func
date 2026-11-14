@@ -19,7 +19,7 @@ contributions (from git history and the project logs; roles not yet recorded are
 | Member | Recorded contributions |
 |---|---|
 | Patrick Ezekiel A. Arcilla | Committed the team's project plan (`docs/plan`, on branch `claude/lucid-ptolemy-nz6qpw`); repository owner; starter instructions and shared logs; G0 scaffold and shared contracts (commits as `parcilla13`) |
-| Eugene Ibañez Jr. (Yujin) | Directed and reviewed the Claude Code sessions of Sat 14 Nov 10:21-12:20 Asia/Manila (G0 review; data pipeline, geo, constants, route engine, leg and margin functions, AREA sheet part 1); merged PR parcilla13/Uptown-Func#1; governance decisions G-01 and G-02 |
+| Eugene Ibañez Jr. (Yujin) | Directed and reviewed the Claude Code sessions of Sat 14 Nov 10:21-12:20 Asia/Manila (G0 review; data pipeline, geo, constants, route engine, leg and margin functions, AREA sheet part 1); merged PR parcilla13/Uptown-Func#1; governance decisions G-01 and G-02; directed the REG-02 verification of every register value, constant and citation (Sun 15 Nov, from 00:02) |
 | John Malubay | Directed the Claude Code session from Sat 14 Nov 12:57 Asia/Manila (engine worker, route and briefing, planned margin, field view, accessibility, tier-2 contours and drill, resilience, README); decisions G-05, K-01, G-06 (since superseded by G-07) and the instruction to apply the plan's defaults |
 | Christian Jesus Alcazar | Directed the Claude Code session from Sat 14 Nov 18:29 Asia/Manila (pipeline reproducibility check RUN-01, merge of the branch work into `main`, G3 inputs); decisions G-07 and C-AGREE (session account; to be confirmed by the team) |
 
@@ -61,7 +61,8 @@ Each record (product, URL, licence, CRS, vertical reference, resolution, checksu
 
 None of these is a measurement or a Mars-validated value. The four plan times are lunar planning figures applied to
 Mars; they load by default, show an "assumed" badge with this rationale, stay editable, and are skipped with
-`?preset=none`. Quotations, pages and checksums: `docs/data/reg-01-register-sources.md` (DECISIONS REG-01).
+`?preset=none`. Quotations, pages and checksums: `docs/data/reg-01-register-sources.md` (DECISIONS REG-01). Check of every value and citation against its source:
+`docs/data/reg-02-verification.md` (REG-02).
 
 | Input | Value | Basis |
 |---|---|---|
@@ -121,9 +122,11 @@ it.
   installed the GDAL command-line tools in its container to run gdal_contour. Later sessions on Sat 14 Nov (18:29 to
   22:50, Claude Opus 5.5, Superpowers not installed) ran the reproducibility check, the benchmarks, the sky layer and
   the deploy. A session from about 23:07 ran on **Claude Fable 5.2** (Superpowers not installed): it read four NASA
-  documents and cleared the placeholder register (REG-01). On Sun 15 Nov from 00:58 a Claude Opus 5.5 session drafted the
-  UI/UX redesign on the unmerged branch `design/sharpwalk-ui-ux`, using Higgsfield (gpt_image_2_6) for 18 exploration
-  images; none of them is shipped or used as data. Details per task: `SI_LOG.md`.
+  documents and cleared the placeholder register (REG-01). A session on Sun 15 Nov from 00:02 (Claude Fable 5.2,
+  directed by Eugene Ibañez Jr.; Superpowers not used) read every cited source again and checked each register value,
+  constant and citation (REG-02). On Sun 15 Nov from 00:58 a Claude Opus 5.5 session drafted the UI/UX redesign on the
+  unmerged branch `design/sharpwalk-ui-ux`, using Higgsfield (gpt_image_2_6) for 18 exploration images; none of them is
+  shipped or used as data. Details per task: `SI_LOG.md`.
 - **What SI contributed:** drafted the data pipeline and its tests; the frame conversions and constants register;
   the route engine, margins and field-margin functions; the engine worker; the AREA sheet, console, profile, sources
   panel, briefing card and field view; accessibility and resilience tests; tier-2 contours and drill; this README and
@@ -155,21 +158,30 @@ it.
 
 - D1: USGS Astrogeology, *MSL Gale DEM Mosaic 1m v3*, `https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Mars/MSL/MSL_Gale_DEM_Mosaic_1m_v3.tif`. Use constraints: none; please credit the authors.
 - D2: USGS Astrogeology, *MSL Gale HiRISE LRGB 78 quads (sharp) COG*, T. J. Parker and F. J. Calef III, `https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Mars/MSL/MSL_Gale_HiRISE-LRGB_78quads_sharp_cog.tif`. Use constraints: none; please credit the authors.
-- Chappell, S. P., Norcross, J. R., Abercromby, A. F. *Life Sciences Implications of Lunar Surface Operations*. NASA/TM-2010-216138, Table 4, p. 13 (planning walking speed 0.83 m/s; suited range 0.64-0.97 m/s, lunar-gravity tests).
-- NASA/TP-2010-216125, pp. 2-3, 10, 70-71, 79, 83-86 (limits of the suited-walking tests), as summarised in the team plan section 19.5.
+- Chappell, S. P., Norcross, J. R., Abercromby, A. F., Gernhardt, M. L. *Life Sciences Implications of Lunar Surface Operations*. NASA/TM-2010-216138, Nov 2010 (NTRS 20110001417), Table 4, p. 13 (planning walking speed 0.83 m/s; IST-1 treadmill speed window 0.64-0.97 m/s at lunar gravity).
+- Norcross, J. R. et al. *Metabolic Costs and Biomechanics of Inclined Ambulation and Exploration Tasks in a Planetary Suit*. NASA/TP-2010-216125 (NTRS 20110003409), pp. 2, 5, 10, 70-71, 79, 83 (limits of the suited incline tests: six male subjects, speed fixed by protocol, 0.12-0.32 g, grades 0-30 %, model coefficients not reported); read for REG-02.
 - IAU 2015 Mars sphere (R = 3,396,190 m), as used by D1 and D2.
-- Drill warning time (Assumed 30 min default): team plan section 6.9, informed by Loewe et al. 2025 (arXiv preprint) and the NESC assessment (Parker et al.).
+- Drill warning time (Assumed 30 min default): team plan section 6.9, informed by Löwe, J. L. et al. (2025), "Nowcasting Solar Energetic Particle Events for Mars Missions", arXiv:2502.02469 (preprint), and Minow, J. I., Mertens, C. J., Parker, L. N. et al. (2020), *Space Weather Architecture Options to Support Human and Robotic Deep Space Exploration*, NASA/TM-20205000837 (NESC-RP-17-01215), recommendations R-1 and R-3, p. 49.
 - D7: Centro de Astrobiologia (CAB), MSL REMS weather summary feed, `https://mars.nasa.gov/rss/api/?feed=weather&category=msl&feedtype=json`, retrieved 2026-11-14T07:32:00Z. Provider's terms: "intended for outreach purposes only. Any other use is discouraged" (DECISIONS REMS-02).
 - D5: NASA/JPL MMGIS, Curiosity (MSL) traverse and waypoints, `https://mars.nasa.gov/mmgis-maps/MSL/Layers/json/MSL_traverse.json` and `MSL_waypoints.json`, retrieved 2026-11-14T11:32:31Z (sha256 in `docs/data/ac08-rover-path.json`). Used for the AC-08 consistency check only; localisation error unverified.
 - D12: USGS Astrogeology, Mars MOLA-HRSC blended DEM, global 200 m, v2 (`mosaic/Mars/HRSC_MOLA_Blend/Mars_HRSC_MOLA_BlendDEM_Global_200mp_v2.tif`). Far field for the AC-07 sky-obstruction benchmark.
-- Ehresmann, B. et al. (2021), JGR Planets, doi:10.1029/2021JE006851; Guo, J. et al. (2021), GRL, doi:10.1029/2021GL093912. Published sky obstruction at Butte M12 (about 19 %), used only as the AC-07 geometric benchmark, never as a dose factor; figures read from the abstracts (plan 19.6), page numbers pending.
-- D6: NASA/JPL-Caltech, Curiosity (MSL) raw images, Left Navigation Camera: NLB_806042016EDR_F1172490NCAM00259M_ (sol 4602), NLB_808343392EDR_F1180924NCAM00292M_ (sol 4628), NLB_810299631EDR_F1182304NCAM00271M_ (sol 4650), `https://mars.nasa.gov/msl/multimedia/raw-images/`; credit "NASA/JPL-Caltech"; raw, uncalibrated, downscaled to 480 px. Chosen by SI at a team member's direction (G3-01). Terrain evidence: NASA Curiosity blog posts for sols 4602-4603, 4627-4628 and 4649-4654 (`public/rover/images.json`). Use under NASA's "Images and Media" guidelines with credit (educational, factual, no implied endorsement; DECISIONS REG-01 / V-08; JPL's own policy page not read).
+- Ehresmann, B. et al. (2021), JGR Planets, doi:10.1029/2021JE006851; Guo, J. et al. (2021), GRL, doi:10.1029/2021GL093912. Published sky obstruction at Butte M12 (about 19 %), used only as the AC-07 geometric benchmark, never as a dose factor; 0.37π of the 2π hemisphere (about 19 %) with an average blocking angle of 11°: Ehresmann et al., sec. 2.2 and 4 (publisher's HTML, no page numbers); "about 0.19": Guo et al., sec. 4, p. 6 of 10 (REG-02).
+- D6: NASA/JPL-Caltech, Curiosity (MSL) raw images, Left Navigation Camera: NLB_806042016EDR_F1172490NCAM00259M_ (sol 4602), NLB_808343392EDR_F1180924NCAM00292M_ (sol 4628), NLB_810299631EDR_F1182304NCAM00271M_ (sol 4650), `https://mars.nasa.gov/msl/multimedia/raw-images/`; credit "NASA/JPL-Caltech"; raw, uncalibrated, downscaled to 480 px. Chosen by SI at a team member's direction (G3-01). Terrain evidence: NASA Curiosity blog posts for sols 4602-4603, 4627-4628 and 4649-4654 (`public/rover/images.json`). Use under NASA's "Images and Media" guidelines with credit (educational, factual, no implied endorsement; DECISIONS REG-01 / V-08) and JPL's Image Use Policy, `https://www.jpl.nasa.gov/jpl-image-use-policy/`, read 15 Nov 2026 (REG-02).
 - D10: NASA GISS, Mars24 Sunclock "Algorithm and Worked Examples" (updated 2025-01-07), `https://www.giss.nasa.gov/tools/mars24/help/algorithm.html`; Allison, M., McEwen, M. (2000), Planet. Space Sci. 48, 215-235; Allison, M. (1997), Geophys. Res. Lett. 24, 1967-1970.
 - NASA, *Exploration EVA System Concept of Operations*, EVA-EXP-0042, Revision B, 19 Oct 2020 (NTRS 20205008200), `https://www.nasa.gov/wp-content/uploads/2017/02/eva-exp-0042_xeva_system_con_ops_rev_b_final_dtd_10192020_ref_doc.pdf`: 4.1.4, p. 29 (EVA duration 6±2 h); 4.1.4.3.2 and 4.1.4.4, p. 30 (hour for egress/ingress; additional hour for off-nominal situations; Mars EVAs "still in work"); 4.2.1.3, p. 38 (walking slopes of up to 20°); 4.2.1.3.1.1, p. 40 (2 km/h pace, not accounting for slope). A lunar planning document; its figures are used as Assumed inputs.
 - Coan, D., *Exploration EVA System Concept of Operations Summary for Artemis Phase 1 Lunar Surface Mission*, EVA-EXP-0075, presentation, 18 Feb 2020 (NTRS 20200001071), slides 6 and 31 (20° slope; 6-hour design reference EVAs).
 - NASA/TM-2010-216138 (above), Tables 2-3, p. 12 (45 min of EVA per exploration site) and Table 1, p. 8.
 - Waligora, J. M., Horrigan, D. J. (1975), "Metabolism and Heat Dissipation During Apollo EVA Periods", ch. 4 in *Biomedical Results of Apollo*, NASA SP-368 (NTRS 19760005584), Table 4, p. 125: Apollo 14 walking rates and net slopes, used only to show that no slope factor can be derived (DECISIONS REG-01 / V-06).
 - NASA, "Images and Media" usage guidelines, `https://www.nasa.gov/nasa-brand-center/images-and-media/`, read 14 Nov 2026 (terms for the D6 images; DECISIONS IMG-01).
+- **Verification sources (REG-02), read only to check values; none adds a number to the app:**
+  - NASA/JPL Solar System Dynamics, Horizons System, API 1.2 (ephemeris DE441), `https://ssd.jpl.nasa.gov/api/horizons.api`, queried 15 Nov 2026: sun elevation at the site, as an independent check of the Mars24 method.
+  - NASA GISS, Mars24 Sunclock 8.3.1 (application), `https://www.giss.nasa.gov/tools/mars24/`, run by a team member 15 Nov 2026 for the third AC-09 date (`docs/data/ac-09-mars24-third-date.png`).
+  - IERS, Bulletin C 72, 6 July 2026, `https://datacenter.iers.org/data/latestVersion/bulletinC.txt` (no leap second at the end of December 2026).
+  - PROJ (OSGeo, MIT licence), IAU 2015 coordinate system table, `https://raw.githubusercontent.com/OSGeo/PROJ/master/data/sql/iau.sql` (Mars radii for IAU_2015:49900 and 49902).
+  - NASA Science, "Curiosity Science Instruments", `https://science.nasa.gov/mission/msl-curiosity/science-instruments/` (RAD is on the rover deck); NASA/JPL-Caltech, PIA11438, "Wheels and Suspension on Mars Science Laboratory Rover", caption (deck 1.1 m above the ground); PDS Geosciences Node, Analyst's Notebook, "MSL instrument host (Curiosity rover)".
+  - NASA, MSL weather page script, `https://mars.nasa.gov/js/general/weather/msl-weather.js` (the D7 feed's temperatures are degrees C).
+  - Gernhardt, M. L., Norcross, J. R., Vos, J. R. (2008), "Integrated Suit Test 1 - A Study to Evaluate Effects of Suit Weight, Pressure, and Kinematics on Human Performance During Lunar Ambulation", SAE paper 2008-01-1951 (NTRS 20080013604), Table 2, p. 3.
+  - NASA/JPL, *Mars Science Laboratory Landing* press kit, July 2012, `https://www.jpl.nasa.gov/news/press_kits/MSLLanding.pdf` (read for the rover's dimensions; it gives no deck height).
 
 ### Software
 

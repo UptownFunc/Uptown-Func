@@ -12,7 +12,8 @@ describe("constants register", () => {
   });
 
   it("lists exactly the known unresolved citations, so no new constant can ship without a page", () => {
-    expect(unresolvedCitations().sort()).toEqual(["skyObstructionM12"]);
+    // REG-02: the last one (skyObstructionM12) was resolved when a team member read Ehresmann et al. 2021 in full.
+    expect(unresolvedCitations().sort()).toEqual([]);
   });
 
   it("does not present the nominal walking speed as an observation", () => {
@@ -60,6 +61,28 @@ describe("constants register", () => {
     expect([d.value, d.unit, d.valueClass]).toEqual([1800, "s", "assumed"]);
     expect(d.citation.location).toBe("Plan 6.9, p. 32");
     expect(d.limitation).toMatch(/Simulated/);
+  });
+
+  // REG-02 (docs/data/reg-02-verification.md): citations re-read in the sources themselves.
+  it("says the speed range is a treadmill speed window and cites the pages read in NASA/TP-2010-216125", () => {
+    const r = constant("walkSpeedRange");
+    expect(r.citation.source).toMatch(/treadmill/i);
+    expect(r.limitation).toContain("NASA/TP-2010-216125, pp. 2, 5, 10, 70");
+    expect(r.limitation).toMatch(/speed fixed by protocol/);
+  });
+
+  it("names the documents behind the drill warning time by number, with the page read", () => {
+    const d = constant("drillWarningDefault");
+    expect(d.citation.source).toContain("arXiv:2502.02469");
+    expect(d.citation.source).toContain("NASA/TM-20205000837");
+    expect(d.citation.source).toContain("p. 49");
+  });
+
+  it("cites the sections read for 0.37 pi at M12 and the page read for the 19 % figure", () => {
+    const m = constant("skyObstructionM12");
+    expect(m.value).toBe(0.185);
+    expect(m.citation.location).toContain("Ehresmann sec. 2.2 and 4");
+    expect(m.citation.location).toContain("p. 6 of 10");
   });
 
   it("does not hold a workload rate (kJ workload is off)", () => {
