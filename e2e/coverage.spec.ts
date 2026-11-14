@@ -3,7 +3,7 @@
 // instead of showing a blank. Driven through the UI only: zoom buttons, the keyboard cursor and the pointer.
 import { readFileSync } from "node:fs";
 import { expect, test, type Page } from "@playwright/test";
-import { STOP, clickAt, pixelAt } from "./helpers";
+import { STOP, clickAt, pixelAt, openStep } from "./helpers";
 
 const cov = JSON.parse(readFileSync(new URL("../public/area/coverage.geojson", import.meta.url), "utf8")) as {
   features: { properties: { dataset: string }; geometry: { coordinates: number[][][][] } }[];
@@ -31,7 +31,7 @@ async function coverageInk(page: Page, at: { x: number; y: number }, h: number):
 
 test("coverage outline is drawn at the data edge and the layer list names partial coverage", async ({ page }) => {
   const errors = trackErrors(page);
-  await page.goto("/?preset=none");
+  await openStep(page, "map");
   const map = page.getByTestId("area-map"), legend = page.getByLabel("Layers");
   await expect(map.locator("canvas").first()).toBeVisible();
   await expect(map).toHaveAttribute("data-coverage-outlines", "2");
@@ -56,7 +56,7 @@ test("coverage outline is drawn at the data edge and the layer list names partia
 });
 
 test("zooming in clears the notes; walking the keyboard cursor past the edge brings them back", async ({ page }) => {
-  await page.goto("/?preset=none");
+  await openStep(page, "map");
   const map = page.getByTestId("area-map"), legend = page.getByLabel("Layers");
   await expect(legend.locator('[data-layer="d2"]')).toContainText("partly outside D2 colour coverage");
   const zoomIn = page.getByTitle("Zoom in"); // OpenLayers' zoom button (accessible name "+")
@@ -75,7 +75,7 @@ test("zooming in clears the notes; walking the keyboard cursor past the edge bri
 test("a missing coverage file is labelled and the sheet still works", async ({ page }) => {
   const errors = trackErrors(page);
   await page.route("**/area/coverage.geojson", (r) => r.fulfill({ status: 404, body: "" }));
-  await page.goto("/?preset=none");
+  await openStep(page, "map");
   await expect(page.getByTestId("coverage-status")).toHaveText("Coverage outlines not available: coverage.geojson could not be loaded (404)");
   await expect(page.getByTestId("area-map")).toHaveAttribute("data-coverage-outlines", "0");
   await expect(page.getByLabel("Layers")).not.toContainText("partly outside");
@@ -86,7 +86,7 @@ test("a missing coverage file is labelled and the sheet still works", async ({ p
 
 test("an invalid coverage file is refused, not drawn", async ({ page }) => {
   await page.route("**/area/coverage.geojson", (r) => r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ type: "FeatureCollection", frame: "WGS84", features: [] }) }));
-  await page.goto("/?preset=none");
+  await openStep(page, "map");
   await expect(page.getByTestId("coverage-status")).toHaveText("Coverage outlines not available: coverage.geojson is not a valid coverage file");
   await expect(page.getByTestId("area-map")).toHaveAttribute("data-coverage-outlines", "0");
 });
@@ -96,7 +96,7 @@ test("a dataset with no valid data on the sheet: every layer says it is outside 
     properties: { dataset, label, layerIds, validFraction: 0, method: "e2e fixture" } });
   await page.route("**/area/coverage.geojson", (r) => r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({
     type: "FeatureCollection", frame: "F1", features: [empty("D1", "D1 elevation coverage", ["hillshade", "terrain"]), empty("D2", "D2 colour coverage", ["d2"])] }) }));
-  await page.goto("/?preset=none");
+  await openStep(page, "map");
   const legend = page.getByLabel("Layers");
   await expect(page.getByTestId("coverage-status")).toHaveText("No valid data on this sheet for any dataset: no coverage outline to draw");
   await expect(page.getByTestId("area-map")).toHaveAttribute("data-coverage-outlines", "0");

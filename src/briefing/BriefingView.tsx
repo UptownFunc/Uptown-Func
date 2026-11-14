@@ -1,8 +1,8 @@
-// SI-assisted: drafted with Claude Code (Claude Opus 5.5); human Design review pending.
+// SI-assisted: drafted with Claude Code (Claude Opus 5.5); Folio desk and confirmation on design/sharpwalk-ui-ux; human Design review pending.
 // Briefing (plan 3.3, UX-10/11, AC-06, module 04C): one action builds the card from the engine's current plan copy and
 // stamps it with that plan version. When the plan changes the card shows STALE at once and cannot be printed until it
 // is regenerated. Print layout: A5 portrait, two columns, 12 mm margins, black on white (plan 9.2).
-import { useRef, useState } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import type { PlanOutput } from "../engine/planner";
 import type { MapSnapshot } from "../map/snapshot";
 import { MarginState } from "../app/MarginState";
@@ -17,9 +17,20 @@ export interface BriefingViewProps {
   readonly snapshot: (() => Promise<MapSnapshot | null>) | null;
   readonly hidden?: boolean;
   readonly rover?: RoverImages | "failed" | null;
+  /** The plan version the crew confirmed (UI state only; never part of MissionPlan or MissionExecution). */
+  readonly confirmed?: string | null;
+  readonly onConfirm?: (version: string | null) => void;
+  readonly next?: ReactNode;
 }
 
-export function BriefingView({ output, snapshot, hidden = false, rover = null }: BriefingViewProps) {
+const ACKS = [
+  "I have reviewed the route, the stops and the leg times on this card.",
+  "The margins are estimates under stated assumptions, not guarantees.",
+  "The route is slope-screened, not rock-free, and suit life support is not modelled.",
+];
+
+export function BriefingView({ output, snapshot, hidden = false, rover = null, confirmed = null, onConfirm, next }: BriefingViewProps) {
+  const [acks, setAcks] = useState<boolean[]>(ACKS.map(() => false));
   const [card, setCard] = useState<Card | null>(null);
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<string | null>(null);
@@ -27,6 +38,7 @@ export function BriefingView({ output, snapshot, hidden = false, rover = null }:
   const currentRef = useRef(current);
   currentRef.current = current;
   const stale = card ? isStale(card.model.versionHash, current) : false;
+  const isConfirmed = !!card && !stale && confirmed === card.model.versionHash;
 
   // The class is removed on afterprint only: in browsers where print() returns before printing (Safari, mobile),
   // removing it earlier would print the whole console instead of the card.
@@ -54,7 +66,12 @@ export function BriefingView({ output, snapshot, hidden = false, rover = null }:
   };
 
   return (
-    <section className="briefing" aria-label="Briefing" hidden={hidden}>
+    <section className="screen briefing" aria-label="Briefing" hidden={hidden}>
+      <header className="screen-head">
+        <p className="kicker"><span className="n">06</span>Mission briefing</p>
+        <h1>Brief the crew</h1>
+        <p className="lede">The card is built from the engine's current plan and stamped with its version. Any plan change marks it STALE until it is rebuilt.</p>
+      </header>
       <div className="briefing-actions">
         <button type="button" className="secondary" onClick={() => void generate()} disabled={!output || busy}>
           {card ? "Regenerate from current plan" : "Generate card from current plan"}
@@ -62,11 +79,13 @@ export function BriefingView({ output, snapshot, hidden = false, rover = null }:
         <button type="button" className="primary" onClick={printCard} disabled={!card || stale || busy}>
           Print briefing
         </button>
-        {stale && <span className="muted">The plan changed: regenerate before printing.</span>}
-        {note && <span className="muted" role="status">{note}</span>}
+        {stale && <span className="note">The plan changed: regenerate before printing.</span>}
+        {note && <span className="note" role="status">{note}</span>}
       </div>
-      {!card ? <p className="muted">No card yet. The card is built from the engine's current plan and stamped with its version.</p> : (
+      <div className="desk">
+      {!card ? <div className="card-empty"><p>No card yet.</p><p className="note">Generate it from the current plan; the map crop, legs, stops and assumptions come straight from the engine.</p></div> : (
         <article className={`card${stale ? " card-stale" : ""}`} data-testid="briefing-card">
+          {isConfirmed && <div className="briefed" aria-hidden="true"><span>Briefed</span></div>}
           {stale && <div className="stale-stamp" role="alert" data-testid="stale">STALE - plan {current ?? "none"} differs from card plan {card.model.versionHash}</div>}
           <div className="card-col">
             <header className="card-head">
@@ -118,6 +137,20 @@ export function BriefingView({ output, snapshot, hidden = false, rover = null }:
           </div>
         </article>
       )}
+      <aside className="confirm" aria-label="Confirmation">
+        <h2>Confirmation</h2>
+        {ACKS.map((t, i) => (
+          <label key={t} className="check">
+            <input type="checkbox" checked={acks[i]} onChange={(e) => setAcks((a) => a.map((v, j) => (j === i ? e.target.checked : v)))} />
+            <span>{t}</span>
+          </label>
+        ))}
+        <button type="button" className="go big" data-done={isConfirmed || undefined} disabled={!card || stale || busy || !acks.every(Boolean) || isConfirmed}
+          onClick={() => card && onConfirm?.(card.model.versionHash)}>{isConfirmed ? "Briefing confirmed" : "Confirm briefing"}</button>
+        <p className="note" role="status">{isConfirmed ? `Confirmed for plan ${current}.` : confirmed ? "An earlier confirmation lapsed: the plan changed since." : !card ? "Generate the card first." : "Tick each line to confirm."}</p>
+        {isConfirmed && next}
+      </aside>
+      </div>
     </section>
   );
 }

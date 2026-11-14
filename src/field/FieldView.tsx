@@ -1,8 +1,8 @@
-// SI-assisted: drafted with Claude Code (Claude Opus 5.5); human Design review pending.
+// SI-assisted: drafted with Claude Code (Claude Opus 5.5); Folio HUD layout on design/sharpwalk-ui-ux; human Design review pending.
 // Field View (plan 3.3, 6.6, UX-12): one column, at most five items, readable at arm's length. The crew ticks arrival
 // and departure by hand; this component alone holds and writes MissionExecution. Field margins are labelled as coming
 // from manual entries with the last tick time, and never replace the planned margin. Suit life support is not modelled.
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import type { MissionExecution, Quantity } from "../contracts";
 import { CONSTANTS } from "../constants";
 import type { PlanOutput } from "../engine/planner";
@@ -14,19 +14,19 @@ import { addTick, fieldMarginAssumptionIds, fieldMarginRanges, newExecution, nex
 
 const SPEED_RATIO = CONSTANTS.walkSpeedRange.low / CONSTANTS.walkSpeedRange.high;
 
-export function FieldView({ output, hidden = false }: { output: PlanOutput | null; hidden?: boolean }) {
+export function FieldView({ output, hidden = false, briefed = false, next }: { output: PlanOutput | null; hidden?: boolean; briefed?: boolean; next?: ReactNode }) {
   const [exec, setExec] = useState<MissionExecution | null>(null);
   const [minutes, setMinutes] = useState("");
   const [error, setError] = useState<string | null>(null);
-  if (!output) return <section className="field" aria-label="Field view" hidden={hidden}><p>Engine loading…</p></section>;
+  if (!output) return <section className="side field" aria-label="Field view" hidden={hidden}><p>Engine loading…</p></section>;
   const { plan, geometry } = output;
   const e = exec && exec.planVersion === plan.versionHash ? exec : null;
   const stale = exec !== null && exec.planVersion !== plan.versionHash;
   const ex = e ?? newExecution(plan);
-  const next = nextEvent(plan, ex);
+  const next0 = nextEvent(plan, ex);
   const stopOf = (id: string) => plan.stops.find((s) => s.id === id);
   // The leg being walked or about to be walked: to the next arrival, or onward after the current stop.
-  const legIndex = next ? plan.stops.findIndex((s) => s.id === next.stopId) + (next.kind === "depart" ? 1 : 0) : plan.legs.length - 1;
+  const legIndex = next0 ? plan.stops.findIndex((s) => s.id === next0.stopId) + (next0.kind === "depart" ? 1 : 0) : plan.legs.length - 1;
   const leg = plan.legs[legIndex];
   const m = fieldMarginRanges(plan, ex, geometry.stopReturn_s, SPEED_RATIO);
   const tEva = plan.assumptions.find((a) => a.id === "A-T_EVA")?.value;
@@ -44,48 +44,56 @@ export function FieldView({ output, hidden = false }: { output: PlanOutput | nul
     } catch (err) { setError(err instanceof Error ? err.message : String(err)); }
   };
 
+  const state = (r: Range | undefined) => (m && tEva && r ? <MarginState state={marginState(r.low, tEva)} /> : null);
+  const nothing = <span className="unknown">{last ? "unknown (plan times or durations not set)" : "no tick yet"}</span>;
   return (
-    <section className="field" aria-label="Field view" hidden={hidden} data-testid="field-view">
+    <section className="side field" aria-label="Field view" hidden={hidden} data-testid="field-view">
+      <header className="hud-head">
+        <p className="kicker"><span className="n">04</span>Field HUD</p>
+        <span className={briefed ? "hud-brief ok" : "hud-brief"}>{briefed ? "Briefing confirmed for this plan" : "Rehearsal: briefing not confirmed yet"}</span>
+      </header>
       {stale && (
         <p className="field-warning" role="alert">
-          The plan changed after ticks were entered; those ticks belong to plan {exec!.planVersion}.
-          <button type="button" onClick={() => setExec(null)}>Start ticks for the current plan</button>
+          The plan changed after ticks were entered; those ticks belong to plan {exec!.planVersion}.{" "}
+          <button type="button" className="textbtn" onClick={() => setExec(null)}>Start ticks for the current plan</button>
         </p>
       )}
-      {plan.stops.length === 0 ? <p className="field-item">No stops in the plan.</p> : <>
-        <div className="field-item" data-testid="field-next">
+      {plan.stops.length === 0 ? <p className="hud-next">No stops in the plan.</p> : <>
+        <h1 className="hud-next" data-testid="field-next">
           <span className="field-label">Next</span>
-          {next ? <>{next.kind === "arrive" ? "Arrive at" : "Depart from"} <strong>{stopOf(next.stopId)?.letter}</strong> {stopOf(next.stopId)?.name}</> : "All stops ticked: walk back to the habitat"}
-        </div>
+          {next0 ? <>{next0.kind === "arrive" ? "Arrive at" : "Depart from"} <strong>{stopOf(next0.stopId)?.letter}</strong> {stopOf(next0.stopId)?.name}</> : "All stops ticked: walk back to the habitat"}
+        </h1>
         {leg && (
-          <div className="field-item" data-testid="field-leg">
+          <div className="hud-leg" data-testid="field-leg">
             <span className="field-label">Leg</span>
-            heading {Math.round(leg.heading_deg) % 360}° · {formatLength(leg.distance_m)} <span className="field-note">(grid path, D1)</span>
+            <span className="hud-big">heading {Math.round(leg.heading_deg) % 360}° · {formatLength(leg.distance_m)}</span> <span className="field-note">(grid path, D1)</span>
           </div>
         )}
-        <div className="field-item" data-testid="field-continue">
-          <span className="field-label">Margin if we continue</span>
-          {m && tEva ? <><QuantityText q={q(m.continue_s, "field:6.6-continue")} label="Field margin, continue" /> <MarginState state={marginState(m.continue_s.low, tEva)} /></>
-            : <span className="unknown">{last ? "unknown (plan times or durations not set)" : "no tick yet"}</span>}
-        </div>
-        <div className="field-item" data-testid="field-return">
-          <span className="field-label">Margin if we turn back now</span>
-          {m && tEva ? <><QuantityText q={q(m.returnNow_s, "field:6.6-return-now")} label="Field margin, return now" /> <MarginState state={marginState(m.returnNow_s.low, tEva)} /></>
-            : <span className="unknown">{last ? "unknown (plan times or durations not set)" : "no tick yet"}</span>}
-        </div>
-        <form className="field-item field-tick" onSubmit={(ev) => { ev.preventDefault(); tick(); }}>
-          <label>Elapsed EVA time, min <input inputMode="decimal" value={minutes} onChange={(ev) => setMinutes(ev.target.value)} aria-label="Elapsed EVA time, minutes" /></label>
-          {/* While ticks from an older plan exist, ticking is blocked until the crew explicitly starts over. */}
-          <button type="submit" className="primary" disabled={!next || stale}>
-            {next ? `Tick: ${next.kind} ${stopOf(next.stopId)?.letter}` : "All ticked"}
-          </button>
-          <div className="field-note" data-testid="field-provenance">
-            From manual entries{last ? `, last tick at ${last.enteredAt.slice(11, 16)} UTC (${last.kind} ${stopOf(last.stopId)?.letter}, elapsed ${last.elapsed_min} min)` : "; no tick yet"}.
-            Estimates under stated assumptions; the planned margin is unchanged. Suit life support not modelled.
+        <div className="hud-pair">
+          <div className="hud-box" data-testid="field-continue">
+            <span className="field-label">Margin if we continue</span>
+            {m && tEva ? <><QuantityText q={q(m.continue_s, "field:6.6-continue")} label="Field margin, continue" /> {state(m.continue_s)}</> : nothing}
           </div>
+          <div className="hud-box" data-testid="field-return">
+            <span className="field-label">Margin if we turn back now</span>
+            {m && tEva ? <><QuantityText q={q(m.returnNow_s, "field:6.6-return-now")} label="Field margin, return now" /> {state(m.returnNow_s)}</> : nothing}
+          </div>
+        </div>
+        <form className="hud-tick" onSubmit={(ev) => { ev.preventDefault(); tick(); }}>
+          <label className="hud-elapsed"><span className="field-label">Elapsed EVA time, min</span>
+            <input inputMode="decimal" value={minutes} onChange={(ev) => setMinutes(ev.target.value)} aria-label="Elapsed EVA time, minutes" /></label>
+          {/* While ticks from an older plan exist, ticking is blocked until the crew explicitly starts over. */}
+          <button type="submit" className="go big" disabled={!next0 || stale}>
+            {next0 ? `Tick: ${next0.kind} ${stopOf(next0.stopId)?.letter}` : "All ticked"}
+          </button>
           {error && <div className="field-error" role="alert">{error}</div>}
         </form>
+        <p className="field-note" data-testid="field-provenance">
+          From manual entries{last ? `, last tick at ${last.enteredAt.slice(11, 16)} UTC (${last.kind} ${stopOf(last.stopId)?.letter}, elapsed ${last.elapsed_min} min)` : "; no tick yet"}.
+          Estimates under stated assumptions; the planned margin is unchanged. Suit life support not modelled.
+        </p>
       </>}
+      {next && <div className="side-foot">{next}</div>}
     </section>
   );
 }

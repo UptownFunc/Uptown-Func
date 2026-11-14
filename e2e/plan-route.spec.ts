@@ -3,11 +3,11 @@
 // (habitat, stop, grid-path route, est. leg times) is drawn and listed; refused commands leave the plan unchanged.
 // Test points were found on the real D1 grid (PHASES.md 3.1 record): STOP is slope-screened and reachable from the
 // habitat; EXCLUDED is in a block of excluded cells at the area centre.
-import { expect, test, type Page } from "@playwright/test";
-import { EXCLUDED, STOP, clickAt, pixelAt } from "./helpers";
+import { expect, test } from "@playwright/test";
+import { EXCLUDED, STOP, clickAt, goStep, pixelAt, openStep, setTime } from "./helpers";
 
 test("a click adds a stop through the engine worker and the route is drawn and listed", async ({ page }) => {
-  await page.goto("/?preset=none");
+  await openStep(page, "map");
   await expect(page.getByTestId("assumed-banner")).toContainText("ASSUMED. Slope factors");
   await expect(page.getByLabel("Plan", { exact: true })).toContainText("No stops yet.");
   await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
@@ -31,7 +31,7 @@ test("a click adds a stop through the engine worker and the route is drawn and l
 });
 
 test("a click on excluded ground is refused and the plan is unchanged", async ({ page }) => {
-  await page.goto("/?preset=none");
+  await openStep(page, "map");
   await expect(page.getByLabel("Plan", { exact: true })).toContainText("No stops yet.");
   await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
   await clickAt(page, EXCLUDED);
@@ -39,44 +39,46 @@ test("a click on excluded ground is refused and the plan is unchanged", async ({
   await expect(page.getByLabel("Plan", { exact: true })).toContainText("No stops yet.");
 });
 
-async function setTime(page: Page, label: string, minutes: string) {
-  await page.getByLabel(`${label}, minutes`).fill(minutes);
-  await page.getByLabel(`${label}, rationale`).fill("e2e test fixture, not a plan value");
-  await page.getByLabel(`${label}, minutes`).press("Enter");
-}
 
 test("planned margin stays unknown until every Assumed time is entered, then shows an est. range and a state", async ({ page }) => {
-  await page.goto("/?preset=none");
+  await openStep(page, "map");
   await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
-  await expect(page.getByTestId("current-T_EVA")).toHaveText("not set");
   await clickAt(page, STOP);
   await expect(page.getByTestId("legs")).toBeVisible({ timeout: 20_000 });
+  await goStep(page, "Planner");
+  await expect(page.getByTestId("current-T_EVA")).toHaveText("not set");
   await setTime(page, "Planned EVA duration (T_EVA)", "240");
   await expect(page.getByTestId("current-T_EVA")).toHaveText("240.0 min · assumed");
   await setTime(page, "Operational tasks (t_ops)", "20");
   await setTime(page, "Contingency (t_cont)", "30");
+  await goStep(page, "Map");
   await expect(page.getByTestId("end-margin")).toContainText("unknown");
+  await goStep(page, "Planner");
   await setTime(page, "Duration at each stop", "15");
+  await expect(page.getByTestId("current-stop_duration")).toHaveText("15.0 min · assumed");
+  await goStep(page, "Map");
   const end = page.getByTestId("end-margin");
   await expect(end).toContainText(/est\. -?\d+\.\d to -?\d+\.\d min/, { timeout: 20_000 });
   await expect(page.getByTestId("margin-state")).toHaveText("OK");
   await page.screenshot({ path: "test-results/plan-margin.png" });
 
   // A shorter EVA that cannot fit the walk, stop, tasks and contingency is OVER (octagon, word and colour).
+  await goStep(page, "Planner");
   await setTime(page, "Planned EVA duration (T_EVA)", "60");
+  await goStep(page, "Assess");
   await expect(page.getByTestId("margin-state")).toHaveText("OVER");
   await expect(page.locator("body")).not.toContainText(/\bSAFE\b/);
 });
 
 test("a time without a rationale cannot be submitted", async ({ page }) => {
-  await page.goto("/?preset=none");
+  await openStep(page, "planner");
   await expect(page.getByTestId("current-T_EVA")).toHaveText("not set");
   await page.getByLabel("Planned EVA duration (T_EVA), minutes").fill("240");
-  await expect(page.getByRole("button", { name: "Set" }).first()).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Set", exact: true }).first()).toBeDisabled();
 });
 
 test("profile scrubs both ways with the map, and margin ticks appear when the plan runs over", async ({ page }) => {
-  await page.goto("/?preset=none");
+  await openStep(page, "map");
   await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
   await clickAt(page, STOP);
   const profile = page.getByTestId("profile");
@@ -97,12 +99,16 @@ test("profile scrubs both ways with the map, and margin ticks appear when the pl
   await expect(readout).toContainText(/s \d+ m/);
 
   // A per-stop duration overrides; a short T_EVA makes the plan run over and draws both ticks.
+  await goStep(page, "Planner");
   await setTime(page, "Planned EVA duration (T_EVA)", "90");
   await setTime(page, "Operational tasks (t_ops)", "10");
   await setTime(page, "Contingency (t_cont)", "10");
+  await expect(page.getByTestId("current-t_cont")).toHaveText("10.0 min · assumed");
+  await expect(page.getByTestId("current-stop_duration")).toHaveText("not set");
+  await goStep(page, "Map");
+  await page.getByText("Duration, name and tasks").click(); // a stop's own duration is disclosed on demand
   await setTime(page, "Stop A duration", "20");
   await expect(page.getByTestId("current-stop_duration-S1")).toHaveText("20.0 min · assumed");
-  await expect(page.getByTestId("current-stop_duration")).toHaveText("not set");
   await expect(page.getByTestId("margin-state")).toHaveText("OVER", { timeout: 20_000 });
   await expect(page.getByTestId("profile-tick-NEAR_LIMIT")).toHaveText("margin 10% here");
   await expect(page.getByTestId("profile-tick-OVER")).toHaveText("margin 0 here");
@@ -112,7 +118,7 @@ test("profile scrubs both ways with the map, and margin ticks appear when the pl
 });
 
 test("AC-05: every displayed quantity carries its class and sources, and opens its source (UX-15, beat 5)", async ({ page }) => {
-  await page.goto("/?preset=none");
+  await openStep(page, "map");
   await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
   await clickAt(page, STOP);
   await expect(page.getByTestId("legs")).toBeVisible({ timeout: 20_000 });

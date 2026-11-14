@@ -3,7 +3,7 @@
 // and labelled; derived layers name source and cell size. Driven through the UI; positions checked with the readout.
 import { readFileSync } from "node:fs";
 import { expect, test, type Page } from "@playwright/test";
-import { STOP, clickAt, pixelAt } from "./helpers";
+import { STOP, clickAt, pixelAt, openStep, goStep } from "./helpers";
 
 /** Two vertices of the -3450 m index line in public/area/contours.geojson, chosen (14 Nov) as the gentlest index
  *  vertices in the load view with the line running east-west (3.9 deg) and north-south (84 deg), so a misplaced layer
@@ -43,7 +43,7 @@ async function contourInk(page: Page, at: { x: number; y: number }, h: number): 
 
 test("contours are drawn, named in the layer list, and sit where D1 has that height", async ({ page }) => {
   const errors = trackErrors(page);
-  await page.goto("/?preset=none");
+  await openStep(page, "map");
   const map = page.getByTestId("area-map");
   await expect(map.locator("canvas").first()).toBeVisible();
   await expect(map).toHaveAttribute("data-elevation-contours", "290");
@@ -71,11 +71,11 @@ test("contours are drawn, named in the layer list, and sit where D1 has that hei
 });
 
 test("the briefing card's layer list names the contours", async ({ page }) => {
-  await page.goto("/?preset=none");
+  await openStep(page, "map");
   await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
   await clickAt(page, STOP);
   await expect(page.getByTestId("legs")).toBeVisible({ timeout: 20_000 });
-  await page.getByRole("navigation", { name: "Views" }).getByRole("button", { name: "Briefing" }).click();
+  await goStep(page, "Brief");
   await page.getByRole("button", { name: "Generate card from current plan" }).click();
   await expect(page.getByTestId("briefing-card").locator(".card-map figcaption")).toContainText("Contours (D1), 10 m interval", { timeout: 20_000 });
 });
@@ -83,7 +83,7 @@ test("the briefing card's layer list names the contours", async ({ page }) => {
 test("a missing contour file is labelled and the sheet still works", async ({ page }) => {
   const errors = trackErrors(page);
   await page.route("**/area/contours.geojson", (r) => r.fulfill({ status: 404, body: "" }));
-  await page.goto("/?preset=none");
+  await openStep(page, "map");
   await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
   await expect(page.getByLabel("Layers").locator('[data-layer="contours"]')).toHaveText("Contours (D1) - not loaded: contours.geojson could not be loaded (404)");
   await expect(page.getByTestId("area-map")).toHaveAttribute("data-elevation-contours", "0");
@@ -95,7 +95,7 @@ test("a missing contour file is labelled and the sheet still works", async ({ pa
 test("an invalid contour file is refused, not drawn", async ({ page }) => {
   await page.route("**/area/contours.geojson", (r) => r.fulfill({ status: 200, contentType: "application/json",
     body: JSON.stringify({ type: "FeatureCollection", frame: "F1", properties: { source: "D12" }, features: [] }) }));
-  await page.goto("/?preset=none");
+  await openStep(page, "map");
   await expect(page.getByLabel("Layers").locator('[data-layer="contours"]')).toHaveText("Contours (D1) - not loaded: contours.geojson is not a valid contours file");
   await expect(page.getByTestId("area-map")).toHaveAttribute("data-elevation-contours", "0");
 });

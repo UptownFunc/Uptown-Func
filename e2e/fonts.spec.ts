@@ -1,16 +1,19 @@
-// SI-assisted: drafted with Claude Code (Claude Opus 5.5); human Design review pending.
-// Plan 9 type: IBM Plex Sans for interface text, IBM Plex Mono for numbers, coordinates and times, with tabular
-// figures; installed from npm inside the repository (plan on-the-day list), so served from our own origin.
-// A successful build is not proof: these checks run in the browser. Nothing in the page is changed by the test.
+// SI-assisted: drafted with Claude Code (Claude Opus 5.5); rewritten for the UI-02 type system on design/sharpwalk-ui-ux.
+// UI-02: Newsreader (display and estimates), Instrument Sans (interface) and DM Mono (labels, coordinates, tables) load
+// from this origin and are what the console renders with; digits are tabular where numbers line up; if the files fail,
+// the console falls back to system fonts and keeps working.
 import { expect, test, type Page } from "@playwright/test";
+import { goStep, openStep } from "./helpers";
 
-/** Every IBM Plex FontFace the page knows, with its load status (read from document.fonts after it settles). */
-async function plexFaces(page: Page) {
-  return page.evaluate(async () => {
+const FAMILIES = ["Newsreader Variable", "Instrument Sans Variable", "DM Mono"];
+
+/** Every UI-02 FontFace the page knows, with its load status (read from document.fonts after it settles). */
+async function faces(page: Page) {
+  return page.evaluate(async (families) => {
     await document.fonts.ready;
-    return [...document.fonts].filter((f) => f.family.replace(/["']/g, "").startsWith("IBM Plex"))
-      .map((f) => ({ family: f.family.replace(/["']/g, ""), weight: f.weight, style: f.style, status: f.status }));
-  });
+    return [...document.fonts].map((f) => ({ family: f.family.replace(/["']/g, ""), weight: f.weight, style: f.style, status: f.status }))
+      .filter((f) => families.includes(f.family));
+  }, FAMILIES);
 }
 
 /** Text width in a detached canvas: differs from the fallback only if the named font is really in use. */
@@ -21,67 +24,63 @@ async function widths(page: Page, text: string, fonts: string[]) {
   }, { text, fonts });
 }
 
-test("IBM Plex Sans and Mono load from this origin and are what the console renders with", async ({ page }) => {
+test("Newsreader, Instrument Sans and DM Mono load from this origin and are what the console renders with", async ({ page }) => {
   const fontResponses: { url: string; status: number }[] = [];
   page.on("response", (r) => { if (/\.woff2?(\?|$)/.test(r.url())) fontResponses.push({ url: r.url(), status: r.status() }); });
-  await page.goto("/?preset=none");
+  await openStep(page, "map");
   await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
-  await page.getByTestId("area-map").hover(); // the status line (Plex Mono) appears with the pointer
+  await page.getByTestId("area-map").hover(); // the status line (DM Mono) appears with the pointer
   await expect(page.getByTestId("status-line")).toContainText("elev");
 
-  const faces = await plexFaces(page);
-  const loaded = (family: string, weight: string) => faces.some((f) => f.family === family && f.weight === weight && f.style === "normal" && f.status === "loaded");
-  expect(loaded("IBM Plex Sans", "400"), JSON.stringify(faces)).toBe(true);
-  expect(loaded("IBM Plex Sans", "600"), JSON.stringify(faces)).toBe(true); // headings and the wordmark
-  expect(loaded("IBM Plex Mono", "400"), JSON.stringify(faces)).toBe(true);
-  expect(faces.filter((f) => f.status === "error")).toEqual([]);
+  const all = await faces(page);
+  for (const family of FAMILIES) expect(all.some((f) => f.family === family && f.style === "normal" && f.status === "loaded"), `${family}: ${JSON.stringify(all)}`).toBe(true);
+  expect(all.filter((f) => f.status === "error")).toEqual([]);
 
-  // Served by us (npm package bundled by Vite), never from a font CDN.
   const origin = new URL(page.url()).origin;
   expect(fontResponses.length).toBeGreaterThan(0);
   for (const r of fontResponses) { expect(r.url.startsWith(origin), r.url).toBe(true); expect(r.status).toBe(200); }
 
-  // The console's own elements resolve to Plex first.
-  await expect(page.locator("body")).toHaveCSS("font-family", /^"IBM Plex Sans"/);
-  await expect(page.getByTestId("status-line")).toHaveCSS("font-family", /^"IBM Plex Mono"/);
+  await expect(page.locator("body")).toHaveCSS("font-family", /^"Instrument Sans Variable"/);
+  await expect(page.getByTestId("status-line")).toHaveCSS("font-family", /^"DM Mono"/);
+  await expect(page.locator(".side-head h1")).toHaveCSS("font-family", /^"Newsreader Variable"/);
 
-  // Rendering proof: Plex changes text widths against the generic fallbacks.
-  const [sans, sansFallback, mono, monoFallback] = await widths(page, "Slope-screened route 0123456789", [
-    '13px "IBM Plex Sans", sans-serif', "13px sans-serif", '13px "IBM Plex Mono", monospace', "13px monospace"]);
+  const [serif, serifFallback, sans, sansFallback, mono, monoFallback] = await widths(page, "Slope-screened route 0123456789", [
+    '15px "Newsreader Variable", serif', "15px serif", '15px "Instrument Sans Variable", sans-serif', "15px sans-serif",
+    '13px "DM Mono", monospace', "13px monospace"]);
+  expect(serif).not.toBe(serifFallback);
   expect(sans).not.toBe(sansFallback);
   expect(mono).not.toBe(monoFallback);
 
-  // Tabular figures: every digit has the same advance in Plex Sans and Plex Mono (CLAUDE.md, plan 9).
-  for (const font of ['13px "IBM Plex Sans"', '13px "IBM Plex Mono"']) {
-    const w = await widths(page, "0", [font]);
-    for (const d of "123456789") expect((await widths(page, d, [font]))[0], `${font} digit ${d}`).toBeCloseTo(w[0]!, 3);
-  }
+  // Coordinates, tables and readouts use DM Mono: every digit has the same advance.
+  const w = await widths(page, "0", ['13px "DM Mono"']);
+  for (const d of "123456789") expect((await widths(page, d, ['13px "DM Mono"']))[0], `DM Mono digit ${d}`).toBeCloseTo(w[0]!, 3);
 });
 
 test("if the font files cannot load, the console falls back to system fonts and keeps working", async ({ page }) => {
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
-  // Both formats: each face lists a .woff fallback after its .woff2 (Fontsource CSS).
   await page.route(/\.woff2?(\?|$)/, (r) => r.abort());
-  await page.goto("/?preset=none");
+  await openStep(page, "map");
   await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
-  const faces = await plexFaces(page);
-  expect(faces.some((f) => f.status === "loaded"), JSON.stringify(faces)).toBe(false);
-  // Text is still shown and the console still works: switch views with the keyboard and back.
+  const all = await faces(page);
+  expect(all.some((f) => f.status === "loaded"), JSON.stringify(all)).toBe(false);
+  // Text is still shown and the console still works: move between steps with the keyboard and back.
   await expect(page.getByText("Independent student project; not affiliated with or endorsed by NASA.")).toBeVisible();
-  const views = page.getByRole("navigation", { name: "Views" });
-  await views.getByRole("button", { name: "Briefing" }).focus();
+  const steps = page.getByRole("navigation", { name: "Mission steps" });
+  await steps.getByRole("button", { name: "Brief", exact: true }).focus();
   await page.keyboard.press("Enter");
-  await expect(views.getByRole("button", { name: "Briefing" })).toHaveAttribute("aria-pressed", "true");
-  await views.getByRole("button", { name: "Planning" }).click();
+  await expect(steps.getByRole("button", { name: "Brief", exact: true })).toHaveAttribute("aria-current", "step");
+  await goStep(page, "Map");
   await expect(page.getByLabel("Plan", { exact: true })).toContainText("No stops yet.");
   expect(errors).toEqual([]);
 });
 
-test("if only the .woff2 files fail, the .woff fallback still loads IBM Plex", async ({ page }) => {
+test("if only the .woff2 files fail, DM Mono's .woff fallback still loads", async ({ page }) => {
   await page.route(/\.woff2(\?|$)/, (r) => r.abort());
-  await page.goto("/?preset=none");
+  await openStep(page, "map");
   await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
-  const faces = await plexFaces(page);
-  expect(faces.some((f) => f.family === "IBM Plex Sans" && f.weight === "400" && f.status === "loaded"), JSON.stringify(faces)).toBe(true);
+  await page.getByTestId("area-map").hover();
+  const all = await faces(page);
+  // The variable packages ship woff2 only (format woff2-variations); their fallback is the system stack.
+  expect(all.some((f) => f.family === "DM Mono" && f.weight === "400" && f.status === "loaded"), JSON.stringify(all)).toBe(true);
 });

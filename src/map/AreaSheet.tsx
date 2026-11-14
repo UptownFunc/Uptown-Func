@@ -1,7 +1,7 @@
-// SI-assisted: drafted with Claude Code (Claude Opus 5.5); human Design review pending.
+// SI-assisted: drafted with Claude Code (Claude Opus 5.5); Folio plate and HUD on design/sharpwalk-ui-ux; human Design review pending.
 // Plan 7.8 AREA level of the 2D sheet: D2 base, D1 hillshade multiplied, terrain classes, scale bar, cursor readout.
 // F7 is display only; the readout's east/north and elevation come from the F6 grid through src/geo.
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import OlMap from "ol/Map";
 import View from "ol/View";
 import ImageLayer from "ol/layer/Image";
@@ -51,7 +51,7 @@ export interface AreaSheetProps {
   /** The engine's latest plan (a copy); the sheet only draws it. */
   readonly plan?: PlanOutput | null;
   /** Called with the F1 position of a click; the console turns it into a Command for the engine. */
-  readonly onPick?: (p: LatLon) => void;
+  readonly onPick?: ((p: LatLon) => void) | undefined;
   /** Receives a function that exports the current sheet with the plan for the briefing card (plan 7.8). */
   readonly onSnapshotReady?: (snapshot: () => Promise<MapSnapshot | null>) => void;
   /** Index into plan.geometry.profile under the pointer (shared with the profile chart, UX-06). */
@@ -67,11 +67,16 @@ export interface AreaSheetProps {
   readonly showSky?: boolean;
   /** Whether this area has a sky layer, and whether its image failed to load; with the per-stop 20 m sampler (plan 6.7). */
   readonly onSky?: (state: "none" | "ok" | "failed", sample?: SkySampler) => void;
+  /** Layer switches shown at the top of the Layers panel (the console owns their state). */
+  readonly tools?: ReactNode;
+  /** One line telling the user what a click on the sheet does in the current step. */
+  readonly hint?: string;
 }
 
 const cursorStyle = new Style({ image: new RegularShape({ points: 4, radius: 11, radius2: 0, angle: 0, stroke: new Stroke({ color: "#f3eee4", width: 2 }) }) });
 
-export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hoverIndex = null, onHoverIndex, onDatasets, onCursor, contours = null, showSky = false, onSky }: AreaSheetProps) {
+export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hoverIndex = null, onHoverIndex, onDatasets, onCursor, contours = null, showSky = false, onSky, tools, hint }: AreaSheetProps) {
+  const [layersOpen, setLayersOpen] = useState(false);
   const target = useRef<HTMLDivElement>(null);
   const area = useRef<LoadedArea | null>(null);
   const planLayerRef = useRef<ReturnType<typeof createPlanLayer> | null>(null);
@@ -313,7 +318,10 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
             {layerErrors.map((n) => `${n} could not be loaded`).join("; ")}. The sheet, the route and the readout work without it.
           </div>
         )}
-        <div className="legend" aria-label="Layers">
+        {hint && <p className="map-hint">{hint}</p>}
+        <button type="button" className="layers-btn" aria-expanded={layersOpen} aria-controls="layers-panel" onClick={() => setLayersOpen((o) => !o)}>Layers</button>
+        <div className="legend" id="layers-panel" aria-label="Layers" data-open={layersOpen}>
+          {tools}
           <ul>{legend.map((l) => layerErrors.includes(l.name)
             ? <li key={l.id} className="failed">{l.name} - not loaded</li>
             : <li key={l.id} data-layer={l.id}>{l.name} - {l.valueClass.replace("_", " ")}, {l.source}, {fmt(l.resolution)}, built {l.builtOn}
@@ -337,13 +345,13 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
           <>
             <span><span className="label">lat </span>{readout.lat}</span>
             <span><span className="label">lon </span>{readout.lon} E</span>
-            <span className="label">(display precision)</span>
+            <span className="label">display precision</span>
             <span><span className="label">E </span>{fmt(readout.east)}</span>
             <span><span className="label">N </span>{fmt(readout.north)}</span>
             <span><span className="label">elev </span>{fmt(readout.elevation)}</span>
             <span className="label">{readout.elevationSource}; vertical reference unverified</span>
           </>
-        ) : <span className="label">Move the pointer over the sheet for coordinates.</span>}
+        ) : <span className="label">Move the pointer over the plate for coordinates.</span>}
       </div>
     </>
   );
