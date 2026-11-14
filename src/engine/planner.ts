@@ -82,16 +82,21 @@ export class Planner {
     return i;
   }
 
+  /** A copy of the current plan; callers can never mutate the engine's own state. */
   current(): PlanOutput {
+    return structuredClone(this.peek());
+  }
+
+  private peek(): PlanOutput {
     this.cached ??= this.compute();
-    return structuredClone(this.cached);
+    return this.cached;
   }
 
   apply(raw: unknown): ApplyResult {
     const parsed = Command.safeParse(raw);
     if (!parsed.success) return { ok: false, reason: `invalid command: ${parsed.error.issues[0]?.message ?? "unknown"}` };
     const c = parsed.data, p = c.payload;
-    const version = this.current().plan.versionHash;
+    const version = this.peek().plan.versionHash;
     if (c.planVersion !== version) return { ok: false, reason: `command was issued against plan version ${c.planVersion}; current version is ${version}` };
     const find = (id: unknown) => this.stops.findIndex((s) => s.id === id);
     switch (c.type) {
@@ -131,7 +136,7 @@ export class Planner {
         return { ok: false, reason: "set_assumption is not supported yet: the Assumed plan times and k_v values are not set (K-01)" };
     }
     this.cached = null;
-    return { ok: true, versionHash: this.current().plan.versionHash };
+    return { ok: true, versionHash: this.peek().plan.versionHash };
   }
 
   private compute(): PlanOutput {

@@ -32,7 +32,9 @@ export interface AreaSheetProps {
 export function AreaSheet({ dataUrl, plan = null, onPick }: AreaSheetProps) {
   const target = useRef<HTMLDivElement>(null);
   const area = useRef<LoadedArea | null>(null);
-  const planLayer = useRef(createPlanLayer());
+  const planLayerRef = useRef<ReturnType<typeof createPlanLayer> | null>(null);
+  planLayerRef.current ??= createPlanLayer();
+  const planLayer = planLayerRef as { current: ReturnType<typeof createPlanLayer> };
   const planRef = useRef(plan);
   planRef.current = plan;
   const pickRef = useRef(onPick);

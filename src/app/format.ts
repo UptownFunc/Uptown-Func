@@ -10,8 +10,10 @@ const min = (s: number) => (s / 60).toFixed(1);
 export function formatDuration(q: Quantity): Formatted {
   if (q.valueClass === "unknown" || q.value === null) return { text: "unknown", estimated: false, unknown: true };
   if (q.unit !== "s") throw new RangeError(`durations must arrive in seconds, got ${q.unit}`);
-  if (q.valueClass === "estimated" && q.low !== undefined && q.high !== undefined)
+  if (q.valueClass === "estimated") {
+    if (q.low === undefined || q.high === undefined) throw new RangeError("an estimate must carry a low-high range");
     return { text: `est. ${min(q.low)}-${min(q.high)} min`, estimated: true, unknown: false };
+  }
   return { text: `${min(q.value)} min`, estimated: false, unknown: false };
 }
 

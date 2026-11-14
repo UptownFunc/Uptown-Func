@@ -11,6 +11,11 @@ describe("quantity formatting (CLAUDE.md: estimates are ranges, italic, marked e
     expect(formatDuration(q)).toEqual({ text: "est. 9.0-13.0 min", estimated: true, unknown: false });
   });
 
+  it("refuses an estimate without a range rather than showing it as a bare number", () => {
+    const q = { value: 600, unit: "s", valueClass: "estimated", ...base } as Quantity;
+    expect(() => formatDuration(q)).toThrow(/range/);
+  });
+
   it("keeps an unknown value unknown", () => {
     const q: Quantity = { value: null, unit: "s", valueClass: "unknown", ...base };
     expect(formatDuration(q)).toEqual({ text: "unknown", estimated: false, unknown: true });

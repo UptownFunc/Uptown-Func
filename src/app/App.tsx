@@ -12,6 +12,11 @@ const AREA_URL = "area/";
  *  (4.795 S, 137.392 E), which itself lies on ground over the 20 deg limit. Assumed scenario input, not a base site. */
 export const DEFAULT_HABITAT: LatLon = { lat: -4.795211, lon: 137.391845 };
 
+let commandSeq = 0;
+/** crypto.randomUUID exists only in secure contexts; a plain-http LAN demo needs a fallback. */
+const commandId = (): string =>
+  typeof crypto !== "undefined" && typeof crypto.randomUUID === "function" ? crypto.randomUUID() : `cmd-${Date.now()}-${++commandSeq}`;
+
 export function App() {
   const engine = useRef<EngineClient | null>(null);
   const [output, setOutput] = useState<PlanOutput | null>(null);
@@ -30,14 +35,24 @@ export function App() {
     return () => { live = false; e.terminate(); engine.current = null; };
   }, []);
 
-  const send = useCallback(async (type: string, payload: Record<string, unknown>) => {
-    const e = engine.current, cur = outputRef.current;
-    if (!e || !cur) return;
-    const { result, output: next, elapsed_ms } = await e.api.apply({
-      id: crypto.randomUUID(), type, payload, issuedAt: new Date().toISOString(), planVersion: cur.plan.versionHash,
+  // Commands run one at a time, each against the plan version the previous one produced, so quick clicks are
+  // not refused as stale. Failures are shown, never swallowed.
+  const queue = useRef<Promise<void>>(Promise.resolve());
+  const send = useCallback((type: string, payload: Record<string, unknown>) => {
+    queue.current = queue.current.then(async () => {
+      const e = engine.current, cur = outputRef.current;
+      if (!e || !cur) return;
+      try {
+        const { result, output: next, elapsed_ms } = await e.api.apply({
+          id: commandId(), type, payload, issuedAt: new Date().toISOString(), planVersion: cur.plan.versionHash,
+        });
+        outputRef.current = next;
+        setOutput(next);
+        setMessage(result.ok ? `Plan updated in ${Math.round(elapsed_ms)} ms.` : `Not changed: ${result.reason}.`);
+      } catch (err: unknown) {
+        setMessage(`Engine error: ${err instanceof Error ? err.message : String(err)}`);
+      }
     });
-    setOutput(next);
-    setMessage(result.ok ? `Plan updated in ${Math.round(elapsed_ms)} ms.` : `Not changed: ${result.reason}.`);
   }, []);
 
   return (
@@ -47,8 +62,8 @@ export function App() {
         <span className="muted">AREA sheet - slope-screened only, no rock detection</span>
       </header>
       <main className="well">
-        <AreaSheet dataUrl={AREA_URL} plan={output} onPick={(p) => void send("add_stop", { lat: p.lat, lon: p.lon })} />
-        <PlanPanel output={output} message={message} onDeleteStop={(id) => void send("delete_stop", { stopId: id })} />
+        <AreaSheet dataUrl={AREA_URL} plan={output} onPick={(p) => send("add_stop", { lat: p.lat, lon: p.lon })} />
+        <PlanPanel output={output} message={message} onDeleteStop={(id) => send("delete_stop", { stopId: id })} />
       </main>
       <footer className="footer">Independent student project; not affiliated with or endorsed by NASA.</footer>
     </div>
