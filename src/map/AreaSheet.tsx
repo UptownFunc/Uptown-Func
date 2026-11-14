@@ -11,6 +11,7 @@ import Zoom from "ol/control/Zoom";
 import { f1ToF7, f7ToF1 } from "../geo";
 import type { LatLon, PlanOutput } from "../engine/planner";
 import { createPlanLayer, drawPlan } from "./planLayer";
+import { snapshotMap, type MapSnapshot } from "./snapshot";
 import { F7_PROJECTION } from "./f7";
 import { loadArea, type LoadedArea } from "./loadArea";
 import { gridFrame, readoutAt, type Readout } from "./readout";
@@ -27,9 +28,11 @@ export interface AreaSheetProps {
   readonly plan?: PlanOutput | null;
   /** Called with the F1 position of a click; the console turns it into a Command for the engine. */
   readonly onPick?: (p: LatLon) => void;
+  /** Receives a function that exports the current sheet with the plan for the briefing card (plan 7.8). */
+  readonly onSnapshotReady?: (snapshot: () => Promise<MapSnapshot | null>) => void;
 }
 
-export function AreaSheet({ dataUrl, plan = null, onPick }: AreaSheetProps) {
+export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady }: AreaSheetProps) {
   const target = useRef<HTMLDivElement>(null);
   const area = useRef<LoadedArea | null>(null);
   const planLayerRef = useRef<ReturnType<typeof createPlanLayer> | null>(null);
@@ -39,6 +42,8 @@ export function AreaSheet({ dataUrl, plan = null, onPick }: AreaSheetProps) {
   planRef.current = plan;
   const pickRef = useRef(onPick);
   pickRef.current = onPick;
+  const snapRef = useRef(onSnapshotReady);
+  snapRef.current = onSnapshotReady;
   const [readout, setReadout] = useState<Readout | null>(null);
   const [legend, setLegend] = useState<LoadedArea["display"]["layers"]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -68,6 +73,8 @@ export function AreaSheet({ dataUrl, plan = null, onPick }: AreaSheetProps) {
         }),
       });
       drawPlan(planLayer.current, planRef.current, a.grid);
+      const m = map;
+      snapRef.current?.(() => snapshotMap(m, planLayer.current, a.grid.origin.lat));
       map.on("singleclick", (e) => {
         const p = f7ToF1({ frame: "F7", x: e.coordinate[0]!, y: e.coordinate[1]! }, 0);
         pickRef.current?.({ lat: p.lat, lon: p.lon });

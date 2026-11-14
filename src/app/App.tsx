@@ -6,6 +6,8 @@ import { AreaSheet } from "../map/AreaSheet";
 import { createEngine, type EngineClient } from "../engine/client";
 import type { LatLon, PlanOutput } from "../engine/planner";
 import { PlanPanel } from "./PlanPanel";
+import { BriefingView } from "../briefing/BriefingView";
+import type { MapSnapshot } from "../map/snapshot";
 
 const AREA_URL = "area/";
 /** H-01 (DECISIONS.md, pending team confirmation): the slope-screened cell nearest the plan 19.2 suggestion
@@ -21,6 +23,8 @@ export function App() {
   const engine = useRef<EngineClient | null>(null);
   const [output, setOutput] = useState<PlanOutput | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [view, setView] = useState<"planning" | "briefing">("planning");
+  const [snapshot, setSnapshot] = useState<(() => Promise<MapSnapshot | null>) | null>(null);
   const outputRef = useRef(output);
   outputRef.current = output;
 
@@ -60,9 +64,17 @@ export function App() {
       <header className="titlebar">
         <span className="wordmark">SharpWalk</span>
         <span className="muted">AREA sheet - slope-screened only, no rock detection</span>
+        <nav className="nav" aria-label="Views">
+          {(["planning", "briefing"] as const).map((v) => (
+            <button key={v} type="button" aria-pressed={view === v} onClick={() => setView(v)}>{v === "planning" ? "Planning" : "Briefing"}</button>
+          ))}
+        </nav>
       </header>
       <main className="well">
-        <AreaSheet dataUrl={AREA_URL} plan={output} onPick={(p) => send("add_stop", { lat: p.lat, lon: p.lon })} />
+        <AreaSheet dataUrl={AREA_URL} plan={output} onPick={(p) => send("add_stop", { lat: p.lat, lon: p.lon })}
+          onSnapshotReady={(fn) => setSnapshot(() => fn)} />
+        {/* Kept mounted so a built card keeps its version stamp and shows STALE after a plan change. */}
+        <BriefingView output={output} snapshot={snapshot} hidden={view !== "briefing"} />
         <PlanPanel output={output} message={message} onDeleteStop={(id) => send("delete_stop", { stopId: id })}
           onSetTime={(id, value_s, rationale) => send("set_assumption", { id, value_s, rationale })} />
       </main>
