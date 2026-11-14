@@ -55,7 +55,7 @@ Plan 19.9 lists fields but leaves these details open. The drafts below are in `s
 | C-12 | AreaManifest residual fields | Manifest not written | `controlPoints`, `rmsHorizontal_m`, `maxHorizontal_m` and `verticalBias_m` are required numbers, so a manifest written before 1.5 would need invented values. Options: make them nullable until measured, or write the manifest only after 1.5. | PENDING (contract change: both owners) |
 | C-13 | Provenance.sha256 scope | sha256 of the D1 window actually read (float32 LE) | The contract does not say whether the checksum covers the full source file (3.9 GB; USGS publishes only an md5) or the bytes used. | PENDING |
 
-## /code-review of 1.1-2.1 (Sat 14 Nov, ~11:30), medium, `3c372f4...ac7e61c`
+## /code-review of 1.1-2.1 (Sat 14 Nov, ~11:15), medium, `3c372f4...ac7e61c`
 
 Ten findings. Eight were fixed, test-first where code was involved. One was fixed in part, and one was not changed:
 - **Not changed (recorded here):** the warped elevation grid and the D1 provenance stay `directly_measured`. Plan section 4 (Must table) classes D1 terrain as "Directly measured", and the repo rules do not let a session redesign the plan. The unverified vertical reference is carried separately (`verticalReference: "unknown"`, D-05). Data and Science may reclassify.
@@ -70,7 +70,7 @@ Ten findings. Eight were fixed, test-first where code was involved. One was fixe
 | K-02 | Bin-edge convention | The code uses lower-inclusive bins: [0,5), [5,10), [10,15), [15, limit]. Edges exactly at the limit are allowed. Route Engine to confirm. |
 | D-03 note | Connectivity of the demo area at 2 m | The main routable region covers 58.1% of the area; the area centre is not in it. Habitat and stops must be placed in the main region. Recorded for the D-03 sign-off. |
 
-## /code-review of 2.2 (Sat 14 Nov, ~12:15), medium, `225e3e3...29e5a71`
+## /code-review of 2.2 (Sat 14 Nov, ~11:29), medium, `225e3e3...29e5a71`
 
 Ten findings: seven fixed, two partly fixed, one skipped.
 - **Fixed, test-first:** out-of-grid cells are refused instead of wrapping to the next row; the grid shape and cell size are validated; bin edges use the same relative tolerance as the limit, so an edge designed at exactly 5, 10 or 15 deg goes to the upper bin (a real rounding miss, reproduced across 400 cell sizes); the heuristic has one implementation, used by both search and the export; a cross-language test checks that the engine's class codes equal the pipeline's (proven by changing a pipeline code and watching the test fail).

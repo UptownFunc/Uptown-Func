@@ -4,7 +4,7 @@ This file is the handoff between team members and Claude sessions. Keep it factu
 
 ## Current snapshot
 
-- Last updated: **Sat 14 Nov 2026, 11:00 Asia/Manila**
+- Last updated: **Sat 14 Nov 2026, 11:32 Asia/Manila**
 - Current local time / time zone: **Sat 14 Nov 2026, ~10:30, Asia/Manila (UTC+8)**
 - Actual challenge deadline: **Sun 15 Nov 2026, 23:59 local.** The official Space Apps FAQ confirms the 14-15 Nov dates; the 23:59 closing time is from third-party pages only. Captain to confirm on the portal.
 - Remaining time: **about 37 h 29 min to the deadline; 30 min to G0 (11:00); 3 h 30 min to G1 (14:00)**
@@ -13,7 +13,7 @@ This file is the handoff between team members and Claude sessions. Keep it factu
 - Last verified commit: **the review follow-up commit after 8986d70 on `claude/kind-ptolemy-1wdqf5`** (tests 44/44, typecheck clean)
 - Current owner / member: **parcilla13 (Captain); this session is operated by Yujin. The project concept and plan belong to the whole team.**
 - Repository state: **`main` = 393723e (logs only). The G0 branches add the package scaffold, `src/contracts`, LICENSE and the log updates.**
-- Active phase part: **1.1 IN PROGRESS (evidence recorded; sign-off pending); 1.2 IN PROGRESS (pipeline built, 29 tests, reproducible real build; GDAL 3.12.3 rerun pending); 1.3 blocked by C-12 (the manifest residual fields cannot be filled before 1.5)**
+- Active phase part: **1.1, 1.2 and 1.4 IN PROGRESS (evidence and code done; owner sign-off, GDAL 3.12.3 rerun and plan section 19 pending); 1.3 blocked by C-12; 2.1 and 2.2 IN PROGRESS (code and tests done; citations and k_v values missing, K-01); 2.7 latency measured on this machine only**
 
 Do not interpret blank fields as proof that no work exists. Inspect GitHub and the working tree.
 
@@ -37,7 +37,7 @@ Avoid simultaneous edits to the same files. Agree on shared contract changes bef
 - **In progress:** 0.3. Contracts are frozen as drafted under the G0 fallback; C-01..C-11 await owner agreement (DECISIONS.md). Owner names are still TBA.
 - **Blocked:** 0.4 (Local Lead answers for D-01 and D-02; none recorded, defaults kept). 1.1: the plan PDF is not readable by this session, and the egress proxy refused the HiRISE, Mars Trek and USGS hosts. QGIS is absent. rasterio 1.4.4 bundles its own GDAL, which is not confirmed to be the pinned 3.12.3.
 - **Cut:** none.
-- **Next action:** Data and Science: sign off 1.1 and D-03; agree P-01/P-02 and C-12/C-13; decide how the trust grid (filled-DEM mask, plan 6.3) is built for 1.4. On a machine with GDAL 3.12.3, run `cd pipeline && pip install -r requirements.txt && python -m pytest && python -m sharpwalk.run_d1 work/area` and compare the checksums in PHASES.md. Read plan section 19 (part 2).
+- **Next action:** Route Engine supplies the k_v values and source (K-01) and confirms K-02. Data and Science sign off 1.1/D-03 and agree P-01/P-02/C-12/C-13. Someone reads plan section 19. Code next: 2.3 leg distance/time ranges, then 2.6 the OpenLayers AREA sheet (needs the app scaffold: Vite/React/OpenLayers at the pinned versions).
 
 ## Last session report
 
