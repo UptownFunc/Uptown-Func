@@ -1,6 +1,10 @@
 // SI-assisted: drafted with Claude Code (Claude Opus 5.5; revised with Claude Fable 5.2); human Data and Science review pending.
 // Science constants register (CLAUDE.md: source citation and page for every constant; SI units).
 // A location marked UNRESOLVED means this session could not read the page; it must be filled before release.
+// REG-02 (Sun 15 Nov 2026, docs/data/reg-02-verification.md): every citation below was re-read in its source at
+// Yujin's direction. Changed: walkSpeedRange wording and pages, drillWarningDefault documents, skyObstructionM12 page.
+// skyObstructionM12: Yujin opened Ehresmann et al. 2021 on the publisher's page (free access) and supplied its text;
+// 0.37 pi is in sections 2.2 and 4. No constant is UNRESOLVED now.
 import type { ValueClass } from "../contracts";
 
 export interface Citation { readonly source: string; readonly location: string }
@@ -42,8 +46,8 @@ export const CONSTANTS = {
   },
   walkSpeedRange: {
     id: "walkSpeedRange", value: 0.83, low: 0.64, high: 0.97, unit: "m/s", valueClass: "estimated",
-    citation: { source: "NASA/TM-2010-216138, suited walking range in IST-1, 2.3-3.5 km/h (plan 19.5)", location: "Table 4, p. 13" },
-    limitation: "Estimated from lunar-gravity treadmill tests (0.12-0.32 g, six male subjects, one 121 kg MKIII suit, no downhill data; NASA/TP-2010-216125, pp. 2-3, 10, 83-86, via plan 19.5); no suited Mars-gravity data exists. The 15-20 deg bin is beyond tested grades. Speeds are along the surface (plan 19.11, weakness 58).",
+    citation: { source: "NASA/TM-2010-216138, IST-1 treadmill speeds, 2.3-3.5 km/h (plan 19.5)", location: "Table 4, p. 13" },
+    limitation: "A lunar-gravity treadmill speed window, not a measured range on terrain. Incline tests (NASA/TP-2010-216125, pp. 2, 5, 10, 70): 0.12-0.32 g, six male subjects, one 121 kg MKIII suit, speed fixed by protocol, no downhill data. No suited Mars-gravity data exists. The 15-20 deg bin is beyond tested grades. Speeds are along the surface (plan 19.11, weakness 58).",
   },
   slopeLimit: {
     id: "slopeLimit", value: 20, unit: "deg", valueClass: "assumed",
@@ -52,12 +56,12 @@ export const CONSTANTS = {
   },
   skyObstructionM12: {
     id: "skyObstructionM12", value: 0.185, unit: "1", valueClass: "published_observation", // fraction of the 2 pi hemisphere
-    citation: { source: "Ehresmann et al. 2021, JGR Planets, doi:10.1029/2021JE006851: 0.37 pi of the 2 pi hemisphere at Butte M12, sols 1456-1467; Guo et al. 2021, GRL, doi:10.1029/2021GL093912: about 19 %", location: "UNRESOLVED: read from the abstracts (plan 19.6); page not read" },
+    citation: { source: "Ehresmann et al. 2021, JGR Planets, doi:10.1029/2021JE006851: 0.37 pi of the 2 pi hemisphere at Butte M12, sols 1456-1467; Guo et al. 2021, GRL, doi:10.1029/2021GL093912: about 19 %", location: "Ehresmann sec. 2.2 and 4 (publisher HTML, no page numbers); Guo sec. 4, p. 6 of 10" },
     limitation: "Geometric sky obstruction at one rover position, used only as the AC-07 benchmark; never converted into dose (plan 6.7).",
   },
   drillWarningDefault: {
     id: "drillWarningDefault", value: 1800, unit: "s", valueClass: "assumed",
-    citation: { source: "SharpWalk plan 6.9 (drill default 30 min, Assumed; stress cases 10 and 20 min), informed by Loewe et al. 2025 (arXiv preprint: at least 30 min to avoid the peak) and the NESC assessment (Parker et al.: operations should give 10-30 min of warning; at least 30 min for SEPs)", location: "Plan 6.9, p. 32" },
+    citation: { source: "SharpWalk plan 6.9 (drill default 30 min, Assumed; stress cases 10 and 20 min), informed by Loewe et al. 2025 (arXiv:2502.02469: at least 30 min to avoid the peak) and NASA/TM-20205000837 (Minow et al. 2020, R-1, R-3, p. 49: 10-30 min of warning; at least 30 min for SEPs)", location: "Plan 6.9, p. 32" },
     limitation: "Simulated drill only: an assumed warning time, not a forecast, a live alert or a measurement. Habitat shielding is Assumed, not modelled; no dose is computed.",
   },
 } as const satisfies Record<string, Constant>;
