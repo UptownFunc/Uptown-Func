@@ -55,25 +55,23 @@ rule; values and approvals the plan leaves to people were not invented (DECISION
   worked example as test oracle); rover point-of-view images (D6: 3-5 images picked by people); first public deploy
   (Vercel account, R-17); D-01/D-02 Local Lead answers; contract changes C-12/C-16/C-17.
 
-## Schedule reconciliation (Sat 14 Nov 2026, 14:48 Asia/Manila, container clock)
+## Schedule reconciliation (Sat 14 Nov 2026, 20:27 Asia/Manila, container clock; previous 14:48)
 
-**Deadline:** Sun 15 Nov 2026, 23:59 local time, from the plan's reading of the 2026 Project Submission Guide (plan
-19.3: "Submit before Sun 15 Nov 23:59 local time ... projects saved or submitted after the deadline are not
-eligible"). The live portal could not be opened from this session; **a person must confirm it on the portal.**
-Remaining: 33 h 11 min.
+**Deadline:** Sun 15 Nov 2026, 23:59 local time (plan 19.3). The official Space Apps FAQ confirms the 14-15 Nov dates;
+the 23:59 close is only on third-party pages: **a person must confirm it on the portal.** Remaining: about 27 h 32 min.
 
-| Gate | Planned | Status now | What is incomplete | Rebaselined plan |
+| Gate | Planned | Status now | What is incomplete | Next |
 |---|---|---|---|---|
-| G0 | Sat 11:00 | Passed under fallback (expired) | Contracts frozen as drafted, unagreed (C-01..C-17); no Local Lead answers (D-01, D-02) | Not rescheduled; open items carried as blockers |
-| G1 | Sat 14:00 | **Passed under fallback (expired)**: overlays 2D only, 3D cut | (1) area manifest not written, so the grids are not Zod-valid as an AreaManifest (C-12); (2) no control-point residuals (1.5); (3) DEM checks partial: trust grid undecided, D1/D2 alignment inconclusive (1.4); (4) outputs built with GDAL 3.10.3, not the pinned 3.12.3 (P-03) | Not rescheduled. Items 1-4 stay open; none blocks G2/G3 under the 2D-only fallback |
-| G2 | Sat 19:00 | **Criteria met at 14:48** on the cloud machine | Mid-range laptop timing not measured; smoothing kept at the plan's interim rule (D-04) | Declare at 19:00 if nothing regresses; laptop timing at G5 |
-| G3 | Sun 01:00 | **At risk** | Tier 1 Musts missing: Conditions (D7, D10), rover point of view (D6); planned margin needs T-01 values; no public deploy (Vercel) | Inputs needed by the "needed by" times in the blocker register below; acceptance not weakened. If they miss, the team decides cuts (the plan's G3 fallback covers only the field view) |
-| G4 | Sun 10:00 | Partly met | Tier 2 not merged (human PR merge); AC-07 and AC-08 blocked on D5; sky-obstruction layer hidden (SKY-1) | Merge after review; AC-07/AC-08 only if D5 arrives |
-| G5 | Sun 13:00 | Not started | Two-machine demo from the public deploy; 2D with Cesium blocked (trivially true: 3D cut) | Unchanged |
+| G0 | Sat 11:00 | Passed under fallback | Contracts agreed as drafted for the merge (C-AGREE, operator); no Local Lead answers (D-01, D-02) | Carried as blockers |
+| G1 | Sat 14:00 | Passed under fallback (overlays 2D only, 3D cut) | AreaManifest not written (C-12); no control points (1.5); P-03 GDAL 3.12.3 rerun | Human items |
+| G2 | Sat 19:00 | **Met** | Laptop timing not measured (cloud: longest route 309-436 ms at 20:26) | Laptop timing at G5 |
+| G3 | Sun 01:00 | **Met except the first public deploy** | Tier 1 e2e green incl. planned margin (G3-01 values); **no deploy (B-4, Vercel access)** | Deploy as soon as a person links Vercel |
+| G4 | Sun 10:00 | **Met except the deploy carried from G3** | Tier 2 merged (main 38839d0); AC-07 PASS at M12, AC-08 PASS; no serious axe violations (48/48 Playwright) | Design review of the sky ramp (V-14) |
+| G5 | Sun 13:00 | Not started | Two-machine demo from the public deploy; clear the CLAUDE.md register V-01..V-14 (G-08) | Needs the deploy |
 | Video | Sun 17:00 | Not started (Design, human) | Video or 7-slide fallback | Unchanged |
 | Internal submit | Sun 21:00 | Not started | Every field; links open without login | Unchanged |
 
-## Status at handoff (Sat 14 Nov 2026, 17:31 Asia/Manila container clock; previous 14:58). Branch claude/wizardly-lovelace-i2i0wa
+## Status at handoff (Sat 14 Nov 2026, 20:27 Asia/Manila container clock; previous 17:31). Branch ccr-dbbcdd02-kqy23v = main 38839d0
 
 | Part | Status | One-line reason / evidence |
 |---|---|---|
@@ -93,20 +91,20 @@ Remaining: 33 h 11 min.
 | 2.4 | VERIFIED (G3-01 demo values; team to confirm) | Planned margin shown on default load from the G3-01 preset (est. 32.3 to 67.2 min, OK, for the e2e stop); values chosen by SI at the operator's direction |
 | 2.5 | VERIFIED (interim) | Grid path for calculations and display (D-04 interim) |
 | 2.6 | IN PROGRESS (code-complete) | Parts 1-5: sheet, route/stops, coverage outlines (7e7c459), Plex fonts (f329682), 10 m contours (0bf81f2), hatch aliasing fix (b40550c); reviews e4cb7f6, 1d85b36, c739bf4. Only Design review (B-13) open |
-| 2.7 | VERIFIED (cloud Xeon) | Unity factors under 500 ms; at handoff one placeholder run hit 523 ms under load (HANDOFF Known failures 2); laptop timing at G5 |
-| 3.1 | IN PROGRESS | Planner + worker + six commands; C-15 route geometry outside the contract |
+| 2.7 | VERIFIED (cloud Xeon) | Re-run 20:26: longest route 309-319 ms (unity, used by the app), 364-436 ms (decreasing placeholder); time field 377-418 ms; laptop timing at G5 |
+| 3.1 | IN PROGRESS | Planner + worker + seven commands (edit_stop added, C-19); C-15 route geometry outside the contract |
 | 3.2 | VERIFIED (Design review pending) | Stop name/tasks via edit_stop (C-19 option a, fdc64e7); D6 rover point of view panel (C-22) |
 | 3.3 | IN PROGRESS (core done) | Outdoor/phone daylight check needs a real phone |
 | 3.4 | IN PROGRESS (core done) | Card prints stop tasks and the three D6 rover views with credits; paper print and fixed-scale map open |
 | 3.5 | NOT STARTED | Needs Vercel access (B-4) |
 | 3.6 | IN PROGRESS | Conditions built (9ec2f70, 6e8ca00, 9608ecb); AC-09 2 of 3 dates (B-10); scenario time set by G3-01 (2026-11-15 12:00 UTC, assumed) |
 | 4.1 | VERIFIED (Design review pending) | Contours, drill, AC-31 done; **sky-obstruction layer built** (20 m grid, plan 6.7; self-check 0.064 pp after R-19; off by default; legend: geometry, not dose + M12 benchmark). Per-stop sky value not shown (bundle, V-14 note) |
-| 4.2 | VERIFIED at M12 (Data and Science review pending) | AC-07 PASS: f_obs 18.50 % vs 18.5 % published (h_obs 1 m); 0-2 m sweep 20.73-16.51 %, all within ±3 pp; AC-21/AC-22 converged; reference position not computed (R-13); layer not built |
+| 4.2 | VERIFIED at M12 (Data and Science review pending) | AC-07 PASS: f_obs 18.50 % vs 18.5 % published (h_obs 1 m); 0-2 m sweep 20.73-16.51 %, all within ±3 pp; AC-21/AC-22 converged; reference position not computed (R-13) |
 | 4.3 | VERIFIED (result recorded; Data and Science review pending) | AC-08 PASS: 83 of 2,537 known path cells excluded (3.27 % ≤ 5 % Assumed), 1 unknown; waypoints sols 4469-5073; `docs/data/ac-08-rover-path.md` |
-| 4.4 | VERIFIED (automated) | axe, keyboard and width checks still pass in the 43-test Playwright run |
-| 4.5 | NOT STARTED | Needs the branch merged (B-8) |
+| 4.4 | VERIFIED (automated) | axe, keyboard and width checks pass in the 48-test Playwright run (20:26); manual checks at G5 |
+| 4.5 | VERIFIED (integrated build on main 38839d0) | PRs #2-#9 merged after checks and /code-review (R-15..R-19); deploy still missing (B-4) |
 | 5.1-5.3, 5.5 | NOT STARTED | After G4 |
-| 5.4 | IN PROGRESS | README SI use and references current to this handoff; Patrick's concept account (B-5) and native-library licences open |
+| 5.4 | IN PROGRESS | README SI use and references current (D5, D6, D12, papers); concept-origin account (B-5) and native-library licences open; D12 licence terms not read |
 
 ## Critical path
 
@@ -173,7 +171,7 @@ Work on optional features only when it does not endanger this path. The AREA 2D 
 | 4.2 | Run AC-07 sky-obstruction benchmark and preserve the interpretation “geometry, not dose.” | Data and Science | VERIFIED at M12 (Sat 19:46; review pending) | **AC-07 PASS at M12: f_obs 18.50 % vs 0.37π/2π = 18.5 %** (h_obs 1 m, Assumed); h_obs 0/1/2 m: 20.73/18.50/16.51 %, all within ±3 pp (Assumed); AC-21 (2°/1°/0.5°) and AC-22 (50/100/150 km) converged within 0.03 pp; horizon set 46 % of azimuths at 10-100 m (the butte), 36 % at 3-50 km. Reference position (about 10 %) NOT computed: sols UNVERIFIED (R-13). Sky-obstruction layer over the area not built. `docs/data/ac-07-sky-m12.md` | see completion record (AC-07) |
 | 4.3 | Run AC-08 rover-path consistency checks and document results. | Data and Science + Route Engine | VERIFIED (Sat 19:33; review pending) | **PASS: 83 / 2,537 known path cells excluded = 3.27 % (≤ 5 %, Assumed; after review R-17)**; slope median 8.8°, 83 cells > 20°; 157 D5 drives, sols 4469-5073; D5 frame check 3 mm. Sanity check only (weakness 64). Report `docs/data/ac-08-rover-path.md`; offline reproduction test in `pipeline/tests/test_rover_path.py`. Reproducible results and limitations | - |
 | 4.4 | Run accessibility checks, including serious axe violations and keyboard/reduced-motion behaviour. | Design | VERIFIED (automated checks); manual checks due at G5 | @axe-core/playwright 4.14.0: 0 serious/critical violations on Planning, Briefing (with card) and Field View (AC-11). AC-32: place, move and delete a stop by keyboard alone (map cursor: arrows 10 m, Shift 100 m, Enter adds; "Move stop X to the map cursor"; Delete), leg table as the non-map equivalent, console at 1280 and 1920 px without sideways scroll. No animations exist yet, so reduced motion has nothing to reduce. Manual projector/outdoor/slow-network checks are a G5 item. | 6bdb98e, 48e2774 |
-| 4.5 | Merge only passing Tier 2 items and produce the integrated G4 build. | Captain | UNVERIFIED | Merged commit SHAs; benchmark and accessibility results | - |
+| 4.5 | Merge only passing Tier 2 items and produce the integrated G4 build. | Captain | VERIFIED (20:27; deploy pending) | Merged in order: PR #2 1da70b5, #3 a761afd, #4 304d87c, #5 31270cf, #6 234d0cf, #7 40f3aef, #8 706cc1a, #9 38839d0. Integrated build at 38839d0: vitest 274/274, tsc clean, build OK (~249.1 of 250 KB), pytest 84, Playwright 48/48, licences current | 38839d0 |
 
 **G4 acceptance:** Tier 2 merged; AC-07 and AC-08 results recorded; no serious axe violations. If missed, ship Tier 1 plus only Tier 2 items that passed.
 
@@ -880,6 +878,27 @@ Known limitations: the graphite ramp is hard to see on dark imagery (Design revi
   ("20 m sample", plan 6.7) not shown: bundle headroom ~0.9 KB; h_obs 1 m (V-12); D12 licence terms not read
 Commit SHA: d8351d4, 48db58d (R-19). **Merged: PR #8 merge commit 706cc1a (Sat 14 Nov 20:24)**
 Next part / blocker owner: Design review of the ramp (B-13); B-4 deploy (human)
+```
+
+```text
+Part: session handoff (ccr-dbbcdd02-kqy23v, Sat 14 Nov 2026 18:29-20:28 Asia/Manila)
+Owner: the team (G-05); session operator (account appears to be Christian Jesus Alcazar's; to be confirmed)
+Status: VERIFIED (checks re-run on a clean install; no phase part left in progress)
+Scope: re-ran every check at 38839d0; updated PHASES, HANDOFF, DECISIONS, SI_LOG
+Checks run (exact commands), Sat 14 Nov 2026 20:25-20:27 Asia/Manila, at 38839d0:
+  npm ci                                           -> 83 packages, 0 vulnerabilities
+  npx vitest run                                   -> 274 passed / 274, 27 files
+  npx tsc --noEmit                                 -> clean
+  rm -rf dist && npm run build                     -> OK; main 207.64 kB gzip (Vite) + worker 41,460 B (gzip -9) = ~249.1 of 250 KB
+  (cd pipeline && ../.venv/bin/python -m pytest)   -> 84 passed
+  .venv/bin/python scripts/licences.py | diff -q - docs/licences.md -> no difference
+  PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome npx playwright test --trace off -> 48 passed
+  SHARPWALK_AREA=public/area node --experimental-strip-types bench/route-bench.ts -> longest route 309-436 ms (< 500),
+     time field 377-418 ms (< 3 s), A* equals the field in every run
+Results: all green.
+Known limitations: no public deploy (B-4); bundle ~0.9 KB from the 250 KB budget; see HANDOFF "Known failures"
+Commit SHA: the handoff commit on ccr-dbbcdd02-kqy23v (not merged; main stays 38839d0)
+Next part / blocker owner: B-4 deploy (a person); register review V-01..V-14 (team)
 ```
 
 ## Phase-part completion record
