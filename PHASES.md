@@ -33,7 +33,16 @@ This file is the live execution record. Update it **after every phase part**, no
 
 The plan freezes at Sun 13:00, leaving 10 h 59 min for validation, video and submission, plus a 2 h 59 min buffer after the internal submit target. Verify the portal in case the event's actual deadline differs.
 
-## Status at handoff (Sat 14 Nov 2026, 13:45 Asia/Manila container clock; previous 12:20)
+## G1 outcome (recorded Sat 14 Nov 2026, 13:55 Asia/Manila, before the 14:00 gate)
+
+G1 acceptance is **not fully met**: area grids are generated and checksummed (reproduced this session: a93aa209...99a3ef,
+aa366e6f...18bdc0, c9c06b3e...58ae21, GDAL 3.10.3) and provenance now covers D1 and D2, but the area manifest is not
+written (C-12: residual fields would need invented numbers) and no control-point residuals exist (1.5). **Plan fallback
+applies: overlays in 2D only.** Cesium overlay draping must not start. The 3D view (1.6) has not been started and has no
+written Local Lead approval for Cesium Mars (D-02); CLAUDE.md says "If 3D is doubtful, cut it at G0/G1". **Recommendation
+for the team (not decided here): cut the 3D view now under the fixed cut order; the AREA 2D sheet is never cut.**
+
+## Status at handoff (Sat 14 Nov 2026, 13:55 Asia/Manila container clock; previous 12:20)
 
 | Part | Status | One-line reason |
 |---|---|---|
@@ -55,8 +64,8 @@ The plan freezes at Sun 13:00, leaving 10 h 59 min for validation, video and sub
 | 2.6 | IN PROGRESS | Part 2 done: habitat, stops, route drawn via the worker (88f8b9a, 19b7c68); coverage outlines, contours, fonts open |
 | 2.7 | VERIFIED (Node, cloud Xeon) | k_v = 1: longest route 354-395 ms, field 426-470 ms; worker command 261 ms for 2 legs |
 | 3.1 | IN PROGRESS | Planner (only MissionPlan writer) + Comlink worker + all six commands; C-15 route geometry outside the contract |
-| 3.3 | IN PROGRESS (core done) | Field View: manual ticks, est. continue/return-now margins, last-tick label, stale-plan guard (edf9492, 0acf9e7); phone-size outdoor check open |
-| 3.4 | IN PROGRESS (core done) | Briefing card: version stamp, STALE + print blocked, legs/stops/assumptions/limits/footer, sheet map (05cc50e, 0ff9423); A5 print not checked on paper
+| 3.3 | IN PROGRESS (core done) | Field View: manual ticks, est. margins, stale guard (edf9492, 0acf9e7); phone width checked (b68dec1); outdoor daylight check needs a real phone |
+| 3.4 | IN PROGRESS (core done) | Card + STALE + print; Chromium PDF = one A5 page (b68dec1, a7cb260); paper print and fixed-scale map open |
 | 3.2 | IN PROGRESS (nearly done) | + sources panel (UX-15) and AC-05 quantity labelling (66c373e, 0acf9e7); remaining: stop renaming/tasks, datasets-in-view derived from layers |
 | 3.x-5.x | NOT STARTED | |
 
@@ -415,6 +424,27 @@ Results: vitest 201/201 (15 files); tsc clean; build OK; playwright 12/12
 Review status: /code-review high on 088a272...edf9492: 6 findings; 4 fixed (0acf9e7); 2 deferred (DECISIONS R-06)
 Commit SHA: 66c373e, edf9492, 0acf9e7 (+ log commit)
 Next part / blocker owner: T-01 values, D-04 (G2 19:00), C-14 -> 3.5 first deploy (G3)
+```
+
+```text
+Part: 3.3 phone width (UX-12), 3.4 print/PDF check, P-04 D2 provenance, R-04/R-06 follow-ups (fifth "proceed")
+Owner: no per-module roles (G-04)
+Status: IN PROGRESS (3.3, 3.4); P-04 DONE (checks green)
+Scope completed: phone layout (the Field View button was off screen at 390 px; field overlay covered the nav);
+  card-only print scoped to 'Print briefing' (Ctrl+P from Planning no longer blank); Chromium PDF of the card is one
+  A5 page (420 x 595 pt), two columns; run_display writes the D2 provenance record (display checksums unchanged);
+  datasets in view derived from layer sources + plan provenanceIds
+Files changed: src/app/{App.tsx,styles.css}, src/briefing/BriefingView.tsx, src/map/AreaSheet.tsx,
+  pipeline/sharpwalk/{run_display,outputs}.py, pipeline/tests/test_outputs.py, e2e/{phone,briefing,plan-route}.spec.ts
+Checks run (exact commands): (cd pipeline && ../.venv/bin/python -m pytest -q); (cd pipeline && ../.venv/bin/python
+  -m sharpwalk.run_display ../public/area); npx vitest run; npx tsc --noEmit; npm run build;
+  PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome npx playwright test --trace off
+Results: pytest 40 passed; display layer sha256 unchanged (08c9e4be8f51, a8ca2a3ba913, d3925d882723); vitest 201/201;
+  tsc clean; build OK; playwright 14/14
+Known limitations: PDF checked in Chromium only, not on paper or in Safari/Firefox; outdoor readability not tested
+Review status: /code-review high on 7539a4f...bfa4189: 5 findings; 4 fixed (a7cb260); 1 deferred (R-07)
+Commit SHA: b68dec1, bfa4189, a7cb260 (+ log commit)
+Next part / blocker owner: team: T-01, D-04 (19:00), C-14, 3D cut decision; then 3.5 first deploy
 ```
 
 ## Phase-part completion record
