@@ -30,7 +30,7 @@ Do not interpret blank fields as proof that no work exists. Inspect GitHub and t
 - Operator approvals recorded: G-07 (team credit), C-AGREE (contracts as drafted), G3-02 (edit_stop contract change; SI-chosen defaults load by default, labelled).
 - **G3 status: Tier 1 end-to-end green including planned margin; first public deploy NOT done (B-4: needs Vercel access, a human).** G3 baseline time Sun 01:00.
 - Next for a session: B-4 deploy as soon as a person links Vercel; then G4: B-7 rover positions for AC-07/AC-08 (team input), AC-09 third date (B-10), design review B-13. Code-only: R-15 items 7/9 cleanup if bundle allows (~2.1 KB headroom).
-- **19:33: AC-08 PASS** (76 of 2,412 Curiosity path cells excluded, 3.15 % <= 5 % Assumed; `docs/data/ac-08-rover-path.md`). D5 fetched from MMGIS with checksums. AC-07 still open.
+- **19:37: AC-08 PASS** (83 of 2,537 known Curiosity path cells excluded, 3.27 % <= 5 % Assumed, after review R-17; `docs/data/ac-08-rover-path.md`). D5 fetched from MMGIS with checksums. AC-07 still open.
 - **19:29: CLAUDE.md now has the placeholder register V-01..V-10 (G-08).** Every invented value must be FIXED or KEPT by the team before the G5 freeze (Sun 13:00); new ones are added there in the same commit.
 - Team to confirm: G-07 (Patrick's G-06 statement said otherwise), G3-01 values, C-22 image picks and image-use terms, H-01 habitat.
 
