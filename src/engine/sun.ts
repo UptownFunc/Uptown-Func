@@ -32,9 +32,6 @@ export interface MarsSun {
   readonly azimuth_deg: number;
 }
 
-/** Unit of local mean solar time in engine Quantities: a clock label, never a duration (plan 6.10). */
-export const MARS_CLOCK_UNIT = "Mars h (clock label)";
-
 const rad = (d: number) => (d * Math.PI) / 180;
 const deg = (r: number) => (r * 180) / Math.PI;
 const mod = (x: number, m: number) => ((x % m) + m) % m;

@@ -4,8 +4,7 @@
 // provenance record is reported as missing, never filled in.
 import type { Assumption, Provenance, Quantity, ValueClass } from "../contracts";
 import { CONSTANTS, type ConstantId } from "../constants";
-import { SCENARIO_UNIT } from "../engine/assumptions";
-import { formatUtc } from "./format";
+import { formatAssumptionValue } from "./format";
 
 /** Computed methods named as data IDs in the plan's register (plan 6, D10). Not datasets: no provenance.json record. */
 const METHOD_SOURCES: Record<string, { title: string; detail: string }> = {
@@ -54,8 +53,7 @@ export function explainQuantity(q: Quantity, provenance: readonly Provenance[], 
     assumptions: q.assumptionIds.map((id) => {
       const a = assumptions.find((x) => x.id === id);
       if (!a) return { id, text: `${id}: not in this plan's assumption list` };
-      const v = a.unit === SCENARIO_UNIT ? formatUtc(a.value) : a.unit === "s" ? `${(a.value / 60).toFixed(1)} min` : `${a.value}${a.unit === "1" ? "" : ` ${a.unit}`}`;
-      return { id, text: `${a.name} = ${v} (${a.source}): ${a.rationale}` };
+      return { id, text: `${a.name} = ${formatAssumptionValue(a)} (${a.source}): ${a.rationale}` };
     }),
   };
 }

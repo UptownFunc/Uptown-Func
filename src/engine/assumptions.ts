@@ -22,6 +22,9 @@ export const KV_PLACEHOLDER = {
  *  seconds UTC, rationale }, stored as an Assumption whose unit names the time scale. No default (team choice). */
 export const SCENARIO_ID = "scenario_utc";
 export const SCENARIO_UNIT = "s since 1970-01-01 UTC";
+/** Unit of local mean solar time in engine Quantities: a clock label, never a duration (plan 6.10). Kept here, not
+ *  in sun.ts, so UI formatting does not import the sun module. */
+export const MARS_CLOCK_UNIT = "Mars h (clock label)";
 
 export const SLOPE_LIMIT_ASSUMPTION: Assumption = {
   id: "A-slope-limit",

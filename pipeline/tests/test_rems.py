@@ -42,3 +42,8 @@ def test_snapshot_carries_the_reading_its_date_and_the_disclaimer():
     assert s["source"]["disclaimer"].startswith("The information contained into this file is provided by Centro de Astrobiologia (CAB)")
     assert "outreach purposes only" in s["source"]["disclaimer"]
     assert s["valueClass"] == "directly_measured"
+
+
+def test_skips_a_sol_that_is_not_a_whole_number():
+    f = feed([sol(4994, "2026-08-24"), {**sol(4995, "2026-08-25"), "sol": "4995.0"}])
+    assert latest_complete_sol(f)["sol"] == "4994"

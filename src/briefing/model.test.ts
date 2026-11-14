@@ -57,3 +57,11 @@ describe("stale check (UX-11, AC-06)", () => {
     expect(isStale("abc", null)).toBe(true);
   });
 });
+
+describe("briefing card: scenario time assumption (Conditions, plan 19.11 weakness 27)", () => {
+  it("shows the scenario time as a UTC date and time, not raw seconds", () => {
+    const a = { id: "A-scenario_utc", name: "Scenario date and time (UTC)", value: Date.UTC(2026, 10, 14, 4, 0) / 1000, unit: "s since 1970-01-01 UTC", rationale: "demo", source: "team choice" as const };
+    const m = briefingModel({ ...plan, assumptions: [...plan.assumptions, a] });
+    expect(m.assumptions[2]!.text).toBe("Scenario date and time (UTC) = 2026-11-14 04:00 UTC (team choice): demo");
+  });
+});

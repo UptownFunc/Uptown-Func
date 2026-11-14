@@ -22,7 +22,7 @@ def _num(v):
 
 def latest_complete_sol(feed: dict) -> dict:
     """The highest-numbered sol whose air temperatures and pressure are all numbers ("--" means not reported)."""
-    complete = [s for s in feed.get("soles", []) if _num(s.get("sol")) is not None and all(_num(s.get(f)) is not None for f in _FIELDS)]
+    complete = [s for s in feed.get("soles", []) if str(s.get("sol", "")).isdigit() and all(_num(s.get(f)) is not None for f in _FIELDS)]
     if not complete:
         raise ValueError("no sol in the feed has air temperature and pressure")
     return max(complete, key=lambda s: int(s["sol"]))

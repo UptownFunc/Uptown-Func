@@ -1,8 +1,8 @@
 // SI-assisted: drafted with Claude Code (Claude Opus 5.5); human Design review pending.
 // Display formatting for engine Quantities. The engine keeps seconds; the UI shows SI minutes (CLAUDE.md).
 // Estimates are shown as ranges marked "est." (the caller italicises them); unknown values stay "unknown".
-import type { Quantity } from "../contracts";
-import { MARS_CLOCK_UNIT } from "../engine/sun";
+import type { Assumption, Quantity } from "../contracts";
+import { MARS_CLOCK_UNIT, SCENARIO_UNIT } from "../engine/assumptions";
 
 export interface Formatted { readonly text: string; readonly estimated: boolean; readonly unknown: boolean }
 
@@ -38,6 +38,14 @@ export function formatQuantity(q: Quantity): Formatted {
 /** A UTC instant (Unix seconds) as "YYYY-MM-DD HH:MM UTC". */
 export function formatUtc(s: number): string {
   return `${new Date(s * 1000).toISOString().slice(0, 16).replace("T", " ")} UTC`;
+}
+
+/** An Assumption's value for the sources panel and the briefing card: durations in SI minutes, the scenario time as
+ *  a UTC date and time, dimensionless values bare, anything else as value and unit. */
+export function formatAssumptionValue(a: Assumption): string {
+  if (a.unit === SCENARIO_UNIT) return formatUtc(a.value);
+  if (a.unit === "s") return `${(a.value / 60).toFixed(1)} min`;
+  return a.unit === "1" ? `${a.value}` : `${a.value} ${a.unit}`;
 }
 
 /** Engine lengths (model-derived from D1); the caller carries the Quantity metadata. */

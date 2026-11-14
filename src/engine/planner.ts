@@ -8,9 +8,9 @@ import { Command, MissionPlan, type Assumption, type Leg, type PlannedMargin, ty
 import { CONSTANTS } from "../constants";
 import { f1 } from "../geo";
 import { f1ToPlanetographic, type PlanetographicPoint } from "../geo/planetographic";
-import { MARS_CLOCK_UNIT, marsSun, ttMinusUtc_s } from "./sun";
+import { marsSun, ttMinusUtc_s } from "./sun";
 import { cellCentreF1, f1ToCell, type GridDef } from "../geo/grid";
-import { KV_PLACEHOLDER, SCENARIO_ID, SCENARIO_UNIT, SLOPE_LIMIT_ASSUMPTION } from "./assumptions";
+import { KV_PLACEHOLDER, MARS_CLOCK_UNIT, SCENARIO_ID, SCENARIO_UNIT, SLOPE_LIMIT_ASSUMPTION } from "./assumptions";
 import { legMetrics, type SpeedRange } from "./leg";
 import { plannedMarginProfile } from "./margin";
 import { CLASS, edgeCost, routeAStar, timeField, type RouteGrid } from "./route";

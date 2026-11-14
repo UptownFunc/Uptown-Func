@@ -2,7 +2,7 @@
 // Briefing card content (plan 3.3 / UX-10 / UX-11, module 04C): built only from a MissionPlan copy and stamped with its
 // version. Values keep their class: estimates stay est. ranges, assumed values say so, unknown stays unknown.
 import type { MarginState, MissionPlan } from "../contracts";
-import { formatDuration, formatLength } from "../app/format";
+import { formatAssumptionValue, formatDuration, formatLength } from "../app/format";
 
 export interface BriefingLeg { label: string; heading: string; distance: string; climb: string; time: string; estimated: boolean }
 export interface BriefingStop { letter: string; name: string; duration: string; durationClass: string; tasks: string[] }
@@ -34,7 +34,7 @@ export function briefingModel(plan: MissionPlan): BriefingModel {
     })),
     assumptions: plan.assumptions.map((a) => ({
       id: a.id,
-      text: `${a.name} = ${a.unit === "s" ? `${(a.value / 60).toFixed(1)} min` : `${a.value} ${a.unit === "1" ? "" : a.unit}`.trim()} (${a.source}): ${a.rationale}`,
+      text: `${a.name} = ${formatAssumptionValue(a)} (${a.source}): ${a.rationale}`,
     })),
     margin: { text: end.text, state: end.unknown ? null : last?.state ?? null, unknown: end.unknown },
   };
