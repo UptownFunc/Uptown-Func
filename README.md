@@ -50,6 +50,7 @@ metabolic workload (off), live data feeds, or 3D (cut at G1, see `DECISIONS.md`)
 | D2 - MSL Gale HiRISE colour orthophoto COG, 0.25 m (USGS Astrogeology) | Base image of the sheet and the briefing map | Display only; no number is derived from it |
 | D7 - MSL REMS daily weather summary (CAB, via mars.nasa.gov) | Build-time snapshot of the latest sol with air temperature and pressure | "Conditions at Curiosity on [date], for context": air temperature range and pressure, at the rover, not the boxwork |
 | D6 - Curiosity raw images (NASA MSL raw image archive) | Three Navcam frames from sols 4602, 4628 and 4650, when the rover was in the boxwork unit (per the mission blog) | "Rover point of view": similar terrain, not the demo stops and not a route check; sol, date, camera and credit on each image, in the console and on the card |
+| D12 - MOLA-HRSC blended DEM 200 m (USGS), with D1 | Plan 6.7 horizon profiles on a 20 m grid; AC-07 benchmark at Butte M12 | "Sky obstruction layer" (off by default): % of the upper hemisphere blocked by terrain, geometry not dose, with the M12 benchmark in its legend |
 | D10 - Mars24 algorithm (NASA GISS) | Computed at the area centre for the team's Assumed scenario time | Local mean solar time (clock label), solar longitude, sun elevation (terrain shadowing not modelled) |
 
 Each record (product, URL, licence, CRS, vertical reference, resolution, checksum scope) is in

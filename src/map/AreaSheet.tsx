@@ -62,11 +62,15 @@ export interface AreaSheetProps {
   readonly onCursor?: (p: LatLon | null) => void;
   /** Tier 2 time-to-habitat contours and the simulated drill line; null hides them. */
   readonly contours?: ContourDisplay | null;
+  /** Plan 6.7 sky-obstruction layer (tier 2), off by default; geometry, not dose. */
+  readonly showSky?: boolean;
+  /** Whether this area has a sky layer, and whether its image failed to load. */
+  readonly onSky?: (state: "none" | "ok" | "failed") => void;
 }
 
 const cursorStyle = new Style({ image: new RegularShape({ points: 4, radius: 11, radius2: 0, angle: 0, stroke: new Stroke({ color: "#f3eee4", width: 2 }) }) });
 
-export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hoverIndex = null, onHoverIndex, onDatasets, onCursor, contours = null }: AreaSheetProps) {
+export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hoverIndex = null, onHoverIndex, onDatasets, onCursor, contours = null, showSky = false, onSky }: AreaSheetProps) {
   const target = useRef<HTMLDivElement>(null);
   const area = useRef<LoadedArea | null>(null);
   const planLayerRef = useRef<ReturnType<typeof createPlanLayer> | null>(null);
@@ -99,6 +103,14 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
   snapRef.current = onSnapshotReady;
   const [readout, setReadout] = useState<Readout | null>(null);
   const [legend, setLegend] = useState<LoadedArea["display"]["layers"]>([]);
+  const [sky, setSky] = useState<LoadedArea["display"]["sky"]>(undefined);
+  const skyLayer = useRef<ImageLayer<Static> | null>(null);
+  const [skyFailed, setSkyFailed] = useState(false);
+  const skyRef = useRef(onSky);
+  skyRef.current = onSky;
+  const showSkyRef = useRef(showSky);
+  showSkyRef.current = showSky;
+  useEffect(() => { skyLayer.current?.setVisible(showSky); }, [showSky]);
   const [error, setError] = useState<string | null>(null);
   /** AC-31: display layers that failed to load are named; the sheet keeps working without them. */
   const [layerErrors, setLayerErrors] = useState<string[]>([]);
@@ -131,6 +143,7 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
       if (cancelled || !target.current) return;
       area.current = a;
       setLegend(a.display.layers);
+      setSky(a.display.sky);
       // UX-15: the datasets in view are the sources of the layers actually shown (recomputed if one fails to load).
       const report = () => datasetsRef.current?.([...new Set(a.display.layers.filter((l) => !failed.current.has(l.id)).map((l) => l.source))]);
       report();
@@ -156,10 +169,19 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
         source.on("imageloaderror", () => fail(L));
         return new ImageLayer({ className, source });
       };
+      // Plan 6.7 / 9.2: precomputed single-hue ramp; hidden until the user turns it on.
+      skyLayer.current = null;
+      setSkyFailed(false);
+      if (a.display.sky) {
+        const src = new Static({ url: dataUrl + a.display.sky.image, imageExtent: extent, projection: F7_PROJECTION, interpolate: false });
+        src.on("imageloaderror", () => { setSkyFailed(true); skyRef.current?.("failed"); });
+        skyLayer.current = new ImageLayer({ className: "layer-sky", source: src, visible: showSkyRef.current });
+      }
+      skyRef.current?.(a.display.sky ? "ok" : "none");
       const o = f1ToF7(a.grid.origin);
       map = new OlMap({
         target: target.current,
-        layers: [image("d2", "layer-d2"), image("hillshade", "layer-hillshade"), terrain(), elevationLayer.current!, coverageLayer.current!, contourLayer.current!, planLayer.current, markerLayerRef.current!, cursorLayer.current!],
+        layers: [image("d2", "layer-d2"), image("hillshade", "layer-hillshade"), ...(skyLayer.current ? [skyLayer.current] : []), terrain(), elevationLayer.current!, coverageLayer.current!, contourLayer.current!, planLayer.current, markerLayerRef.current!, cursorLayer.current!],
         controls: [new Zoom(), new ScaleLine({ units: "metric" })],
         view: new View({
           projection: F7_PROJECTION, center: [o.x, o.y], resolution: INITIAL_RESOLUTION_F7,
@@ -294,6 +316,10 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
             {contourEntry && (contourEntry.ok
               ? <li data-layer="contours">{contourEntry.text}{contourEntry.source && coverageNotes[contourEntry.source] && <span className="coverage-note"> · {coverageNotes[contourEntry.source]}</span>}</li>
               : <li data-layer="contours" className="failed">Contours (D1) - not loaded: {contourEntry.text}</li>)}
+            {showSky && sky && skyFailed && <li data-layer="sky" className="failed">Sky obstruction - not loaded</li>}
+            {showSky && sky && !skyFailed && <li data-layer="sky">Sky obstruction, % of the upper hemisphere (geometry, not dose) - model derived, D1 near and
+              D12 far, {fmt(sky.cell)} grid, observer {fmt(sky.hObs)} assumed; darker = more sky blocked. Checked at Butte M12: {fmt(sky.benchmark)}{" "}
+              vs {fmt(sky.published)} published (AC-07)</li>}
             {legend.length > 0 && (coverageError
               ? <li className="failed" data-testid="coverage-status">Coverage outlines not available: {coverageError}</li>
               : <li className="muted" data-testid="coverage-status">{coverageDatasets.length

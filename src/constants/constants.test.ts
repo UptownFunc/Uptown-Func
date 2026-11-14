@@ -12,7 +12,7 @@ describe("constants register", () => {
   });
 
   it("lists exactly the known unresolved citations, so no new constant can ship without a page", () => {
-    expect(unresolvedCitations().sort()).toEqual(["slopeLimit"]);
+    expect(unresolvedCitations().sort()).toEqual(["skyObstructionM12", "slopeLimit"]);
   });
 
   it("does not present the nominal walking speed as an observation", () => {

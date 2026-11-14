@@ -26,5 +26,19 @@
     "valueClass": "directly_measured",
     "retrievedOn": "2026-11-14",
     "sha256": "3514c10d406d6aac6ee827cadad1ef3c4bac9fdc34568ec83deee390bf9c181d"
+  },
+  {
+    "id": "D12",
+    "productId": "Mars_HRSC_MOLA_BlendDEM_Global_200mp_v2",
+    "url": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Mars/HRSC_MOLA_Blend/Mars_HRSC_MOLA_BlendDEM_Global_200mp_v2.tif",
+    "licence": "USGS Astrogeology product; licence terms not yet read (UNVERIFIED)",
+    "crs": "+proj=longlat +R=3396190 +no_defs",
+    "latitudeType": "planetocentric",
+    "longitudeDirection": "east",
+    "verticalReference": "unknown (not stated in the header; phase 1.1 audit)",
+    "resolution_m": 200.0,
+    "valueClass": "directly_measured",
+    "retrievedOn": "2026-11-14",
+    "sha256": "8602093eab5ad5b00066269c96de55d72c1e787d008bd82241281b820d56cced"
   }
 ]

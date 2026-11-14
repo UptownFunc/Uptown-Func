@@ -84,5 +84,56 @@
   "contours": {
     "path": "contours.geojson",
     "sha256": "c276ed4af5814cedab628f85f730bca103d9ba4126f6aee105980672f168c173"
+  },
+  "sky": {
+    "name": "Sky obstruction, % of the upper hemisphere (geometry, not dose)",
+    "valueClass": "model_derived",
+    "source": "D1",
+    "sources": [
+      "D1",
+      "D12"
+    ],
+    "grid": {
+      "path": "sky_obstruction.uint16.bin",
+      "sha256": "fc225d1364d60b951095556ede0b3a96f7008eb931d5c6646c53cfecb6f90027",
+      "rows": 150,
+      "cols": 150,
+      "cell_m": 20.0,
+      "f6Transform": [
+        20.0,
+        0.0,
+        -1500.0,
+        0.0,
+        -20.0,
+        1500.0
+      ],
+      "dtype": "uint16",
+      "scale": 0.0001,
+      "noData": 65535
+    },
+    "image": {
+      "path": "sky_obstruction.png",
+      "sha256": "03cc0f5964ab07af7c8e0543b33392df74339df2fd6301258529a6b7c6fe39a9",
+      "pixel_m": 4.0,
+      "rampMax": 0.5
+    },
+    "h_obs_m": 1.0,
+    "range": [
+      0.061995052035568814,
+      0.4345862736642714
+    ],
+    "benchmark": {
+      "id": "AC-07",
+      "f_obs": 0.1850098373119806,
+      "published": 0.185,
+      "site": "Butte M12, sols 1456-1467"
+    },
+    "method": "plan 6.7: 1 deg rays, steps max(2 m, r/100) to 100 km, max-aggregated levels, curvature r^2/2R",
+    "selfCheck_maxDiff_pp": 0.06400619787330919,
+    "d1MinusD12Offset_m": {
+      "mean": 2.9160742303224536,
+      "std": 20.51118696244306
+    },
+    "builtOn": "2026-11-14"
   }
 }

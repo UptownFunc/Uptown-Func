@@ -36,11 +36,21 @@ def _require_f7(ds, name, x0, y0, x1, y1):
         raise ValueError(f"{name} does not cover the area extent")
 
 
-def main(area_dir: str) -> None:
+def keep_sky(old: dict, new: dict, out) -> dict:
+    """Carry the sky registration over a layers.json rewrite if its grid and image files still match their sha256."""
+    from pathlib import Path
+    sky = old.get("sky")
+    if sky and all((Path(out) / sky[k]["path"]).exists() and sha256_file(Path(out) / sky[k]["path"]) == sky[k]["sha256"] for k in ("grid", "image")):
+        return {**new, "sky": sky}
+    return {k: v for k, v in new.items() if k != "sky"}
+
+
+def main(area_dir: str, with_sky: bool = False) -> None:
     # run_contours (called at the end) needs the GDAL CLI; fail now, before any download or rewrite, not after.
     if shutil.which("gdal_contour") is None:
         raise SystemExit("gdal_contour not found: install the GDAL command-line tools (e.g. apt-get install gdal-bin) first")
     out = Path(area_dir)
+    old_layers = json.loads((out / "layers.json").read_text()) if (out / "layers.json").exists() else {}
     rep = json.loads((out / "build_report.json").read_text())
     lat0, lon0 = rep["origin"]["f1"]["lat"], rep["origin"]["f1"]["lon"]
     n, cell = rep["rows"], rep["cellSize_m"]
@@ -118,7 +128,15 @@ def main(area_dir: str) -> None:
     # The 10 m contours (plan 7.8) are registered in layers.json the same way.
     from .run_contours import main as write_contours
     write_contours(area_dir)
+    # The plan 6.7 sky-obstruction layer takes about 5 min and the network, so it is recomputed only with --sky;
+    # otherwise its existing registration is kept when its files still match (keep_sky).
+    if with_sky:
+        from .run_sky_grid import main as write_sky
+        write_sky(area_dir)
+    else:
+        lay_path = out / "layers.json"
+        lay_path.write_text(json.dumps(keep_sky(old_layers, json.loads(lay_path.read_text()), out), indent=2))
 
 
 if __name__ == "__main__":
-    main(sys.argv[1])
+    main(sys.argv[1], "--sky" in sys.argv[2:])
