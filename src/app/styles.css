@@ -136,3 +136,4 @@ body { background: var(--housing); color: var(--text); font-family: var(--sans);
    other than the one under the cursor (the status line wraps to two lines on first hover; the profile appears). */
 .well > .status { height: 52px; overflow: hidden; align-content: flex-start; }
 .well > .profile { height: 158px; overflow: hidden; }
+@media (max-width: 800px) { .well > .status { height: 92px; } }

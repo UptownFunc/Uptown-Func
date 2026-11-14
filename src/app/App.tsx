@@ -44,6 +44,10 @@ export function App() {
   // Commands run one at a time, each against the plan version the previous one produced, so quick clicks are
   // not refused as stale. Failures are shown, never swallowed.
   const queue = useRef<Promise<void>>(Promise.resolve());
+  // A hover index belongs to one plan's profile; drop it when the plan version changes.
+  const version = output?.plan.versionHash;
+  useEffect(() => { setHover(null); }, [version]);
+
   const send = useCallback((type: string, payload: Record<string, unknown>) => {
     queue.current = queue.current.then(async () => {
       const e = engine.current, cur = outputRef.current;

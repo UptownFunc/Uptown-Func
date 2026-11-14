@@ -113,7 +113,8 @@ test("profile scrubs both ways with the map, and margin ticks appear when the pl
   await setTime(page, "Operational tasks (t_ops)", "10");
   await setTime(page, "Contingency (t_cont)", "10");
   await setTime(page, "Stop A duration", "20");
-  await expect(page.getByTestId("current-stop_duration").first()).toBeVisible();
+  await expect(page.getByTestId("current-stop_duration-S1")).toHaveText("20.0 min · assumed");
+  await expect(page.getByTestId("current-stop_duration")).toHaveText("not set");
   await expect(page.getByTestId("margin-state")).toHaveText("OVER", { timeout: 20_000 });
   await expect(page.getByTestId("profile-tick-NEAR_LIMIT")).toHaveText("margin 10% here");
   await expect(page.getByTestId("profile-tick-OVER")).toHaveText("margin 0 here");

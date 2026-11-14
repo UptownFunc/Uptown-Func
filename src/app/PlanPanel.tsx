@@ -62,7 +62,7 @@ export function PlanPanel({ output, message, onDeleteStop, onSetTime }: PlanPane
           <thead><tr><th>Leg</th>
             <th>Length <span className="badge" title="Model-derived from D1 on the 2 m grid path">model · D1</span></th>
             <th>Climb <span className="badge" title="Model-derived from D1 heights">model · D1</span></th>
-            <th>Walking time <span className="badge" title="Estimated range: 0.64-0.97 m/s suited range, k_v placeholder">est.</span></th></tr></thead>
+            <th>Walking time <span className="badge" title={`Estimated range: ${RANGE.low}-${RANGE.high} m/s suited range, k_v placeholder`}>est.</span></th></tr></thead>
           <tbody>
             {plan.legs.map((l) => {
               const t = formatDuration(l.time);

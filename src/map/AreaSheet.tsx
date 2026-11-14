@@ -62,6 +62,7 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
   hoverRef.current = onHoverIndex;
   /** F7 x, y of each profile sample, for nearest-sample lookup on pointer move. */
   const profXY = useRef<Float64Array>(new Float64Array(0));
+  const lastHover = useRef<number | null>(null);
   const snapRef = useRef(onSnapshotReady);
   snapRef.current = onSnapshotReady;
   const [readout, setReadout] = useState<Readout | null>(null);
@@ -102,7 +103,7 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
       });
       // The frame is computed once; readouts are throttled to one per animation frame.
       const frame = gridFrame(a.grid);
-      let pending: number[] | null = null, raf = 0, lastHover: number | null = null;
+      let pending: number[] | null = null, raf = 0;
       map.on("pointermove", (e) => {
         pending = e.coordinate;
         if (raf) return;
@@ -118,7 +119,7 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
             if (d < bestD) { bestD = d; best = i / 2; }
           }
           const next = best >= 0 ? best : null;
-          if (next !== lastHover) { lastHover = next; hoverRef.current?.(next); }
+          if (next !== lastHover.current) { lastHover.current = next; hoverRef.current?.(next); }
         });
       });
     }).catch((e: unknown) => setError(e instanceof Error ? e.message : String(e)));
@@ -129,6 +130,7 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
     if (!area.current) return;
     drawPlan(planLayer.current, plan, area.current.grid);
     profXY.current = profileXY(plan, area.current.grid);
+    lastHover.current = null; // indices refer to the previous profile
   }, [plan]);
 
   useEffect(() => {

@@ -27,7 +27,7 @@ export function TimeRow({ id, label, current, onSet, stopId, inherited }: {
     <form className="time-row" onSubmit={(e) => { e.preventDefault(); if (valid) onSet(id, n * 60, why.trim(), stopId); }}>
       <div className="time-head">
         <span>{label}</span>
-        <span data-testid={`current-${id}`} className={current ? "assumed" : "unknown"}>
+        <span data-testid={`current-${id}${stopId ? `-${stopId}` : ""}`} className={current ? "assumed" : "unknown"}>
           {current ? `${(current.value / 60).toFixed(1)} min · assumed` : inherited ?? "not set"}
         </span>
       </div>
