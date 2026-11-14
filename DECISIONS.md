@@ -66,7 +66,7 @@ Ten findings. Eight were fixed, test-first where code was involved. One was fixe
 
 | ID | Topic | Status |
 |---|---|---|
-| K-01 | Slope factors k_v for the bins 0-5, 5-10, 10-15 and 15-20 deg | **Values missing.** Plan 6.5 says they are Assumed and editable but does not list them in part 1; they are probably in section 19. The engine takes them as a required input and refuses anything other than four positive factors. Route Engine to supply the values with their source. |
+| K-01 | Slope factors k_v for the bins 0-5, 5-10, 10-15 and 15-20 deg | **DECIDED 14 Nov 13:00 by the session operator: k_v = 1 placeholder in every bin, with a visible ASSUMED banner.** Plan 19.5 confirms k_v stay Assumed (no speed-versus-slope source exists) and gives no values; 19.11 weakness 5 leaves them to the team "by G2". The placeholder is a team-choice Assumption (`A-kv`), not a measurement. Revisit: the team supplies four values with a one-line rationale; then also apply weakness 57 (interpolate between bin centres). |
 | K-02 | Bin-edge convention | The code uses lower-inclusive bins: [0,5), [5,10), [10,15), [15, limit]. Edges exactly at the limit are allowed. Route Engine to confirm. |
 | D-03 note | Connectivity of the demo area at 2 m | The main routable region covers 58.1% of the area; the area centre is not in it. Habitat and stops must be placed in the main region. Recorded for the D-03 sign-off. |
 
@@ -119,6 +119,19 @@ All ten findings fixed, test-first where possible. Each of the three key tests w
 |---|---|---|
 | G-04 | Authorship wording | The handoff request asked to "preserve the user's sole authorship", but CLAUDE.md on `main` (G-01, PR #1) credits the concept and plan to the whole four-member team. The session followed the merged repo rule. The team should confirm which wording is right; the session changed nothing. |
 | R-01 | G2 latency | At the handoff re-run, the longest route took 521-552 ms with decreasing placeholder factors (target < 500 ms). First try: reuse search buffers. Fallback: a 4 m grid (D-08). Re-measure with the real K-01 values on a mid-range laptop, in a Worker. |
+
+## Session 14 Nov 13:00-13:20 (claude/trusting-fermi-c5pc0s)
+
+| ID | Topic | Decision / status | Evidence / revisit |
+|---|---|---|---|
+| G-04 | Module ownership | **No per-module roles.** The session operator (14 Nov, ~13:00) stated: "no roles the phases are setup to start from beginning to end so simply continue working". Sessions take phase parts in order; one branch per session. Contract changes still need the agreement rule in CLAUDE.md, now from the team as a whole. | HANDOFF.md ownership section |
+| H-01 | Default demo habitat | The plan 19.2 suggestion (4.795 S, 137.392 E) falls on an excluded cell (over 20 deg) outside the main routable region. Default set to the nearest slope-screened cell in the main region, 15.6 m away: **4.795211 S, 137.391845 E** (F6 row 163, col 804). Assumed scenario input, not a base site. | PENDING team confirmation; `src/app/App.tsx` DEFAULT_HABITAT |
+| T-01 | Assumed plan times: T_EVA, t_ops, t_cont, stop durations, 30-min warning | **No values exist** in either plan part (weakness 5: "Assumed and still have no values"; due at G0). The engine keeps durations and margins `unknown` and the console says so. Planned margin (G3 acceptance) cannot be shown until the team sets them with a one-line rationale each. | BLOCKING for G3 - team |
+| C-15 | Route geometry | MissionPlan (19.9) has no route geometry. The engine returns `geometry` (grid cells per leg, habitat/stop cells) beside the plan in `PlanOutput`; not a contract change. Adding it to the contract needs team agreement. | PENDING |
+| C-16 | Leg length / climb display | Contract `Leg.distance_m` and `climb_m` are bare numbers, so the console shows them without Quantity metadata (CLAUDE.md Quantity rule). Fix needs a contract change (Quantity fields) agreed by the team. | PENDING (review finding 4) |
+| R-02 | /code-review high of `204a9c4...88f8b9a` | 10 findings: fixed 1-3, 5, 6, 9 in 19b7c68. Deferred: 4 (= C-16); 7 loadGrid duplicates loadArea elevation decoding (merge after P-01 agreed); 8 readoutAt duplicates `f1ToCell` (a test pins them together); 10 e2e hard-codes the initial view. | Follow-ups, not blockers |
+| X-01 | Superpowers skill | Not installed in this cloud session (no skill or plugin present). Its test-first and verify-before-marking practice was followed manually; the skill is not claimed as used. | Install for future sessions if required |
+| D-04 note | Smoothing | Still undecided; the map draws the grid path itself (option 3 behaviour by default). Decide by G2 (19:00). | PENDING |
 
 ## Governance decisions
 

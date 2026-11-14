@@ -33,7 +33,7 @@ This file is the live execution record. Update it **after every phase part**, no
 
 The plan freezes at Sun 13:00, leaving 10 h 59 min for validation, video and submission, plus a 2 h 59 min buffer after the internal submit target. Verify the portal in case the event's actual deadline differs.
 
-## Status at handoff (Sat 14 Nov 2026, 12:20 Asia/Manila)
+## Status at handoff (Sat 14 Nov 2026, 13:20 Asia/Manila; previous 12:20)
 
 | Part | Status | One-line reason |
 |---|---|---|
@@ -47,13 +47,14 @@ The plan freezes at Sun 13:00, leaving 10 h 59 min for validation, video and sub
 | 1.4 | IN PROGRESS | Seam candidates listed; alignment inconclusive; trust-grid method undecided |
 | 1.5 | NOT STARTED | Needs 8+ control points with Cesium picks (human + 3D owner) |
 | 1.6 | NOT STARTED | Optional 3D feasibility; depends on D-02 |
-| 2.1 | IN PROGRESS | Code done; 2 citations UNRESOLVED (plan 19.5) |
-| 2.2 | IN PROGRESS | Engine done; k_v values missing (K-01) |
-| 2.3 | IN PROGRESS | Leg metrics done; k_v missing; L-01/L-02 to confirm |
+| 2.1 | IN PROGRESS | Range citation resolved from plan 19.5 (3d0e68c); 20 deg slide still UNRESOLVED (plan names only "NASA presentation") |
+| 2.2 | VERIFIED (human review pending) | K-01 decided: k_v = 1 placeholder with ASSUMED banner (9e9496c) |
+| 2.3 | VERIFIED (human review pending) | Leg ranges use the cited 0.64-0.97 m/s range; L-01/L-02 still to confirm |
 | 2.4 | IN PROGRESS | Margin functions done (AC-19 on the grid metric); stores and UI not yet |
 | 2.5 | NOT STARTED | Smoothing decision D-04 due at G2 (Route Engine + Data and Science) |
-| 2.6 | IN PROGRESS | Part 1 done (sheet, layers, readout); stops and route not drawn yet |
-| 2.7 | IN PROGRESS | **Latency target not met reliably** with non-unity factors |
+| 2.6 | IN PROGRESS | Part 2 done: habitat, stops, route drawn via the worker (88f8b9a, 19b7c68); coverage outlines, contours, fonts open |
+| 2.7 | VERIFIED (Node, cloud Xeon) | k_v = 1: longest route 354-395 ms, field 426-470 ms; worker command 261 ms for 2 legs |
+| 3.1 | IN PROGRESS | Planner (only MissionPlan writer) + Comlink worker + commands done; plan times unset so margins unknown; C-15 route geometry outside the contract |
 | 3.x-5.x | NOT STARTED | |
 
 ## Critical path
@@ -90,13 +91,13 @@ Work on optional features only when it does not endanger this path. The AREA 2D 
 
 | Part | Task | Owner | Status | Checks / evidence | Commit |
 |---|---|---|---|---|---|
-| 2.1 | Implement and test the approved `src/geo` frame conversions and typed scientific constants with citations/pages. | Data and Science | IN PROGRESS (code and tests done; 2 citations UNRESOLVED) | `src/geo`: frame-tagged F1/F5/F6 points, F1 range checks, F1<->F5 and F5<->F6 on the F1 sphere. `src/constants`: register with citation and location per constant. `npx vitest run` 62/62 after the review fixes; `npx tsc --noEmit` clean. The TS F1->F5 reproduces the Python pipeline origin to 1 mm. **Open:** page for the 0.64-0.97 m/s range (plan 19.5, not read) and the source slide for the 20 deg limit; owner review. | see 2.1 record |
-| 2.2 | Implement admissible grid costs and route search. Exclude unknown terrain; apply slope screening; forbid diagonal corner cutting when either orthogonal neighbour is blocked. | Route Engine | IN PROGRESS (built and tested; speed-factor values missing) | `src/engine/route.ts`: A* on 8-connected slope-screened cells; edge time = 3D edge length / (v_level x k_v(bin)); edges over the 20 deg Assumed limit refused; no corner cutting; unknown/excluded never entered; octile heuristic over the fastest bin; Dijkstra oracle; `timeField` for the habitat field. `npx vitest run` 81/81 after /code-review (19 engine tests), including A* = Dijkstra on 40 random grids and h <= true remaining time on 10 grids. **Open:** k_v values for the four bins are not in plan part 1 (K-01); owner review; Web Worker wiring (3.1). | see 2.2 record |
-| 2.3 | Implement leg distance/time ranges and habitat time field. Keep seconds in the engine and display SI minutes. | Route Engine | IN PROGRESS (built and tested; k_v values missing) | `src/engine/leg.ts`: per-leg horizontal and 3D distance, climb, descent, heading (F6 bearing from grid north), and the low/nominal/high time range (fast bound -> low, slow bound -> high) along the nominal path; `habitatField` = time field at the slow bound (plan 6.2). 8 tests. **Open:** k_v (K-01); distance/heading conventions L-01/L-02 to confirm. | see 2.3/2.4 record |
+| 2.1 | Implement and test the approved `src/geo` frame conversions and typed scientific constants with citations/pages. | Data and Science | IN PROGRESS (range citation resolved; 20 deg source UNRESOLVED) | **13:00 (this session):** `walkSpeedRange` now cites NASA/TM-2010-216138, Table 4, p. 13 (plan 19.5) with the lunar-gravity limits; both speeds state they are along the surface (plan 19.11 weakness 58). The 20 deg slope-limit source stays UNRESOLVED: the plan reference list names only "xEVA 20 deg slope requirement (NASA presentation)". `npx vitest run` 144/144; `npx tsc --noEmit` clean. | 3d0e68c |
+| 2.2 | Implement admissible grid costs and route search. Exclude unknown terrain; apply slope screening; forbid diagonal corner cutting when either orthogonal neighbour is blocked. | Route Engine | VERIFIED (checks pass; human review pending) | K-01 decided by the session operator (14 Nov, 13:00): k_v = 1 in every bin as a labelled placeholder (`src/engine/assumptions.ts`), recorded as a team-choice Assumption and shown on a visible ASSUMED banner. Engine tests unchanged and passing (vitest 169/169 at 19b7c68). Weakness 57 (interpolate k_v) moot while all factors are 1; revisit when values arrive. | 9e9496c |
+| 2.3 | Implement leg distance/time ranges and habitat time field. Keep seconds in the engine and display SI minutes. | Route Engine | VERIFIED (checks pass; L-01/L-02 confirmation pending) | Leg ranges now feed the plan: `Leg.time` is an estimated Quantity in seconds (low = 0.97 m/s, high = 0.64 m/s) with A-kv and A-slope-limit assumption ids; planner test checks 16 m -> 16/0.83 s nominal. UI shows SI minutes. | 9e9496c |
 | 2.4 | Implement planned margin and the manual-entry field-margin calculations without conflating `MissionPlan` and `MissionExecution`. | Route Engine + Design | IN PROGRESS (engine functions done; stores and UI not yet) | `src/engine/margin.ts`: plan 6.6 planned margin at every route cell (slow bound walk + stops before x + t_ops + t_return from the habitat field + t_cont), with arrive/depart values at each stop; states OK (>= 10% of T_EVA) / NEAR_LIMIT (0 to < 10%) / OVER (< 0), no SAFE; field margins (continue, return-now). **AC-19 on the grid metric:** 30 random-grid property tests (all 30 exercise the assertions) check that the margin never rises, the lowest is at the end and the state never improves. A deliberate mutation (outbound walk at nominal speed) failed 32 tests, then was reverted. **Not yet:** MissionPlan/MissionExecution stores (3.1/3.3); D-04 smoothing decision. | see 2.3/2.4 record |
 | 2.5 | Resolve route smoothing at G2 with Route Engine owner and Data and Science agreement. Record the selected option in `DECISIONS.md`, plan log and O-22. | Route Engine | UNVERIFIED | Written option and matching tests; until decided, calculations use grid paths only | - |
-| 2.6 | Build the OpenLayers **AREA-level 2D sheet** by G2. It is the permanent fallback and is never cut. | Design + Data and Science | IN PROGRESS (part 1 done: sheet, layers, readout; stops and route not yet drawn) | Pipeline `run_display` writes F7 layers (D2 luminance 2.6 MB, D1 hillshade 1.7 MB, terrain overlay 0.56 MB, `layers.json` with sha256). The app (Vite 8.3.7, React 19.3.1, OpenLayers 10.11.0) registers F7 as its own projection (true scale bar), draws D2 + multiplied hillshade + class overlay, stops zoom at twice the native pixel, and shows a status line (F1 to 5 decimals, F6 E/N, elevation from the F6 grid, source, "vertical reference unverified") and the NASA footer. Checks: vitest 88/88; tsc clean; `vite build` JS 130.7 KB gzipped (budget 250); `npx playwright test` 2/2, including a check that no Cesium request is made and an error state when data is missing. **Not yet:** stops, route and habitat symbols (need 2.3/2.4 and the worker); D1/D2 coverage outlines; 10 m contours; the hatch aliases at coarse zoom (Design to review); fonts not bundled (S-02). | see 2.6 record |
-| 2.7 | Run the complete G2 engine test and latency gate; record all speed inputs as cited or Assumed. | Route Engine | IN PROGRESS: **latency target NOT met reliably** | `bench/route-bench.ts` on the real 1,500 x 1,500 grid, Node 22.23.4, shared cloud Xeon 2.1 GHz, main thread. First runs (11:26): longest route 365-402 ms with unity placeholder factors, 447-478 ms with decreasing placeholders. **Handoff re-run (12:18): unity 421-431 ms; decreasing placeholders 521-552 ms, over the 500 ms target.** Time field 474-542 ms (target < 3 s, met). The results vary with machine load, so the G2 latency criterion is not met with non-unity factors. Options: reuse search buffers (first try), then the plan's G2 fallback of a 4 m grid (D-08). Not yet on a mid-range laptop or in a Worker; real k_v values missing (K-01). | see handoff record |
+| 2.6 | Build the OpenLayers **AREA-level 2D sheet** by G2. It is the permanent fallback and is never cut. | Design + Data and Science | IN PROGRESS (parts 1 and 2 done) | **Part 2 (13:10):** `src/map/planLayer.ts` draws grid-path legs, habitat (H) and lettered stops via cell -> F1 -> F7 (`src/geo/grid.ts`); a click sends `add_stop` to the engine worker; refused clicks are reported. `npx playwright test` 4/4 (2 new: route drawn and listed with italic est. ranges; excluded ground refused). Screenshot `test-results/plan-route.png`. **Still open:** D1/D2 coverage outlines, 10 m contours, fonts (S-02), hatch aliasing. | 88f8b9a, 19b7c68 |
+| 2.7 | Run the complete G2 engine test and latency gate; record all speed inputs as cited or Assumed. | Route Engine | VERIFIED on this machine (Node 22.23.4, cloud Xeon 2.1 GHz, 4 cores) | **13:00 re-run, k_v = 1 (K-01):** longest route 395/354/377 ms (< 500); time field 470/462/426 ms (< 3 s); A* equals the field every run. The decreasing placeholder also passed this run (349-429 ms) but is not used. In the browser worker, one `add_stop` (two A* legs, ~1.95 km each) took 261 ms. Not yet measured on a mid-range laptop. Workload off. | 9e9496c |
 
 **G2 acceptance:** all listed engine tests pass and route is under 500 ms. If missed, move to a 4 m grid and show a visible Assumed-input banner. Do not turn on kJ workload without cited rates.
 
@@ -104,7 +105,7 @@ Work on optional features only when it does not endanger this path. The AREA 2D 
 
 | Part | Task | Owner | Status | Checks / evidence | Commit |
 |---|---|---|---|---|---|
-| 3.1 | Integrate command flow, engine worker, `MissionPlan`, version hash and shared contracts. | Route Engine + Captain | UNVERIFIED | Command/plan integration tests; only engine writes plan | - |
+| 3.1 | Integrate command flow, engine worker, `MissionPlan`, version hash and shared contracts. | Route Engine + Captain | IN PROGRESS | `src/engine/planner.ts`: only writer of MissionPlan; applies add/move/delete/reorder/recompute Commands, refuses stale versions and off-screen ground, emits Zod-valid plans with a content version hash; set_assumption refused until plan times/k_v are set. `worker.ts`/`client.ts`: Comlink 4.4.2. `loadGrid.ts`: size-checked typed arrays. 12 planner + 3 loader tests. Works in dev and in the production build. **Open:** plan times (T_EVA, t_ops, t_cont, stop durations) unset so margins unknown; route geometry returned beside the plan (C-15); review findings 7/8/10 deferred. | 9e9496c, 88f8b9a, 19b7c68 |
 | 3.2 | Integrate console Planning and Analysis around the AREA sheet, stops, route, profile and provenance. | Design | UNVERIFIED | Playwright flows; quantity labels; responsive checks | - |
 | 3.3 | Integrate Field View with manual arrival/departure ticks and separate `MissionExecution` state. | Design | UNVERIFIED | Tick timing, continue/return-now margin, last-tick labels; field view cannot mutate plan | - |
 | 3.4 | Produce the briefing card with route, leg ranges, margin, assumptions, sources, limits and the required NASA non-affiliation footer. | Design | UNVERIFIED | Print/export check; no untraceable number; readable on one card | - |
@@ -327,6 +328,29 @@ Checks run at handoff (exact commands, results):
   SHARPWALK_AREA=<area> node --experimental-strip-types bench/route-bench.ts -> see the 2.7 row (target missed with
     decreasing placeholders)
 Commit SHA: see the handoff commit on claude/kind-ptolemy-1wdqf5
+```
+
+```text
+Part: 2.1 (range citation), 2.2/2.3 (K-01 placeholder), 2.6 part 2, 2.7 re-run, 3.1 part 1
+Owner: no per-module roles (session operator, 14 Nov); Claude Code session on claude/trusting-fermi-c5pc0s
+Status: 2.2, 2.3, 2.7 VERIFIED (human review pending); 2.1, 2.6, 3.1 IN PROGRESS
+Scope completed: plan section 19 read (first time); 19.5 citation applied; K-01 placeholder; planner + worker;
+  route, habitat and stops on the AREA sheet; ASSUMED banner; H-01 default habitat
+Files changed: src/constants/*, src/geo/grid*, src/engine/{assumptions,planner*,loadGrid*,worker,client}.ts,
+  src/map/{AreaSheet.tsx,planLayer.ts}, src/app/{App,PlanPanel}.tsx, src/app/format*, src/app/styles.css,
+  e2e/plan-route.spec.ts, package.json, package-lock.json, logs
+Checks run (exact commands): npm ci; npx vitest run; npx tsc --noEmit; npm run build;
+  PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome npx playwright test --trace off;
+  (cd pipeline && ../.venv/bin/python -m pytest -q); pipeline run_d1 + run_display into public/area;
+  SHARPWALK_AREA=public/area node --experimental-strip-types bench/route-bench.ts
+Results: vitest 169/169 in 12 files; tsc clean; build OK (main JS 160.6 KB gz + worker chunk 118 KB raw);
+  playwright 4/4; pytest 39 passed; grid checksums reproduce a93aa209...99a3ef, aa366e6f...18bdc0,
+  c9c06b3e...58ae21 (GDAL 3.10.3); bench as in 2.7
+Known limitations or failures: margins unknown (plan times unset); 20 deg source UNRESOLVED; Superpowers skill
+  not installed in this session (workflow followed manually: tests first, verify before marking)
+Review status: /code-review high on 204a9c4...88f8b9a: 10 findings; 6 fixed (19b7c68); 4 deferred (DECISIONS R-02)
+Commit SHA: 3d0e68c, 9e9496c, 88f8b9a, 19b7c68 (+ log commit)
+Next part / blocker owner: team sets plan times (T-01) -> planned margin; then 3.2 console / 3.4 briefing card
 ```
 
 ## Phase-part completion record
