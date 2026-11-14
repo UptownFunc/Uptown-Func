@@ -95,6 +95,13 @@ Ten findings: seven fixed, two partly fixed, one skipped.
 | S-04 | No geotiff.js / COG source in the browser | Display layers are F7 PNG/JPEG with a known extent (OpenLayers ImageStatic); grids are binary | Plan 10.1 rejects geotiff.js in the browser. `ol` still installs geotiff as its own dependency, but the app does not import it. | DONE; Captain to confirm |
 | C-14 | Delivery of area data | `public/area/` is git-ignored and filled by the pipeline | Grids (11 MB) plus display layers (4.8 MB) are generated. Committing them, publishing them as a release asset, or building them in CI is a Captain decision before the first deploy (G3). | OPEN (Captain) |
 
+## Leg conventions (2.3, Route Engine to confirm)
+
+| ID | Topic | Choice in code | Status |
+|---|---|---|---|
+| L-01 | `Leg.distance_m` | The sum of 3D edge lengths (plan 6.2: in-plane step plus height difference). `horizontal_m` is also computed for display. | PENDING |
+| L-02 | `Leg.heading_deg` | The straight start-to-end bearing in F6, clockwise from grid north (0-360). The briefing card may want the initial heading instead. | PENDING |
+
 ## Governance decisions
 
 | ID | Topic | Decision | Decided by | Date/time (Asia/Manila) | Evidence |

@@ -39,7 +39,7 @@ const REL_TOL = 1e-12;
 const TAN_BIN_EDGES = BIN_EDGES_DEG.map((d) => Math.tan((d * Math.PI) / 180) * (1 - REL_TOL));
 
 /** Factor for an edge with |dz| / horizontal length = ratio (bin edges compared as tangents, so no atan per edge). */
-function kForRatio(ratio: number, m: SpeedModel): number {
+export function kForRatio(ratio: number, m: Pick<SpeedModel, "kBins">): number {
   if (ratio < TAN_BIN_EDGES[0]!) return m.kBins[0];
   if (ratio < TAN_BIN_EDGES[1]!) return m.kBins[1];
   if (ratio < TAN_BIN_EDGES[2]!) return m.kBins[2];
