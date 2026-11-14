@@ -1,0 +1,64 @@
+// SI-assisted: drafted with Claude Code (Claude Opus 5.5); human Design review pending.
+// Conditions panel, Tier 1 (plan 4 "Conditions", 6.10): local mean solar time, solar longitude and sun elevation at
+// the area centre from the Mars24 algorithm (D10), computed by the engine for an Assumed scenario date and time
+// (plan 19.11 weakness 27). No default time: everything stays "unknown" until a person sets one with a rationale,
+// sent as a set_assumption Command. Terrain shadowing is not modelled, and the UI says so.
+import { useState } from "react";
+import type { Quantity } from "../contracts";
+import type { PlanOutput } from "../engine/planner";
+import { SCENARIO_ID } from "../engine/assumptions";
+import { QuantityText } from "./QuantityText";
+import { formatUtc } from "./format";
+
+export interface ConditionsPanelProps {
+  readonly output: PlanOutput | null;
+  readonly onSet: (id: string, value_s: number, rationale: string) => void;
+  readonly onOpenSource: (q: Quantity) => void;
+}
+
+/** "YYYY-MM-DDTHH:MM" from a datetime-local input, read as UTC; null if not a complete date and time. */
+export function parseUtcInput(v: string): number | null {
+  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(v)) return null;
+  const ms = Date.parse(`${v}:00Z`);
+  return Number.isFinite(ms) ? ms / 1000 : null;
+}
+
+export function ConditionsPanel({ output, onSet, onOpenSource }: ConditionsPanelProps) {
+  const [when, setWhen] = useState("");
+  const [why, setWhy] = useState("");
+  const c = output?.conditions;
+  const s = parseUtcInput(when);
+  const valid = s !== null && why.trim() !== "";
+  const elev = c?.sunElevation.value;
+  return (
+    <section aria-label="Conditions" className="conditions">
+      <h2>Conditions <span className="muted">model-derived, area centre</span></h2>
+      <form className="time-row" onSubmit={(e) => { e.preventDefault(); if (valid && s !== null) onSet(SCENARIO_ID, s, why.trim()); }}>
+        <div className="time-head">
+          <span>Scenario date and time</span>
+          <span data-testid="current-scenario" className={c?.scenario ? "assumed" : "unknown"}>
+            {c?.scenario ? `${formatUtc(c.scenario.value)} · assumed` : "not set"}
+          </span>
+        </div>
+        {c?.scenario && <div className="muted small">Rationale: {c.scenario.rationale}</div>}
+        <div className="time-inputs">
+          <label>UTC <input type="datetime-local" aria-label="Scenario date and time, UTC" value={when} onChange={(e) => setWhen(e.target.value)} /></label>
+          <input className="rationale" aria-label="Scenario date and time, rationale" placeholder="one-line rationale" value={why} onChange={(e) => setWhy(e.target.value)} />
+          <button type="submit" disabled={!valid || !output}>Set</button>
+        </div>
+      </form>
+      {c && (
+        <dl className="conditions-values">
+          <dt>Local mean solar time</dt>
+          <dd data-testid="cond-lmst"><QuantityText q={c.lmst} onOpen={onOpenSource} label="Local mean solar time" /> <span className="muted small">clock label; durations are SI minutes</span></dd>
+          <dt>Sun elevation</dt>
+          <dd data-testid="cond-sun"><QuantityText q={c.sunElevation} onOpen={onOpenSource} label="Sun elevation" />
+            {elev != null && elev < 0 && <span> below the horizon</span>}</dd>
+          <dt>Solar longitude L<sub>s</sub></dt>
+          <dd data-testid="cond-ls"><QuantityText q={c.ls} onOpen={onOpenSource} label="Solar longitude" /></dd>
+        </dl>
+      )}
+      <p className="muted small">Mars24 algorithm (NASA GISS) at one point, the area centre. Terrain shadowing is not modelled: nearby slopes can hide the sun.</p>
+    </section>
+  );
+}

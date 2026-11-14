@@ -18,6 +18,11 @@ export const KV_PLACEHOLDER = {
   } satisfies Assumption,
 } as const;
 
+/** Scenario date and time (plan 19.11 weakness 27): set_assumption payload { id: "scenario_utc", value_s: Unix
+ *  seconds UTC, rationale }, stored as an Assumption whose unit names the time scale. No default (team choice). */
+export const SCENARIO_ID = "scenario_utc";
+export const SCENARIO_UNIT = "s since 1970-01-01 UTC";
+
 export const SLOPE_LIMIT_ASSUMPTION: Assumption = {
   id: "A-slope-limit",
   name: "Slope limit for walking edges",

@@ -7,15 +7,17 @@
 import { Command, MissionPlan, type Assumption, type Leg, type PlannedMargin, type Quantity, type Stop } from "../contracts";
 import { CONSTANTS } from "../constants";
 import { f1 } from "../geo";
+import { f1ToPlanetographic, type PlanetographicPoint } from "../geo/planetographic";
+import { MARS_CLOCK_UNIT, marsSun, ttMinusUtc_s } from "./sun";
 import { cellCentreF1, f1ToCell, type GridDef } from "../geo/grid";
-import { KV_PLACEHOLDER, SLOPE_LIMIT_ASSUMPTION } from "./assumptions";
+import { KV_PLACEHOLDER, SCENARIO_ID, SCENARIO_UNIT, SLOPE_LIMIT_ASSUMPTION } from "./assumptions";
 import { legMetrics, type SpeedRange } from "./leg";
 import { plannedMarginProfile } from "./margin";
 import { CLASS, edgeCost, routeAStar, timeField, type RouteGrid } from "./route";
 import type { MarginSample } from "./margin";
 
-export const ENGINE_VERSION = "engine-0.3.0";
-export const CONSTANTS_VERSION = "constants-2026-11-14b";
+export const ENGINE_VERSION = "engine-0.4.0";
+export const CONSTANTS_VERSION = "constants-2026-11-14c";
 
 export interface PlannerGrid extends GridDef { readonly elevation: Float64Array; readonly classes: Uint8Array }
 export interface LatLon { readonly lat: number; readonly lon: number }
@@ -41,7 +43,20 @@ export interface PlanGeometry {
   /** Slow-bound time from each stop back to the habitat (plan 6.6 t_return), seconds; Infinity if unreachable. */
   readonly stopReturn_s: Record<string, number>;
 }
-export interface PlanOutput { readonly plan: MissionPlan; readonly geometry: PlanGeometry; readonly kvPlaceholder: boolean }
+/** Conditions panel, D10 part (plan 6.10, Tier 1): sun at the area centre for the Assumed scenario time. Outside the
+ *  MissionPlan contract, like geometry; the scenario time itself is a plan assumption. Values stay unknown until set. */
+export interface PlanConditions {
+  readonly scenario: Assumption | null;
+  /** The grid origin (area centre) through src/geo, in the Mars24 input convention. */
+  readonly site: PlanetographicPoint;
+  /** Areocentric solar longitude L_s, degrees. */
+  readonly ls: Quantity;
+  /** Local mean solar time at the site: a clock label in Mars hours [0, 24), never a duration. */
+  readonly lmst: Quantity;
+  /** Sun elevation above the horizontal, degrees; terrain shadowing not modelled. */
+  readonly sunElevation: Quantity;
+}
+export interface PlanOutput { readonly plan: MissionPlan; readonly geometry: PlanGeometry; readonly conditions: PlanConditions; readonly kvPlaceholder: boolean }
 export type ApplyResult = { ok: true; versionHash: string } | { ok: false; reason: string };
 
 interface StopState { id: string; name: string; cell: number }
@@ -54,6 +69,9 @@ export const PLAN_TIME_IDS = {
   stop_duration: { name: "Planned duration at each stop", min: "zero" },
 } as const;
 export type PlanTimeId = keyof typeof PLAN_TIME_IDS;
+
+const SUN_METHOD = "engine:mars24-giss-2025-01-07";
+const SUN_SOURCES = ["D10", "ttMinusUtc2017"];
 
 const HABITAT_ID = "habitat";
 const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -86,6 +104,7 @@ export class Planner {
   private planTimes: Partial<Record<PlanTimeId, Assumption>> = {};
   /** Per-stop duration overrides (seconds, rationale); the stop's letter is applied at compute time. */
   private stopDurations: Record<string, { value: number; rationale: string }> = {};
+  private scenario: Assumption | null = null;
   /** Slow-bound time-to-habitat field, keyed by the inputs it depends on (habitat, k_v, slope limit, speed). */
   private slowField: { key: string; field: Float64Array } | null = null;
 
@@ -169,9 +188,18 @@ export class Planner {
       case "recompute":
         break;
       case "set_assumption": {
+        if (p.id === SCENARIO_ID) {
+          const v = p.value_s;
+          if (p.stopId !== undefined) return { ok: false, reason: "the scenario time applies to the whole plan, not one stop" };
+          if (!num(v)) return { ok: false, reason: "scenario time must be a finite number of seconds since 1970-01-01 UTC" };
+          try { ttMinusUtc_s(v * 1000); } catch (e) { return { ok: false, reason: (e as Error).message }; }
+          if (!str(p.rationale) || !p.rationale.trim()) return { ok: false, reason: "every Assumed value needs a one-line rationale" };
+          this.scenario = { id: `A-${SCENARIO_ID}`, name: "Scenario date and time (UTC)", value: v, unit: SCENARIO_UNIT, rationale: p.rationale.trim(), source: "team choice" };
+          break;
+        }
         const id = p.id as PlanTimeId;
         if (typeof p.id !== "string" || !Object.hasOwn(PLAN_TIME_IDS, id))
-          return { ok: false, reason: `unknown assumption ${String(p.id)}; settable: ${Object.keys(PLAN_TIME_IDS).join(", ")}` };
+          return { ok: false, reason: `unknown assumption ${String(p.id)}; settable: ${[...Object.keys(PLAN_TIME_IDS), SCENARIO_ID].join(", ")}` };
         const v = p.value_s;
         if (!num(v) || v < 0 || (PLAN_TIME_IDS[id].min === "positive" && v === 0))
           return { ok: false, reason: `${id} must be a finite ${PLAN_TIME_IDS[id].min === "positive" ? "positive" : "non-negative"} number of seconds` };
@@ -202,7 +230,7 @@ export class Planner {
       own.push(a);
       return a;
     });
-    const assumptions = [KV_PLACEHOLDER.assumption, SLOPE_LIMIT_ASSUMPTION, ...times, ...own];
+    const assumptions = [KV_PLACEHOLDER.assumption, SLOPE_LIMIT_ASSUMPTION, ...times, ...own, ...(this.scenario ? [this.scenario] : [])];
     const stops: Stop[] = this.stops.map((s, k) => {
       const a = durA[k];
       const duration: Quantity = a
@@ -239,11 +267,21 @@ export class Planner {
       terrainClassSummary: legs.length ? { slope_screened_candidate: 1 } : {}, provenanceIds: ["D1"],
     });
     return {
-      plan, kvPlaceholder: KV_PLACEHOLDER.isPlaceholder,
+      plan, kvPlaceholder: KV_PLACEHOLDER.isPlaceholder, conditions: this.conditions(),
       geometry: { habitatCell: this.habitat, stopCells: Object.fromEntries(this.stops.map((s) => [s.id, s.cell])), legs: geomLegs, unreachable,
         profile, marginTicks,
         stopReturn_s: this.stops.length ? Object.fromEntries(this.stops.map((s) => [s.id, this.habitatFieldSlow()[s.cell]!])) : {} },
     };
+  }
+
+  /** D10 sun and Mars time at the area centre, or unknown while the scenario time is unset. */
+  private conditions(): PlanConditions {
+    const site = f1ToPlanetographic(this.grid.origin), a = this.scenario;
+    const unknown = (unit: string): Quantity => ({ value: null, unit, valueClass: "unknown", methodId: "plan-19.11:scenario-time-unset", assumptionIds: [], sourceIds: ["plan-19.11"] });
+    if (!a) return { scenario: null, site, ls: unknown("deg"), lmst: unknown(MARS_CLOCK_UNIT), sunElevation: unknown("deg") };
+    const ms = a.value * 1000, sun = marsSun(ms, ttMinusUtc_s(ms), site);
+    const q = (value: number, unit: string): Quantity => ({ value, unit, valueClass: "model_derived", methodId: SUN_METHOD, assumptionIds: [a.id], sourceIds: SUN_SOURCES });
+    return { scenario: { ...a }, site, ls: q(sun.ls_deg, "deg"), lmst: q(sun.lmst_h, MARS_CLOCK_UNIT), sunElevation: q(sun.elevation_deg, "deg") };
   }
 
   /** Plan 6.6 margins at the slow, nominal and fast speed bounds, or null while any plan time is unset.

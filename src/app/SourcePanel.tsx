@@ -2,7 +2,7 @@
 // Sources panel (UX-15, demo beat 5): the selected number's class, method, sources and assumptions, and every dataset
 // used in the current view, all generated from provenance.json, the constants register and the plan.
 import type { Assumption, Provenance, Quantity } from "../contracts";
-import { formatDuration } from "./format";
+import { formatQuantity } from "./format";
 import { describeSource, explainQuantity } from "./sources";
 
 export interface SourcePanelProps {
@@ -20,7 +20,7 @@ export function SourcePanel({ selected, provenance, assumptions, datasetsInView,
       <h2>Sources {selected && <button type="button" className="link" onClick={onClose}>close</button>}</h2>
       {selected && e && (
         <div data-testid="source-detail">
-          <p><strong>{formatDuration(selected).text}</strong> · {e.valueClass.replace("_", " ")} · method {e.method}</p>
+          <p><strong>{formatQuantity(selected).text}</strong> · {e.valueClass.replace("_", " ")} · method {e.method}</p>
           <ul className="small">{e.sources.map((s) => <li key={s.id}><strong>{s.title}</strong>{s.detail && ` - ${s.detail}`}</li>)}</ul>
           {e.assumptions.length > 0 && <>
             <p className="small"><strong>Assumptions</strong></p>

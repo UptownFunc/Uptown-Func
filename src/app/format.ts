@@ -2,6 +2,7 @@
 // Display formatting for engine Quantities. The engine keeps seconds; the UI shows SI minutes (CLAUDE.md).
 // Estimates are shown as ranges marked "est." (the caller italicises them); unknown values stay "unknown".
 import type { Quantity } from "../contracts";
+import { MARS_CLOCK_UNIT } from "../engine/sun";
 
 export interface Formatted { readonly text: string; readonly estimated: boolean; readonly unknown: boolean }
 
@@ -18,6 +19,25 @@ export function formatDuration(q: Quantity): Formatted {
     return { text: estRange(q.low, q.high), estimated: true, unknown: false };
   }
   return { text: `${min(q.value)} min`, estimated: false, unknown: false };
+}
+
+/** Any engine Quantity: durations in SI minutes, angles to 0.1 deg, Mars local time as an HH:MM clock label
+ *  (truncated, like a clock), other units as value and unit. Unknown stays unknown. */
+export function formatQuantity(q: Quantity): Formatted {
+  if (q.unit === "s") return formatDuration(q);
+  if (q.valueClass === "unknown" || q.value === null) return { text: "unknown", estimated: false, unknown: true };
+  const est = q.valueClass === "estimated";
+  if (q.unit === "deg") return { text: `${est ? "est. " : ""}${q.value.toFixed(1)}°`, estimated: est, unknown: false };
+  if (q.unit === MARS_CLOCK_UNIT) {
+    const m = Math.floor(q.value * 60) % 1440;
+    return { text: `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")} LMST`, estimated: false, unknown: false };
+  }
+  return { text: `${est ? "est. " : ""}${q.value} ${q.unit}`, estimated: est, unknown: false };
+}
+
+/** A UTC instant (Unix seconds) as "YYYY-MM-DD HH:MM UTC". */
+export function formatUtc(s: number): string {
+  return `${new Date(s * 1000).toISOString().slice(0, 16).replace("T", " ")} UTC`;
 }
 
 /** Engine lengths (model-derived from D1); the caller carries the Quantity metadata. */

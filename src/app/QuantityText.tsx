@@ -2,12 +2,11 @@
 // One displayed Quantity (CLAUDE.md, AC-05): carries its value class and source ids in the DOM and opens its source
 // on click (demo beat 5). Estimates render italic as "est. a to b"; unknown stays "unknown".
 import type { Quantity } from "../contracts";
-import { formatDuration } from "./format";
+import { formatQuantity } from "./format";
 
 export function QuantityText({ q, onOpen, label }: { q: Quantity; onOpen?: ((q: Quantity) => void) | undefined; label?: string }) {
-  // Durations (seconds) show in SI minutes; any other unit shows its value and unit (unknown stays unknown).
-  const f = q.unit === "s" ? formatDuration(q)
-    : { text: q.value === null ? "unknown" : `${q.valueClass === "estimated" ? "est. " : ""}${q.value} ${q.unit}`, estimated: q.valueClass === "estimated", unknown: q.value === null };
+  // Durations in SI minutes, angles to 0.1 deg, Mars time as a clock label (format.ts); unknown stays unknown.
+  const f = formatQuantity(q);
   const cls = f.unknown ? "unknown" : f.estimated ? "est" : undefined;
   if (!onOpen) {
     return <span className={`qty-static${cls ? ` ${cls}` : ""}`} data-quantity="" data-value-class={q.valueClass} data-source-ids={q.sourceIds.join(" ")}

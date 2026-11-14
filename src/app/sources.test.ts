@@ -50,3 +50,20 @@ describe("explainQuantity (demo beat 5: open one number's source)", () => {
     ]);
   });
 });
+
+describe("D10 Mars24 algorithm and the scenario time (Conditions panel)", () => {
+  it("describes D10 as a computed method with its citation, not as a missing dataset", () => {
+    const d = describeSource("D10", []);
+    expect(d.kind).toBe("other");
+    expect(d.title).toMatch(/Mars24/);
+    expect(d.detail).toMatch(/Algorithm and Worked Examples/);
+    expect(d.detail).toMatch(/Allison and McEwen \(2000\)/);
+    expect(d.detail).toMatch(/terrain shadowing not modelled/i);
+  });
+
+  it("shows the scenario assumption as a UTC date and time, not raw seconds", () => {
+    const a = { id: "A-scenario_utc", name: "Scenario date and time (UTC)", value: Date.UTC(2026, 10, 14, 4, 0) / 1000, unit: "s since 1970-01-01 UTC", rationale: "demo", source: "team choice" as const };
+    const q = { value: 10, unit: "deg", valueClass: "model_derived" as const, methodId: "m", assumptionIds: [a.id], sourceIds: ["D10"] };
+    expect(explainQuantity(q, [], [a]).assumptions[0]!.text).toBe("Scenario date and time (UTC) = 2026-11-14 04:00 UTC (team choice): demo");
+  });
+});

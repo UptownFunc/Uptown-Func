@@ -4,6 +4,16 @@
 // provenance record is reported as missing, never filled in.
 import type { Assumption, Provenance, Quantity, ValueClass } from "../contracts";
 import { CONSTANTS, type ConstantId } from "../constants";
+import { SCENARIO_UNIT } from "../engine/assumptions";
+import { formatUtc } from "./format";
+
+/** Computed methods named as data IDs in the plan's register (plan 6, D10). Not datasets: no provenance.json record. */
+const METHOD_SOURCES: Record<string, { title: string; detail: string }> = {
+  D10: {
+    title: "D10: Mars24 algorithm (NASA GISS)",
+    detail: "Computed, not measured. NASA GISS, Mars24 Sunclock 'Algorithm and Worked Examples' (updated 2025-01-07, retrieved 14 Nov 2026), steps A-2 to D-6; Allison and McEwen (2000), Planet. Space Sci. 48, 215-235; Allison (1997), Geophys. Res. Lett. 24, 1967-1970. One point at the area centre (planetographic latitude, west longitude via src/geo); terrain shadowing not modelled.",
+  },
+};
 
 export interface SourceDescription { id: string; kind: "dataset" | "constant" | "team" | "plan" | "missing" | "other"; title: string; detail: string }
 
@@ -13,6 +23,8 @@ export function describeSource(id: string, provenance: readonly Provenance[]): S
     return { id, kind: "dataset", title: `${p.id}: ${p.productId}`,
       detail: `${p.valueClass.replace("_", " ")}; ${p.resolution_m} m; ${p.latitudeType} latitude, ${p.longitudeDirection}-positive longitude; vertical reference ${p.verticalReference}; licence: ${p.licence}; retrieved ${p.retrievedOn}; ${p.url}` };
   }
+  const m = METHOD_SOURCES[id];
+  if (m) return { id, kind: "other", ...m };
   if (/^D(?:[1-9]|1[0-3])$/.test(id)) return { id, kind: "missing", title: id, detail: "No provenance record in provenance.json yet (pipeline follow-up P-04)." };
   if (Object.hasOwn(CONSTANTS, id)) {
     const c = CONSTANTS[id as ConstantId];
@@ -39,7 +51,7 @@ export function explainQuantity(q: Quantity, provenance: readonly Provenance[], 
     assumptions: q.assumptionIds.map((id) => {
       const a = assumptions.find((x) => x.id === id);
       if (!a) return { id, text: `${id}: not in this plan's assumption list` };
-      const v = a.unit === "s" ? `${(a.value / 60).toFixed(1)} min` : `${a.value}${a.unit === "1" ? "" : ` ${a.unit}`}`;
+      const v = a.unit === SCENARIO_UNIT ? formatUtc(a.value) : a.unit === "s" ? `${(a.value / 60).toFixed(1)} min` : `${a.value}${a.unit === "1" ? "" : ` ${a.unit}`}`;
       return { id, text: `${a.name} = ${v} (${a.source}): ${a.rationale}` };
     }),
   };

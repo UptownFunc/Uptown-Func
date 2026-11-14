@@ -9,6 +9,7 @@ import { PlanPanel } from "./PlanPanel";
 import { RouteProfile } from "./RouteProfile";
 import { SourcePanel } from "./SourcePanel";
 import { DrillPanel } from "./DrillPanel";
+import { ConditionsPanel } from "./ConditionsPanel";
 import type { ContourLevel } from "../engine/contours";
 import { Provenance, type Quantity } from "../contracts";
 import { BriefingView } from "../briefing/BriefingView";
@@ -126,6 +127,8 @@ export function App() {
           onSetTime={(id, value_s, rationale, stopId) => send("set_assumption", { id, value_s, rationale, ...(stopId ? { stopId } : {}) })}
           onOpenSource={setSelected}
           onMoveToCursor={cursor ? (stopId) => send("move_stop", { stopId, lat: cursor.lat, lon: cursor.lon }) : undefined}>
+          <ConditionsPanel output={output} onOpenSource={setSelected}
+            onSet={(id, value_s, rationale) => send("set_assumption", { id, value_s, rationale })} />
           <DrillPanel output={output} showContours={showContours} onShowContours={setShowContours}
             drillMin={drillMin} onDrillMin={setDrillMin} busy={contourBusy} />
           <SourcePanel selected={selected} provenance={provenance} assumptions={output?.plan.assumptions ?? []}

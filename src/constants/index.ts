@@ -23,12 +23,17 @@ export const CONSTANTS = {
   ellipsoidEquatorialF2: {
     id: "ellipsoidEquatorialF2", value: 3_396_190, unit: "m", valueClass: "published_observation",
     citation: { source: "IAU_2015:49902, Mars (2015) / Ocentric, via spatialreference.org (plan 7.3, frame F2)", location: "Plan 7.3 frame table" },
-    limitation: "Comparison reference only; never used to place data.",
+    limitation: "Comparison reference and the planetographic latitude of the Mars24 sun input (D10) only; never used to place data.",
   },
   ellipsoidPolarF2: {
     id: "ellipsoidPolarF2", value: 3_376_200, unit: "m", valueClass: "published_observation",
     citation: { source: "IAU_2015:49902, Mars (2015) / Ocentric, via spatialreference.org (plan 7.3, frame F2)", location: "Plan 7.3 frame table" },
-    limitation: "Comparison reference only; never used to place data.",
+    limitation: "Comparison reference and the planetographic latitude of the Mars24 sun input (D10) only; never used to place data.",
+  },
+  ttMinusUtc2017: {
+    id: "ttMinusUtc2017", value: 69.184, unit: "s", valueClass: "published_observation",
+    citation: { source: "NASA GISS, Mars24 Sunclock 'Algorithm and Worked Examples' (updated 2025-01-07, retrieved 14 Nov 2026): TAI - UTC = 37.0 s from 1 Jan 2017, plus 32.184 s", location: "Step A-4 (web page, no page numbers)" },
+    limitation: "Valid from 1 Jan 2017 while no further leap second is inserted; the page reports none as of winter 2025. One leap second would move the sun by about 0.004 deg.",
   },
   walkSpeedNominal: {
     id: "walkSpeedNominal", value: 0.83, unit: "m/s", valueClass: "assumed",

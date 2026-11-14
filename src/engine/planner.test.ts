@@ -349,3 +349,53 @@ describe("time back to the habitat from each stop (plan 6.6 t_return, slow bound
     expect(p.current().geometry.stopReturn_s[id]).toBeCloseTo(16 / 0.64, 6); // 8 flat 2 m steps at 0.64 m/s
   });
 });
+
+describe("Conditions: scenario date and time (Assumed, plan 19.11 weakness 27) and the D10 sun at the area centre", () => {
+  const T = Date.UTC(2026, 10, 14, 4, 0) / 1000; // a test instant, not a team choice
+  it("keeps every sun value unknown until a person sets the scenario time", () => {
+    const { p } = plannerWithHabitat();
+    const c = p.current().conditions;
+    expect(c.scenario).toBeNull();
+    for (const q of [c.ls, c.lmst, c.sunElevation]) {
+      expect(q.valueClass).toBe("unknown");
+      expect(q.value).toBeNull();
+    }
+  });
+
+  it("sets the scenario time as a team-choice assumption in the plan and computes the sun from it", () => {
+    const { g, p } = plannerWithHabitat();
+    const before = p.current().plan.versionHash;
+    const r = p.apply(cmd("set_assumption", { id: "scenario_utc", value_s: T, rationale: "demo morning" }, before));
+    expect(r.ok).toBe(true);
+    const { plan, conditions } = p.current();
+    expect(MissionPlan.safeParse(plan).success).toBe(true);
+    expect(plan.versionHash).not.toBe(before);
+    const a = plan.assumptions.find((x) => x.id === "A-scenario_utc")!;
+    expect(a).toMatchObject({ value: T, source: "team choice", rationale: "demo morning" });
+    expect(conditions.scenario).toEqual(a);
+    // The site is the grid origin (area centre), converted through src/geo to planetographic / west longitude.
+    expect(conditions.site.frame).toBe("F3");
+    expect(conditions.site.lonW).toBeCloseTo(360 - g.origin.lon, 9);
+    for (const q of [conditions.ls, conditions.lmst, conditions.sunElevation]) {
+      expect(q.valueClass).toBe("model_derived");
+      expect(q.assumptionIds).toEqual(["A-scenario_utc"]);
+      expect(q.sourceIds).toEqual(["D10", "ttMinusUtc2017"]);
+      expect(q.value).not.toBeNull();
+    }
+    expect(conditions.sunElevation.unit).toBe("deg");
+    expect(conditions.sunElevation.value!).toBeGreaterThanOrEqual(-90);
+    expect(conditions.sunElevation.value!).toBeLessThanOrEqual(90);
+    expect(conditions.lmst.value!).toBeGreaterThanOrEqual(0);
+    expect(conditions.lmst.value!).toBeLessThan(24);
+  });
+
+  it("refuses a scenario time before 2017 (no leap-second table), a non-finite value or a blank rationale", () => {
+    const { p } = plannerWithHabitat();
+    const v = () => p.current().plan.versionHash;
+    expect(p.apply(cmd("set_assumption", { id: "scenario_utc", value_s: Date.UTC(2016, 0, 1) / 1000, rationale: "x" }, v())).ok).toBe(false);
+    expect(p.apply(cmd("set_assumption", { id: "scenario_utc", value_s: Number.NaN, rationale: "x" }, v())).ok).toBe(false);
+    expect(p.apply(cmd("set_assumption", { id: "scenario_utc", value_s: T, rationale: " " }, v())).ok).toBe(false);
+    expect(p.apply(cmd("set_assumption", { id: "scenario_utc", value_s: T, rationale: "x", stopId: "S1" }, v())).ok).toBe(false);
+    expect(p.current().conditions.scenario).toBeNull();
+  });
+});
