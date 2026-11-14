@@ -2,3 +2,8 @@ node_modules/
 dist/
 coverage/
 .claude/settings.local.json
+
+# Local reference material (never commit)
+*.pdf
+*.zip
+reference/
