@@ -69,3 +69,27 @@ describe("F5 -> F6", () => {
     expect(f5ToF6(f1ToF5(f1(-4.815, 137.39, -3500)), origin).frame).toBe("F6");
   });
 });
+
+describe("F1 <-> F7 (display projection, plan 7.8)", () => {
+  it("matches the plan's test vector: 137.4 E, -4.8 gives x = 8,144,343.5 m, y = -284,518.6 m", async () => {
+    const { f1ToF7 } = await import("./index");
+    const p = f1ToF7(f1(-4.8, 137.4, 0));
+    // Exact: x = k * 137.4 = 8,144,343.44 m, y = -284,518.55 m (k = pi * 3,396,190 / 180).
+    close(p.x, 8_144_343.4397, 1e-3); close(p.y, -284_518.5481, 1e-3);
+    // The plan prints the vector to 0.1 m; its x differs from the exact value by 0.06 m (logged as G-03).
+    close(p.x, 8_144_343.5, 0.1); close(p.y, -284_518.6, 0.1);
+    expect(p.frame).toBe("F7");
+  });
+
+  it("round-trips F1 -> F7 -> F1 exactly (heights are carried, not projected)", async () => {
+    const { f1ToF7, f7ToF1 } = await import("./index");
+    const a = f1(-4.8123, 137.4011, -3600);
+    const b = f7ToF1(f1ToF7(a), a.h);
+    close(b.lat, a.lat, 1e-12); close(b.lon, a.lon, 1e-12);
+  });
+
+  it("gives a point resolution of resolution x cos(lat) so the scale bar is true", async () => {
+    const { f7PointResolution } = await import("./index");
+    close(f7PointResolution(2, -4.8), 2 * Math.cos((4.8 * Math.PI) / 180), 1e-12);
+  });
+});

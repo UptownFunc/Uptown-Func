@@ -55,3 +55,23 @@ export function f6ToF5(p: F6Point, frame: LocalFrame): F5Point {
   const at = (i: 0 | 1 | 2) => b.east[i] * p.e + b.north[i] * p.n + b.up[i] * p.u;
   return { frame: "F5", x: o.x + at(0), y: o.y + at(1), z: o.z + at(2) };
 }
+
+/** F7: Equidistant Cylindrical on the F1 sphere, standard parallel 0, central meridian 0, metres (plan 7.8).
+ *  Display only: OpenLayers draws D1/D2 in F7 without resampling. Never measure in F7 (east-west is stretched). */
+export interface F7Point { readonly frame: "F7"; readonly x: number; readonly y: number }
+
+const K_F7 = (Math.PI * R_F1) / 180; // metres per degree, 59,274.70
+
+export function f1ToF7(p: F1Point): F7Point {
+  return { frame: "F7", x: K_F7 * p.lon, y: K_F7 * p.lat };
+}
+
+/** The inverse needs the height from elsewhere (D1 at that point); F7 carries none. */
+export function f7ToF1(p: F7Point, h: number): F1Point {
+  return f1(p.y / K_F7, p.x / K_F7, h);
+}
+
+/** Ground metres per F7 unit at a latitude, for the OpenLayers scale bar (plan 7.8: resolution x cos(lat)). */
+export function f7PointResolution(resolution: number, latDeg: number): number {
+  return resolution * Math.cos(rad(latDeg));
+}

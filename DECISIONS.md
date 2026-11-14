@@ -79,6 +79,12 @@ Ten findings: seven fixed, two partly fixed, one skipped.
 - **Partly fixed:** the class codes are still defined in `src/engine` rather than `src/contracts`, because moving them is a contract change (P-02, both owners). The cross-language test guards against drift until then.
 - **Skipped:** `bench/` is not type-checked, because doing so needs `@types/node`, which is not in the plan's pinned stack. Adding a dependency needs a documented decision.
 
+## Plan number discrepancies found while implementing
+
+| ID | Where | Plan says | Exact value | Effect |
+|---|---|---|---|---|
+| G-03 | Plan 7.8 F7 test vector (137.4 E, -4.8) | x = 8,144,343.5 m | 8,144,343.44 m (k = pi x 3,396,190 / 180 = 59,274.6975 m/deg) | 0.06 m, below display precision. The code uses the exact formula; the test accepts the plan's value at its printed 0.1 m precision. Data and Science to note. |
+
 ## Governance decisions
 
 | ID | Topic | Decision | Decided by | Date/time (Asia/Manila) | Evidence |
