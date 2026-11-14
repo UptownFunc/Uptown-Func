@@ -24,6 +24,10 @@ Do not interpret blank fields as proof that no work exists. Inspect GitHub and t
 - No code, data, contract or decision changed. No PR opened, nothing merged. Open PRs: none (PR #1 merged earlier).
 - **Resolved ~19:00:** G-07 restores team credit (G-01). Contracts accepted as drafted for the merge (C-AGREE). The operator authorised the merge of the branch work into `main` and delegated the G3 input choices to the session.
 
+## Session update 19:35 (merge, PR #2)
+
+- PR parcilla13/Uptown-Func#2 (ccr-dbbcdd02-kqy23v -> main) carries all branch work plus G-07, C-AGREE and the R-15 review fixes. Checks at the merge head: vitest 262/262, tsc clean, build OK (~246.4 KB), pytest 61, Playwright 43/43. Merge commit: see PHASES and the PR once merged.
+
 ## Team and module ownership
 
 Team: Patrick Ezekiel A. Arcilla (parcilla13), Christian Jesus Alcazar, Eugene Ibañez Jr. ("Yujin"), John Malubay.

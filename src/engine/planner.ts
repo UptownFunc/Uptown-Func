@@ -121,7 +121,6 @@ export class Planner {
     this.habitat = h;
   }
 
-  /** The cell under an F1 position, or the reason it cannot hold a habitat or stop. */
   /** Refuses the habitat cell and other stops' cells: a one-cell leg would drop that stop's time from the margin. */
   private cellTaken(cell: number, exceptId?: string): string | null {
     if (cell === this.habitat) return "a stop cannot be on the habitat cell";
@@ -129,6 +128,7 @@ export class Planner {
     return other ? `${other.name} is already in that 2 m cell` : null;
   }
 
+  /** The cell under an F1 position, or the reason it cannot hold a habitat or stop. */
   private cellAt(p: LatLon): number | string {
     if (!num(p.lat) || !num(p.lon)) return "position must have finite lat and lon";
     let cell;

@@ -755,6 +755,30 @@ Next part / blocker owner: P-03 on a team machine with GDAL 3.12.3 (or the user 
   human inputs B-1, B-3, B-4, B-9, B-12 for G3
 ```
 
+```text
+Part: merge of the branch work to main (B-8), PR parcilla13/Uptown-Func#2, with /code-review R-15 fixes
+Owner: the team (G-05); session operator of ccr-dbbcdd02-kqy23v directed the merge, G-07 and C-AGREE
+Status: VERIFIED (checks green at the merge head; review findings fixed or recorded)
+Scope completed: G-07 attribution (team credit) and C-AGREE recorded (d3330cb); R-15 review of the whole branch diff
+  (10 findings: 6 fixed, 4 recorded in DECISIONS R-15); low review of the fix commit (1 finding, fixed)
+Files changed (R-15): src/engine/{margin.ts,margin.test.ts,planner.ts,planner.test.ts}, src/app/{profile.ts (new),
+  profile.test.ts (new),RouteProfile.tsx}, src/field/{execution.ts,execution.test.ts,FieldView.tsx},
+  src/map/{snapshot.ts,AreaSheet.tsx}
+Tests written first and seen failing: 4 engine tests (one-cell leg, stop on habitat/same cell, scenario beyond the date
+  range, no tick when OVER from the start), stopProfilePositions (module missing), fieldMarginAssumptionIds (not a function)
+Checks run (exact commands), Sat 14 Nov 2026 ~19:20-19:35 Asia/Manila, at the R-15 fix commits:
+  npx vitest run                                   -> 262 passed / 262, 24 files
+  npx tsc --noEmit                                 -> clean
+  rm -rf dist && npm run build                     -> OK; main 205.39 kB gzip + worker 40,991 B (~246.4 of 250 KB, B-01)
+  (cd pipeline && ../.venv/bin/python -m pytest)   -> 61 passed (gdal-bin 3.8.4 installed, contour oracle runs)
+  PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome npx playwright test --trace off -> 43 passed / 43
+Results: all green. main (bb473b7) is an ancestor of the branch: fast-forward, no conflicts.
+Known limitations or failures: R-15 items 2, 6, 7, 9 recorded, not fixed; P-03 open; bundle headroom ~3.6 KB
+Review status: /code-review medium (whole PR diff) + low (fix commit), all findings fixed or recorded (R-15)
+Commit SHA: d3330cb (G-07), 5e4e5d2 + follow-up (R-15); merge commit recorded in HANDOFF after the merge
+Next part / blocker owner: G3 inputs (T-01, T-02, C-19, B-3) chosen by the session at the operator's direction; B-4 human
+```
+
 ## Phase-part completion record
 
 Copy this block for every phase part and update its table row above:
