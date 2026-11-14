@@ -16,7 +16,7 @@ This file is the handoff between team members and Claude sessions. Keep it factu
 - **Checks at `4733a4f`:** vitest 289/289; tsc clean; build ~249.9 of 250 KB (about 94 bytes left). Playwright: 50/50 with `--workers=1`; two default parallel runs on this 4-core computer gave 48/50 and 49/50 with different specs failing each time (briefing.spec.ts:50 and conditions.spec.ts:7, then coverage.spec.ts:94), and the first two pass when run alone (6/6); read as machine load, not proven. **pytest, run later (00:50):** 79 passed, 3 failed, 2 skipped; the three failures are this Windows computer's, not data (one carriage return added to two geojson files at checkout, whose git copies match the recorded sha256; the licence check needs the repo's Linux `.venv`). The licence check itself was not run. Details: section 8 of the record.
 - **Open for people:**
   1. ~~0.37 pi at M12~~ **Done (00:57):** Yujin opened the paper and supplied its text. 0.37 pi and the 11 deg average are in sec. 2.2 and 4. The paper states no height for RAD. No constant is UNRESOLVED now.
-  1b. **Six leftover items worked through (01:15, record section 10):** REMS degrees C confirmed; RAD height sourced to the 1.1 m deck; D1 agrees with the rover's geoid heights at 116 waypoints; the p. 8 station durations confirmed (Figure 4, not Table 1); sun angles within 0.1 deg of JPL Horizons at the scenario times. Still needing a person: a library copy of NASA/TP-2010-216115, and the Mars24 app's third date (B-10).
+  1b. **Six leftover items worked through (01:15, record section 10):** REMS degrees C confirmed; RAD height sourced to the 1.1 m deck; D1 agrees with the rover's geoid heights at 116 waypoints; the p. 8 station durations confirmed (Figure 4, not Table 1); sun angles within 0.1 deg of JPL Horizons at the scenario times. **AC-09 is now 3 of 3 (01:45):** Yujin ran the Mars24 app; 43.5 deg at 09:28 LMST, the same as SharpWalk (B-10 closed). NASA/TP-2010-216115 is not online and stays unread; the speed window keeps its secondary citation.
   2. **W-01:** two sources now give 0.56 m/s, below the app's slow bound of 0.64 m/s. Data and Science to decide.
   3. The other members review REG-01 and REG-02.
   4. A PR for this branch (`/code-review` low of the diff: 0 findings), then the CLAUDE.md step 6 checklist before any merge.
@@ -153,7 +153,7 @@ Earlier sessions' PRs #2-#12 and their merges are listed in `PHASES.md` and `git
 | Data and Science | P-01/P-02, P-03/P-05; D-05; 1.1 sign-off; 1.4 trust grid; 20° slope-limit source; SUN-01..03; REMS-01/02; AC-07/AC-08 review; V-11..V-13 |
 | Design (B-13) | V-14 sky ramp; COV-01, CON-03, HATCH-01, S-06; 2.6 review; video (5.3) |
 | Local Lead (via the team) | D-01 pre-event wireframes; D-02 GSAP / Cesium Mars |
-| Any member with Java | AC-09 third date with the Mars24 app (B-10) |
+| ~~Any member with Java~~ | ~~AC-09 third date with the Mars24 app (B-10)~~ **Done Sun 01:45** |
 
 ## External blocker register (Sat 14 Nov 2026, 22:50)
 
@@ -162,7 +162,7 @@ Earlier sessions' PRs #2-#12 and their merges are listed in `PHASES.md` and `git
 | ~~B-4~~ | ~~Vercel deploy~~ **Done** (3.5 VERIFIED). FortiGuard request moved to 5.5 (G5-DEFER) | Captain | Sun 21:00 (5.5) |
 | G5-DEFER | Two-machine check of the public deploy | Captain + any member | Sun 21:00 (5.5) |
 | B-5 | Concept-formation account for SI_LOG / README (not written by SI) | Team (G-07) | Sun 17:00 |
-| B-10 | AC-09 third date (Mars24 app) | Any member with Java | Sun 13:00 |
+| ~~B-10~~ | ~~AC-09 third date (Mars24 app)~~ **Done Sun 01:45: 3 of 3 dates pass** | Yujin | - |
 | B-11 | REMS units and outreach terms | Data and Science | Sun 13:00 |
 | B-13 | Design confirmations incl. V-14 | Design | Sun 13:00 |
 | R-13 | AC-07 reference-period sols, RAD observer height, page numbers | Data and Science | Sun 13:00 (else reported as not computed) |
