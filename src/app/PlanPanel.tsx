@@ -1,5 +1,5 @@
 // SI-assisted: drafted with Claude Code (Claude Opus 5.5); human Design review pending.
-// Planning panel (Tier 1 subset): K-01 placeholder banner, stops, leg estimates and the planned margin state.
+// Planning panel (Tier 1 subset): K-01 Assumed slope-factor banner, stops, leg estimates and the planned margin state.
 // It never edits the plan: deleting a stop sends a Command to the engine through onCommand.
 import { useEffect, useState } from "react";
 import type { PlanOutput } from "../engine/planner";
@@ -45,10 +45,10 @@ export function PlanPanel({ output, message, onDeleteStop, onEditStop, onSetTime
     : "EVA duration, task, contingency and stop times are Assumed inputs not yet set below.";
   return (
     <aside className="console" aria-label="Plan">
-      {output.kvPlaceholder && (
+      {output.kvAssumed && (
         <div className="banner" role="note" data-testid="assumed-banner">
-          <strong>ASSUMED placeholder.</strong> Slope factors k<sub>v</sub> = 1 in every bin (K-01, team choice): slope
-          changes walking time only through 3D path length. Times are estimates from the {RANGE.low}-{RANGE.high} m/s suited
+          <strong>ASSUMED.</strong> Slope factors k<sub>v</sub> = 1 in every bin (K-01, team choice; no sourced
+          speed-versus-slope value exists): slope changes walking time only through 3D path length. Times are estimates from the {RANGE.low}-{RANGE.high} m/s suited
           range (lunar-gravity tests, {RANGE.citation.source.split(",")[0]}, {RANGE.citation.location}), not Mars-validated.
         </div>
       )}
@@ -80,7 +80,7 @@ export function PlanPanel({ output, message, onDeleteStop, onEditStop, onSetTime
           <thead><tr><th>Leg</th>
             <th>Length <span className="badge" title="Model-derived from D1 on the 2 m grid path">model · D1</span></th>
             <th>Climb <span className="badge" title="Model-derived from D1 heights">model · D1</span></th>
-            <th>Walking time <span className="badge" title={`Estimated range: ${RANGE.low}-${RANGE.high} m/s suited range, k_v placeholder`}>est.</span></th></tr></thead>
+            <th>Walking time <span className="badge" title={`Estimated range: ${RANGE.low}-${RANGE.high} m/s suited range, k_v = 1 Assumed`}>est.</span></th></tr></thead>
           <tbody>
             {plan.legs.map((l) => {
               return (

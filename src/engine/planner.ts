@@ -10,7 +10,7 @@ import { f1 } from "../geo";
 import { f1ToPlanetographic, type PlanetographicPoint } from "../geo/planetographic";
 import { marsSun, ttMinusUtc_s } from "./sun";
 import { cellCentreF1, f1ToCell, type GridDef } from "../geo/grid";
-import { KV_PLACEHOLDER, MARS_CLOCK_UNIT, SCENARIO_ID, SCENARIO_UNIT, SLOPE_LIMIT_ASSUMPTION, STOP_LIMITS } from "./assumptions";
+import { KV_ASSUMED, MARS_CLOCK_UNIT, SCENARIO_ID, SCENARIO_UNIT, SLOPE_LIMIT_ASSUMPTION, STOP_LIMITS } from "./assumptions";
 import { legMetrics, type SpeedRange } from "./leg";
 import { plannedMarginProfile } from "./margin";
 import { CLASS, edgeCost, routeAStar, timeField, type RouteGrid } from "./route";
@@ -56,7 +56,7 @@ export interface PlanConditions {
   /** Sun elevation above the horizontal, degrees; terrain shadowing not modelled. */
   readonly sunElevation: Quantity;
 }
-export interface PlanOutput { readonly plan: MissionPlan; readonly geometry: PlanGeometry; readonly conditions: PlanConditions; readonly kvPlaceholder: boolean }
+export interface PlanOutput { readonly plan: MissionPlan; readonly geometry: PlanGeometry; readonly conditions: PlanConditions; readonly kvAssumed: boolean }
 export type ApplyResult = { ok: true; versionHash: string } | { ok: false; reason: string };
 
 interface StopState { id: string; name: string; cell: number; tasks: string[] }
@@ -117,7 +117,7 @@ export class Planner {
     this.routeGrid = { rows: grid.rows, cols: grid.cols, cell_m: grid.cell_m, elevation: grid.elevation, classes: grid.classes };
     const r = CONSTANTS.walkSpeedRange;
     this.speeds = { nominal_mps: CONSTANTS.walkSpeedNominal.value, low_mps: r.low, high_mps: r.high,
-      kBins: KV_PLACEHOLDER.kBins, slopeLimit_deg: CONSTANTS.slopeLimit.value };
+      kBins: KV_ASSUMED.kBins, slopeLimit_deg: CONSTANTS.slopeLimit.value };
     const h = this.cellAt(habitat);
     if (typeof h === "string") throw new RangeError(`habitat: ${h}`);
     this.habitat = h;
@@ -266,7 +266,7 @@ export class Planner {
       own.push(a);
       return a;
     });
-    const assumptions = [KV_PLACEHOLDER.assumption, SLOPE_LIMIT_ASSUMPTION, ...times, ...own, ...(this.scenario ? [this.scenario] : [])];
+    const assumptions = [KV_ASSUMED.assumption, SLOPE_LIMIT_ASSUMPTION, ...times, ...own, ...(this.scenario ? [this.scenario] : [])];
     const stops: Stop[] = this.stops.map((s, k) => {
       const a = durA[k];
       const duration: Quantity = a
@@ -287,7 +287,7 @@ export class Planner {
       legs.push({
         fromId: a.id, toId: b.id, heading_deg: m.heading_deg, distance_m: m.distance_m, climb_m: m.climb_m,
         time: { value: m.time_s.nominal, low: m.time_s.low, high: m.time_s.high, unit: "s", valueClass: "estimated",
-          methodId: "engine:grid-path-6.4", assumptionIds: [KV_PLACEHOLDER.assumption.id, SLOPE_LIMIT_ASSUMPTION.id],
+          methodId: "engine:grid-path-6.4", assumptionIds: [KV_ASSUMED.assumption.id, SLOPE_LIMIT_ASSUMPTION.id],
           sourceIds: ["D1", "walkSpeedNominal", "walkSpeedRange"] },
       });
       geomLegs.push({ fromId: a.id, toId: b.id, cells: route.cells });
@@ -303,7 +303,7 @@ export class Planner {
       terrainClassSummary: legs.length ? { slope_screened_candidate: 1 } : {}, provenanceIds: ["D1"],
     });
     return {
-      plan, kvPlaceholder: KV_PLACEHOLDER.isPlaceholder, conditions: this.conditions(),
+      plan, kvAssumed: KV_ASSUMED.isAssumed, conditions: this.conditions(),
       geometry: { habitatCell: this.habitat, stopCells: Object.fromEntries(this.stops.map((s) => [s.id, s.cell])), legs: geomLegs, unreachable,
         profile, marginTicks,
         stopReturn_s: this.stops.length ? Object.fromEntries(this.stops.map((s) => [s.id, this.habitatFieldSlow()[s.cell]!])) : {} },
@@ -353,7 +353,7 @@ export class Planner {
       samples: slow,
 
       end: { value: nominal, low, high, unit: "s", valueClass: "estimated", methodId: "engine:margin-6.6-grid-metric",
-        assumptionIds: [...new Set([KV_PLACEHOLDER.assumption.id, SLOPE_LIMIT_ASSUMPTION.id, "A-T_EVA", "A-t_ops", "A-t_cont", ...durA.map((a) => a!.id)])],
+        assumptionIds: [...new Set([KV_ASSUMED.assumption.id, SLOPE_LIMIT_ASSUMPTION.id, "A-T_EVA", "A-t_ops", "A-t_cont", ...durA.map((a) => a!.id)])],
         sourceIds: ["D1", "walkSpeedNominal", "walkSpeedRange"] },
     };
   }

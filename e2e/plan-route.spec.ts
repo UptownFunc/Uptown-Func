@@ -8,7 +8,7 @@ import { EXCLUDED, STOP, clickAt, pixelAt } from "./helpers";
 
 test("a click adds a stop through the engine worker and the route is drawn and listed", async ({ page }) => {
   await page.goto("/?preset=none");
-  await expect(page.getByTestId("assumed-banner")).toContainText("ASSUMED placeholder");
+  await expect(page.getByTestId("assumed-banner")).toContainText("ASSUMED. Slope factors");
   await expect(page.getByLabel("Plan", { exact: true })).toContainText("No stops yet.");
   await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
 
@@ -127,7 +127,7 @@ test("AC-05: every displayed quantity carries its class and sources, and opens i
   await expect(detail).toContainText("estimated");
   await expect(detail).toContainText("NASA/TM-2010-216138");
   await expect(detail).toContainText("Table 4, p. 13");
-  await expect(detail).toContainText("K-01 placeholder");
+  await expect(detail).toContainText("K-01 kept (REG-01)");
   const datasets = page.getByTestId("datasets-in-view");
   await expect(datasets).toContainText("MSL_Gale_DEM_Mosaic_1m_v3");
   await expect(datasets).toContainText("vertical reference unknown");

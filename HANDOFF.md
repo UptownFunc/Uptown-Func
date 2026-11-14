@@ -2,6 +2,25 @@
 
 This file is the handoff between team members and Claude sessions. Keep it factual and current. A new session must read this file before touching code.
 
+## Latest session (Sat 14 Nov 2026, 23:07-23:59 Asia/Manila): register cleared, REG-01
+
+**Read this first; the older snapshot below is from 22:50 and is otherwise still valid.**
+
+- **Branch:** `claude/amazing-hypatia-f808mz`, commit `29830fd` plus a log commit. **Not merged and no PR opened** (no instruction to). `main` is still `b1e0ff8`, so **the live site still shows the old 240/30/30 values.**
+- **Session:** operator not stated. Model: Claude Fable 5.2 (the session's configured model; CLAUDE.md names Opus 5.5 as primary). Superpowers not installed, not used.
+- **Done:** register V-01..V-14 cleared (DECISIONS REG-01; evidence `docs/data/reg-01-register-sources.md`).
+  - FIXED: T_EVA 360 min, t_ops 60 min, t_cont 60 min (EVA-EXP-0042 Rev B, pp. 29-30); stop 45 min (NASA/TM-2010-216138, Tables 2-3, p. 12); V-08 image terms.
+  - KEPT with reasons: scenario time, k_v = 1, habitat, display and method rows.
+  - 20 deg slope-limit citation resolved (EVA-EXP-0042 Rev B, 4.2.1.3, p. 38).
+- **Checks at 29830fd:** vitest 286/286; tsc clean; build ~249.8 of 250 KB (about 165 bytes left); Playwright 50/50; pytest 82 + 2 skipped; licences current; /code-review low 0 findings. Route bench not re-run.
+- **Open for people:**
+  1. The other members confirm REG-01 (the values were picked by SI at one member's direction).
+  2. **W-01:** the same NASA document plans walking at about 2 km/h (0.56 m/s), below the app's slow bound of 0.64 m/s. Data and Science to decide.
+  3. **IMG-01:** confirm the citation wording with the Local Lead (never "according to NASA").
+  4. k_v = 1 is unsupported for 10-20 deg; R-13 (RAD height) and the M12 page numbers stay unresolved.
+- **Environment:** the session moved to the "Uptown-Func" cloud environment and added `ntrs.nasa.gov` and `www.nasa.gov` to its allowed hosts (operator approved).
+- **Next:** open a PR for this branch and merge it under CLAUDE.md step 6 once the team agrees; then check the live site shows 360.0 min.
+
 ## Current snapshot
 
 - **Last updated:** Sat 14 Nov 2026, 22:50 Asia/Manila (UTC+8). Container clock read in UTC (14:50) plus 8 h, because `TZ=Asia/Manila` is not honoured in this container.
@@ -127,7 +146,7 @@ Earlier sessions' PRs #2-#12 and their merges are listed in `PHASES.md` and `git
 | B-11 | REMS units and outreach terms | Data and Science | Sun 13:00 |
 | B-13 | Design confirmations incl. V-14 | Design | Sun 13:00 |
 | R-13 | AC-07 reference-period sols, RAD observer height, page numbers | Data and Science | Sun 13:00 (else reported as not computed) |
-| G-08 / REG-DEFER | Register V-01..V-14 cleared | Team, in another session | Sun 13:00 unless the team changes it |
+| G-08 / REG-01 | Register cleared on branch `claude/amazing-hypatia-f808mz` (29830fd); needs the other members' confirmation and a merge | Team | Sun 13:00 |
 | BENCH | Laptop route-latency measurement (< 500 ms) | Any member with a laptop | Sun 13:00 |
 
 ## Exact next task

@@ -8,7 +8,7 @@ const prov: Provenance[] = [{
   latitudeType: "planetocentric", longitudeDirection: "east", verticalReference: "unknown", resolution_m: 1,
   valueClass: "directly_measured", retrievedOn: "2026-11-14", sha256: "a".repeat(64),
 }];
-const assumptions: Assumption[] = [{ id: "A-kv", name: "Slope factors", value: 1, unit: "1", rationale: "K-01 placeholder", source: "team choice" }];
+const assumptions: Assumption[] = [{ id: "A-kv", name: "Slope factors", value: 1, unit: "1", rationale: "K-01 kept", source: "team choice" }];
 
 describe("source descriptions (UX-15: generated from provenance.json and the constants register)", () => {
   it("describes a dataset from its provenance record, including an unverified vertical reference", () => {
@@ -45,7 +45,7 @@ describe("explainQuantity (demo beat 5: open one number's source)", () => {
     expect(e.method).toBe("engine:grid-path-6.4");
     expect(e.sources.map((s) => s.kind)).toEqual(["dataset", "constant"]);
     expect(e.assumptions).toEqual([
-      { id: "A-kv", text: "Slope factors = 1 (team choice): K-01 placeholder" },
+      { id: "A-kv", text: "Slope factors = 1 (team choice): K-01 kept" },
       { id: "A-missing", text: "A-missing: not in this plan's assumption list" },
     ]);
   });

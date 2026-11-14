@@ -36,35 +36,40 @@ The plan is the project authority. **Section 19 overrides earlier sections where
 - Radiation values are only cited published observations. The `12%` figure is a model prediction for downward dose only. Obstruction must never be converted into dose.
 - Do not present generated Mars imagery as scientific data. Do not use NASA logos, flags, or mission identifiers. Every view carries the footer: “Independent student project; not affiliated with or endorsed by NASA.”
 
-## Placeholder and invented values register - fix before the site is final
+## Placeholder and invented values register - cleared by REG-01, team confirmation pending
 
-These values were **not given by the plan or a cited source**. A session or a team member chose them so the app could run. Each is shown in the app as assumed or placeholder where it appears. **Before the G5 freeze (Sun 15 Nov 13:00 Asia/Manila), or as soon as the site is nearly done**, every row must be either replaced with a team-chosen or sourced value (code, tests and `DECISIONS.md` updated), or explicitly kept by the team with the reason recorded in `DECISIONS.md`. Then mark the row FIXED or KEPT here.
+These values were **not given by the plan**. A session or a team member chose them so the app could run. On Sat 14 Nov 2026 (about 23:10-23:59 Asia/Manila) a team member instructed the session to clear the register and to replace each value with a sourced one (DECISIONS **REG-01**). Each row is now **FIXED** (the value comes from a cited document, with section and page) or **KEPT** (no source can supply it; the reason is recorded). Evidence: `docs/data/reg-01-register-sources.md`.
 
-**Any session that introduces a new invented or placeholder value must add a row here in the same commit.** Never present a row's value as measured, cited or Mars-validated.
+**Still to do before the G5 freeze (Sun 15 Nov 13:00 Asia/Manila):** the other team members confirm REG-01, or change a row and record it in `DECISIONS.md`. The values were picked from the documents by SI at one member's direction; that is not the whole team's review.
 
-| # | Value | Current setting | Chosen by | Where | Decision | Status |
+**Any session that introduces a new invented or placeholder value must add a row here in the same commit.** Never present a row's value as measured or Mars-validated. Every FIXED value is a lunar planning figure applied to Mars and stays **Assumed**. Cite documents by number; never write "according to NASA" or imply NASA reviewed the project (IMG-01).
+
+| # | Value | Setting | Basis | Where | Decision | Status |
 |---|---|---|---|---|---|---|
-| V-01 | Planned EVA duration T_EVA | 240 min | SI at a team member's direction | `src/app/demoPreset.ts` | G3-01, G3-02 | OPEN |
-| V-02 | Operational tasks t_ops | 30 min | SI, as V-01 | `src/app/demoPreset.ts` | G3-01 | OPEN |
-| V-03 | Contingency t_cont | 30 min | SI, as V-01 | `src/app/demoPreset.ts` | G3-01 | OPEN |
-| V-04 | Default stop duration | 45 min | SI, as V-01 | `src/app/demoPreset.ts` | G3-01 | OPEN |
-| V-05 | Scenario date and time (sun values) | 2026-11-15 12:00 UTC | SI, as V-01 | `src/app/demoPreset.ts` | G3-01 | OPEN |
-| V-06 | Slope factors k_v, all four bins | 1 (placeholder, ASSUMED banner shown) | Session operator | `src/engine/assumptions.ts` | K-01 | OPEN |
-| V-07 | Default habitat position | 4.795211 S, 137.391845 E (nearest slope-screened cell, 15.6 m from the plan 19.2 point) | Session | `src/app/App.tsx` `DEFAULT_HABITAT` | H-01 | OPEN |
-| V-08 | Rover point-of-view images | Navcam frames from sols 4602, 4628, 4650 | SI, as V-01 | `public/rover/images.json` | C-22 | OPEN (picks and image-use terms) |
-| V-09 | Stop name and task limits | name 60 chars; 10 tasks of 120 chars | SI | `src/engine/assumptions.ts` `STOP_LIMITS` | C-19 | OPEN |
-| V-10 | Time-to-habitat contour display | 5-min levels (plan) up to 90 min; 4 m display grid; minimum area 400 cells | Session (display) | `src/app/App.tsx`, `src/engine/worker.ts` | R-08 | OPEN |
-| V-11 | AC-08 path rule | a 2 m cell counts if the D5 line enters it (exact traversal); share over known cells | Session (method) | `pipeline/sharpwalk/rover_path.py` | AC-08 record | OPEN |
-| V-12 | AC-07 base observer height h_obs | 1 m (the plan sweeps 0-2 m; RAD's reference height UNVERIFIED, R-13) | Session (method) | `pipeline/sharpwalk/run_sky_benchmark.py` `BASE` | AC-07 record | OPEN |
-| V-13 | AC-07 sampling | D1 to 3 km (plan: to the D1 edge), 1 m steps; D12 beyond, 100 m steps | Session (method) | `pipeline/sharpwalk/run_sky_benchmark.py` | AC-07 record | OPEN |
-| V-14 | Sky layer display ramp | graphite #191B20, alpha 0 to 200 for f_obs 0 to 50 %, 4 m display pixels | Session (display) | `pipeline/sharpwalk/run_sky_grid.py` `RAMP_MAX` | SKY-3 | OPEN (Design: hard to see on dark imagery) |
+| V-01 | Planned EVA duration T_EVA | **360 min** (was 240) | Centre of the 6±2 h EVA range: EVA-EXP-0042 Rev B, 4.1.4, p. 29 | `src/app/demoPreset.ts` | REG-01 | **FIXED** |
+| V-02 | Operational tasks t_ops | **60 min** (was 30) | "hour for egress/ingress": EVA-EXP-0042 Rev B, 4.1.4.3.2, p. 30 | `src/app/demoPreset.ts` | REG-01 | **FIXED** |
+| V-03 | Contingency t_cont | **60 min** (was 30) | "an additional hour for emergency and off-nominal situations": EVA-EXP-0042 Rev B, 4.1.4.3.2, p. 30; held inside T_EVA; a time allowance, not life support | `src/app/demoPreset.ts` | REG-01 | **FIXED** |
+| V-04 | Default stop duration | 45 min (unchanged) | 45 min of EVA per exploration site: NASA/TM-2010-216138, Tables 2-3, p. 12 | `src/app/demoPreset.ts` | REG-01 | **FIXED** (source added) |
+| V-05 | Scenario date and time (sun values) | 2026-11-15 12:00 UTC | A scenario input; no source can give it. Checked: a 6 h EVA from this start stays in daylight (sun 43.5 to 75.7 deg) | `src/app/demoPreset.ts` | REG-01 | **KEPT** |
+| V-06 | Slope factors k_v, all four bins | 1 (ASSUMED banner shown) | No sourced speed-versus-slope value exists: EVA-EXP-0042 Rev B p. 40 ("does not account for slope"); Apollo 14 legs (NASA SP-368, ch. 4, Table 4, p. 125) reach only 7.9 deg and show no pooled slowdown. Probably optimistic for 10-20 deg | `src/engine/assumptions.ts` | K-01, REG-01 | **KEPT** |
+| V-07 | Default habitat position | 4.795211 S, 137.391845 E (nearest slope-screened cell, 15.6 m from the plan 19.2 point) | A scenario input from plan 19.2 and the D1 slope screen | `src/app/App.tsx` `DEFAULT_HABITAT` | H-01, REG-01 | **KEPT** |
+| V-08 | Rover point-of-view images | Navcam frames from sols 4602, 4628, 4650 | Files confirmed on NASA's raw image server; use fits NASA's "Images and Media" guidelines (educational, factual, credited, no logo). Blog terrain evidence not re-checked; JPL's policy page not read | `public/rover/images.json` | C-22, REG-01 | **FIXED** (terms); picks **KEPT** |
+| V-09 | Stop name and task limits | name 60 chars; 10 tasks of 120 chars | Interface limit, not a science value | `src/engine/assumptions.ts` `STOP_LIMITS` | C-19, REG-01 | **KEPT** |
+| V-10 | Time-to-habitat contour display | 5-min levels (plan) up to 90 min; 4 m display grid; minimum area 400 cells | Display setting, not a science value | `src/app/App.tsx`, `src/engine/worker.ts` | R-08, REG-01 | **KEPT** |
+| V-11 | AC-08 path rule | a 2 m cell counts if the D5 line enters it (exact traversal); share over known cells | Method choice, stated in the AC-08 record | `pipeline/sharpwalk/rover_path.py` | AC-08 record, REG-01 | **KEPT** |
+| V-12 | AC-07 base observer height h_obs | 1 m (the plan sweeps 0-2 m) | RAD's reference height not found (R-13 open). The whole 0-2 m sweep passes (20.73 to 16.51 %) | `pipeline/sharpwalk/run_sky_benchmark.py` `BASE` | AC-07 record, REG-01 | **KEPT** (R-13 open) |
+| V-13 | AC-07 sampling | D1 to 3 km (plan: to the D1 edge), 1 m steps; D12 beyond, 100 m steps | Method choice; AC-21/AC-22 convergence recorded | `pipeline/sharpwalk/run_sky_benchmark.py` | AC-07 record, REG-01 | **KEPT** |
+| V-14 | Sky layer display ramp | graphite #191B20, alpha 0 to 200 for f_obs 0 to 50 %, 4 m display pixels | Display setting; hard to see on dark imagery | `pipeline/sharpwalk/run_sky_grid.py` `RAMP_MAX` | SKY-3, REG-01 | **KEPT** (Design review still open, B-13) |
 
 **Plan values whose source is still unresolved** (the value comes from the plan; the citation or reference is missing):
-- 20 deg slope limit: page or slide UNRESOLVED (`src/constants`; the release check lists it).
+- ~~20 deg slope limit~~ **resolved by REG-01:** EVA-EXP-0042 Rev B, 4.2.1.3, p. 38 (`src/constants`). Still Assumed: a lunar suit capability applied to Mars.
+- Sky obstruction at M12 (about 19 %): page numbers not read (`src/constants`; the release check lists it).
 - D1 vertical reference: unverified (D-05); shown as "vertical reference unverified".
 - REMS units read as degrees C and Pa, not labelled in the feed (REMS-01).
 
-**Conventions pending confirmation** (no displayed science value invented): P-01, P-02, K-02, L-01, L-02, F-01, CON-01, CON-03, COV-01, HATCH-01 in `DECISIONS.md`.
+**Open finding (W-01):** EVA-EXP-0042 Rev B plans walking at about 2 km/h (0.56 m/s) on level regolith (p. 40), below the app's slow bound of 0.64 m/s. The plan's speeds are unchanged; Data and Science to decide.
+
+**Conventions pending confirmation** (no displayed science value invented): P-01, P-02, K-02, L-01, L-02, F-01, CON-01, CON-03, COV-01, HATCH-01, IMG-01 in `DECISIONS.md`.
 
 ## Architecture - do not bypass these boundaries
 
