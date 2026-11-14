@@ -281,7 +281,7 @@ Part: 2.3 and 2.4 engine functions (not VERIFIED: k_v missing; stores/UI later)
 Owner: Route Engine (+ Design for 2.4) (TBA); written in Yujin's session
 Files changed: src/engine/leg.ts, leg.test.ts, margin.ts, margin.test.ts; route.ts (kForRatio exported)
 Checks run: npx vitest run ; npx tsc --noEmit ; AC-19 seed count (node script) ; mutation test (reverted)
-Results: vitest 133/133; tsc clean; 30/30 AC-19 seeds exercise the assertions; the mutation failed 32 tests
+Results: after /code-review: vitest 143/143, pytest 39/39, playwright 2/2 (before the review: vitest 133/133); tsc clean; 30/30 AC-19 seeds exercise the assertions; the mutation failed 32 tests
 Known limitations: k_v placeholders in tests only; margins on the grid metric only (D-04); the ops time is charged in
   full from the first step (plan 6.6, conservative)
 Commit SHA: see the 2.3/2.4 commit on claude/kind-ptolemy-1wdqf5

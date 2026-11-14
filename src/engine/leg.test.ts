@@ -34,9 +34,9 @@ describe("leg metrics", () => {
   });
 
   it("counts climb and descent separately", () => {
-    const g = grid(1, 4, (_r, c) => [0, 1, 0.5, 2][c]!);
+    const g = grid(1, 4, (_r, c) => [0, 0.4, 0.2, 0.6][c]!); // every step under the 20 deg limit at 2 m
     const m = legMetrics(g, [0, 1, 2, 3], speeds);
-    close(m.climb_m, 1 + 1.5); close(m.descent_m, 0.5);
+    close(m.climb_m, 0.4 + 0.4); close(m.descent_m, 0.2);
   });
 
   it("gives headings clockwise from grid north (row decreasing is north)", () => {
@@ -69,5 +69,31 @@ describe("time-to-habitat field", () => {
     const f = habitatField(g, { r: 2, c: 2 }, speeds);
     const ref = timeField(g, { r: 2, c: 2 }, { vLevel_mps: 0.64, kBins: speeds.kBins, slopeLimit_deg: 20 });
     for (let i = 0; i < f.length; i++) close(f[i]!, ref[i]!);
+  });
+});
+
+describe("leg validation (shared edge rules)", () => {
+  it("refuses a leg through a cell that is not slope-screened", () => {
+    const g = grid(1, 3); g.classes[1] = CLASS.UNKNOWN;
+    expect(() => legMetrics(g, [0, 1, 2], speeds)).toThrow(/slope-screened/);
+  });
+  it("refuses an edge steeper than the limit", () => {
+    const g = grid(1, 2, (_r, c) => c * 2 * Math.tan((30 * Math.PI) / 180));
+    expect(() => legMetrics(g, [0, 1], speeds)).toThrow(/limit/);
+  });
+  it("refuses a NaN elevation instead of returning NaN times", () => {
+    const g = grid(1, 2); g.elevation[1] = Number.NaN;
+    expect(() => legMetrics(g, [0, 1], speeds)).toThrow(/elevation/);
+  });
+});
+
+describe("one metric", () => {
+  it("leg nominal time equals the A* route time (the search's inlined edge rule matches edgeCost)", async () => {
+    const { routeAStar } = await import("./route");
+    let s = 7; const rnd = () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 2 ** 32);
+    const g = grid(15, 15, () => rnd() * 1.2);
+    const m = { vLevel_mps: speeds.nominal_mps, kBins: speeds.kBins, slopeLimit_deg: 20 };
+    const r = routeAStar(g, { r: 0, c: 0 }, { r: 14, c: 14 }, m)!;
+    close(legMetrics(g, r.cells, speeds).time_s.nominal, r.time_s, 1e-9);
   });
 });

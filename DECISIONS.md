@@ -102,6 +102,17 @@ Ten findings: seven fixed, two partly fixed, one skipped.
 | L-01 | `Leg.distance_m` | The sum of 3D edge lengths (plan 6.2: in-plane step plus height difference). `horizontal_m` is also computed for display. | PENDING |
 | L-02 | `Leg.heading_deg` | The straight start-to-end bearing in F6, clockwise from grid north (0-360). The briefing card may want the initial heading instead. | PENDING |
 
+## /code-review of 2.6 part 1 and 2.3/2.4 (Sat 14 Nov, ~12:10), medium, `7db8df0...e5dfbcc`
+
+All ten findings fixed, test-first where possible. Each of the three key tests was shown to fail against the old code:
+- **Readout geometry (real bug):** the readout put the cursor at the origin height (h0 about -3,500 m) before F6, but the grid is `+proj=ortho` on the bare sphere. That scaled east/north by (R + h0)/R, about 1.4 m at 1.4 km, enough to read the wrong cell. It now uses h = 0, exactly the grid's projection. The test point at a northing of 1,398.2 m fails under the old behaviour.
+- **One edge rule:** `edgeCost` in `route.ts` validates adjacency, class, corner cutting, NaN and the slope limit. `legMetrics` and `plannedMarginProfile` now use it, so a jump, an over-limit edge or a NaN elevation is refused rather than costed. A test checks that the leg's nominal time equals the A* time, which pins the search's inlined rule to the same metric.
+- **Unknown stays unknown:** plan times are validated, and `marginState` throws on NaN instead of returning NEAR_LIMIT.
+- **Quantities:** the readout returns schema-valid Quantities (lat, lon, E, N, elevation); unknown elevation is `valueClass: unknown, value: null`. Legend resolutions are Quantities.
+- **Legend date:** renamed `builtOn` and shown as "built ...", so it is not read as a data date.
+- **Display sources:** `run_display` asserts that D1 and D2 are in F7 and cover the extent (a test shows it rejects a different `lat_ts` and a short extent).
+- **Performance:** the readout frame is computed once and throttled to one per animation frame; `plannedMarginProfile` accepts a precomputed habitat field.
+
 ## Governance decisions
 
 | ID | Topic | Decision | Decided by | Date/time (Asia/Manila) | Evidence |

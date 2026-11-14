@@ -45,3 +45,26 @@ def test_linear_stretch_is_linear_and_keeps_order():
     a = np.array([[10.0, 20.0, 30.0, 40.0]])
     s = linear_stretch_u8(a, lo=10.0, hi=40.0)
     assert s.tolist() == [[0, 85, 170, 255]]
+
+
+def _mem(crs, bounds=(0.0, 0.0, 100.0, 100.0)):
+    import rasterio
+    from rasterio.io import MemoryFile
+    x0, y0, x1, y1 = bounds
+    mf = MemoryFile()
+    ds = mf.open(driver="GTiff", width=10, height=10, count=1, dtype="uint8", crs=crs,
+                 transform=Affine((x1 - x0) / 10, 0, x0, 0, -(y1 - y0) / 10, y1))
+    return mf, ds
+
+
+def test_display_sources_must_be_in_f7_and_cover_the_extent():
+    import pytest
+    from sharpwalk.run_display import _require_f7
+    mf, ok = _mem(F7_CRS)
+    _require_f7(ok, "ok", 10, 10, 90, 90)
+    with pytest.raises(ValueError, match="does not cover"):
+        _require_f7(ok, "ok", 10, 10, 190, 90)
+    mf2, other = _mem(CRS.from_proj4("+proj=eqc +lat_ts=-5 +lon_0=0 +R=3396190 +units=m +no_defs"))
+    with pytest.raises(ValueError, match="not in F7"):
+        _require_f7(other, "other", 10, 10, 90, 90)
+    ok.close(); other.close(); mf.close(); mf2.close()

@@ -2,7 +2,7 @@
 // Plan 6.2 / 6.4 / 6.5 leg metrics along an engine path, in seconds and metres (the UI shows SI minutes).
 // distance_m is the sum of 3D edge lengths (plan 6.2: in-plane step plus height difference); horizontal_m is also
 // given (L-01). heading_deg is the straight start-to-end bearing in F6, clockwise from grid north (L-02).
-import { kForRatio, timeField, type Cell, type RouteGrid } from "./route";
+import { edgeCost, timeField, type Cell, type RouteGrid } from "./route";
 
 export interface SpeedRange {
   readonly nominal_mps: number;   // routes the path (plan 6.4)
@@ -31,16 +31,10 @@ export function legMetrics(g: RouteGrid, cells: readonly number[], s: SpeedRange
   if (cells.length < 2) throw new RangeError("a leg needs at least two cells");
   let horizontal = 0, distance = 0, climb = 0, descent = 0, unitTime = 0;
   for (let j = 1; j < cells.length; j++) {
-    const a = cells[j - 1]!, b = cells[j]!;
-    const dr = Math.abs(Math.floor(a / g.cols) - Math.floor(b / g.cols)), dc = Math.abs((a % g.cols) - (b % g.cols));
-    if (Math.max(dr, dc) !== 1) throw new RangeError(`path is not connected between cells ${a} and ${b}`);
-    const len = dr === 1 && dc === 1 ? g.cell_m * Math.SQRT2 : g.cell_m;
-    const dz = g.elevation[b]! - g.elevation[a]!;
-    const e = Math.sqrt(len * len + dz * dz);
-    horizontal += len; distance += e;
-    if (dz > 0) climb += dz; else descent -= dz;
-    // Time at unit level speed; the three bounds differ only by the level speed.
-    unitTime += e / kForRatio(Math.abs(dz) / len, s);
+    const e = edgeCost(g, cells[j - 1]!, cells[j]!, s);
+    horizontal += e.horizontal_m; distance += e.length3d_m;
+    if (e.dz_m > 0) climb += e.dz_m; else descent -= e.dz_m;
+    unitTime += e.unitTime_s; // the three bounds differ only by the level speed
   }
   const first = cells[0]!, last = cells[cells.length - 1]!;
   const east = (last % g.cols) - (first % g.cols), north = Math.floor(first / g.cols) - Math.floor(last / g.cols);

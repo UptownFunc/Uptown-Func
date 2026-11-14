@@ -11,7 +11,13 @@ import Zoom from "ol/control/Zoom";
 import { f1ToF7 } from "../geo";
 import { F7_PROJECTION } from "./f7";
 import { loadArea, type LoadedArea } from "./loadArea";
-import { readoutAt, type Readout } from "./readout";
+import { gridFrame, readoutAt, type Readout } from "./readout";
+import type { Quantity } from "../contracts";
+
+/** Displays a Quantity: unknown stays "unknown" (CLAUDE.md); one decimal for metres. */
+function fmt(q: Quantity): string {
+  return q.value === null ? "unknown" : `${q.value.toFixed(1)} ${q.unit}`;
+}
 
 export function AreaSheet({ dataUrl }: { dataUrl: string }) {
   const target = useRef<HTMLDivElement>(null);
@@ -44,8 +50,16 @@ export function AreaSheet({ dataUrl }: { dataUrl: string }) {
           minResolution: a.display.pixel_m / 2, maxResolution: 16, extent, constrainOnlyCenter: true,
         }),
       });
+      // The frame is computed once; readouts are throttled to one per animation frame.
+      const frame = gridFrame(a.grid);
+      let pending: number[] | null = null, raf = 0;
       map.on("pointermove", (e) => {
-        if (area.current) setReadout(readoutAt(e.coordinate, area.current.grid));
+        pending = e.coordinate;
+        if (raf) return;
+        raf = requestAnimationFrame(() => {
+          raf = 0;
+          if (pending && area.current) setReadout(readoutAt(pending, area.current.grid, frame));
+        });
       });
     }).catch((e: unknown) => setError(e instanceof Error ? e.message : String(e)));
     return () => { cancelled = true; map?.setTarget(undefined); };
@@ -57,7 +71,7 @@ export function AreaSheet({ dataUrl }: { dataUrl: string }) {
       <div className="sheet">
         <div className="map" ref={target} data-testid="area-map" />
         <div className="legend" aria-label="Layers">
-          <ul>{legend.map((l) => <li key={l.id}>{l.name} - {l.valueClass.replace("_", " ")}, {l.source}, {l.resolution_m} m, {l.date}</li>)}</ul>
+          <ul>{legend.map((l) => <li key={l.id}>{l.name} - {l.valueClass.replace("_", " ")}, {l.source}, {fmt(l.resolution)}, built {l.builtOn}</li>)}</ul>
         </div>
       </div>
       <div className="status" data-testid="status-line">
@@ -66,9 +80,9 @@ export function AreaSheet({ dataUrl }: { dataUrl: string }) {
             <span><span className="label">lat </span>{readout.lat}</span>
             <span><span className="label">lon </span>{readout.lon} E</span>
             <span className="label">(display precision)</span>
-            <span><span className="label">E </span>{readout.east_m.toFixed(1)} m</span>
-            <span><span className="label">N </span>{readout.north_m.toFixed(1)} m</span>
-            <span><span className="label">elev </span>{readout.elevation_m === null ? "unknown" : `${readout.elevation_m.toFixed(1)} m`}</span>
+            <span><span className="label">E </span>{fmt(readout.east)}</span>
+            <span><span className="label">N </span>{fmt(readout.north)}</span>
+            <span><span className="label">elev </span>{fmt(readout.elevation)}</span>
             <span className="label">{readout.elevationSource}; vertical reference unverified</span>
           </>
         ) : <span className="label">Move the pointer over the sheet for coordinates.</span>}

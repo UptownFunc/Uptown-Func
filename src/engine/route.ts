@@ -67,6 +67,25 @@ function octileSeconds(di: number, dj: number, secondsPerCell: number): number {
   return secondsPerCell * (di > dj ? di + OCTILE_D2 * dj : dj + OCTILE_D2 * di);
 }
 
+/** One edge under the engine's rules (plan 6.4), for costing a given path. Throws if the edge is not allowed.
+ *  unitTime_s is the time at a level speed of 1 m/s; divide by the level speed. The search inlines the same rules. */
+export function edgeCost(g: RouteGrid, a: number, b: number, m: Pick<SpeedModel, "kBins" | "slopeLimit_deg">) {
+  const ra = Math.floor(a / g.cols), ca = a % g.cols, rb = Math.floor(b / g.cols), cb = b % g.cols;
+  const dr = Math.abs(ra - rb), dc = Math.abs(ca - cb);
+  if (Math.max(dr, dc) !== 1) throw new RangeError(`path is not connected between cells ${a} and ${b}`);
+  if (!routable(g, a) || !routable(g, b)) throw new RangeError(`edge ${a}-${b} enters a cell that is not slope-screened`);
+  const diagonal = dr === 1 && dc === 1;
+  if (diagonal && (!routable(g, ra * g.cols + cb) || !routable(g, rb * g.cols + ca)))
+    throw new RangeError(`edge ${a}-${b} cuts a corner past a blocked cell`);
+  const len = diagonal ? g.cell_m * Math.SQRT2 : g.cell_m;
+  const dz = g.elevation[b]! - g.elevation[a]!;
+  if (!Number.isFinite(dz)) throw new RangeError(`edge ${a}-${b} has no elevation`);
+  const ratio = Math.abs(dz) / len;
+  if (ratio > Math.tan((m.slopeLimit_deg * Math.PI) / 180) * (1 + REL_TOL)) throw new RangeError(`edge ${a}-${b} is over the slope limit`);
+  const length3d = Math.sqrt(len * len + dz * dz);
+  return { horizontal_m: len, dz_m: dz, length3d_m: length3d, unitTime_s: length3d / kForRatio(ratio, m) };
+}
+
 /** Octile distance over the fastest bin: a lower bound on the remaining time (plan 6.4). */
 export function heuristicSeconds(from: Cell, to: Cell, cell_m: number, m: SpeedModel): number {
   return octileSeconds(Math.abs(from.r - to.r), Math.abs(from.c - to.c), cell_m / (m.vLevel_mps * Math.max(...m.kBins)));

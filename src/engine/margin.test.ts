@@ -2,7 +2,7 @@
 // Plan 6.6 planned and field return margins; AC-19 on the grid metric (route smoothing undecided, D-04).
 import { describe, expect, it } from "vitest";
 import { CLASS, routeAStar, type RouteGrid } from "./route";
-import type { SpeedRange } from "./leg";
+import { habitatField, type SpeedRange } from "./leg";
 import { fieldMargins, marginState, plannedMarginProfile, type PlanTimes } from "./margin";
 
 const close = (a: number, b: number, tol = 1e-9) => expect(Math.abs(a - b)).toBeLessThanOrEqual(tol);
@@ -95,5 +95,28 @@ describe("field margins (plan 6.6)", () => {
     expect(f.returnNow_s).toBeGreaterThanOrEqual(f.continue_s);
     close(f.continue_s, 3600 - (1200 + 1500 + 300));
     close(f.returnNow_s, 3600 - (1200 + 700 + 400 + 300));
+  });
+});
+
+describe("margin validation", () => {
+  const g = flat(1, 6);
+  const times: PlanTimes = { tEva_s: 3600, tOps_s: 600, tCont_s: 300 };
+  it("refuses a leg that jumps cells, instead of costing it as one step", () => {
+    expect(() => plannedMarginProfile(g, [[0, 2], [2, 1, 0]], [0], times, speeds)).toThrow(/connected/);
+  });
+  it("refuses an edge over the slope limit", () => {
+    const steep = flat(1, 3, (_r, c) => (c === 1 ? 2 * Math.tan((30 * Math.PI) / 180) : 0));
+    expect(() => plannedMarginProfile(steep, [[0, 1], [1, 0]], [0], times, speeds)).toThrow(/limit/);
+  });
+  it("refuses non-finite or negative plan times rather than labelling them", () => {
+    expect(() => plannedMarginProfile(g, [[0, 1], [1, 0]], [0], { ...times, tCont_s: Number.NaN }, speeds)).toThrow(/time/);
+    expect(() => plannedMarginProfile(g, [[0, 1], [1, 0]], [-1], times, speeds)).toThrow(/time/);
+    expect(() => marginState(Number.NaN, 3600)).toThrow();
+  });
+  it("accepts a precomputed habitat field and gives the same profile", () => {
+    const legs = [[0, 1, 2, 3], [3, 2, 1, 0]];
+    const a = plannedMarginProfile(g, legs, [120], times, speeds);
+    const b = plannedMarginProfile(g, legs, [120], times, speeds, habitatField(g, { r: 0, c: 0 }, speeds));
+    expect(b.map((x) => x.margin_s)).toEqual(a.map((x) => x.margin_s));
   });
 });

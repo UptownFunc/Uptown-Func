@@ -3,7 +3,11 @@
 import { f1 } from "../geo";
 import type { AreaGrid } from "./readout";
 
-export interface DisplayLayer { id: string; path: string; name: string; unit: string; valueClass: string; source: string; resolution_m: number; date: string }
+import type { Quantity } from "../contracts";
+
+interface RawLayer { id: string; path: string; name: string; unit: string; valueClass: string; source: string; resolution_m: number; builtOn: string }
+/** A display layer; its resolution is a Quantity because it is shown in the legend. builtOn is the pipeline build date. */
+export interface DisplayLayer extends RawLayer { resolution: Quantity }
 export interface AreaDisplay { extentF7: [number, number, number, number]; pixel_m: number; layers: DisplayLayer[] }
 export interface LoadedArea { grid: AreaGrid; display: AreaDisplay }
 
@@ -16,7 +20,9 @@ export async function loadArea(base: string): Promise<LoadedArea> {
     return r;
   };
   const report = await (await get("build_report.json")).json();
-  const display = (await (await get("layers.json")).json()) as AreaDisplay;
+  const raw = (await (await get("layers.json")).json()) as Omit<AreaDisplay, "layers"> & { layers: RawLayer[] };
+  const display: AreaDisplay = { ...raw, layers: raw.layers.map((l) => ({ ...l, resolution: {
+    value: l.resolution_m, unit: "m", valueClass: "model_derived", methodId: "pipeline:display-grid", assumptionIds: [], sourceIds: [l.source] } })) };
   const eg = (report.grids as GridMeta[]).find((g) => g.name === "elevation");
   if (!eg || eg.dtype !== "uint16") throw new Error("elevation grid missing or not uint16");
   const q = new Uint16Array(await (await get(eg.path)).arrayBuffer());

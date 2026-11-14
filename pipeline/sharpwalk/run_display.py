@@ -25,6 +25,18 @@ ENV = dict(GDAL_DISABLE_READDIR_ON_OPEN="EMPTY_DIR", CPL_VSIL_CURL_ALLOWED_EXTEN
            GDAL_HTTP_MERGE_CONSECUTIVE_RANGES="YES")
 
 
+def _require_f7(ds, name, x0, y0, x1, y1):
+    """The display layers are cut in F7 directly, so each source must be in F7 and must contain the extent."""
+    p = ds.crs.to_dict()
+    same = (p.get("proj") == "eqc" and abs(p.get("R", p.get("a", 0)) - F7_CRS.to_dict()["R"]) < 1e-6
+            and p.get("lon_0", 0) == 0 and p.get("lat_ts", 0) == 0 and p.get("x_0", 0) == 0 and p.get("y_0", 0) == 0)
+    if not same:
+        raise ValueError(f"{name} is not in F7 ({ds.crs.to_proj4()}); reproject it before cutting display layers")
+    b = ds.bounds
+    if not (b.left <= x0 and b.right >= x1 and b.bottom <= y0 and b.top >= y1):
+        raise ValueError(f"{name} does not cover the area extent")
+
+
 def main(area_dir: str) -> None:
     out = Path(area_dir)
     rep = json.loads((out / "build_report.json").read_text())
@@ -33,6 +45,7 @@ def main(area_dir: str) -> None:
     bx0, by0, bx1, by1 = f7_bounds_of_f6_grid(lat0, lon0, half_m=n * cell / 2)
     with rasterio.Env(**ENV):
         with rasterio.open("/vsicurl/" + D1_URL) as d1:
+            _require_f7(d1, "D1", bx0, by0, bx1, by1)
             # Snap outward to D1 pixel edges (1 m), then pad 1 px for the hillshade kernel.
             fw = from_bounds(bx0, by0, bx1, by1, d1.transform)
             c0, r0 = math.floor(fw.col_off), math.floor(fw.row_off)
@@ -47,6 +60,7 @@ def main(area_dir: str) -> None:
         x0, y1 = t.c, t.f
         x1, y0 = x0 + cols * t.a, y1 + rows * t.e
         with rasterio.open("/vsicurl/" + D2_URL) as d2:
+            _require_f7(d2, "D2", x0, y0, x1, y1)
             wd = from_bounds(x0, y0, x1, y1, d2.transform)
             rgb = d2.read(window=wd, out_shape=(3, rows, cols), resampling=Resampling.average).astype(np.float64)
     lum = 0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2]
@@ -84,12 +98,12 @@ def main(area_dir: str) -> None:
         "layers": [
             {"id": "d2", "path": "d2_luminance.jpg", "name": "Orthophoto (D2 colour mosaic, luminance)",
              "unit": "8-bit luminance", "valueClass": "directly_measured", "source": "D2", "resolution_m": 1.0,
-             "nativeResolution_m": 0.25, "stretch": [round(float(lo), 2), round(float(hi), 2)], "date": today},
+             "nativeResolution_m": 0.25, "stretch": [round(float(lo), 2), round(float(hi), 2)], "builtOn": today},
             {"id": "hillshade", "path": "d1_hillshade.jpg", "name": "Hillshade (D1)", "unit": "8-bit shade",
-             "valueClass": "model_derived", "source": "D1", "resolution_m": 1.0, "date": today},
+             "valueClass": "model_derived", "source": "D1", "resolution_m": 1.0, "builtOn": today},
             {"id": "terrain", "path": "terrain_overlay.png", "name": "Terrain classes (slope-screened only, no rock detection)",
              "unit": "class", "valueClass": "model_derived", "source": "D1", "resolution_m": rep["cellSize_m"],
-             "slopeLimit_deg": rep["slopeLimit_deg"], "date": today},
+             "slopeLimit_deg": rep["slopeLimit_deg"], "builtOn": today},
         ],
     }
     for L in layers["layers"]:
