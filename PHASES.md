@@ -100,7 +100,7 @@ Remaining: 33 h 11 min.
 | 3.4 | IN PROGRESS (core done) | Card prints stop tasks and the three D6 rover views with credits; paper print and fixed-scale map open |
 | 3.5 | NOT STARTED | Needs Vercel access (B-4) |
 | 3.6 | IN PROGRESS | Conditions built (9ec2f70, 6e8ca00, 9608ecb); AC-09 2 of 3 dates (B-10); scenario time set by G3-01 (2026-11-15 12:00 UTC, assumed) |
-| 4.1 | VERIFIED (Design review pending) | Contours, drill, AC-31 done; **sky-obstruction layer built** (20 m grid, plan 6.7; self-check 0.03 pp; off by default; legend: geometry, not dose + M12 benchmark). Per-stop sky value not shown (bundle, V-14 note) |
+| 4.1 | VERIFIED (Design review pending) | Contours, drill, AC-31 done; **sky-obstruction layer built** (20 m grid, plan 6.7; self-check 0.064 pp after R-19; off by default; legend: geometry, not dose + M12 benchmark). Per-stop sky value not shown (bundle, V-14 note) |
 | 4.2 | VERIFIED at M12 (Data and Science review pending) | AC-07 PASS: f_obs 18.50 % vs 18.5 % published (h_obs 1 m); 0-2 m sweep 20.73-16.51 %, all within ±3 pp; AC-21/AC-22 converged; reference position not computed (R-13); layer not built |
 | 4.3 | VERIFIED (result recorded; Data and Science review pending) | AC-08 PASS: 83 of 2,537 known path cells excluded (3.27 % ≤ 5 % Assumed), 1 unknown; waypoints sols 4469-5073; `docs/data/ac-08-rover-path.md` |
 | 4.4 | VERIFIED (automated) | axe, keyboard and width checks still pass in the 43-test Playwright run |
@@ -870,9 +870,15 @@ Checks run (exact commands), Sat 14 Nov 2026 19:59-20:08 Asia/Manila:
   PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome npx playwright test --trace off -> 47 passed
      (first run: sky spec failed on "20.0 m" formatting and a missing space in the legend; fixed)
 Results: PASS. Geometry, not dose; never labelled safe or shelter.
+Review: /code-review medium R-19 (10 findings, all fixed): explicit --cell (no machine-dependent fallback); aggregated
+  levels read by nearest block (a crest is never blended down); load failure named and D12 not claimed; toggle without a
+  hard-coded number and only offered when the area has the layer; layer below the terrain symbols; layer reset per
+  load; run_display keeps the registration unless --sky; 32 m level dropped; published M12 value is the constant
+  skyObstructionM12 (page UNRESOLVED). Regenerated 20:22: grid sha256 fc225d1364d6..., self-check max 0.064 pp,
+  f_obs 6.2-43.5 %; pytest 84; vitest 274; build ~249.1 of 250 KB; Playwright 48/48
 Known limitations: the graphite ramp is hard to see on dark imagery (Design review, V-14); per-stop sky value
-  ("20 m sample", plan 6.7) not shown: bundle headroom ~1.5 KB; h_obs 1 m (V-12); D12 licence terms not read
-Commit SHA: see the PR for this work
+  ("20 m sample", plan 6.7) not shown: bundle headroom ~0.9 KB; h_obs 1 m (V-12); D12 licence terms not read
+Commit SHA: d8351d4 and the R-19 commit (PR #8)
 Next part / blocker owner: Design review of the ramp (B-13); B-4 deploy (human)
 ```
 

@@ -50,6 +50,11 @@ export const CONSTANTS = {
     citation: { source: "xEVA requirement to walk up, down and across 20 deg slopes (NASA presentation; plan 6.4)", location: "UNRESOLVED: the plan's reference list (both parts, read 14 Nov 13:10) names only 'xEVA 20 deg slope requirement (NASA presentation)', with no title, date or slide" },
     limitation: "A lunar requirement applied to Mars; Assumed, not Mars-validated.",
   },
+  skyObstructionM12: {
+    id: "skyObstructionM12", value: 0.185, unit: "1", valueClass: "published_observation", // fraction of the 2 pi hemisphere
+    citation: { source: "Ehresmann et al. 2021, JGR Planets, doi:10.1029/2021JE006851: 0.37 pi of the 2 pi hemisphere at Butte M12, sols 1456-1467; Guo et al. 2021, GRL, doi:10.1029/2021GL093912: about 19 %", location: "UNRESOLVED: read from the abstracts (plan 19.6); page not read" },
+    limitation: "Geometric sky obstruction at one rover position, used only as the AC-07 benchmark; never converted into dose (plan 6.7).",
+  },
   drillWarningDefault: {
     id: "drillWarningDefault", value: 1800, unit: "s", valueClass: "assumed",
     citation: { source: "SharpWalk plan 6.9 (drill default 30 min, Assumed; stress cases 10 and 20 min), informed by Loewe et al. 2025 (arXiv preprint: at least 30 min to avoid the peak) and the NESC assessment (Parker et al.: operations should give 10-30 min of warning; at least 30 min for SEPs)", location: "Plan 6.9, p. 32" },

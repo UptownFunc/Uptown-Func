@@ -95,7 +95,7 @@
     ],
     "grid": {
       "path": "sky_obstruction.uint16.bin",
-      "sha256": "9efb466e47ef7c684452a35542b72b109933fe21442e461e7983ea5e84432383",
+      "sha256": "fc225d1364d60b951095556ede0b3a96f7008eb931d5c6646c53cfecb6f90027",
       "rows": 150,
       "cols": 150,
       "cell_m": 20.0,
@@ -113,14 +113,14 @@
     },
     "image": {
       "path": "sky_obstruction.png",
-      "sha256": "ee703869f552a32f75cfffe7be11fd0a071fa64e1deef7c2b5fb9800acd168b8",
+      "sha256": "03cc0f5964ab07af7c8e0543b33392df74339df2fd6301258529a6b7c6fe39a9",
       "pixel_m": 4.0,
       "rampMax": 0.5
     },
     "h_obs_m": 1.0,
     "range": [
-      0.06191799487862691,
-      0.43450916383343424
+      0.061995052035568814,
+      0.4345862736642714
     ],
     "benchmark": {
       "id": "AC-07",
@@ -129,7 +129,7 @@
       "site": "Butte M12, sols 1456-1467"
     },
     "method": "plan 6.7: 1 deg rays, steps max(2 m, r/100) to 100 km, max-aggregated levels, curvature r^2/2R",
-    "selfCheck_maxDiff_pp": 0.031588473826008046,
+    "selfCheck_maxDiff_pp": 0.06400619787330919,
     "d1MinusD12Offset_m": {
       "mean": 2.9160742303224536,
       "std": 20.51118696244306

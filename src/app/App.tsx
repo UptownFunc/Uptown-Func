@@ -42,6 +42,7 @@ export function App() {
   // Tier 2: contour lines from the engine worker (computed once per habitat), shown as lines only.
   const [showContours, setShowContours] = useState(false);
   const [showSky, setShowSky] = useState(false);
+  const [skyState, setSkyState] = useState<"none" | "ok" | "failed">("none");
   const [drillMin, setDrillMin] = useState<number | null>(null);
   const [levels, setLevels] = useState<ContourLevel[] | null>(null);
   const [contourBusy, setContourBusy] = useState(false);
@@ -78,7 +79,7 @@ export function App() {
   const extraSources = [...(rems && rems !== "failed" ? [remsSource(rems)] : []), ...(rover && rover !== "failed" ? [roverSource(rover)] : [])];
   // UX-15: every dataset in the current view = the sheet's layer sources plus the datasets the plan's numbers use.
   // D10 (sun) and D7 (REMS) are always in the Planning view through the Conditions panel.
-  const datasetsInView = [...new Set([...layerDatasets, ...(output?.plan.provenanceIds ?? []), "D10", ...extraSources.map((x) => x.id), ...(showSky ? ["D12"] : [])])].sort((a, b) => Number(a.slice(1)) - Number(b.slice(1)));
+  const datasetsInView = [...new Set([...layerDatasets, ...(output?.plan.provenanceIds ?? []), "D10", ...extraSources.map((x) => x.id), ...(showSky && skyState === "ok" ? ["D12"] : [])])].sort((a, b) => Number(a.slice(1)) - Number(b.slice(1)));
   useEffect(() => {
     // provenance.json is the pipeline's record (UX-15); it is validated against the shared contract.
     fetch(new URL(AREA_URL + "provenance.json", document.baseURI)).then((r) => (r.ok ? r.json() : []))
@@ -146,7 +147,7 @@ export function App() {
       </header>
       <main className="well">
         <AreaSheet dataUrl={AREA_URL} plan={output} onPick={(p) => send("add_stop", { lat: p.lat, lon: p.lon })}
-          onSnapshotReady={(fn) => setSnapshot(() => fn)} hoverIndex={hover} onHoverIndex={setHover} onDatasets={setLayerDatasets} onCursor={setCursor} contours={contourDisplay} showSky={showSky} />
+          onSnapshotReady={(fn) => setSnapshot(() => fn)} hoverIndex={hover} onHoverIndex={setHover} onDatasets={setLayerDatasets} onCursor={setCursor} contours={contourDisplay} showSky={showSky} onSky={setSkyState} />
         <RouteProfile output={output} hoverIndex={hover} onHoverIndex={setHover} />
         {/* Kept mounted so a built card keeps its version stamp and shows STALE after a plan change. */}
         <BriefingView output={output} snapshot={snapshot} hidden={view !== "briefing"} rover={rover} />
@@ -160,7 +161,7 @@ export function App() {
           <ConditionsPanel output={output} onOpenSource={setSelected} rems={rems}
             onSet={(id, value_s, rationale) => send("set_assumption", { id, value_s, rationale })} />
           <RoverView data={rover} />
-          <DrillPanel output={output} showContours={showContours} onShowContours={setShowContours} showSky={showSky} onShowSky={setShowSky}
+          <DrillPanel output={output} showContours={showContours} onShowContours={setShowContours} showSky={showSky} onShowSky={setShowSky} skyAvailable={skyState !== "none"}
             drillMin={drillMin} onDrillMin={setDrillMin} busy={contourBusy} />
           <SourcePanel selected={selected} provenance={provenance} assumptions={output?.plan.assumptions ?? []}
             datasetsInView={datasetsInView} extraSources={extraSources} onClose={() => setSelected(null)} />

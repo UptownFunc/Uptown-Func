@@ -65,3 +65,29 @@ def test_committed_sky_layer_matches_its_registration():
     assert sky["range"] == pytest.approx([v.min(), v.max()], abs=g["scale"])
     assert sky["selfCheck_maxDiff_pp"] <= 0.5  # coarse steps + max levels vs fixed fine steps (plan's convergence bar)
     assert "geometry, not dose" in sky["name"]
+
+
+def test_aggregated_levels_are_read_by_block_so_a_narrow_crest_is_not_understated():
+    # A 2 m-wide, 40 m-high crest at 400-402 m east; the 8 m max level holds 40 m in that block. Bilinear between block
+    # maxima would blend it with the 0 m neighbours; the nearest block keeps it.
+    base = np.zeros((1000, 1000))
+    t = Affine(2.0, 0.0, -1000.0, 0.0, -2.0, 1000.0)
+    base[:, 700] = 40.0                      # column 700 covers east 400-402 m
+    lv = max_pyramid(Level(base, t, 2.0), 8.0)
+    f = sky_fraction([(0.0, 0.0)], np.array([0.0]), [Level(base, t, 2.0), lv], [], np.array([90.0]),
+                     np.array([401.0, 430.0]), 1000.0)  # a 29 m step reads the 8 m level at 401 m (block 400-408, off-centre)
+    expect = math.sin(math.atan((40.0 - 401.0 ** 2 / (2 * R_F1)) / 401.0))  # bilinear would give 25 m there
+    assert f[0] >= expect - 1e-9
+
+
+def test_run_display_keeps_an_existing_sky_registration(tmp_path):
+    import json
+    from sharpwalk.run_display import keep_sky
+    (tmp_path / "sky_obstruction.png").write_bytes(b"x")
+    (tmp_path / "sky_obstruction.uint16.bin").write_bytes(b"y")
+    from sharpwalk.outputs import sha256_file
+    old = {"sky": {"grid": {"path": "sky_obstruction.uint16.bin", "sha256": sha256_file(tmp_path / "sky_obstruction.uint16.bin")},
+                   "image": {"path": "sky_obstruction.png", "sha256": sha256_file(tmp_path / "sky_obstruction.png")}}}
+    assert keep_sky(old, {"layers": []}, tmp_path)["sky"] == old["sky"]
+    (tmp_path / "sky_obstruction.png").write_bytes(b"changed")
+    assert "sky" not in keep_sky(old, {"layers": []}, tmp_path)   # a stale registration is dropped, not kept

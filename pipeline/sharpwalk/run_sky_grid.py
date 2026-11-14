@@ -4,9 +4,10 @@
 usage: python -m sharpwalk.run_sky_grid <area_dir> [--cell 20]
 1. D1 (area +- 3 km) and D12 (+- ~104 km) are reprojected once into the area's F6 plane (ortho, as warp.py), D1 at 2 m
    by averaging, D12 at 200 m bilinear; the mean D1 - D12 offset is measured on 200 m blocks and removed (plan 6.7).
-2. Max-aggregated levels: near 4/8/16/32 m, far 400/800 m (sky_grid.max_pyramid).
+2. Max-aggregated levels: near 4/8/16 m (steps reach 30 m at 3 km), far 400/800 m (sky_grid.max_pyramid).
 3. f_obs per observer on a 20 m grid (h_obs = 1 m, V-12), rays every 1 deg, steps max(2 m, r/100) to 100 km. Timed on a
-   300 m crop first; if the full run would pass 20 minutes the grid is coarsened to 40 m (plan 6.7).
+   300 m crop first; if the full run would pass 20 minutes the run stops and asks for --cell 40 (plan 6.7), so the
+   committed grid never depends silently on the machine's speed.
 4. Self-check: 25 observers also run with fixed 2 m steps on the 2 m level to 3 km and 100 m steps on D12 (no
    aggregation); the largest difference is recorded.
 Writes sky_obstruction.uint16.bin (f_obs x 10,000; 65535 = no value), sky_obstruction.png (F7 display, single-hue
@@ -95,7 +96,7 @@ def main(area_dir: str, cell_m: float = 20.0) -> None:
     d12 = d12 + offset
 
     near = [Level(d1, near_t, 2.0)]
-    for c in (4.0, 8.0, 16.0, 32.0):
+    for c in (4.0, 8.0, 16.0):
         near.append(max_pyramid(near[0], c))
     far = [Level(d12, far_t, 200.0)]
     for c in (400.0, 800.0):
@@ -122,7 +123,7 @@ def main(area_dir: str, cell_m: float = 20.0) -> None:
     n_obs = int(round(2 * half / cell_m)) ** 2
     projected_min = per_obs * n_obs / 60
     if projected_min > 20 and cell_m < 40:
-        cell_m = 40.0
+        raise SystemExit(f"projected {projected_min:.1f} min at {cell_m:g} m (> 20 min): rerun with --cell 40 (plan 6.7)")
     n, rows = observers(cell_m)
     ts = time.time()
     with mp.get_context("fork").Pool() as pool:

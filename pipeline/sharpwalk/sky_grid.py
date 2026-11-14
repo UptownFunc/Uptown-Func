@@ -3,8 +3,9 @@
 
 Rays every 1 deg; the step grows with range, max(2 m, r/100) (about 725 samples to 100 km). Heights come from rasters in
 the area's own F6 plane (+proj=ortho about the area origin): a near level set (D1) and a far level set (D12). Beyond the
-base cell, a ray reads the max-aggregated level whose cell matches its step, so a narrow crest is not missed (the
-horizon can be over-, never under-stated by the aggregation). gamma and f_obs follow sky.py (curvature r^2 / 2R).
+base cell, a ray reads the max-aggregated level whose cell matches its step, by nearest block (not bilinear, which would
+blend a block maximum with lower neighbours), so a narrow crest is not missed: the aggregation can over-, never
+under-state the horizon. Base levels (2 m D1, 200 m D12) are read bilinearly (plan 6.7). gamma and f_obs follow sky.py (curvature r^2 / 2R).
 """
 import math
 from typing import NamedTuple
@@ -30,6 +31,17 @@ def max_pyramid(base: Level, cell_m: float) -> Level:
     finite = np.isfinite(b).any(axis=(1, 3))
     out = np.where(finite, np.max(np.where(np.isfinite(b), b, -np.inf), axis=(1, 3)), np.nan)
     return Level(out, Affine(cell_m, 0.0, base.t.c, 0.0, -cell_m, base.t.f), cell_m)
+
+
+def nearest(a: np.ndarray, t, x: np.ndarray, y: np.ndarray) -> np.ndarray:
+    """Value of the block containing each point (NaN outside)."""
+    inv = ~t
+    col = np.floor(inv.a * x + inv.b * y + inv.c).astype(int)
+    row = np.floor(inv.d * x + inv.e * y + inv.f).astype(int)
+    ok = (col >= 0) & (row >= 0) & (col < a.shape[1]) & (row < a.shape[0])
+    out = np.full(np.shape(x), np.nan)
+    out[ok] = a[row[ok], col[ok]]
+    return out
 
 
 def ray_ranges(r0: float, r_max: float) -> np.ndarray:
@@ -62,9 +74,11 @@ def sky_fraction(observers, z_obs: np.ndarray, near: list, far: list, az_deg: np
             continue
         best = np.full(len(az_deg), -np.inf)
         for (side, li), idx in groups.items():
-            lv = (near if side == "near" else far)[li]
+            levels = near if side == "near" else far
+            lv = levels[li]
             r = ranges[idx][None, :]
-            z = bilinear(lv.a, lv.t, e0 + r * sa, n0 + r * ca)
+            lookup = bilinear if lv.cell_m == min(x.cell_m for x in levels) else nearest
+            z = lookup(lv.a, lv.t, e0 + r * sa, n0 + r * ca)
             ang = np.arctan((z - z_obs[o] - r * r / (2 * radius_m)) / r)
             best = np.maximum(best, np.where(np.isnan(ang), -np.inf, ang).max(axis=1))
         out[o] = float(np.mean(np.sin(np.maximum(0.0, best))))

@@ -9,6 +9,8 @@ test("sky obstruction layer: off by default, legend states geometry not dose and
   const legend = page.getByLabel("Layers");
   await expect(legend.locator('[data-layer="sky"]')).toHaveCount(0);
   const toggle = page.getByLabel(/Sky obstruction layer/);
+  await expect(toggle).toHaveAccessibleName(/geometry, not dose/);
+  await expect(page.getByText(/Sky obstruction layer .*20 m/)).toHaveCount(0); // no hard-coded resolution in the label
   await expect(toggle).not.toBeChecked();
   await toggle.check();
   const entry = legend.locator('[data-layer="sky"]');
@@ -28,4 +30,14 @@ test("sky obstruction layer: off by default, legend states geometry not dose and
   await page.screenshot({ path: "test-results/sky-layer.png" });
   await toggle.uncheck();
   await expect(legend.locator('[data-layer="sky"]')).toHaveCount(0);
+});
+
+
+test("a sky image that fails to load is named, and D12 is not claimed as in view", async ({ page }) => {
+  await page.route("**/area/sky_obstruction.png", (r) => r.fulfill({ status: 404, body: "" }));
+  await page.goto("/?preset=none");
+  await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
+  await page.getByLabel(/Sky obstruction layer/).check();
+  await expect(page.getByLabel("Layers").locator('[data-layer="sky"]')).toContainText("not loaded", { timeout: 10_000 });
+  await expect(page.getByRole("region", { name: /Sources/ })).not.toContainText("D12");
 });
