@@ -59,7 +59,9 @@ export interface PlanConditions {
 export interface PlanOutput { readonly plan: MissionPlan; readonly geometry: PlanGeometry; readonly conditions: PlanConditions; readonly kvPlaceholder: boolean }
 export type ApplyResult = { ok: true; versionHash: string } | { ok: false; reason: string };
 
-interface StopState { id: string; name: string; cell: number }
+interface StopState { id: string; name: string; cell: number; tasks: string[] }
+
+const MAX_NAME = 60, MAX_TASK = 120, MAX_TASKS = 10;
 
 /** The Assumed plan times (plan 6.6). Payload of set_assumption: { id, value_s, rationale } (C-03, engine-defined). */
 export const PLAN_TIME_IDS = {
@@ -168,7 +170,7 @@ export class Planner {
         if (taken) return { ok: false, reason: taken };
         if (this.stops.length >= LETTERS.length) return { ok: false, reason: "too many stops" };
         const id = `S${this.nextStop++}`;
-        this.stops.push({ id, name: str(p.name) ? p.name : `Stop ${id}`, cell });
+        this.stops.push({ id, name: str(p.name) ? p.name : `Stop ${id}`, cell, tasks: [] });
         break;
       }
       case "move_stop": {
@@ -198,6 +200,26 @@ export class Planner {
       }
       case "recompute":
         break;
+      case "edit_stop": {
+        const k = find(p.stopId);
+        if (k < 0) return { ok: false, reason: `no stop ${String(p.stopId)}` };
+        if (p.name === undefined && p.tasks === undefined) return { ok: false, reason: "edit_stop needs a name or tasks" };
+        const next = { ...this.stops[k]! };
+        if (p.name !== undefined) {
+          const name = typeof p.name === "string" ? p.name.trim() : "";
+          if (!name || name.length > MAX_NAME) return { ok: false, reason: `a stop name must be 1-${MAX_NAME} characters` };
+          next.name = name;
+        }
+        if (p.tasks !== undefined) {
+          const t = p.tasks;
+          if (!Array.isArray(t) || t.length > MAX_TASKS) return { ok: false, reason: `tasks must be a list of at most ${MAX_TASKS} entries` };
+          const tasks = t.map((x) => (typeof x === "string" ? x.trim() : ""));
+          if (tasks.some((x) => !x || x.length > MAX_TASK)) return { ok: false, reason: `each task must be 1-${MAX_TASK} characters of text` };
+          next.tasks = tasks;
+        }
+        this.stops[k] = next;
+        break;
+      }
       case "set_assumption": {
         if (p.id === SCENARIO_ID) {
           const v = p.value_s;
@@ -248,7 +270,7 @@ export class Planner {
       const duration: Quantity = a
         ? { value: a.value, unit: "s", valueClass: "assumed", methodId: "plan-6.6:team-choice", assumptionIds: [a.id], sourceIds: ["team choice"] }
         : { ...PLAN_TIMES_UNSET, unit: "s" };
-      return { id: s.id, letter: LETTERS[k]!, f1: latLon(s.cell), name: s.name, duration, tasks: [] };
+      return { id: s.id, letter: LETTERS[k]!, f1: latLon(s.cell), name: s.name, duration, tasks: [...s.tasks] };
     });
     const nodes = [{ id: HABITAT_ID, cell: this.habitat }, ...this.stops, ...(this.stops.length ? [{ id: HABITAT_ID, cell: this.habitat }] : [])];
     const model = { vLevel_mps: this.speeds.nominal_mps, kBins: this.speeds.kBins, slopeLimit_deg: this.speeds.slopeLimit_deg };

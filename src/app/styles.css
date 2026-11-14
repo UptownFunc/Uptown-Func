@@ -213,3 +213,9 @@ body { background: var(--housing); color: var(--text); font-family: var(--sans);
 .conditions .time-inputs .rationale { min-width: 12em; }
 /* Plan 7.8 coverage notes in the layer list: informational, not a warning (no status colour). */
 .legend .coverage-note { color: var(--text-muted); }
+/* C-19 stop name and tasks editor */
+.stop-edit summary { cursor: pointer; font-size: 0.85em; color: var(--text-muted); font-size: 13px; }
+.stop-edit form { display: grid; gap: 4px; margin-top: 4px; }
+.stop-edit textarea, .stop-edit input { font: inherit; width: 100%; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 4px; padding: 3px 6px; }
+.stop-edit button { justify-self: start; background: var(--plan); color: var(--paper); border: 0; border-radius: 4px; padding: 3px 10px; cursor: pointer; font: inherit; }
+.stop-edit button:disabled { opacity: 0.45; cursor: not-allowed; }

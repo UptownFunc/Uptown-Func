@@ -1,6 +1,7 @@
 // SI-assisted: drafted with Claude Code (Claude Opus 5.5); human Design review pending.
 // Planning panel (Tier 1 subset): K-01 placeholder banner, stops, leg estimates and the planned margin state.
 // It never edits the plan: deleting a stop sends a Command to the engine through onCommand.
+import { useState } from "react";
 import type { PlanOutput } from "../engine/planner";
 import { CONSTANTS } from "../constants";
 import { formatDuration, formatLength } from "./format";
@@ -9,12 +10,14 @@ const RANGE = CONSTANTS.walkSpeedRange;
 import { MarginState } from "./MarginState";
 import { PlanTimes, TimeRow } from "./PlanTimes";
 import { QuantityText } from "./QuantityText";
-import type { Quantity } from "../contracts";
+import type { Quantity, Stop } from "../contracts";
 
 export interface PlanPanelProps {
   readonly output: PlanOutput | null;
   readonly message: string | null;
   readonly onDeleteStop: (stopId: string) => void;
+  /** C-19: sends edit_stop; the card lists the tasks. */
+  readonly onEditStop?: ((stopId: string, name: string, tasks: string[]) => void) | undefined;
   readonly onSetTime: (id: string, value_s: number, rationale: string, stopId?: string) => void;
   readonly onOpenSource?: (q: Quantity) => void;
   /** Moves a stop to the map's keyboard cursor (AC-32); undefined while there is no cursor. */
@@ -22,7 +25,7 @@ export interface PlanPanelProps {
   readonly children?: React.ReactNode;
 }
 
-export function PlanPanel({ output, message, onDeleteStop, onSetTime, onOpenSource, onMoveToCursor, children }: PlanPanelProps) {
+export function PlanPanel({ output, message, onDeleteStop, onEditStop, onSetTime, onOpenSource, onMoveToCursor, children }: PlanPanelProps) {
   if (!output) return (
     <aside className="console" aria-label="Plan">
       {message ? <p className="problem" role="alert" data-testid="engine-message">{message}</p> : <p className="muted">Engine loading…</p>}
@@ -59,6 +62,7 @@ export function PlanPanel({ output, message, onDeleteStop, onSetTime, onOpenSour
               <TimeRow id="stop_duration" stopId={s.id} label={`Stop ${s.letter} duration`} onSet={onSetTime}
                 current={plan.assumptions.find((a) => a.id === `A-stop_duration-${s.id}`)}
                 inherited={plan.assumptions.some((a) => a.id === "A-stop_duration") ? "uses the default" : "not set"} />
+              {onEditStop && <StopEdit key={`${s.id}:${s.name}:${s.tasks.join("\n")}`} stop={s} onSave={onEditStop} />}
             </li>
           ))}
         </ol>
@@ -106,5 +110,22 @@ export function PlanPanel({ output, message, onDeleteStop, onSetTime, onOpenSour
       <p className="muted small">Plan {plan.versionHash} · {plan.engineVersion} · suit life support not modelled</p>
       {message && <p className="message" role="status" data-testid="engine-message">{message}</p>}
     </aside>
+  );
+}
+
+/** C-19: a stop's name and tasks (one per line), sent to the engine as edit_stop; the card prints them. */
+function StopEdit({ stop, onSave }: { stop: Stop; onSave: (stopId: string, name: string, tasks: string[]) => void }) {
+  const [name, setName] = useState(stop.name);
+  const [tasks, setTasks] = useState(stop.tasks.join("\n"));
+  const list = tasks.split("\n").map((t) => t.trim()).filter(Boolean);
+  return (
+    <details className="stop-edit">
+      <summary>Name and tasks{stop.tasks.length ? ` (${stop.tasks.length})` : ""}</summary>
+      <form onSubmit={(e) => { e.preventDefault(); if (name.trim()) onSave(stop.id, name.trim(), list); }}>
+        <input aria-label={`Stop ${stop.letter} name`} value={name} maxLength={60} onChange={(e) => setName(e.target.value)} />
+        <textarea aria-label={`Stop ${stop.letter} tasks, one per line`} rows={3} value={tasks} onChange={(e) => setTasks(e.target.value)} />
+        <button type="submit" disabled={!name.trim()}>Save</button>
+      </form>
+    </details>
   );
 }

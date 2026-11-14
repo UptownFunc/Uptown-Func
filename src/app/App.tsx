@@ -143,6 +143,7 @@ export function App() {
         {/* Kept mounted: the field view alone holds MissionExecution, so ticks survive switching views. */}
         <FieldView output={output} hidden={view !== "field"} />
         <PlanPanel output={output} message={message} onDeleteStop={(id) => send("delete_stop", { stopId: id })}
+          onEditStop={(stopId, name, tasks) => send("edit_stop", { stopId, name, tasks })}
           onSetTime={(id, value_s, rationale, stopId) => send("set_assumption", { id, value_s, rationale, ...(stopId ? { stopId } : {}) })}
           onOpenSource={setSelected}
           onMoveToCursor={cursor ? (stopId) => send("move_stop", { stopId, lat: cursor.lat, lon: cursor.lon }) : undefined}>
