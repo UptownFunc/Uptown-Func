@@ -5,7 +5,7 @@ Products (plan 7.7/7.8/9.2): D2 luminance JPEG at 1 m (linear stretch only), D1 
 pixels, no resampling), terrain-class overlay PNG (F6 classes warped to F7 by nearest neighbour), layers.json.
 """
 import datetime as dt
-import hashlib, json, math, sys
+import hashlib, json, math, shutil, sys
 from pathlib import Path
 import numpy as np
 import rasterio
@@ -38,6 +38,9 @@ def _require_f7(ds, name, x0, y0, x1, y1):
 
 
 def main(area_dir: str) -> None:
+    # run_contours (called at the end) needs the GDAL CLI; fail now, before any download or rewrite, not after.
+    if shutil.which("gdal_contour") is None:
+        raise SystemExit("gdal_contour not found: install the GDAL command-line tools (e.g. apt-get install gdal-bin) first")
     out = Path(area_dir)
     rep = json.loads((out / "build_report.json").read_text())
     lat0, lon0 = rep["origin"]["f1"]["lat"], rep["origin"]["f1"]["lon"]

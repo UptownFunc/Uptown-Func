@@ -59,8 +59,9 @@ def test_contours_match_their_checksum_and_the_sheet_spec():
     c = layers["contours"]
     assert _sha(AREA / c["path"]) == c["sha256"]
     fc = json.loads((AREA / c["path"]).read_text())
-    assert fc["frame"] == "F1" and fc["properties"]["source"] == "D1" == c["source"]
-    assert fc["properties"]["interval_m"] == c["interval_m"] == 10.0 and fc["properties"]["indexEvery"] == c["indexEvery"] == 5
+    assert set(c) == {"path", "sha256"}  # the file carries its own metadata (R-13)
+    assert fc["frame"] == "F1" and fc["properties"]["source"] == "D1"
+    assert fc["properties"]["interval_m"] == 10.0 and fc["properties"]["indexEvery"] == 5
     k = 3.141592653589793 * 3_396_190 / 180
     x0, y0, x1, y1 = layers["extentF7"]
     for f in fc["features"]:

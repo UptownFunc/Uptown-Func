@@ -44,8 +44,7 @@ def main(area_dir: str) -> None:
     fc = contours_collection(lines, interval=INTERVAL_M, index_every=INDEX_EVERY, cell_m=float(CELL_M),
                              method=f"gdal_contour ({version}) on D1 averaged to {CELL_M} m blocks of the 1 m F7 display grid")
     (out / "contours.geojson").write_text(json.dumps(fc, separators=(",", ":")) + "\n")
-    layers["contours"] = {"path": "contours.geojson", "sha256": sha256_file(out / "contours.geojson"), "source": "D1",
-                          "interval_m": INTERVAL_M, "indexEvery": INDEX_EVERY, "cell_m": float(CELL_M)}
+    layers["contours"] = {"path": "contours.geojson", "sha256": sha256_file(out / "contours.geojson")}
     (out / "layers.json").write_text(json.dumps(layers, indent=2))
     lv = sorted({lvl for lvl, _ in lines})
     print(f"{len(lines)} lines, {sum(len(c) for _, c in lines)} vertices, levels {lv[0]}..{lv[-1]} m ({len(lv)}), "

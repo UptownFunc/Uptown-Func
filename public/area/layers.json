@@ -60,10 +60,6 @@
   },
   "contours": {
     "path": "contours.geojson",
-    "sha256": "c276ed4af5814cedab628f85f730bca103d9ba4126f6aee105980672f168c173",
-    "source": "D1",
-    "interval_m": 10.0,
-    "indexEvery": 5,
-    "cell_m": 4.0
+    "sha256": "c276ed4af5814cedab628f85f730bca103d9ba4126f6aee105980672f168c173"
   }
 }

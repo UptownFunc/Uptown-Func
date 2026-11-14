@@ -112,7 +112,7 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
   const elevationLayer = useRef<ReturnType<typeof createElevationLayer> | null>(null);
   elevationLayer.current ??= createElevationLayer();
   /** Plan 7.8 / 9 contours: the layer-list text, or why they are missing. */
-  const [contourEntry, setContourEntry] = useState<{ ok: boolean; text: string } | null>(null);
+  const [contourEntry, setContourEntry] = useState<{ ok: boolean; text: string; source?: string } | null>(null);
   const datasetsRef = useRef(onDatasets);
   datasetsRef.current = onDatasets;
 
@@ -176,7 +176,7 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
       const contours = a.contours;
       target.current.dataset.elevationContours = String(contours.ok
         ? drawElevationContours(elevationLayer.current!, contourLinesF7(contours.collection), contours.collection.properties) : 0);
-      setContourEntry(contours.ok ? { ok: true, text: contourLegend(contours.collection.properties) } : { ok: false, text: contours.reason });
+      setContourEntry(contours.ok ? { ok: true, text: contourLegend(contours.collection.properties), source: contours.collection.properties.source } : { ok: false, text: contours.reason });
       drawPlan(planLayer.current, planRef.current, a.grid);
       target.current.dataset.contourLines = String(drawContours(contourLayer.current!, contoursRef.current, a.grid));
       profXY.current = profileXY(planRef.current, a.grid);
@@ -281,7 +281,7 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
             : <li key={l.id} data-layer={l.id}>{l.name} - {l.valueClass.replace("_", " ")}, {l.source}, {fmt(l.resolution)}, built {l.builtOn}
               {coverageNotes[l.source] && <span className="coverage-note"> · {coverageNotes[l.source]}</span>}</li>)}
             {contourEntry && (contourEntry.ok
-              ? <li data-layer="contours">{contourEntry.text}{coverageNotes.D1 && <span className="coverage-note"> · {coverageNotes.D1}</span>}</li>
+              ? <li data-layer="contours">{contourEntry.text}{contourEntry.source && coverageNotes[contourEntry.source] && <span className="coverage-note"> · {coverageNotes[contourEntry.source]}</span>}</li>
               : <li data-layer="contours" className="failed">Contours (D1) - not loaded: {contourEntry.text}</li>)}
             {legend.length > 0 && (coverageError
               ? <li className="failed" data-testid="coverage-status">Coverage outlines not available: {coverageError}</li>
