@@ -3,8 +3,8 @@
 // +proj=ortho on the bare F1 sphere (pipeline 1.2), so the lookup uses points and origin at h = 0, which is exactly that
 // projection. Every value is a Quantity (CLAUDE.md); unknown elevation stays unknown, never zero.
 import type { Quantity } from "../contracts";
-import { f1, f1ToF5, f5ToF6, f7ToF1, localFrame, type F1Point, type LocalFrame } from "../geo";
-import { f1ToCell } from "../geo/grid";
+import { f1ToF5, f5ToF6, f7ToF1, type F1Point } from "../geo";
+import { enuToCell, gridFrameOf } from "../geo/grid";
 
 export interface AreaGrid {
   readonly origin: F1Point;
@@ -29,14 +29,12 @@ export interface Readout {
 const POSITION = { methodId: "geo:F7-F1-F5-F6", assumptionIds: [] as string[], sourceIds: ["plan-7.3"] };
 const q = (value: number, unit: string): Quantity => ({ value, unit, valueClass: "model_derived", ...POSITION });
 
-/** The grid's own local frame: the area origin on the bare sphere (h = 0). Compute once per area. */
-export const gridFrame = (grid: AreaGrid): LocalFrame => localFrame(f1(grid.origin.lat, grid.origin.lon, 0));
-
-export function readoutAt(coordF7: readonly number[], grid: AreaGrid, frame: LocalFrame = gridFrame(grid)): Readout {
+export function readoutAt(coordF7: readonly number[], grid: AreaGrid): Readout {
   const p = f7ToF1({ frame: "F7", x: coordF7[0]!, y: coordF7[1]! }, 0);
-  const enu = f5ToF6(f1ToF5(p), frame);
-  // The same cell lookup as the engine (src/geo/grid), so the readout and the planner never disagree (R-02 item 8).
-  const cell = f1ToCell(p, grid);
+  // One transform in the grid's own frame (src/geo/grid, cached per grid) gives both east/north and the cell, with the
+  // engine's own cell rule, so the readout and the planner never disagree (R-02 item 8, R-11 items 1-2).
+  const enu = f5ToF6(f1ToF5(p), gridFrameOf(grid));
+  const cell = enuToCell(enu, grid);
   const v = cell ? grid.elevation[cell.r * grid.cols + cell.c]! : NaN;
   const z = Number.isFinite(v) ? v : null;
   const elevation: Quantity = z === null

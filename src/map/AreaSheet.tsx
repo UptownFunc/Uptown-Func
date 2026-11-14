@@ -22,7 +22,7 @@ import { snapshotMap, type MapSnapshot } from "./snapshot";
 import { F7_PROJECTION } from "./f7";
 import { INITIAL_RESOLUTION_F7 } from "./view";
 import { loadArea, type LoadedArea } from "./loadArea";
-import { gridFrame, readoutAt, type Readout } from "./readout";
+import { readoutAt, type Readout } from "./readout";
 import type { Quantity } from "../contracts";
 
 /** Displays a Quantity: unknown stays "unknown" (CLAUDE.md); one decimal for metres. */
@@ -148,8 +148,7 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
         const p = f7ToF1({ frame: "F7", x: e.coordinate[0]!, y: e.coordinate[1]! }, 0);
         pickRef.current?.({ lat: p.lat, lon: p.lon });
       });
-      // The frame is computed once; readouts are throttled to one per animation frame.
-      const frame = gridFrame(a.grid);
+      // Readouts are throttled to one per animation frame; the grid frame is cached in src/geo/grid.
       let pending: number[] | null = null, raf = 0;
       map.on("pointermove", (e) => {
         pending = e.coordinate;
@@ -157,7 +156,7 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
         raf = requestAnimationFrame(() => {
           raf = 0;
           if (!pending || !area.current) return;
-          setReadout(readoutAt(pending, area.current.grid, frame));
+          setReadout(readoutAt(pending, area.current.grid));
           // Nearest profile sample within 10 screen pixels drives the shared scrub marker (UX-06).
           const xy = profXY.current, tol = 10 * (m.getView().getResolution() ?? 1);
           let best = -1, bestD = tol * tol;

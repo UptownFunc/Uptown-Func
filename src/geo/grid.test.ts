@@ -36,3 +36,15 @@ describe("grid cell <-> F1 (through F5 and F6)", () => {
     expect(out.elevation.value).toBe(42);
   });
 });
+
+describe("one grid frame for cells and east/north (review R-11 items 1-2)", () => {
+  it("enuToCell on the grid frame's F6 point gives the same cell as f1ToCell", async () => {
+    const { enuToCell, gridFrameOf } = await import("./grid");
+    const { f1ToF5, f5ToF6 } = await import("./index");
+    for (const [r, c] of [[0, 0], [1499, 1499], [123, 987], [750, 750]] as const) {
+      const p = cellCentreF1({ r, c }, grid);
+      expect(enuToCell(f5ToF6(f1ToF5(p), gridFrameOf(grid)), grid)).toEqual(f1ToCell(p, grid));
+    }
+    expect(gridFrameOf(grid)).toBe(gridFrameOf(grid)); // cached per grid
+  });
+});
