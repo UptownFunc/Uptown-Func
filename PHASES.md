@@ -384,7 +384,7 @@ Next part / blocker owner: team sets plan times (T-01) -> planned margin; then 3
 
 ```text
 Part: 2.4 (planned margin) and 3.2 (console inputs and margin state), same session, after "proceed"
-Owner: no per-module roles (G-04)
+Owner: no per-module roles (G-05)
 Status: IN PROGRESS (both): implemented and green; per-stop durations, profile and field UI open
 Scope completed: set_assumption command; plan 6.6 margins in the plan; Assumed time inputs; state badge
 Files changed: src/engine/planner.ts, src/engine/planner.test.ts, src/app/{PlanTimes,MarginState,PlanPanel,App}.tsx,
@@ -401,7 +401,7 @@ Next part / blocker owner: team enters real T-01 values in the console (or tells
 
 ```text
 Part: 3.4 briefing card (after the operator's second "proceed")
-Owner: no per-module roles (G-04)
+Owner: no per-module roles (G-05)
 Status: IN PROGRESS (core implemented and green; print output on paper/PDF not checked)
 Files changed: src/briefing/{model,model.test,BriefingView}.ts(x), src/map/{snapshot.ts,AreaSheet.tsx}, src/app/{App.tsx,styles.css},
   e2e/briefing.spec.ts
@@ -416,7 +416,7 @@ Next part / blocker owner: T-01 values (team); D-04 (G2, 19:00); C-14 then 3.5 f
 
 ```text
 Part: 3.2 (and 2.4 per-stop durations), after the operator's third "proceed"
-Owner: no per-module roles (G-04)
+Owner: no per-module roles (G-05)
 Status: IN PROGRESS (core analysis features done; provenance panel open)
 Files changed: src/engine/planner{,.test}.ts, src/map/{AreaSheet.tsx,planLayer.ts}, src/app/{App,PlanPanel,PlanTimes,RouteProfile}.tsx,
   src/app/{format,format.test}.ts, src/app/styles.css, src/briefing/model.test.ts, e2e/{area-sheet,plan-route,briefing}.spec.ts
@@ -431,7 +431,7 @@ Next part / blocker owner: T-01 values, D-04 (G2 19:00), C-14 -> 3.5 first deplo
 
 ```text
 Part: 3.2 sources panel / AC-05 and 3.3 Field View, after the operator's fourth "proceed"
-Owner: no per-module roles (G-04)
+Owner: no per-module roles (G-05)
 Status: IN PROGRESS (both core-complete and green)
 Files changed: src/app/{sources,sources.test}.ts, src/app/{QuantityText,SourcePanel,PlanPanel,App}.tsx, src/app/styles.css,
   src/field/{execution,execution.test}.ts, src/field/FieldView.tsx, src/engine/planner{,.test}.ts, e2e/{plan-route,field}.spec.ts
@@ -445,7 +445,7 @@ Next part / blocker owner: T-01 values, D-04 (G2 19:00), C-14 -> 3.5 first deplo
 
 ```text
 Part: 3.3 phone width (UX-12), 3.4 print/PDF check, P-04 D2 provenance, R-04/R-06 follow-ups (fifth "proceed")
-Owner: no per-module roles (G-04)
+Owner: no per-module roles (G-05)
 Status: IN PROGRESS (3.3, 3.4); P-04 DONE (checks green)
 Scope completed: phone layout (the Field View button was off screen at 390 px; field overlay covered the nav);
   card-only print scoped to 'Print briefing' (Ctrl+P from Planning no longer blank); Chromium PDF of the card is one
@@ -466,7 +466,7 @@ Next part / blocker owner: team: T-01, D-04 (19:00), C-14, 3D cut decision; then
 
 ```text
 Part: 4.4 accessibility (automated) and 4.1 tier 2 contours + drill, after "do what is needed based on the plan" / "proceed"
-Owner: no per-module roles (G-04)
+Owner: no per-module roles (G-05)
 Status: 4.4 VERIFIED (automated); 4.1 IN PROGRESS (sky obstruction not started)
 Files changed: package.json, package-lock.json, src/geo/{index,geo.test}.ts, src/engine/{contours,contours.test,planner,planner.test,worker}.ts,
   src/constants/{index,constants.test}.ts, src/map/{AreaSheet.tsx,planLayer.ts}, src/app/{App,PlanPanel,DrillPanel}.tsx,
@@ -482,7 +482,7 @@ Next part / blocker owner: team (T-01, rover images, deploy account); network fo
 
 ```text
 Part: AC-31 resilience (4.1/G4), 4.2 assessment, 5.4 README draft, after another "proceed"
-Owner: no per-module roles (G-04)
+Owner: no per-module roles (G-05)
 Status: AC-31 done; 4.2 BLOCKED (D5); 5.4 IN PROGRESS (draft)
 Files changed: src/map/AreaSheet.tsx, src/app/styles.css, e2e/resilience.spec.ts, README.md, logs
 Checks run (exact commands): npx vitest run; npx tsc --noEmit; npm run build;

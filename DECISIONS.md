@@ -124,7 +124,7 @@ All ten findings fixed, test-first where possible. Each of the three key tests w
 
 | ID | Topic | Decision / status | Evidence / revisit |
 |---|---|---|---|
-| G-04 | Module ownership | **No per-module roles.** The session operator (14 Nov, ~13:00) stated: "no roles the phases are setup to start from beginning to end so simply continue working". Sessions take phase parts in order; one branch per session. Contract changes still need the agreement rule in CLAUDE.md, now from the team as a whole. | HANDOFF.md ownership section |
+| G-05 | Module ownership | **No per-module roles.** The session operator (14 Nov, ~13:00) stated: "no roles the phases are setup to start from beginning to end so simply continue working". Sessions take phase parts in order; one branch per session. Contract changes still need the agreement rule in CLAUDE.md, now from the team as a whole. | HANDOFF.md ownership section |
 | H-01 | Default demo habitat | The plan 19.2 suggestion (4.795 S, 137.392 E) falls on an excluded cell (over 20 deg) outside the main routable region. Default set to the nearest slope-screened cell in the main region, 15.6 m away: **4.795211 S, 137.391845 E** (F6 row 163, col 804). Assumed scenario input, not a base site. | PENDING team confirmation; `src/app/App.tsx` DEFAULT_HABITAT |
 | T-01 | Assumed plan times: T_EVA, t_ops, t_cont, stop durations, 30-min warning | **No values exist** in either plan part (weakness 5: "Assumed and still have no values"; due at G0). Since 4420678 the console has inputs for T_EVA, t_ops, t_cont and one stop duration (minutes + required rationale) sent as `set_assumption`; margins appear once all four are entered. **No values are built in.** The team must choose them (and decide whether demo values ship pre-set). The 30-min warning is not implemented. | BLOCKING for G3 demo - team |
 | C-15 | Route geometry | MissionPlan (19.9) has no route geometry. The engine returns `geometry` (grid cells per leg, habitat/stop cells) beside the plan in `PlanOutput`; not a contract change. Adding it to the contract needs team agreement. | PENDING |
@@ -165,8 +165,10 @@ All ten findings fixed, test-first where possible. Each of the three key tests w
 
 | ID | Topic | Decision | Decided by | Date/time (Asia/Manila) | Evidence |
 |---|---|---|---|---|---|
-| G-01 | Attribution | The project concept, challenge framing, solution direction, requirements and plan are credited to the whole four-member team. | Team member Yujin, in the Claude Code session | Sat 14 Nov 2026 | `CLAUDE.md` Authorship section; PR parcilla13/Uptown-Func#1 |
+| G-01 | Attribution | **Superseded by G-06 (14:47).** Was: the project concept, challenge framing, solution direction, requirements and plan are credited to the whole four-member team. | Team member Yujin, in the Claude Code session | Sat 14 Nov 2026 | `CLAUDE.md` Authorship section; PR parcilla13/Uptown-Func#1 |
 | G-02 | Merging | Human approval is no longer required to merge. A human or the AI agent may merge a PR only when it meets the completeness checklist in `CLAUDE.md` step 6. | Team member Yujin, in the Claude Code session | Sat 14 Nov 2026 | `CLAUDE.md` step 6; PR parcilla13/Uptown-Func#1 |
+
+| G-06 | Concept and plan authorship | **Supersedes G-01.** SharpWalk's concept and project plan originated with Patrick Ezekiel A. Arcilla (parcilla13). Not credited to the team or to Claude/SI. Team members credited for recorded contributions: Patrick Ezekiel A. Arcilla, Christian Jesus Alcazar, Eugene Ibañez Jr. (Yujin), John Malubay. How the concept was formed: pending Patrick's own account. | John Malubay (session operator), in this Claude Code session, choosing "supersede G-01 everywhere" | Sat 14 Nov 2026, 14:47 | `CLAUDE.md` Authorship section, `README.md`; **flag for the team's review before merge** (G-01 was a team decision recorded by Yujin) |
 
 ## Fixed technical / presentation constraints
 

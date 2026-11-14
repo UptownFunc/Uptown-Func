@@ -17,7 +17,7 @@ Do not interpret blank fields as proof that no work exists. Inspect GitHub and t
 
 ## Team and module ownership
 
-**No per-module roles (G-04, session operator, 14 Nov ~13:00):** "no roles the phases are setup to start from beginning to end so simply continue working". Each session takes the phase parts in order, from the first incomplete one, on its own branch. Contract changes still need the team's recorded agreement (CLAUDE.md step 6). The earlier table (Captain = parcilla13, others TBA) is superseded; where the plan names an owner role (Captain, Data and Science, Route Engine, Design), read it as "the team".
+**No per-module roles (G-05, session operator, 14 Nov ~13:00):** "no roles the phases are setup to start from beginning to end so simply continue working". Each session takes the phase parts in order, from the first incomplete one, on its own branch. Contract changes still need the team's recorded agreement (CLAUDE.md step 6). The earlier table (Captain = parcilla13, others TBA) is superseded; where the plan names an owner role (Captain, Data and Science, Route Engine, Design), read it as "the team".
 
 ## Current work
 
@@ -114,7 +114,7 @@ Files changed: src/constants/*, src/geo/grid*, src/engine/{assumptions,planner*,
 Checks run: see the PHASES.md completion record (all green)
 Failures / limitations: margins unknown (T-01); Superpowers not installed; plan PDFs live only on
   claude/lucid-ptolemy-nz6qpw (docs/plan); *.pdf is git-ignored on this line of work
-Decisions made by humans this session: G-04 (no roles), K-01 (k_v = 1 placeholder + banner)
+Decisions made by humans this session: G-05 (no roles), K-01 (k_v = 1 placeholder + banner)
 SI_LOG.md entries added: 9 rows
 Uncommitted changes left: none (public/area/, .venv/, work/, dist/ are git-ignored build outputs)
 Next owner: next session, from "Exact next task" above
