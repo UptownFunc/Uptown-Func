@@ -35,9 +35,9 @@ export function ConditionsPanel({ output, onSet, onOpenSource, rems }: Condition
   const elev = c?.sunElevation.value;
   return (
     <section aria-label="Conditions" className="conditions">
-      <h2 className="rule-head">Conditions <span className="sub">sun model-derived at the area centre; weather measured at the rover</span></h2>
+      <p className="section-title">Conditions</p>
       <div className="readout-row">
-        <span className="time-label">Scenario date and time</span>
+        <span className="k">Scenario date and time</span>
         <span data-testid="current-scenario" key={c?.scenario?.value} className={c?.scenario ? "assumed flash" : "unknown"}>
           {c?.scenario ? `${formatUtc(c.scenario.value)} · assumed` : "not set"}
         </span>
@@ -62,7 +62,7 @@ export function ConditionsPanel({ output, onSet, onOpenSource, rems }: Condition
           <dd data-testid="cond-ls"><QuantityText q={c.ls} onOpen={onOpenSource} label="Solar longitude" /></dd>
         </dl>
       )}
-      <p className="note">Mars24 algorithm (NASA GISS) at one point, the area centre. Terrain shadowing is not modelled: nearby slopes can hide the sun.</p>
+      <p className="note">Sun values are model-derived with the Mars24 algorithm (NASA GISS) at one point, the area centre. Terrain shadowing is not modelled: nearby slopes can hide the sun.</p>
       <Rems rems={rems} onOpenSource={onOpenSource} />
     </section>
   );

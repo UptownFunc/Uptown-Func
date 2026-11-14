@@ -1,12 +1,8 @@
 /* SI-assisted: drafted with Claude Code (Claude Opus 5.5) on design/sharpwalk-ui-ux; human Design review pending.
- * UI-02 type system (docs/design/visual-system.md), replacing IBM Plex on this branch:
- *   Newsreader (variable, optical size + weight; display, headings and key readouts; italic carries estimates),
- *   Instrument Sans (variable weight; interface text), DM Mono (labels, coordinates, tables; tabular by design).
- * Packages: @fontsource-variable/newsreader 5.3.0, @fontsource-variable/instrument-sans 5.3.0, @fontsource/dm-mono
- * 5.3.0; exact pins, SIL Open Font Licence 1.1, no install scripts, no dependencies, font-display: swap, served from
- * our origin. The fallback stacks in styles.css apply if the files fail to load. */
-@import "@fontsource-variable/newsreader/opsz.css";
-@import "@fontsource-variable/newsreader/opsz-italic.css";
-@import "@fontsource-variable/instrument-sans/index.css";
-@import "@fontsource/dm-mono/400.css";
-@import "@fontsource/dm-mono/500.css";
+ * UI-08 type system: Geist (interface and display; its italic carries estimates only) and Geist Mono (coordinates,
+ * plan hashes and other technical identifiers only). Packages @fontsource-variable/geist 5.3.0 and
+ * @fontsource-variable/geist-mono 5.3.0: exact pins, SIL Open Font Licence 1.1, no install scripts, no dependencies,
+ * font-display: swap, served from our origin. Numbers use tabular figures (styles.css). System stacks are the fallback. */
+@import "@fontsource-variable/geist/wght.css";
+@import "@fontsource-variable/geist/wght-italic.css";
+@import "@fontsource-variable/geist-mono/wght.css";

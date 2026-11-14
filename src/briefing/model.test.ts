@@ -64,4 +64,21 @@ describe("briefing card: scenario time assumption (Conditions, plan 19.11 weakne
     const m = briefingModel({ ...plan, assumptions: [...plan.assumptions, a] });
     expect(m.assumptions[2]!.text).toBe("Scenario date and time (UTC) = 2026-11-14 04:00 UTC (team choice): demo");
   });
+
+  it("summarises the decision: return walk, distance, elevation gain and the largest climb (UI-09)", () => {
+    const m = briefingModel(plan);
+    // The return walk is the engine's own last-leg estimate (no new computation); totals are sums of the legs (D1 model).
+    expect(m.summary.returnWalk).toEqual({ text: "est. 33.5 to 50.8 min", estimated: true, unknown: false });
+    expect(m.summary.distance).toBe("3.90 km");
+    expect(m.summary.climb).toBe("304 m");
+    expect(m.summary.concern).toBe("Largest climb: H → A, 248 m over 1.95 km");
+  });
+
+  it("leaves the summary unknown without a route, never zero", () => {
+    const m = briefingModel({ ...plan, legs: [], stops: [], plannedMargins: [], endMargin: unknown });
+    expect(m.summary.returnWalk).toEqual({ text: "unknown", estimated: false, unknown: true });
+    expect(m.summary.distance).toBe("unknown");
+    expect(m.summary.climb).toBe("unknown");
+    expect(m.summary.concern).toBeNull();
+  });
 });

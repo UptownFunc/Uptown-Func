@@ -5,7 +5,6 @@
 // its layers and the briefing snapshot never reset; the field view and the briefing card stay mounted for their state.
 // The engine worker is the only writer of MissionPlan; the console sends it Commands and shows the copies it returns.
 import { useCallback, useEffect, useRef, useState } from "react";
-import { flushSync } from "react-dom";
 import { AreaSheet } from "../map/AreaSheet";
 import type { SkySampler } from "../map/skySample";
 import { createEngine, type EngineClient } from "../engine/client";
@@ -25,6 +24,10 @@ import { FieldView } from "../field/FieldView";
 import type { MapSnapshot } from "../map/snapshot";
 import { DEMO_PRESET, presetEnabled } from "./demoPreset";
 import { STEPS, stepFromHash, stepIndex, type StepId } from "./steps";
+import { ArrowRight, BookOpen, ClipboardCheck, Gauge, LoaderCircle, Map as MapIcon, Navigation, SlidersHorizontal, Timer } from "lucide-react";
+import { ICON } from "./icons";
+
+const STEP_ICON = { setup: SlidersHorizontal, planner: Timer, map: MapIcon, hud: Navigation, assess: Gauge, brief: ClipboardCheck } as const;
 
 const AREA_URL = "area/";
 /** H-01 (DECISIONS.md, pending team confirmation): the slope-screened cell nearest the plan 19.2 suggestion
@@ -73,11 +76,12 @@ export function App() {
     document.documentElement.dataset.dir = stepIndex(next) < stepIndex(stepRef.current) ? "back" : "fwd";
     const apply = () => {
       setStep(next);
+      setDrawer(false); // a new step starts uncovered; the drawer opens again from any number or the masthead
       if (push) history.pushState(null, "", next === "welcome" ? location.pathname + location.search : `#${next}`);
     };
-    // Native view transition (MOT-01: CSS only, no animation library); skipped under reduced motion or where unsupported.
-    const d = document as Document & { startViewTransition?: (cb: () => void) => unknown };
-    if (d.startViewTransition && !matchMedia("(prefers-reduced-motion: reduce)").matches) d.startViewTransition(() => flushSync(apply)); else apply();
+    // MOT-02: the step changes at once and the new panel settles in with CSS (@starting-style). No view-transition
+    // capture: snapshotting the full-screen terrain canvas delayed input and the STALE stamp past the 1 s criterion.
+    apply();
   }, []);
   const go = (s: StepId) => show(s, true);
   useEffect(() => {
@@ -171,25 +175,32 @@ export function App() {
   const [ping, setPing] = useState<{ x: number; y: number; n: number } | null>(null);
   const down = useRef<{ x: number; y: number } | null>(null);
   const plan = output?.plan;
-  const next = (s: StepId, label: string) => <button type="button" className="go" onClick={() => go(s)}>{label} <span aria-hidden="true">→</span></button>;
+  const next = (s: StepId, label: string) => <button type="button" className="go" onClick={() => go(s)}>{label}<ArrowRight {...ICON} aria-hidden="true" /></button>;
+  const recalculating = pending > 0 && output !== null;
 
   return (
     <div className="app" data-step={step} data-busy={pending > 0 || (!output && !engineFailed) || contourBusy}>
       <header className="masthead" inert={step === "welcome"}>
-        <button type="button" className="wordmark" onClick={() => go("welcome")} aria-label="SharpWalk, start screen">SharpWalk</button>
-        <span className="edition">Mars walk planner · Gale crater</span>
+        <button type="button" className="wordmark" onClick={() => go("welcome")} aria-label="SharpWalk, start screen">
+          <span className="mark" aria-hidden="true" />SharpWalk
+        </button>
         <nav aria-label="Mission steps">
           <ol>
-            {STEPS.map((s, i) => (
-              <li key={s.id}>
-                <button type="button" aria-current={step === s.id ? "step" : undefined} onClick={() => go(s.id)}>
-                  <span className="n" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>{s.label}
-                </button>
-              </li>
-            ))}
+            {STEPS.map((s) => {
+              const Icon = STEP_ICON[s.id];
+              return (
+                <li key={s.id}>
+                  <button type="button" aria-current={step === s.id ? "step" : undefined} onClick={() => go(s.id)}>
+                    <Icon {...ICON} aria-hidden="true" /><span>{s.label}</span>
+                  </button>
+                </li>
+              );
+            })}
           </ol>
         </nav>
-        <button type="button" className="textbtn" aria-expanded={drawer} onClick={() => setDrawer((o) => !o)}>Sources</button>
+        <button type="button" className="icon-btn" aria-expanded={drawer} onClick={() => setDrawer((o) => !o)}>
+          <BookOpen {...ICON} aria-hidden="true" /><span>Sources</span>
+        </button>
         <span className="progress" aria-hidden="true" />
       </header>
       {step === "welcome" && <Welcome onBegin={() => go("setup")} ready={output ? true : engineFailed ? null : false} />}
@@ -206,6 +217,10 @@ export function App() {
             tools={<LayerToggles showContours={showContours} onShowContours={setShowContours} showSky={showSky} onShowSky={setShowSky} skyAvailable={skyState !== "none"} busy={contourBusy} />}
             hint={step === "map" ? "Click slope-screened ground to add a stop" : "View only · edit the route on the Map step"} />
           {ping && <span key={ping.n} className="ping" style={{ left: ping.x, top: ping.y }} aria-hidden="true" />}
+          {/* Route recalculation feedback: shown while a Command is with the engine (route search, margins). */}
+          <p className="recalc" data-on={recalculating} aria-hidden={!recalculating}>
+            <LoaderCircle {...ICON} aria-hidden="true" />Recalculating route and margins
+          </p>
         </div>
         <RouteProfile output={output} hoverIndex={hover} onHoverIndex={setHover} />
         {step === "map" && <PlanPanel output={output} onOpenSource={openSource} next={next("hud", "Continue to the field HUD")}

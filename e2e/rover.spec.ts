@@ -7,7 +7,7 @@ import { STOP, clickAt, goStep, openSources, openStep } from "./helpers";
 test("rover views are shown as similar terrain with credits, listed as D6, and printed on the card", async ({ page }) => {
   await openStep(page, "setup"); // context imagery belongs to mission setup
   const view = page.getByRole("region", { name: "Rover point of view" });
-  await expect(view).toContainText("similar terrain, not the demo stops");
+  await expect(view).toContainText("Similar terrain, not the demo stops");
   const imgs = view.locator("img");
   await expect(imgs).toHaveCount(3);
   for (let i = 0; i < 3; i++) {

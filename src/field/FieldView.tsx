@@ -18,7 +18,7 @@ export function FieldView({ output, hidden = false, briefed = false, next }: { o
   const [exec, setExec] = useState<MissionExecution | null>(null);
   const [minutes, setMinutes] = useState("");
   const [error, setError] = useState<string | null>(null);
-  if (!output) return <section className="side field" aria-label="Field view" hidden={hidden}><p>Engine loading…</p></section>;
+  if (!output) return <section className="side field" aria-label="Field view" hidden={hidden}><div className="side-scroll"><p>Loading the route engine…</p></div></section>;
   const { plan, geometry } = output;
   const e = exec && exec.planVersion === plan.versionHash ? exec : null;
   const stale = exec !== null && exec.planVersion !== plan.versionHash;
@@ -48,17 +48,15 @@ export function FieldView({ output, hidden = false, briefed = false, next }: { o
   const nothing = <span className="unknown">{last ? "unknown (plan times or durations not set)" : "no tick yet"}</span>;
   return (
     <section className="side field" aria-label="Field view" hidden={hidden} data-testid="field-view">
-      <header className="hud-head">
-        <p className="kicker"><span className="n">04</span>Field HUD</p>
-        <span className={briefed ? "hud-brief ok" : "hud-brief"}>{briefed ? "Briefing confirmed for this plan" : "Rehearsal: briefing not confirmed yet"}</span>
-      </header>
+      <div className="side-scroll">
+      <span className={briefed ? "hud-brief ok" : "hud-brief"}>{briefed ? "Briefing confirmed for this plan" : "Rehearsal: briefing not confirmed yet"}</span>
       {stale && (
         <p className="field-warning" role="alert">
           The plan changed after ticks were entered; those ticks belong to plan {exec!.planVersion}.{" "}
           <button type="button" className="textbtn" onClick={() => setExec(null)}>Start ticks for the current plan</button>
         </p>
       )}
-      {plan.stops.length === 0 ? <p className="hud-next">No stops in the plan.</p> : <>
+      {plan.stops.length === 0 ? <p className="hud-next">No stops in the plan yet.</p> : <>
         <div data-testid="field-next"><span className="field-label">Next</span><h1 className="hud-next">
           {next0 ? <>{next0.kind === "arrive" ? "Arrive at" : "Depart from"} <strong>{stopOf(next0.stopId)?.letter}</strong> {stopOf(next0.stopId)?.name}</> : "All stops ticked: walk back to the habitat"}
         </h1></div>
@@ -92,6 +90,7 @@ export function FieldView({ output, hidden = false, briefed = false, next }: { o
           Estimates under stated assumptions; the planned margin is unchanged. Suit life support not modelled.
         </p>
       </>}
+      </div>
       {next && <div className="side-foot">{next}</div>}
     </section>
   );

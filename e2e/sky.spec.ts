@@ -23,6 +23,7 @@ test("sky obstruction layer: off by default, legend states geometry not dose and
   await expect(page.locator("body")).not.toContainText(/\b(safe|shelter)\b/i);
   await openSources(page);
   await expect(page.getByRole("region", { name: /Sources/ })).toContainText("D12");
+  await page.keyboard.press("Escape"); // close the drawer before using the map's Layers panel again
   // The ramp is drawn: the layer canvas has visible alpha (mean over the canvas).
   await expect.poll(() => page.locator(".layer-sky canvas").first().evaluate((c: HTMLCanvasElement) => {
     const d = c.getContext("2d")!.getImageData(0, 0, c.width, c.height).data;

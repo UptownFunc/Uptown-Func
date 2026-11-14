@@ -1,11 +1,11 @@
-// SI-assisted: drafted with Claude Code (Claude Opus 5.5); rewritten for the UI-02 type system on design/sharpwalk-ui-ux.
-// UI-02: Newsreader (display and estimates), Instrument Sans (interface) and DM Mono (labels, coordinates, tables) load
-// from this origin and are what the console renders with; digits are tabular where numbers line up; if the files fail,
-// the console falls back to system fonts and keeps working.
+// SI-assisted: drafted with Claude Code (Claude Opus 5.5); rewritten for the UI-08 type system on design/sharpwalk-ui-ux.
+// UI-08: Geist (interface and display) and Geist Mono (coordinates and technical identifiers) load from this origin and
+// are what the console renders with; the mono's digits are equal width; if the files fail, the console falls back to
+// system fonts and keeps working.
 import { expect, test, type Page } from "@playwright/test";
 import { goStep, openStep } from "./helpers";
 
-const FAMILIES = ["Newsreader Variable", "Instrument Sans Variable", "DM Mono"];
+const FAMILIES = ["Geist Variable", "Geist Mono Variable"];
 
 /** Every UI-02 FontFace the page knows, with its load status (read from document.fonts after it settles). */
 async function faces(page: Page) {
@@ -24,12 +24,12 @@ async function widths(page: Page, text: string, fonts: string[]) {
   }, { text, fonts });
 }
 
-test("Newsreader, Instrument Sans and DM Mono load from this origin and are what the console renders with", async ({ page }) => {
+test("Geist and Geist Mono load from this origin and are what the console renders with", async ({ page }) => {
   const fontResponses: { url: string; status: number }[] = [];
   page.on("response", (r) => { if (/\.woff2?(\?|$)/.test(r.url())) fontResponses.push({ url: r.url(), status: r.status() }); });
   await openStep(page, "map");
   await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
-  await page.getByTestId("area-map").hover(); // the status line (DM Mono) appears with the pointer
+  await page.getByTestId("area-map").hover(); // the status line (Geist Mono) appears with the pointer
   await expect(page.getByTestId("status-line")).toContainText("elev");
 
   const all = await faces(page);
@@ -40,20 +40,19 @@ test("Newsreader, Instrument Sans and DM Mono load from this origin and are what
   expect(fontResponses.length).toBeGreaterThan(0);
   for (const r of fontResponses) { expect(r.url.startsWith(origin), r.url).toBe(true); expect(r.status).toBe(200); }
 
-  await expect(page.locator("body")).toHaveCSS("font-family", /^"Instrument Sans Variable"/);
-  await expect(page.getByTestId("status-line")).toHaveCSS("font-family", /^"DM Mono"/);
-  await expect(page.locator(".side-head h1")).toHaveCSS("font-family", /^"Newsreader Variable"/);
+  await expect(page.locator("body")).toHaveCSS("font-family", /^"Geist Variable"/);
+  await expect(page.locator("body")).toHaveCSS("font-variant-numeric", "tabular-nums"); // measurements and telemetry line up
+  await expect(page.getByTestId("status-line")).toHaveCSS("font-family", /^"Geist Mono Variable"/);
+  await expect(page.locator(".side-head h1")).toHaveCSS("font-family", /^"Geist Variable"/);
 
-  const [serif, serifFallback, sans, sansFallback, mono, monoFallback] = await widths(page, "Slope-screened route 0123456789", [
-    '15px "Newsreader Variable", serif', "15px serif", '15px "Instrument Sans Variable", sans-serif', "15px sans-serif",
-    '13px "DM Mono", monospace', "13px monospace"]);
-  expect(serif).not.toBe(serifFallback);
+  const [sans, sansFallback, mono, monoFallback] = await widths(page, "Slope-screened route 0123456789", [
+    '15px "Geist Variable", sans-serif', "15px sans-serif", '13px "Geist Mono Variable", monospace', "13px monospace"]);
   expect(sans).not.toBe(sansFallback);
   expect(mono).not.toBe(monoFallback);
 
-  // Coordinates, tables and readouts use DM Mono: every digit has the same advance.
-  const w = await widths(page, "0", ['13px "DM Mono"']);
-  for (const d of "123456789") expect((await widths(page, d, ['13px "DM Mono"']))[0], `DM Mono digit ${d}`).toBeCloseTo(w[0]!, 3);
+  // Coordinates use Geist Mono: every digit has the same advance.
+  const w = await widths(page, "0", ['13px "Geist Mono Variable"']);
+  for (const d of "123456789") expect((await widths(page, d, ['13px "Geist Mono Variable"']))[0], `Geist Mono digit ${d}`).toBeCloseTo(w[0]!, 3);
 });
 
 test("if the font files cannot load, the console falls back to system fonts and keeps working", async ({ page }) => {
@@ -73,14 +72,4 @@ test("if the font files cannot load, the console falls back to system fonts and 
   await goStep(page, "Map");
   await expect(page.getByLabel("Plan", { exact: true })).toContainText("No stops yet.");
   expect(errors).toEqual([]);
-});
-
-test("if only the .woff2 files fail, DM Mono's .woff fallback still loads", async ({ page }) => {
-  await page.route(/\.woff2(\?|$)/, (r) => r.abort());
-  await openStep(page, "map");
-  await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
-  await page.getByTestId("area-map").hover();
-  const all = await faces(page);
-  // The variable packages ship woff2 only (format woff2-variations); their fallback is the system stack.
-  expect(all.some((f) => f.family === "DM Mono" && f.weight === "400" && f.status === "loaded"), JSON.stringify(all)).toBe(true);
 });

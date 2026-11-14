@@ -30,6 +30,7 @@ import { createElevationLayer, drawElevationContours } from "./elevationLayer";
 import { createTerrainLayer } from "./terrainLayer";
 import { skySampleAt, type SkySampler } from "./skySample";
 import type { Quantity } from "../contracts";
+import { Layers, MousePointerClick } from "lucide-react";
 
 /** Displays a Quantity: unknown stays "unknown" (CLAUDE.md); one decimal for metres. */
 function fmt(q: Quantity): string {
@@ -318,8 +319,8 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
             {layerErrors.map((n) => `${n} could not be loaded`).join("; ")}. The sheet, the route and the readout work without it.
           </div>
         )}
-        {hint && <p className="map-hint">{hint}</p>}
-        <button type="button" className="layers-btn" aria-expanded={layersOpen} aria-controls="layers-panel" onClick={() => setLayersOpen((o) => !o)}>Layers</button>
+        {hint && <p className="map-hint"><MousePointerClick size={16} strokeWidth={1.5} aria-hidden="true" />{hint}</p>}
+        <button type="button" className="layers-btn" aria-expanded={layersOpen} aria-controls="layers-panel" onClick={() => setLayersOpen((o) => !o)}><Layers size={18} strokeWidth={1.5} aria-hidden="true" />Layers</button>
         <div className="legend" id="layers-panel" aria-label="Layers" data-open={layersOpen}>
           {tools}
           <ul>{legend.map((l) => layerErrors.includes(l.name)

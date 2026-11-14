@@ -14,12 +14,13 @@ import { cellCentreF1, type GridDef } from "../geo/grid";
 import type { PlanOutput } from "../engine/planner";
 import type { ContourLevel } from "../engine/contours";
 
-// UI-02 Folio: cobalt survey ink marks the plan (interaction), ink and paper the symbols; status colours stay status.
-const PLAN = "#2340d8", PAPER = "#fbf9f4", INK = "#14130f", OVER = "#c2261b", CAUTION = "#e3a21a";
+// UI-07: the route is a white line on a dark casing (reads on any terrain); stops carry the oxide accent (plan
+// features, interaction); status colours stay status (OVER red dashed, NEAR LIMIT amber).
+const PLAN = "#b94c22", PAPER = "#ffffff", INK = "#16120f", OVER = "#ff6b5e", CAUTION = "#f5c451";
 
 const routeStyle = [
-  new Style({ stroke: new Stroke({ color: PAPER, width: 6, lineCap: "round", lineJoin: "round" }) }),
-  new Style({ stroke: new Stroke({ color: PLAN, width: 3, lineCap: "round", lineJoin: "round" }) }),
+  new Style({ stroke: new Stroke({ color: "rgba(22, 18, 15, 0.75)", width: 7, lineCap: "round", lineJoin: "round" }) }),
+  new Style({ stroke: new Stroke({ color: PAPER, width: 3, lineCap: "round", lineJoin: "round" }) }),
 ];
 // Plan 9.4: route beyond the 0 tick takes the over colour and its word.
 const overRouteStyle = [
@@ -29,17 +30,17 @@ const overRouteStyle = [
 const tickStyle = (kind: "NEAR_LIMIT" | "OVER") => new Style({
   image: new RegularShape({ points: 2, radius: 12, angle: Math.PI / 2, stroke: new Stroke({ color: kind === "OVER" ? OVER : CAUTION, width: 4 }) }),
   text: new Text({ text: kind === "OVER" ? "margin 0 here · OVER beyond" : "margin 10% here", offsetY: -16,
-    font: "600 11px 'Instrument Sans Variable', system-ui", fill: new Fill({ color: INK }), backgroundFill: new Fill({ color: PAPER }), padding: [1, 3, 1, 3] }),
+    font: "600 11px 'Geist Variable', system-ui", fill: new Fill({ color: INK }), backgroundFill: new Fill({ color: PAPER }), padding: [1, 3, 1, 3] }),
 });
 const markerStyle = new Style({ image: new CircleStyle({ radius: 6, fill: new Fill({ color: PAPER }), stroke: new Stroke({ color: INK, width: 2 }) }) });
 
 const habitatStyle = new Style({
   image: new RegularShape({ points: 4, radius: 9, angle: Math.PI / 4, fill: new Fill({ color: PAPER }), stroke: new Stroke({ color: INK, width: 2 }) }),
-  text: new Text({ text: "H", font: "600 11px 'Instrument Sans Variable', system-ui", fill: new Fill({ color: INK }) }),
+  text: new Text({ text: "H", font: "600 11px 'Geist Variable', system-ui", fill: new Fill({ color: INK }) }),
 });
 const stopStyle = (letter: string) => new Style({
-  image: new CircleStyle({ radius: 11, fill: new Fill({ color: PAPER }), stroke: new Stroke({ color: INK, width: 2 }) }),
-  text: new Text({ text: letter, font: "600 13px 'Newsreader Variable', Georgia, serif", fill: new Fill({ color: INK }) }),
+  image: new CircleStyle({ radius: 12, fill: new Fill({ color: PLAN }), stroke: new Stroke({ color: PAPER, width: 2.5 }) }),
+  text: new Text({ text: letter, font: "700 12px 'Geist Variable', system-ui", fill: new Fill({ color: PAPER }) }),
 });
 
 export function createPlanLayer(): VectorLayer<VectorSource> {
@@ -117,13 +118,13 @@ export interface ContourDisplay { readonly levels: readonly ContourLevel[]; read
 
 const contourStyle = (label: string) => new Style({
   stroke: new Stroke({ color: "rgba(243, 238, 228, 0.7)", width: 1 }),
-  text: new Text({ text: label, placement: "line", font: "10px 'DM Mono', monospace", fill: new Fill({ color: PAPER }),
+  text: new Text({ text: label, placement: "line", font: "10px 'Geist Mono Variable', monospace", fill: new Fill({ color: PAPER }),
     stroke: new Stroke({ color: INK, width: 3 }) }),
 });
 const drillStyle = (min: number) => [
   new Style({ stroke: new Stroke({ color: INK, width: 6 }) }),
   new Style({ stroke: new Stroke({ color: PAPER, width: 3, lineDash: [10, 5] }),
-    text: new Text({ text: `SIMULATED DRILL · ASSUMED ${min} MIN WARNING`, placement: "line", font: "600 11px 'Instrument Sans Variable', system-ui",
+    text: new Text({ text: `SIMULATED DRILL · ASSUMED ${min} MIN WARNING`, placement: "line", font: "600 11px 'Geist Variable', system-ui",
       fill: new Fill({ color: INK }), stroke: new Stroke({ color: PAPER, width: 4 }) }) }),
 ];
 

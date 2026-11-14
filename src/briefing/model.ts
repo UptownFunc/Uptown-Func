@@ -14,6 +14,14 @@ export interface BriefingModel {
   stops: BriefingStop[];
   assumptions: { id: string; text: string }[];
   margin: { text: string; state: MarginState | null; unknown: boolean };
+  /** UI-09: the decision summary at the top of the card. Totals are sums of the engine's legs (model-derived from D1);
+   *  the return walk is the engine's own last-leg estimate. Nothing is new science; unknown stays unknown. */
+  summary: {
+    returnWalk: { text: string; estimated: boolean; unknown: boolean };
+    distance: string;
+    climb: string;
+    concern: string | null;
+  };
 }
 
 export function briefingModel(plan: MissionPlan): BriefingModel {
@@ -37,8 +45,22 @@ export function briefingModel(plan: MissionPlan): BriefingModel {
       text: `${a.name} = ${formatAssumptionValue(a)} (${a.source}): ${a.rationale}`,
     })),
     margin: { text: end.text, state: end.unknown ? null : last?.state ?? null, unknown: end.unknown },
+    summary: summarise(plan, letter),
   };
 }
 
 /** A card is stale as soon as the engine's current plan version differs from the version it was built from. */
 export const isStale = (cardVersion: string, currentVersion: string | null): boolean => cardVersion !== currentVersion;
+
+function summarise(plan: MissionPlan, letter: (id: string) => string): BriefingModel["summary"] {
+  const legs = plan.legs;
+  if (legs.length === 0) return { returnWalk: { text: "unknown", estimated: false, unknown: true }, distance: "unknown", climb: "unknown", concern: null };
+  const back = legs.find((l) => l.toId === "habitat");
+  const steepest = legs.reduce((a, l) => (l.climb_m > a.climb_m ? l : a));
+  return {
+    returnWalk: back ? formatDuration(back.time) : { text: "unknown", estimated: false, unknown: true },
+    distance: formatLength(legs.reduce((a, l) => a + l.distance_m, 0)),
+    climb: `${Math.round(legs.reduce((a, l) => a + l.climb_m, 0))} m`,
+    concern: `Largest climb: ${letter(steepest.fromId)} → ${letter(steepest.toId)}, ${Math.round(steepest.climb_m)} m over ${formatLength(steepest.distance_m)}`,
+  };
+}

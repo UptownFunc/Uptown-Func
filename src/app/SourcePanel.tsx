@@ -19,7 +19,7 @@ export function SourcePanel({ selected, provenance, assumptions, datasetsInView,
   const e = selected ? explainQuantity(selected, provenance, assumptions, extraSources) : null;
   return (
     <section className="sources" aria-label="Sources" data-testid="source-panel">
-      <header className="drawer-head"><p className="kicker">Provenance</p><h2>Sources</h2><button type="button" className="textbtn" onClick={onClose}>Close</button></header>
+      <header className="drawer-head"><h2>Sources</h2><button type="button" className="textbtn" onClick={onClose}>Close</button></header>
       {selected && e && (
         <div data-testid="source-detail">
           <p className="src-value"><strong>{formatQuantity(selected).text}</strong> · {e.valueClass.replace("_", " ")} · method {e.method}</p>

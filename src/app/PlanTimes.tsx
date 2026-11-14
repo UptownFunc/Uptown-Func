@@ -27,7 +27,7 @@ export function TimeRow({ id, label, current, onSet, stopId, inherited }: {
         <span data-testid={`current-${id}${stopId ? `-${stopId}` : ""}`} key={current?.value} className={current ? "assumed flash" : "unknown"}>
           {current ? `${(current.value / 60).toFixed(1)} min · assumed` : inherited ?? "not set"}
         </span>
-        {current && <span className="why">{current.rationale}</span>}
+        {current && <span className="why" title={current.rationale}>{current.rationale}</span>}
       </div>
       <label className="time-min"><span>min</span>
         <input aria-label={`${label}, minutes`} inputMode="decimal" value={minutes} placeholder={current ? (current.value / 60).toFixed(0) : "—"} onChange={(e) => setMinutes(e.target.value)} />

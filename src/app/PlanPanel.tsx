@@ -12,6 +12,8 @@ import type { SkySampler } from "../map/skySample";
 import type { Quantity, Stop } from "../contracts";
 import { STOP_LIMITS } from "../engine/assumptions";
 import { parseTasks } from "./stopTasks";
+import { Crosshair, MapPinPlus, Trash2 } from "lucide-react";
+import { ICON_LG, ICON_SM } from "./icons";
 
 const RANGE = CONSTANTS.walkSpeedRange;
 
@@ -34,7 +36,7 @@ export function AssumedNote({ output }: { output: PlanOutput }) {
   if (!output.kvAssumed) return null;
   return (
     <details className="note-assumed" data-testid="assumed-banner">
-      <summary><span className="tag">Assumed</span> Slope factors k<sub>v</sub> = 1</summary>
+      <summary><span className="tag">Assumed</span><span>Slope factors k<sub>v</sub> = 1</span></summary>
       <p><strong>ASSUMED.</strong> Slope factors k<sub>v</sub> = 1 in every bin (K-01, team choice; no sourced
         speed-versus-slope value exists): slope changes walking time only through 3D path length. Times are estimates from the {RANGE.low}-{RANGE.high} m/s suited
         range (lunar-gravity tests, {RANGE.citation.source.split(",")[0]}, {RANGE.citation.location}), not Mars-validated.</p>
@@ -43,7 +45,7 @@ export function AssumedNote({ output }: { output: PlanOutput }) {
 }
 
 export function PlanPanel({ output, onDeleteStop, onEditStop, onSetTime, onOpenSource, onMoveToCursor, skyAt, next }: PlanPanelProps) {
-  if (!output) return <aside className="side" aria-label="Plan"><p className="unknown">Engine loading…</p></aside>;
+  if (!output) return <aside className="side" aria-label="Plan"><div className="side-scroll"><p className="unknown">Loading the route engine…</p></div></aside>;
   const { plan, geometry } = output;
   const name = (id: string) => (id === "habitat" ? "Habitat" : plan.stops.find((s) => s.id === id)?.letter ?? id);
   const end = formatDuration(plan.endMargin);
@@ -53,13 +55,19 @@ export function PlanPanel({ output, onDeleteStop, onEditStop, onSetTime, onOpenS
     : "EVA duration, task, contingency and stop times are Assumed inputs not yet set on the Planner step.";
   return (
     <aside className="side" aria-label="Plan">
+      <div className="side-scroll">
       <header className="side-head">
-        <p className="kicker"><span className="n">03</span>Interactive map</p>
         <h1>Route</h1>
-        <p className="sub">Slope-screened, not rock-free. The habitat is an Assumed scenario input.</p>
+        <p>Slope-screened, not rock-free. The habitat is an Assumed scenario input.</p>
       </header>
       <AssumedNote output={output} />
-      {plan.stops.length === 0 ? <p className="empty-state">No stops yet. Click slope-screened ground on the plate, or focus the map and use the arrow keys and Enter.</p> : (
+      {plan.stops.length === 0 ? (
+        <div className="empty-state">
+          <MapPinPlus {...ICON_LG} aria-hidden="true" />
+          <strong>No stops yet.</strong>
+          <span>Click slope-screened ground on the map, or focus the map and use the arrow keys and Enter.</span>
+        </div>
+      ) : (
         <ol className="stops">
           {plan.stops.map((s) => (
             <li key={s.id} className="stop">
@@ -68,8 +76,10 @@ export function PlanPanel({ output, onDeleteStop, onEditStop, onSetTime, onOpenS
                 <span className="stop-name">{s.name}</span>
                 <span className="stop-dur"><QuantityText q={s.duration} onOpen={onOpenSource} label={`Stop ${s.letter} duration`} /></span>
                 <span className="stop-acts">
-                  <button type="button" className="textbtn" disabled={!onMoveToCursor} onClick={() => onMoveToCursor?.(s.id)} aria-label={`Move stop ${s.letter} to the map cursor`}>Move</button>
-                  <button type="button" className="textbtn" onClick={() => onDeleteStop(s.id)} aria-label={`Delete stop ${s.letter}`}>Delete</button>
+                  <button type="button" className="textbtn" disabled={!onMoveToCursor} onClick={() => onMoveToCursor?.(s.id)} aria-label={`Move stop ${s.letter} to the map cursor`}
+                    title="Move to the keyboard cursor"><Crosshair {...ICON_SM} aria-hidden="true" /></button>
+                  <button type="button" className="textbtn danger" onClick={() => onDeleteStop(s.id)} aria-label={`Delete stop ${s.letter}`} title="Delete stop">
+                    <Trash2 {...ICON_SM} aria-hidden="true" /></button>
                 </span>
               </div>
               <details className="stop-more">
@@ -87,11 +97,8 @@ export function PlanPanel({ output, onDeleteStop, onEditStop, onSetTime, onOpenS
       )}
       {plan.legs.length > 0 && (
         <table className="legs" data-testid="legs">
-          <caption>Legs on the 2 m grid path (D1 heights)</caption>
-          <thead><tr><th>Leg</th>
-            <th>Length <abbr className="badge" title="Model-derived from D1 on the 2 m grid path">model</abbr></th>
-            <th>Climb <abbr className="badge" title="Model-derived from D1 heights">model</abbr></th>
-            <th>Walking time <abbr className="badge" title={`Estimated range: ${RANGE.low}-${RANGE.high} m/s suited range, k_v = 1 Assumed`}>est.</abbr></th></tr></thead>
+          <caption className="section-title">Legs</caption>
+          <thead><tr><th>Leg</th><th>Length</th><th>Climb</th><th>Walking time</th></tr></thead>
           <tbody>
             {plan.legs.map((l) => (
               <tr key={`${l.fromId}-${l.toId}`}>
@@ -104,15 +111,18 @@ export function PlanPanel({ output, onDeleteStop, onEditStop, onSetTime, onOpenS
           </tbody>
         </table>
       )}
+      {plan.legs.length > 0 && <p className="legs-note">Length and climb are model-derived from D1 heights on the 2 m grid path. Walking times are
+        estimates from the {RANGE.low}-{RANGE.high} m/s suited range with k<sub>v</sub> = 1 assumed.</p>}
       {geometry.unreachable.length > 0 && (
         <p className="problem" role="status">No slope-screened path: {geometry.unreachable.map((u) => `${name(u.fromId)} → ${name(u.toId)}`).join(", ")}.</p>
       )}
+      </div>
       <div className="side-foot">
         <p className="margin-line" data-testid="end-margin">
           <span className="k">End margin</span>
-          <span key={plan.versionHash} className="flash"><QuantityText q={plan.endMargin} onOpen={onOpenSource} label="End margin" /></span>
+          <span key={plan.versionHash} className="flash v"><QuantityText q={plan.endMargin} onOpen={onOpenSource} label="End margin" /></span>
           {last && <MarginState state={last.state} />}
-          {end.unknown && <span className="why"> - {why}</span>}
+          {end.unknown && <span className="why">Unknown: {why}</span>}
         </p>
         {next}
       </div>
