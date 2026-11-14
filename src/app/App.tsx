@@ -10,6 +10,7 @@ import { RouteProfile } from "./RouteProfile";
 import { SourcePanel } from "./SourcePanel";
 import { DrillPanel } from "./DrillPanel";
 import { ConditionsPanel } from "./ConditionsPanel";
+import { RemsSnapshot, remsSource } from "./rems";
 import type { ContourLevel } from "../engine/contours";
 import { Provenance, type Quantity } from "../contracts";
 import { BriefingView } from "../briefing/BriefingView";
@@ -56,8 +57,17 @@ export function App() {
   const contourDisplay = levels && wantContours
     ? { levels: showContours ? levels : levels.filter((l) => drillMin !== null && Math.abs(l.level_s - drillMin * 60) < 1), drill_s: drillMin === null ? null : drillMin * 60 }
     : null;
+  // D7: the build-time REMS snapshot, validated; a missing or invalid file is shown as unavailable, never filled in.
+  const [rems, setRems] = useState<RemsSnapshot | "failed" | null>(null);
+  useEffect(() => {
+    fetch(new URL("conditions/rems.json", document.baseURI)).then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then((j: unknown) => { const p = RemsSnapshot.safeParse(j); setRems(p.success ? p.data : "failed"); })
+      .catch(() => setRems("failed"));
+  }, []);
+  const extraSources = rems && rems !== "failed" ? [remsSource(rems)] : [];
   // UX-15: every dataset in the current view = the sheet's layer sources plus the datasets the plan's numbers use.
-  const datasetsInView = [...new Set([...layerDatasets, ...(output?.plan.provenanceIds ?? [])])].sort((a, b) => Number(a.slice(1)) - Number(b.slice(1)));
+  // D10 (sun) and D7 (REMS) are always in the Planning view through the Conditions panel.
+  const datasetsInView = [...new Set([...layerDatasets, ...(output?.plan.provenanceIds ?? []), "D10", ...(extraSources.length ? ["D7"] : [])])].sort((a, b) => Number(a.slice(1)) - Number(b.slice(1)));
   useEffect(() => {
     // provenance.json is the pipeline's record (UX-15); it is validated against the shared contract.
     fetch(new URL(AREA_URL + "provenance.json", document.baseURI)).then((r) => (r.ok ? r.json() : []))
@@ -127,12 +137,12 @@ export function App() {
           onSetTime={(id, value_s, rationale, stopId) => send("set_assumption", { id, value_s, rationale, ...(stopId ? { stopId } : {}) })}
           onOpenSource={setSelected}
           onMoveToCursor={cursor ? (stopId) => send("move_stop", { stopId, lat: cursor.lat, lon: cursor.lon }) : undefined}>
-          <ConditionsPanel output={output} onOpenSource={setSelected}
+          <ConditionsPanel output={output} onOpenSource={setSelected} rems={rems}
             onSet={(id, value_s, rationale) => send("set_assumption", { id, value_s, rationale })} />
           <DrillPanel output={output} showContours={showContours} onShowContours={setShowContours}
             drillMin={drillMin} onDrillMin={setDrillMin} busy={contourBusy} />
           <SourcePanel selected={selected} provenance={provenance} assumptions={output?.plan.assumptions ?? []}
-            datasetsInView={datasetsInView} onClose={() => setSelected(null)} />
+            datasetsInView={datasetsInView} extraSources={extraSources} onClose={() => setSelected(null)} />
         </PlanPanel>
       </main>
       <footer className="footer">Independent student project; not affiliated with or endorsed by NASA.</footer>

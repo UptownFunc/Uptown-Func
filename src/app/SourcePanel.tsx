@@ -3,18 +3,20 @@
 // used in the current view, all generated from provenance.json, the constants register and the plan.
 import type { Assumption, Provenance, Quantity } from "../contracts";
 import { formatQuantity } from "./format";
-import { describeSource, explainQuantity } from "./sources";
+import { describeSource, explainQuantity, type SourceDescription } from "./sources";
 
 export interface SourcePanelProps {
   readonly selected: Quantity | null;
   readonly provenance: readonly Provenance[];
   readonly assumptions: readonly Assumption[];
   readonly datasetsInView: readonly string[];
+  /** Descriptions from pipeline outputs with their own records (D7 REMS snapshot). */
+  readonly extraSources?: readonly SourceDescription[];
   readonly onClose: () => void;
 }
 
-export function SourcePanel({ selected, provenance, assumptions, datasetsInView, onClose }: SourcePanelProps) {
-  const e = selected ? explainQuantity(selected, provenance, assumptions) : null;
+export function SourcePanel({ selected, provenance, assumptions, datasetsInView, extraSources = [], onClose }: SourcePanelProps) {
+  const e = selected ? explainQuantity(selected, provenance, assumptions, extraSources) : null;
   return (
     <section className="sources" aria-label="Sources" data-testid="source-panel">
       <h2>Sources {selected && <button type="button" className="link" onClick={onClose}>close</button>}</h2>
@@ -30,7 +32,7 @@ export function SourcePanel({ selected, provenance, assumptions, datasetsInView,
       )}
       <p className="small"><strong>Datasets in this view</strong></p>
       <ul className="small" data-testid="datasets-in-view">
-        {datasetsInView.map((id) => { const d = describeSource(id, provenance); return <li key={id}><strong>{d.title}</strong> - {d.detail}</li>; })}
+        {datasetsInView.map((id) => { const d = describeSource(id, provenance, extraSources); return <li key={id}><strong>{d.title}</strong> - {d.detail}</li>; })}
       </ul>
     </section>
   );

@@ -17,7 +17,10 @@ const METHOD_SOURCES: Record<string, { title: string; detail: string }> = {
 
 export interface SourceDescription { id: string; kind: "dataset" | "constant" | "team" | "plan" | "missing" | "other"; title: string; detail: string }
 
-export function describeSource(id: string, provenance: readonly Provenance[]): SourceDescription {
+/** `extra`: descriptions built from other pipeline outputs with their own records (D7 REMS snapshot). */
+export function describeSource(id: string, provenance: readonly Provenance[], extra: readonly SourceDescription[] = []): SourceDescription {
+  const x = extra.find((d) => d.id === id);
+  if (x) return x;
   const p = provenance.find((x) => x.id === id);
   if (p) {
     return { id, kind: "dataset", title: `${p.id}: ${p.productId}`,
@@ -43,11 +46,11 @@ export interface QuantityExplanation {
   assumptions: { id: string; text: string }[];
 }
 
-export function explainQuantity(q: Quantity, provenance: readonly Provenance[], assumptions: readonly Assumption[]): QuantityExplanation {
+export function explainQuantity(q: Quantity, provenance: readonly Provenance[], assumptions: readonly Assumption[], extra: readonly SourceDescription[] = []): QuantityExplanation {
   return {
     valueClass: q.valueClass,
     method: q.methodId,
-    sources: q.sourceIds.map((id) => describeSource(id, provenance)),
+    sources: q.sourceIds.map((id) => describeSource(id, provenance, extra)),
     assumptions: q.assumptionIds.map((id) => {
       const a = assumptions.find((x) => x.id === id);
       if (!a) return { id, text: `${id}: not in this plan's assumption list` };

@@ -9,11 +9,14 @@ import type { PlanOutput } from "../engine/planner";
 import { SCENARIO_ID } from "../engine/assumptions";
 import { QuantityText } from "./QuantityText";
 import { formatUtc } from "./format";
+import { remsQuantities, type RemsSnapshot } from "./rems";
 
 export interface ConditionsPanelProps {
   readonly output: PlanOutput | null;
   readonly onSet: (id: string, value_s: number, rationale: string) => void;
   readonly onOpenSource: (q: Quantity) => void;
+  /** D7 snapshot; "failed" when the file is missing or invalid (shown as such, never filled in). */
+  readonly rems: RemsSnapshot | "failed" | null;
 }
 
 /** "YYYY-MM-DDTHH:MM" from a datetime-local input, read as UTC; null if not a complete date and time. */
@@ -23,7 +26,7 @@ export function parseUtcInput(v: string): number | null {
   return Number.isFinite(ms) ? ms / 1000 : null;
 }
 
-export function ConditionsPanel({ output, onSet, onOpenSource }: ConditionsPanelProps) {
+export function ConditionsPanel({ output, onSet, onOpenSource, rems }: ConditionsPanelProps) {
   const [when, setWhen] = useState("");
   const [why, setWhy] = useState("");
   const c = output?.conditions;
@@ -32,7 +35,7 @@ export function ConditionsPanel({ output, onSet, onOpenSource }: ConditionsPanel
   const elev = c?.sunElevation.value;
   return (
     <section aria-label="Conditions" className="conditions">
-      <h2>Conditions <span className="muted">model-derived, area centre</span></h2>
+      <h2>Conditions <span className="muted">sun model-derived at the area centre; weather measured at the rover</span></h2>
       <form className="time-row" onSubmit={(e) => { e.preventDefault(); if (valid && s !== null) onSet(SCENARIO_ID, s, why.trim()); }}>
         <div className="time-head">
           <span>Scenario date and time</span>
@@ -59,6 +62,26 @@ export function ConditionsPanel({ output, onSet, onOpenSource }: ConditionsPanel
         </dl>
       )}
       <p className="muted small">Mars24 algorithm (NASA GISS) at one point, the area centre. Terrain shadowing is not modelled: nearby slopes can hide the sun.</p>
+      <Rems rems={rems} onOpenSource={onOpenSource} />
     </section>
+  );
+}
+
+/** D7: "conditions at Curiosity on [date], for context" (plan 19.11 weakness 27): a real recent sol at the rover. */
+function Rems({ rems, onOpenSource }: { rems: ConditionsPanelProps["rems"]; onOpenSource: (q: Quantity) => void }) {
+  if (rems === null) return null;
+  if (rems === "failed") return <p className="unknown small" data-testid="rems">Curiosity weather snapshot (D7) unavailable.</p>;
+  const q = remsQuantities(rems), r = rems.reading;
+  return (
+    <div data-testid="rems">
+      <h3 className="small">Conditions at Curiosity on {r.terrestrialDate} (sol {r.sol}), for context</h3>
+      <dl className="conditions-values">
+        <dt>Air temperature</dt>
+        <dd><QuantityText q={q.airTempMin} onOpen={onOpenSource} label="Air temperature, minimum" /> to <QuantityText q={q.airTempMax} onOpen={onOpenSource} label="Air temperature, maximum" /></dd>
+        <dt>Pressure</dt>
+        <dd><QuantityText q={q.pressure} onOpen={onOpenSource} label="Air pressure" /></dd>
+      </dl>
+      <p className="muted small">REMS daily summary at the rover, not at the boxwork, and not a forecast for the scenario date. Outreach data from CAB.</p>
+    </div>
   );
 }

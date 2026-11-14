@@ -31,3 +31,24 @@ test("scenario time drives the Mars24 sun values, each traceable to D10", async 
   await expect(sources).toContainText("2026-11-14 04:00 UTC (team choice): e2e test instant");
   await page.screenshot({ path: "test-results/conditions.png" });
 });
+
+test("D7: the dated Curiosity reading is shown for context and opens its source with the provider's disclaimer", async ({ page }) => {
+  await page.goto("/");
+  const rems = page.getByTestId("rems");
+  await expect(rems).toContainText(/Conditions at Curiosity on \d{4}-\d{2}-\d{2} \(sol \d+\), for context/);
+  await expect(rems).toContainText("not at the boxwork");
+  const p = rems.getByRole("button", { name: /Air pressure/ });
+  await expect(p).toHaveText(/^\d+ Pa$/);
+  await expect(p).toHaveAttribute("data-value-class", "directly_measured");
+  await p.click();
+  const sources = page.getByRole("region", { name: "Sources" });
+  await expect(sources.getByTestId("source-detail")).toContainText("outreach purposes only");
+  await expect(sources.getByTestId("datasets-in-view")).toContainText("D7: MSL REMS");
+  await expect(sources.getByTestId("datasets-in-view")).toContainText("D10: Mars24");
+});
+
+test("D7: a missing snapshot is labelled unavailable, not filled in", async ({ page }) => {
+  await page.route("**/conditions/rems.json", (r) => r.fulfill({ status: 404, body: "" }));
+  await page.goto("/");
+  await expect(page.getByTestId("rems")).toHaveText("Curiosity weather snapshot (D7) unavailable.");
+});
