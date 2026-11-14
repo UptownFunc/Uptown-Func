@@ -41,11 +41,14 @@ test("briefing card: built from the current plan, then STALE and unprintable aft
   await card.screenshot({ path: "test-results/briefing-card.png" });
 
   // Change the plan, return: the card is STALE within 1 s and cannot be printed.
+  // AC-06: measured from the plan edit (the Delete click) to the STALE mark, including the switch back to Briefing.
   await page.getByRole("button", { name: "Planning" }).click();
+  const t0 = Date.now();
   await page.getByRole("button", { name: "Delete stop A" }).click();
   await expect(page.getByLabel("Plan", { exact: true })).toContainText("No stops yet.");
   await page.getByRole("button", { name: "Briefing" }).click();
   await expect(page.getByTestId("stale")).toBeVisible({ timeout: 1000 });
+  expect(Date.now() - t0).toBeLessThanOrEqual(1000);
   await expect(print).toBeDisabled();
   await page.getByRole("button", { name: "Regenerate from current plan" }).click();
   await expect(page.getByTestId("stale")).toHaveCount(0, { timeout: 20_000 });

@@ -81,7 +81,7 @@ Plan defaults were applied at 14:15 (DECISIONS "Plan defaults applied"). Remaini
 4. **3.5 first public deploy** (Vercel account, R-17); area data is now committed. Then request the FortiGuard classification (plan 19.3).
 5. G4 remaining: AC-07 and AC-08 need D5 (rover positions; host not reachable). The sky-obstruction layer is deferred by the plan's own rule until AC-07 can run (SKY-1).
 6. 5.4: the team writes the concept-origin account in SI_LOG.md and reviews README "SI use"; then the submission SI field.
-7. Follow-ups: R-02 (7, 8, 10), R-03 (5), R-04 (5-7), R-05 (5, 6), R-06 (5), R-07 (3), R-08 (5); contracts C-12/C-16/C-17; P-03 GDAL 3.12.3 rerun.
+7. Follow-ups: R-02 (7, 8, 10), R-03 (5), R-04 (6, 7), R-05 (5, 6), R-06 (5), R-07 (3), R-08 (5); contracts C-12/C-16/C-17; P-03 GDAL 3.12.3 rerun.
 
 ## Exact commands for the next session
 
