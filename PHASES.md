@@ -92,7 +92,7 @@ Remaining: 33 h 11 min.
 | 2.3 | VERIFIED (human review pending) | Leg ranges use the cited 0.64-0.97 m/s range; L-01/L-02 still to confirm |
 | 2.4 | IN PROGRESS | Planned margin incl. per-stop durations and ticks (bf0524b..0aaae81); field-margin UI belongs to 3.3 |
 | 2.5 | VERIFIED (interim) | No smoothing: grid path for calculations and display; AC-19 on the grid metric |
-| 2.6 | IN PROGRESS | Part 2 done: habitat, stops, route drawn via the worker (88f8b9a, 19b7c68); coverage outlines, contours, fonts open |
+| 2.6 | IN PROGRESS | Parts 1-3 done (coverage outlines 7e7c459, fonts f329682, review e4cb7f6); 10 m contours and hatch aliasing open |
 | 2.7 | VERIFIED (Node, cloud Xeon) | k_v = 1: longest route 354-395 ms, field 426-470 ms; worker command 261 ms for 2 legs |
 | 3.1 | IN PROGRESS | Planner (only MissionPlan writer) + Comlink worker + all six commands; C-15 route geometry outside the contract |
 | 3.3 | IN PROGRESS (core done) | Field View: manual ticks, est. margins, stale guard (edf9492, 0acf9e7); phone width checked (b68dec1); outdoor daylight check needs a real phone |
@@ -144,7 +144,7 @@ Work on optional features only when it does not endanger this path. The AREA 2D 
 | 2.3 | Implement leg distance/time ranges and habitat time field. Keep seconds in the engine and display SI minutes. | Route Engine | VERIFIED (checks pass; L-01/L-02 confirmation pending) | Leg ranges now feed the plan: `Leg.time` is an estimated Quantity in seconds (low = 0.97 m/s, high = 0.64 m/s) with A-kv and A-slope-limit assumption ids; planner test checks 16 m -> 16/0.83 s nominal. UI shows SI minutes. | 9e9496c |
 | 2.4 | Implement planned margin and the manual-entry field-margin calculations without conflating `MissionPlan` and `MissionExecution`. | Route Engine + Design | IN PROGRESS (planned margin wired end to end; field-margin UI and per-stop durations open) | **13:15 (this session):** `set_assumption` { id: T_EVA, t_ops, t_cont, stop_duration; value_s; rationale } records team-choice Assumptions with no defaults (T-01). With all set and every leg reachable, the planner fills `plannedMargins` (slow bound, minutes, state) and `endMargin` (est. range slow..fast, nominal value). 8 new planner tests incl. exact end margins at all three bounds, AC-19 monotone profile, OVER state, unreachable leg -> unknown. Habitat field cached by its inputs; other bounds derived as 1/v (review R-03). **Open:** one duration applies to every stop (per-stop durations not yet); field margins UI belongs to 3.3. | bf0524b, 4420678 |
 | 2.5 | Resolve route smoothing at G2 with Route Engine owner and Data and Science agreement. Record the selected option in `DECISIONS.md`, plan log and O-22. | Route Engine | VERIFIED (interim rule kept) | At G2 no smoothing is implemented: calculations and the drawn line both use the grid path, which is the plan's stated interim rule (6.6 / D-04); AC-19 property tests hold on the grid metric (30 random grids). Options 1-3 remain open if the team wants smoothing later; any change needs matching tests. | 9e9496c (engine), 2.4 tests |
-| 2.6 | Build the OpenLayers **AREA-level 2D sheet** by G2. It is the permanent fallback and is never cut. | Design + Data and Science | IN PROGRESS (parts 1 and 2 done) | **Part 2 (13:10):** `src/map/planLayer.ts` draws grid-path legs, habitat (H) and lettered stops via cell -> F1 -> F7 (`src/geo/grid.ts`); a click sends `add_stop` to the engine worker; refused clicks are reported. `npx playwright test` 4/4 (2 new: route drawn and listed with italic est. ranges; excluded ground refused). Screenshot `test-results/plan-route.png`. **Still open:** D1/D2 coverage outlines, 10 m contours, fonts (S-02), hatch aliasing. | 88f8b9a, 19b7c68 |
+| 2.6 | Build the OpenLayers **AREA-level 2D sheet** by G2. It is the permanent fallback and is never cut. | Design + Data and Science | IN PROGRESS (parts 1-3 done; 10 m contours and hatch aliasing open) | **Part 2 (13:10):** `src/map/planLayer.ts` draws grid-path legs, habitat (H) and lettered stops via cell -> F1 -> F7 (`src/geo/grid.ts`); a click sends `add_stop` to the engine worker; refused clicks are reported. `npx playwright test` 4/4 (2 new: route drawn and listed with italic est. ranges; excluded ground refused). Screenshot `test-results/plan-route.png`. **Still open:** D1/D2 coverage outlines, 10 m contours, fonts (S-02), hatch aliasing. **Part 3 (14 Nov 16:27-16:47):** plan 7.8 coverage outlines (pipeline `run_coverage` -> `coverage.geojson` in F1, measured D1 and D2 100% valid on the window; dotted outline layer; layer list says "partly outside D2 colour coverage" for the current view; missing/invalid file labelled) and IBM Plex Sans/Mono from npm (S-02, S-06), both verified in the browser. **Still open:** 10 m contours (plan 7.8 AREA level), hatch aliasing, Design review (COV-01). | 88f8b9a, 19b7c68, 7e7c459, f329682, e4cb7f6 |
 | 2.7 | Run the complete G2 engine test and latency gate; record all speed inputs as cited or Assumed. | Route Engine | VERIFIED on this machine (Node 22.23.4, cloud Xeon 2.1 GHz, 4 cores) | **13:00 re-run, k_v = 1 (K-01):** longest route 395/354/377 ms (< 500); time field 470/462/426 ms (< 3 s); A* equals the field every run. The decreasing placeholder also passed this run (349-429 ms) but is not used. In the browser worker, one `add_stop` (two A* legs, ~1.95 km each) took 261 ms. Not yet measured on a mid-range laptop. Workload off. **14:48 re-run (k_v = 1):** longest route 393/316/359 ms; time field 438/431/382 ms; A* equals the field each run. | 9e9496c |
 
 **G2 acceptance:** all listed engine tests pass and route is under 500 ms. If missed, move to a 4 m grid and show a visible Assumed-input banner. Do not turn on kJ workload without cited rates.
@@ -599,6 +599,58 @@ Known limitations or failures: R-02 item 7 still deferred (P-01 pending); C-19 f
 Review status: self-reviewed diff (small refactor); no separate /code-review run on b0741fe
 Commit SHA: b0741fe
 Next part / blocker owner: team decisions (B-1, B-9, C-19); then 3.5 deploy when B-4 arrives
+```
+
+```text
+Part: /code-review R-11 of 6e8ca00..8526718 (review fixes, e2e helpers, readout refactor)
+Owner: team (G-05); session operated from parcilla13's account, Sat 14 Nov 2026 16:27-16:33 Asia/Manila
+Status: VERIFIED
+Scope completed: 4 findings - 3 fixed (one grid frame for the readout via gridFrameOf/enuToCell; one transform per
+  pointer move; helper pin test on STOP and EXCLUDED with expect.poll), 1 skipped (DECISIONS R-11)
+Files changed: src/geo/{grid,grid.test}.ts; src/map/{readout.ts,AreaSheet.tsx}; e2e/area-sheet.spec.ts
+Checks run (exact commands), at 2498856: npx vitest run -> 236/236; npx tsc --noEmit -> clean; npm run build -> OK;
+  PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome npx playwright test --trace off -> 27/27
+Commit SHA: 2498856
+```
+
+```text
+Part: 2.6 part 3 - coverage outlines (plan 7.8 "Missing and coarse data") and IBM Plex fonts (plan 9 type, S-02)
+Owner: team (G-05; plan owner Design + Data and Science); session operated from parcilla13's account, 16:33-16:47
+Status: VERIFIED for this scope (2.6 as a whole stays IN PROGRESS: 10 m contours, hatch aliasing, Design review)
+Scope completed:
+  Coverage: pipeline/sharpwalk/{coverage,run_coverage}.py polygonise each dataset's valid-data mask on the F7
+    display grid and write public/area/coverage.geojson (F1), registered in layers.json with its sha256; run_display
+    now writes it too. Measured: D1 and D2 100% valid over the whole window (COV-02). App: src/map/{coverage.ts,
+    coverageLayer.ts}, AreaSheet outline layer and per-layer notes for the current view ("partly outside D2 colour
+    coverage"), missing/invalid/empty states labelled; not on the briefing card.
+  Fonts: @fontsource/ibm-plex-sans 5.3.0 + @fontsource/ibm-plex-mono 5.3.0 (S-06; IBM packages removed for their
+    telemetry postinstall); src/app/fonts.css; docs/licences.md regenerated.
+Files changed: pipeline/sharpwalk/{coverage.py,run_coverage.py,run_display.py}; pipeline/tests/{test_coverage.py,
+  test_area_outputs.py}; public/area/{coverage.geojson,layers.json}; src/map/{coverage.ts,coverage.test.ts,
+  coverageLayer.ts,loadArea.ts,AreaSheet.tsx,snapshot.ts}; src/app/{fonts.css,main.tsx,styles.css}; e2e/{coverage,
+  fonts}.spec.ts; package.json; package-lock.json; docs/licences.md
+Checks run (exact commands), at e4cb7f6:
+  npx vitest run                                   -> 245 passed / 245, 23 files
+  npx tsc --noEmit                                 -> clean
+  npm run build                                    -> OK; main 203.10 kB gzip + worker 40.9 kB (~244 of 250, B-01)
+  (cd pipeline && ../.venv/bin/python -m pytest)   -> 54 passed
+  PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome npx playwright test --trace off -> 35 passed / 35
+  (cd pipeline && SSL_CERT_FILE=/root/.ccr/ca-bundle.crt ../.venv/bin/python -m sharpwalk.run_coverage ../public/area)
+                                                   -> D1 1.0, D2 1.0 valid, 1 polygon each, 29 s
+Browser evidence: e2e reads the coverage layer's own canvas (ink at the west data edge from coverage.geojson, none
+  at the sheet middle) and the readout confirms that pixel's longitude within 1e-4 deg; Zoom-in button clears the
+  notes; 16 x Shift+ArrowRight brings them back (readout E ~1.6 km); 404, invalid and all-empty files are labelled.
+  Fonts: FontFace status "loaded" for Plex Sans 400/600 and Mono 400, all .woff2 responses 200 from this origin,
+  body/status line resolve to Plex, text widths differ from generic fallbacks, digits tabular; all font files
+  aborted -> fallback, console used by keyboard; .woff2 aborted -> .woff fallback loads Plex.
+  TDD: each new test was run red first (pipeline coverage, app coverage module, fonts e2e).
+Not re-run: run_display (full D1/D2 rebuild) after it gained the run_coverage call; the call was import-checked only.
+Known limitations: coverage symbol is a display choice (COV-01); schema app-local (C-20); fonts fetch ~60 KB of
+  unused 600-weight subsets (FONT-01); load view wider than the crop (COV-02)
+Review status: /code-review high R-12 on 2498856..f329682: 6 findings, 4 fixed (e4cb7f6), 2 recorded (C-20, S-06)
+Commit SHA: 7e7c459, f329682, e4cb7f6 (branch claude/wizardly-lovelace-i2i0wa); not merged
+Next part / blocker owner: 2.6 10 m contours (plan 7.8 AREA level; gdal_contour on D1, GeoJSON in F1) is code-only;
+  team inputs B-1, B-3, B-4, B-9, B-12 (C-19) unchanged
 ```
 
 ## Phase-part completion record
