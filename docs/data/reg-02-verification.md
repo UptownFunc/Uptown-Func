@@ -190,3 +190,35 @@ benchmark does not model tilt.
 
 Checks after this change: vitest 289 of 289; `tsc --noEmit` clean; build main 208.35 kB gzip + worker 41,530 B = about
 249.9 of 250 KB.
+
+## 10. Addendum (Sun 15 Nov 2026, 01:04-01:15): the six items left after section 9
+
+Yujin asked for the six remaining items to be worked through. Four are closed. Two are closed as far as public
+sources allow, and say what is still missing.
+
+| # | Item | What was read or run | Result |
+|---|---|---|---|
+| 1 | RAD height above the ground (V-12, R-13) | NASA Science, "Curiosity Science Instruments": RAD "Location: Rover Deck, pointed toward the sky." NASA/JPL image PIA11438 caption: "The deck is 1.1 meter (3.6 feet) above the ground." PDS Analyst's Notebook, "MSL instrument host": "1.1 m top deck height". Hassler et al. (2012), the instrument paper, is not open access and was not read. | **Sourced to the deck height: about 1.1 m.** This is the deck, not a stated detector height. The base h_obs of 1 m is within 0.1 m of it. From the recorded sweep (20.73 % at 0 m, 16.51 % at 2 m; 2.11 pp per metre) a 1.1 m observer gives about 18.3 % (our arithmetic), inside the ±3 pp band. |
+| 2 | REMS temperature unit (REMS-01) | NASA's own page for this feed, `https://mars.nasa.gov/layout/embed/image/mslweather/`, and its script `/js/general/weather/msl-weather.js` (sha256 `fc55c21ab486394a`). | **CONFIRMED: degrees C.** The script reads the same feed and has `var highCelsius = solObject.max_temp; var lowCelsius = solObject.min_temp;`, converts with `* 9/5 + 32` for Fahrenheit, and prints the feed value with "°C". Pressure in Pa rests on the feed's own text ("about 700 Pascals"). |
+| 3 | The 2.3-3.5 km/h window at its original source | NASA/TP-2010-216115 has no record on NTRS (searched by number and by title). Read instead: Gernhardt, Norcross and Vos (2008), "Integrated Suit Test 1", SAE paper 2008-01-1951 (NTRS 20080013604, 12 pp.). | **Partly.** The paper confirms the test the figure comes from: six male astronaut subjects, mean body mass 80.7 kg (the same 80.7 kg that NASA/TM-2010-216138 Table 4 credits to IST-1), and walking speeds set for each subject at his preferred transition speed minus 2.4, 1.6 and 0.8 km/h (Table 2, p. 3). So the speeds were set by protocol, which supports the "treadmill speed window" wording. It does not print "2.3-3.5 km/h". That number is still confirmed only as quoted in the TM. **Needs a person:** a copy of NASA/TP-2010-216115 from a library, or the team accepts the secondary citation. |
+| 4 | D1 vertical reference (D-05) | D1 heights (bilinear, read from the USGS file) compared with `elev_geoid` at 116 rover waypoints from D5 (every 12th of 1,389; sols 3 to 5014; heights -4,521 to -3,486 m). | **Strong support that D1 heights are areoid ("geoid") heights.** D1 minus `elev_geoid`: mean -0.003 m, median 0.001 m, standard deviation 0.050 m, largest 0.17 m; all 116 within 0.5 m, over more than 1 km of relief. A sphere or ellipsoid reference would differ by far more. Limit: the rover heights were very likely taken from this same elevation product, so this shows a shared reference, not an independent survey. The plan's control-point test (1.5) is still not done, and the app's label is not changed here. |
+| 5 | Station durations in NASA/TM-2010-216138, p. 8 | Row positions rebuilt from the PDF's text coordinates. | **CONFIRMED:** Station 1 0:45, Station 2 0:45, Station 3 0:20, Station 4 0:20, Station 5 0:30. **CORRECTED citation:** this is Figure 4, p. 8 ("Representative planned daily traverse timeline from Desert RATS 2009"), not Table 1. Table 1 is on p. 7. |
+| 6 | Sun model against an outside source (AC-09) | NASA/JPL Horizons (API 1.2, ephemeris DE441, Mars orientation mar099): airless apparent elevation of the Sun from 222.61 W, -4.8719 deg planetodetic, on radii 3,396.19 and 3,376.2 km. | See the table below. The four scenario times agree within 0.1 deg. Two other dates differ by 0.13 and 0.19 deg. **AC-09 as written still needs the Mars24 app** for its third date; this check is against a different, independent source. Java 1.8 is installed on the computer used, so a member can run Mars24 there. |
+
+**Item 6, numbers.** "Mars24 steps" is the separate implementation of section 4, which matches the app.
+
+| Time (UTC) | Horizons elevation | Mars24 steps | Difference |
+|---|---|---|---|
+| 2026-11-15 12:00 | 43.493 deg | 43.467 deg | 0.026 deg |
+| 2026-11-15 15:00 | 75.804 deg | 75.710 deg | 0.094 deg |
+| 2026-11-15 18:00 | 44.696 deg | 44.670 deg | 0.026 deg |
+| 2026-11-15 19:00 | 30.702 deg | 30.685 deg | 0.017 deg |
+| 2025-03-01 10:00 | -75.473 deg | -75.284 deg | 0.189 deg |
+| 2027-06-21 08:00 | 50.189 deg | 50.057 deg | 0.132 deg |
+
+Reading: the Mars24 method is an analytic approximation, and against the JPL ephemeris it is good to about 0.2 deg
+in these six cases. The app shows the angle to 0.1 deg. This is a limit of the published method, not an error in the
+app's implementation, which reproduces the published worked examples.
+
+Still open after this section: a library copy of NASA/TP-2010-216115 (item 3); the Mars24 app's third date (item 6);
+the plan's control-point test (item 4).
