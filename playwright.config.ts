@@ -11,5 +11,9 @@ export default defineConfig({
     viewport: { width: 1280, height: 800 },
     launchOptions: process.env.PW_CHROMIUM ? { executablePath: process.env.PW_CHROMIUM } : {},
   },
-  webServer: { command: "npx vite --port 5173 --strictPort", url: "http://localhost:5173", reuseExistingServer: true, timeout: 60_000 },
+  // E2E runs against the production build (vite preview), not the dev server: the dev server's dependency optimiser
+  // reloads the page on a cold cache (first run after npm ci), which failed the first specs; and the preview serves
+  // exactly what is deployed, worker chunk and public/area included.
+  webServer: { command: "npm run build && npx vite preview --port 5173 --strictPort", url: "http://localhost:5173",
+    reuseExistingServer: false, timeout: 120_000 },
 });
