@@ -144,6 +144,19 @@ All ten findings fixed, test-first where possible. Each of the three key tests w
 | X-01 | Superpowers skill | Not installed in this cloud session (no skill or plugin present). Its test-first and verify-before-marking practice was followed manually; the skill is not claimed as used. | Install for future sessions if required |
 | D-04 note | Smoothing | Still undecided; the map draws the grid path itself (option 3 behaviour by default). Decide by G2 (19:00). | PENDING |
 
+## Plan defaults applied (Sat 14 Nov 2026, 14:15; operator instruction "do what is needed based on the plan")
+
+| ID | Decision applied | Plan / CLAUDE.md basis | Status |
+|---|---|---|---|
+| D-10 | **3D view cut**; Cesium overlay draping not attempted; AREA 2D sheet kept | CLAUDE.md "If 3D is doubtful, cut it at G0/G1"; G1 fallback "overlays in 2D only"; cut order under the no-ion default; D-02 has no written approval | APPLIED |
+| D-04 | **No smoothing at G2**: grid path for calculations and display; AC-19 on the grid metric | Plan 6.6: "until decided, all calculations use grid paths and the guarantee is only claimed on the grid metric" | APPLIED (interim rule; options stay open) |
+| H-01 | Default habitat 4.795211 S, 137.391845 E (nearest slope-screened cell, 15.6 m from the 19.2 point) | Plan 19.2: habitat "around 4.795 S, 137.392 E ... confirm the slope there at G1; it is a scenario input" (the exact point is over 20 deg) | APPLIED |
+| F-01 | Field return-now charges all of t_ops | Plan 6.6: charging all t_ops "is conservative" (same choice as the planned margin) | APPLIED |
+| C-14 | Area outputs committed in public/area, checked by pytest | Plan 7: static app, one-time pipeline, static files | APPLIED (db7c103) |
+| T-01 | **Not applied**: no plan-time values exist in the plan | CLAUDE.md: never invent values; plan weakness 5 leaves them to the team | BLOCKED - team |
+| C-12, C-16, C-17 | **Not applied**: contract changes | CLAUDE.md: change a contract only with the owners' agreement | BLOCKED - team |
+| N-01 | Network: new personal environment "Uptown-Func" allows www.giss.nasa.gov, mars.nasa.gov and the USGS bucket (operator approved). Fetches from this session were still refused (WebFetch DNS failure; Bash download refused by the session's permission check) | Plan D6, D7, D10 sources | BLOCKED - retry in a session on that environment, or the operator allows the fetch |
+
 ## Governance decisions
 
 | ID | Topic | Decision | Decided by | Date/time (Asia/Manila) | Evidence |

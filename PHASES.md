@@ -42,7 +42,20 @@ applies: overlays in 2D only.** Cesium overlay draping must not start. The 3D vi
 written Local Lead approval for Cesium Mars (D-02); CLAUDE.md says "If 3D is doubtful, cut it at G0/G1". **Recommendation
 for the team (not decided here): cut the 3D view now under the fixed cut order; the AREA 2D sheet is never cut.**
 
-## Status at handoff (Sat 14 Nov 2026, 13:55 Asia/Manila container clock; previous 12:20)
+## Plan defaults applied (Sat 14 Nov 2026, 14:15 Asia/Manila)
+
+The session operator instructed "do what is needed based on the plan". Applied only where the plan or CLAUDE.md states the
+rule; values and approvals the plan leaves to people were not invented (DECISIONS "Plan defaults applied, 14:15").
+- **3D view CUT** (1.6): G1 residuals missing, no written Cesium Mars approval, CLAUDE.md "If 3D is doubtful, cut it at
+  G0/G1"; fixed cut order under the no-ion default. The AREA 2D sheet stays.
+- **G2 engine gate: criteria met on the cloud machine** except smoothing, which keeps the plan's interim rule (D-04):
+  grid paths for calculations and display; AC-19 claimed on the grid metric only.
+- **C-14:** area outputs committed (db7c103), checked by pytest against recorded checksums.
+- **Still blocked (people or network):** T-01 plan times; Conditions panel (D7 REMS snapshot, D10 Mars24 needs the GISS
+  worked example as test oracle); rover point-of-view images (D6: 3-5 images picked by people); first public deploy
+  (Vercel account, R-17); D-01/D-02 Local Lead answers; contract changes C-12/C-16/C-17.
+
+## Status at handoff (Sat 14 Nov 2026, 14:15 Asia/Manila container clock; previous 12:20)
 
 | Part | Status | One-line reason |
 |---|---|---|
@@ -55,12 +68,12 @@ for the team (not decided here): cut the 3D view now under the fixed cut order; 
 | 1.3 | BLOCKED | Manifest cannot be written without invented residuals (C-12) |
 | 1.4 | IN PROGRESS | Seam candidates listed; alignment inconclusive; trust-grid method undecided |
 | 1.5 | NOT STARTED | Needs 8+ control points with Cesium picks (human + 3D owner) |
-| 1.6 | NOT STARTED | Optional 3D feasibility; depends on D-02 |
+| 1.6 | CUT | 3D view cut at G1 under the plan rule (no residuals, no D-02 approval); AREA 2D sheet kept |
 | 2.1 | IN PROGRESS | Range citation resolved from plan 19.5 (3d0e68c); 20 deg slide still UNRESOLVED (plan names only "NASA presentation") |
 | 2.2 | VERIFIED (human review pending) | K-01 decided: k_v = 1 placeholder with ASSUMED banner (9e9496c) |
 | 2.3 | VERIFIED (human review pending) | Leg ranges use the cited 0.64-0.97 m/s range; L-01/L-02 still to confirm |
 | 2.4 | IN PROGRESS | Planned margin incl. per-stop durations and ticks (bf0524b..0aaae81); field-margin UI belongs to 3.3 |
-| 2.5 | NOT STARTED | Smoothing decision D-04 due at G2 (Route Engine + Data and Science) |
+| 2.5 | VERIFIED (interim) | No smoothing: grid path for calculations and display; AC-19 on the grid metric |
 | 2.6 | IN PROGRESS | Part 2 done: habitat, stops, route drawn via the worker (88f8b9a, 19b7c68); coverage outlines, contours, fonts open |
 | 2.7 | VERIFIED (Node, cloud Xeon) | k_v = 1: longest route 354-395 ms, field 426-470 ms; worker command 261 ms for 2 legs |
 | 3.1 | IN PROGRESS | Planner (only MissionPlan writer) + Comlink worker + all six commands; C-15 route geometry outside the contract |
@@ -95,7 +108,7 @@ Work on optional features only when it does not endanger this path. The AREA 2D 
 | 1.3 | Emit area manifest, typed grid files, provenance and checksums; validate against shared Zod contracts. | Data and Science + Contracts owner | UNVERIFIED | All required files present; schema validation; checksums reproduced | - |
 | 1.4 | Run DEM quality checks and raster alignment checks. Record the hillshade/roughness check and D1/D2 vertical relationship. | Data and Science | IN PROGRESS (measurements recorded; alignment inconclusive) | Hillshade/roughness: see 1.1 audit. **Seams:** 2,411 F6 cells over 60 deg (2,423 before quantisation) in 197 clusters. Most follow natural scarps; a few short, straight north-south segments (up to 57 cells in one column) are seam candidates for owner inspection. All are already excluded (over 20 deg). **Raster alignment (code, not QGIS):** D1 and D2 have identical CRS definitions, so there is no CRS-level offset. Image matching at 3 sites was **inconclusive**: hillshade NCC 0.21-0.41 with inconsistent shifts (one at the search limit); edge NCC 0.04-0.26 with shifts of 0-5 m. No residual is claimed; the 7.4 control points must decide. **Not done:** fill/seam trust grid (method undecided); D1-Cesium comparison (needs 1.5/1.6). Script: `pipeline/checks/align_d1_d2.py`. | see 1.4 record |
 | 1.5 | Complete at least eight spread-out control points; record D2 pixel, F1, F5 XYZ, matching Cesium Cartesian pick, per-point east/north/up residuals, RMS, maximum, raster offset and vertical bias/spread. | Data and Science + 3D owner | UNVERIFIED | AC-15 evidence; horizontal RMS and fallback decision recorded | - |
-| 1.6 | Optional early 3D feasibility task, only if retained at G0: test Cesium with own D1 heights and Mars Trek imagery. Verify the plan's 105-159 m sphere-to-ellipsoid correction plus D1's vertical reference against control points. Do not delay G1/G2 or assume 3D is required. | 3D owner + Data and Science | UNVERIFIED | Height conversion and control-point evidence; if in doubt or schedule slips, mark CUT and keep the 2D AREA sheet | - |
+| 1.6 | Optional early 3D feasibility task, only if retained at G0: test Cesium with own D1 heights and Mars Trek imagery. Verify the plan's 105-159 m sphere-to-ellipsoid correction plus D1's vertical reference against control points. Do not delay G1/G2 or assume 3D is required. | 3D owner + Data and Science | CUT (14:15) | Cut under the plan rule at G1: control-point residuals absent (1.5), no written Local Lead approval for Cesium Mars (D-02), 3D not started. Fixed cut order: PLANET, SITE, then the whole 3D view (no-ion default). The AREA 2D sheet is never cut. | - |
 
 **G1 acceptance:** area grids are generated, Zod-valid and checksummed; DEM checks and control-point residuals are recorded. If horizontal RMS exceeds 5 m (Assumed), apply and log a translation; if it exceeds 25 m (Assumed), keep overlays in 2D only. Never use Cesium overlays before residuals pass.
 
@@ -107,7 +120,7 @@ Work on optional features only when it does not endanger this path. The AREA 2D 
 | 2.2 | Implement admissible grid costs and route search. Exclude unknown terrain; apply slope screening; forbid diagonal corner cutting when either orthogonal neighbour is blocked. | Route Engine | VERIFIED (checks pass; human review pending) | K-01 decided by the session operator (14 Nov, 13:00): k_v = 1 in every bin as a labelled placeholder (`src/engine/assumptions.ts`), recorded as a team-choice Assumption and shown on a visible ASSUMED banner. Engine tests unchanged and passing (vitest 169/169 at 19b7c68). Weakness 57 (interpolate k_v) moot while all factors are 1; revisit when values arrive. | 9e9496c |
 | 2.3 | Implement leg distance/time ranges and habitat time field. Keep seconds in the engine and display SI minutes. | Route Engine | VERIFIED (checks pass; L-01/L-02 confirmation pending) | Leg ranges now feed the plan: `Leg.time` is an estimated Quantity in seconds (low = 0.97 m/s, high = 0.64 m/s) with A-kv and A-slope-limit assumption ids; planner test checks 16 m -> 16/0.83 s nominal. UI shows SI minutes. | 9e9496c |
 | 2.4 | Implement planned margin and the manual-entry field-margin calculations without conflating `MissionPlan` and `MissionExecution`. | Route Engine + Design | IN PROGRESS (planned margin wired end to end; field-margin UI and per-stop durations open) | **13:15 (this session):** `set_assumption` { id: T_EVA, t_ops, t_cont, stop_duration; value_s; rationale } records team-choice Assumptions with no defaults (T-01). With all set and every leg reachable, the planner fills `plannedMargins` (slow bound, minutes, state) and `endMargin` (est. range slow..fast, nominal value). 8 new planner tests incl. exact end margins at all three bounds, AC-19 monotone profile, OVER state, unreachable leg -> unknown. Habitat field cached by its inputs; other bounds derived as 1/v (review R-03). **Open:** one duration applies to every stop (per-stop durations not yet); field margins UI belongs to 3.3. | bf0524b, 4420678 |
-| 2.5 | Resolve route smoothing at G2 with Route Engine owner and Data and Science agreement. Record the selected option in `DECISIONS.md`, plan log and O-22. | Route Engine | UNVERIFIED | Written option and matching tests; until decided, calculations use grid paths only | - |
+| 2.5 | Resolve route smoothing at G2 with Route Engine owner and Data and Science agreement. Record the selected option in `DECISIONS.md`, plan log and O-22. | Route Engine | VERIFIED (interim rule kept) | At G2 no smoothing is implemented: calculations and the drawn line both use the grid path, which is the plan's stated interim rule (6.6 / D-04); AC-19 property tests hold on the grid metric (30 random grids). Options 1-3 remain open if the team wants smoothing later; any change needs matching tests. | 9e9496c (engine), 2.4 tests |
 | 2.6 | Build the OpenLayers **AREA-level 2D sheet** by G2. It is the permanent fallback and is never cut. | Design + Data and Science | IN PROGRESS (parts 1 and 2 done) | **Part 2 (13:10):** `src/map/planLayer.ts` draws grid-path legs, habitat (H) and lettered stops via cell -> F1 -> F7 (`src/geo/grid.ts`); a click sends `add_stop` to the engine worker; refused clicks are reported. `npx playwright test` 4/4 (2 new: route drawn and listed with italic est. ranges; excluded ground refused). Screenshot `test-results/plan-route.png`. **Still open:** D1/D2 coverage outlines, 10 m contours, fonts (S-02), hatch aliasing. | 88f8b9a, 19b7c68 |
 | 2.7 | Run the complete G2 engine test and latency gate; record all speed inputs as cited or Assumed. | Route Engine | VERIFIED on this machine (Node 22.23.4, cloud Xeon 2.1 GHz, 4 cores) | **13:00 re-run, k_v = 1 (K-01):** longest route 395/354/377 ms (< 500); time field 470/462/426 ms (< 3 s); A* equals the field every run. The decreasing placeholder also passed this run (349-429 ms) but is not used. In the browser worker, one `add_stop` (two A* legs, ~1.95 km each) took 261 ms. Not yet measured on a mid-range laptop. Workload off. | 9e9496c |
 
