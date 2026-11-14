@@ -123,6 +123,21 @@ Work on optional features only when it does not endanger this path. The AREA 2D 
 
 The AREA sheet is never cut. Preserve the working route, planned margin and briefing card. If 3D is in doubt, cut it at G0/G1 rather than waiting until late integration.
 
+```text
+Part: Governance (G-01 attribution, G-02 merge rule), PR parcilla13/Uptown-Func#1
+Owner: Team member Yujin (direction); Claude Code session (drafting)
+Status: VERIFIED (docs only)
+Scope completed: CLAUDE.md credits the concept and plan to the whole team; the human-merge rule is replaced by
+  the completeness checklist in step 6; HANDOFF.md and SESSION_PROMPTS.md aligned; G-01/G-02 in DECISIONS.md
+Files changed: CLAUDE.md, DECISIONS.md, HANDOFF.md, SESSION_PROMPTS.md, PHASES.md, SI_LOG.md
+Checks run (exact commands): no package scripts on main (docs-only); /code-review low on origin/main...claude/team-attribution
+Results: 2 review findings (PR failed its own 'Logged' item; 'Checks green' unrunnable on docs-only main); both fixed in this PR
+Known limitations or failures: none
+Review status: /code-review done
+Commit SHA: head of claude/team-attribution at merge (see the merge commit on main)
+Next part / blocker owner: merge PR #1; G0 branch claude/kind-ptolemy-1wdqf5 then needs a rebase on main
+```
+
 ## Phase-part completion record
 
 Copy this block for every phase part and update its table row above:
