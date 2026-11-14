@@ -1007,7 +1007,11 @@ Results: vitest 289/289 (28 files; 3 new tests, first shown failing 3 of 14); ts
   + worker 41,546 B = ~249.9 of 250 KB (B-01, about 94 bytes left). Before the change the build reproduced
   assets/index-D-8LoYh9.js, the file the live site serves.
   Playwright: 50/50 with `--workers=1`; two default parallel runs on this 4-core computer gave 48/50 and 49/50 with different specs failing each time (briefing.spec.ts:50 and conditions.spec.ts:7, then coverage.spec.ts:94), and the first two pass when run alone (6/6); read as machine load, not proven.
-Known limitations or failures: pytest and scripts/licences.py NOT run (no Python 3.11 pipeline environment on this
+Later check (00:50), pins installed on Python 3.14.4: (cd pipeline && PYTHONUTF8=1 python -m pytest) -> 79 passed, 3 failed,
+  2 skipped. The 3 failures are the Windows checkout (one CR added to coverage.geojson and contours.geojson; their git
+  copies match the recorded sha256) and the licence check (needs the repo's Linux .venv). D1, D2, D12 headers, the D5
+  waypoints file and the rover image checksums were re-read and match (record section 8).
+Known limitations or failures (as first written): pytest and scripts/licences.py NOT run (no Python 3.11 pipeline environment on this
   computer; no pipeline or dependency file changed). Ehresmann et al. 2021 full text not read (HTTP 403), so 0.37 pi
   and RAD's height stay unverified. NASA/TP-2010-216115 is not online. Route bench not re-run.
 Review status: /code-review low of origin/main...4733a4f plus the log changes: 0 findings

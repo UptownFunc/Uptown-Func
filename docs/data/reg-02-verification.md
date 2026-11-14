@@ -146,3 +146,23 @@ proven. pytest and the licence check were not run (no pipeline environment here;
 - D1, D2 and D12 headers were not re-read here (file sizes only); the 1.1 audit stands.
 - Pipeline tests (pytest) were not run in this session: Python 3.11.18 and the pipeline packages are not installed on
   this machine, and no pipeline file changed.
+
+## 8. Addendum, same session (Sun 15 Nov 2026, 00:43-01:00): checks first listed as not done
+
+The pipeline's Python packages were then installed at the repo's pins (rasterio 1.4.4 with GDAL 3.10.3, numpy 2.4.6,
+pytest 9.2.0) on Python 3.14.4, not the pinned 3.11.18. This closes four items from section 7.
+
+| Item | Result |
+|---|---|
+| D1 header, read from the USGS file | **CONFIRMED.** 32,980 x 57,440, float32, NoData -32767, 1 m, equirectangular on R = 3,396,190 m, `AREA_OR_POINT=Point`, statistics -4,625.875 to -322.560 m. |
+| D2 header | **CONFIRMED.** 36,000 x 76,000, 3 x uint8, 0.25 m, same projection. Extent 8,140,000 to 8,149,000 m east and -289,000 to -270,000 m north, which is 137.3267-137.4786 E, 4.5551-4.8756 S. |
+| D12 header | **CONFIRMED.** 106,694 x 53,347, int16, NoData -32768, geographic on the 3,396,190 m sphere, 296.37 pixels per degree. |
+| D5 waypoints file | **CONFIRMED.** Same sha256 as recorded for AC-08 (`5a32324f4b8ba22e`). The M12 observer is in it as recorded: sol 1455, site 57, drive 2798, 4.69520223 S, 137.3530064 E, `elev_geoid` -4,379.46 m; the next waypoint is sol 1468. |
+| Rover image files | **CONFIRMED.** The three JPEGs in `public/rover` have the sha256 values in `images.json`. |
+| Allison and McEwen (2000); Allison (1997) | Citations **CONFIRMED** in Crossref: Planet. Space Sci. 48, 215-235; Geophys. Res. Lett. 24, 1967-1970. The papers themselves were not read. |
+| REMS units (REMS-01) | Pressure: the feed's own description says "about 700 Pascals", so Pa is supported. Temperature: the feed states no unit anywhere. **Degrees C is still not verified.** |
+| pytest (`cd pipeline && python -m pytest`, with `PYTHONUTF8=1`) | **79 passed, 3 failed, 2 skipped.** None of the three failures is a data error. Two are the checksums of `coverage.geojson` and `contours.geojson`: this Windows checkout adds one carriage return to each file; the files as stored in git have exactly the recorded sha256 (`08271050153a1bf4`, `c276ed4af5814ced`). The third is the licence check, which looks for the repo's Linux `.venv` folder. The two skips need `gdal_contour`. |
+
+Section 7 now reads: still not done are the Ehresmann full text, NASA/TP-2010-216115, the TM Table 1 alignment, the
+licence check, and a re-run of the AC-07 and AC-08 pipeline jobs (their inputs and committed outputs were checked;
+the jobs themselves were not run again).
