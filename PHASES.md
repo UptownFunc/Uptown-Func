@@ -131,7 +131,7 @@ Deadline still Sun 15 Nov 23:59 local (portal confirmation by a person still pen
 | 4.4 | VERIFIED (automated) | axe, keyboard and width checks pass: Playwright 50/50 on the local build and 50/50 against the live deploy (Sat 22:30-22:45); manual checks at G5 |
 | 4.5 | VERIFIED (integrated build on main 38839d0) | PRs #2-#9 merged after checks and /code-review (R-15..R-19); deploy done since (3.5, PRs #13-#16) |
 | 5.1 | PENDING | Freeze Sun 13:00; two-machine check moved to 5.5 (G5-DEFER); Cesium-blocked criterion trivially true (3D cut) |
-| 5.2 | IN PROGRESS (register cleared, REG-01, 29830fd; other members' confirmation and the post-freeze regression pending) | **Sat 23:59:** V-01..V-14 each FIXED or KEPT; T_EVA 360, t_ops 60, t_cont 60, stop 45 min cited; 20 deg citation resolved; **merged to `main` as 08ed600 (PR #19)**. **Sun 00:35: REG-02** checked every value, constant and citation against its source: all confirmed except the unread 0.37 pi at M12 and the RAD height (V-12); none changed; three citations corrected (`docs/data/reg-02-verification.md`); branch `yujin/reg-02-verification`, not merged |
+| 5.2 | IN PROGRESS (register cleared, REG-01, 29830fd; other members' confirmation and the post-freeze regression pending) | **Sat 23:59:** V-01..V-14 each FIXED or KEPT; T_EVA 360, t_ops 60, t_cont 60, stop 45 min cited; 20 deg citation resolved; **merged to `main` as 08ed600 (PR #19)**. **Sun 00:35: REG-02** checked every value, constant and citation against its source: all confirmed except the unread 0.37 pi at M12 and the RAD height (V-12); none changed; three citations corrected (`docs/data/reg-02-verification.md`); **merged to `main` as 4d24d53 (PR #21), Sun 01:51; live site checked** |
 | 5.3 | NOT STARTED | Video (Design, Sun 17:00) or the 7-slide fallback |
 | 5.5 | PENDING (last phase) | Includes the deferred two-machine check and FortiGuard request (G5-DEFER); internal submit Sun 21:00 |
 | 5.4 | IN PROGRESS | README SI use and references current (D5, D6, D12, papers); concept-origin account (B-5) and native-library licences open; D12 licence terms not read |
@@ -1019,6 +1019,11 @@ Known limitations or failures (as first written): pytest and scripts/licences.py
   and RAD's height stay unverified. NASA/TP-2010-216115 is not online. Route bench not re-run.
 Review status: /code-review low of origin/main...4733a4f plus the log changes: 0 findings
 Commit SHA: 4733a4f
+Merge: PR #21 merged as 4d24d53 (Sun 15 Nov 01:51 Asia/Manila, by the SI session at the member's instruction "Do it";
+  GitHub reported mergeable, state clean; head d898fe3). vitest 289/289 and tsc clean at 13506af; later commits are docs.
+Live deploy after the merge (01:52): https://uptown-func.vercel.app serves assets/index-D6_LSyTq.js, byte-identical (cmp)
+  to the local build; the full 50-spec Playwright suite against the live URL (temporary config, deleted, --workers=1):
+  50 passed / 50.
 Next part / blocker owner: the other members review REG-01 and REG-02; a person opens the Ehresmann paper (M12);
   W-01 Data and Science
 ```
