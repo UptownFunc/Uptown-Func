@@ -1,17 +1,19 @@
 // SI-assisted: drafted with Claude Code (Claude Opus 5.5); human Route Engine review pending.
 // The engine's plan store (plan 19.9, CLAUDE.md): the only writer of MissionPlan. The console changes the plan only by
 // sending Commands; a command against a stale plan version is refused. Engine units are seconds and metres.
-// Planned margins need T_EVA, t_ops, t_cont and stop durations, which the plan leaves to the team (19.11 weakness 5)
-// and which are not set yet, so margins and durations stay unknown rather than defaulted.
-import { Command, MissionPlan, type Leg, type Quantity, type Stop } from "../contracts";
+// Planned margins need T_EVA, t_ops, t_cont and a stop duration, which the plan leaves to the team (19.11 weakness 5,
+// DECISIONS T-01). They have no defaults: each arrives through a set_assumption Command with a rationale, and margins
+// and durations stay unknown until all are set (CLAUDE.md: unknown is never silently defaulted).
+import { Command, MissionPlan, type Assumption, type Leg, type PlannedMargin, type Quantity, type Stop } from "../contracts";
 import { CONSTANTS } from "../constants";
 import { f1 } from "../geo";
 import { cellCentreF1, f1ToCell, type GridDef } from "../geo/grid";
 import { KV_PLACEHOLDER, SLOPE_LIMIT_ASSUMPTION } from "./assumptions";
 import { legMetrics, type SpeedRange } from "./leg";
-import { CLASS, routeAStar, type RouteGrid } from "./route";
+import { plannedMarginProfile } from "./margin";
+import { CLASS, routeAStar, timeField, type RouteGrid } from "./route";
 
-export const ENGINE_VERSION = "engine-0.2.0";
+export const ENGINE_VERSION = "engine-0.3.0";
 export const CONSTANTS_VERSION = "constants-2026-11-14b";
 
 export interface PlannerGrid extends GridDef { readonly elevation: Float64Array; readonly classes: Uint8Array }
@@ -28,6 +30,15 @@ export interface PlanOutput { readonly plan: MissionPlan; readonly geometry: Pla
 export type ApplyResult = { ok: true; versionHash: string } | { ok: false; reason: string };
 
 interface StopState { id: string; name: string; cell: number }
+
+/** The Assumed plan times (plan 6.6). Payload of set_assumption: { id, value_s, rationale } (C-03, engine-defined). */
+export const PLAN_TIME_IDS = {
+  T_EVA: { name: "Planned EVA duration, T_EVA", min: "positive" },
+  t_ops: { name: "Operational tasks (egress, ingress, equipment), t_ops", min: "zero" },
+  t_cont: { name: "Contingency allowance, t_cont", min: "zero" },
+  stop_duration: { name: "Planned duration at each stop", min: "zero" },
+} as const;
+export type PlanTimeId = keyof typeof PLAN_TIME_IDS;
 
 const HABITAT_ID = "habitat";
 const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -57,6 +68,10 @@ export class Planner {
   private stops: StopState[] = [];
   private nextStop = 1;
   private cached: PlanOutput | null = null;
+  private planTimes: Partial<Record<PlanTimeId, Assumption>> = {};
+  /** Time to the habitat at 1 m/s level speed; divide by a speed to get that bound's field (time scales as 1/v). */
+  private unitField: Float64Array | null = null;
+  private fieldScratch: Float64Array | null = null;
 
   constructor(grid: PlannerGrid, habitat: LatLon) {
     if (grid.elevation.length !== grid.rows * grid.cols || grid.classes.length !== grid.rows * grid.cols)
@@ -132,8 +147,17 @@ export class Planner {
       }
       case "recompute":
         break;
-      case "set_assumption":
-        return { ok: false, reason: "set_assumption is not supported yet: the Assumed plan times and k_v values are not set (K-01)" };
+      case "set_assumption": {
+        const id = p.id as PlanTimeId;
+        if (typeof p.id !== "string" || !Object.hasOwn(PLAN_TIME_IDS, id))
+          return { ok: false, reason: `unknown assumption ${String(p.id)}; settable: ${Object.keys(PLAN_TIME_IDS).join(", ")}` };
+        const v = p.value_s;
+        if (!num(v) || v < 0 || (PLAN_TIME_IDS[id].min === "positive" && v === 0))
+          return { ok: false, reason: `${id} must be a finite ${PLAN_TIME_IDS[id].min === "positive" ? "positive" : "non-negative"} number of seconds` };
+        if (!str(p.rationale) || !p.rationale.trim()) return { ok: false, reason: "every Assumed value needs a one-line rationale" };
+        this.planTimes[id] = { id: `A-${id}`, name: PLAN_TIME_IDS[id].name, value: v, unit: "s", rationale: p.rationale.trim(), source: "team choice" };
+        break;
+      }
     }
     this.cached = null;
     return { ok: true, versionHash: this.peek().plan.versionHash };
@@ -142,9 +166,14 @@ export class Planner {
   private compute(): PlanOutput {
     const g = this.grid, cols = g.cols;
     const latLon = (i: number) => { const p = cellCentreF1({ r: Math.floor(i / cols), c: i % cols }, g); return { lat: p.lat, lon: p.lon }; };
-    const assumptions = [KV_PLACEHOLDER.assumption, SLOPE_LIMIT_ASSUMPTION];
+    const times = (Object.keys(PLAN_TIME_IDS) as PlanTimeId[]).map((k) => this.planTimes[k]).filter((a): a is Assumption => !!a);
+    const assumptions = [KV_PLACEHOLDER.assumption, SLOPE_LIMIT_ASSUMPTION, ...times];
+    const sd = this.planTimes.stop_duration;
+    const duration: Quantity = sd
+      ? { value: sd.value, unit: "s", valueClass: "assumed", methodId: "plan-6.6:team-choice", assumptionIds: [sd.id], sourceIds: ["team choice"] }
+      : { ...PLAN_TIMES_UNSET, unit: "s" };
     const stops: Stop[] = this.stops.map((s, k) => ({
-      id: s.id, letter: LETTERS[k]!, f1: latLon(s.cell), name: s.name, duration: { ...PLAN_TIMES_UNSET, unit: "s" }, tasks: [],
+      id: s.id, letter: LETTERS[k]!, f1: latLon(s.cell), name: s.name, duration, tasks: [],
     }));
     const nodes = [{ id: HABITAT_ID, cell: this.habitat }, ...this.stops, ...(this.stops.length ? [{ id: HABITAT_ID, cell: this.habitat }] : [])];
     const model = { vLevel_mps: this.speeds.nominal_mps, kBins: this.speeds.kBins, slopeLimit_deg: this.speeds.slopeLimit_deg };
@@ -164,16 +193,47 @@ export class Planner {
       });
       geomLegs.push({ fromId: a.id, toId: b.id, cells: route.cells });
     }
+    const margins = unreachable.length === 0 && this.stops.length > 0 ? this.margins(geomLegs.map((l) => l.cells)) : null;
     const versionHash = contentHash(JSON.stringify({ e: ENGINE_VERSION, c: CONSTANTS_VERSION, h: this.habitat,
       s: this.stops, a: assumptions, k: this.speeds }));
     const plan: MissionPlan = MissionPlan.parse({
       planId: "plan-boxwork-demo", versionHash, engineVersion: ENGINE_VERSION, constantsVersion: CONSTANTS_VERSION,
-      assumptions, stops, legs, plannedMargins: [], endMargin: { ...PLAN_TIMES_UNSET, unit: "s" },
+      assumptions, stops, legs, plannedMargins: margins?.profile ?? [], endMargin: margins?.end ?? { ...PLAN_TIMES_UNSET, unit: "s" },
       terrainClassSummary: legs.length ? { slope_screened_candidate: 1 } : {}, provenanceIds: ["D1"],
     });
     return {
       plan, kvPlaceholder: KV_PLACEHOLDER.isPlaceholder,
       geometry: { habitatCell: this.habitat, stopCells: Object.fromEntries(this.stops.map((s) => [s.id, s.cell])), legs: geomLegs, unreachable },
+    };
+  }
+
+  /** Plan 6.6 margins at the slow, nominal and fast speed bounds, or null while any plan time is unset.
+   *  The profile and the state use the slow bound (conservative, AC-19); the end margin is an est. range. */
+  private margins(legCells: number[][]): { profile: PlannedMargin[]; end: Quantity } | null {
+    const t = this.planTimes;
+    if (!t.T_EVA || !t.t_ops || !t.t_cont || !t.stop_duration) return null;
+    const times = { tEva_s: t.T_EVA.value, tOps_s: t.t_ops.value, tCont_s: t.t_cont.value };
+    const stopDur = this.stops.map(() => t.stop_duration!.value);
+    const g = this.routeGrid, sp = this.speeds;
+    if (!this.unitField) {
+      const h = { r: Math.floor(this.habitat / g.cols), c: this.habitat % g.cols };
+      this.unitField = timeField(g, h, { vLevel_mps: 1, kBins: sp.kBins, slopeLimit_deg: sp.slopeLimit_deg });
+      this.fieldScratch = new Float64Array(this.unitField.length);
+    }
+    const unit = this.unitField, scratch = this.fieldScratch!;
+    const at = (v: number) => {
+      for (let i = 0; i < unit.length; i++) scratch[i] = unit[i]! / v;
+      const s: SpeedRange = { ...sp, low_mps: v, nominal_mps: v, high_mps: v };
+      return plannedMarginProfile(g, legCells, stopDur, times, s, scratch);
+    };
+    const slow = at(sp.low_mps);
+    const endOf = (p: ReturnType<typeof at>) => p[p.length - 1]!.margin_s;
+    const low = endOf(slow), nominal = endOf(at(sp.nominal_mps)), high = endOf(at(sp.high_mps));
+    return {
+      profile: slow.map((m) => ({ s_m: m.s_m, margin_min: m.margin_s / 60, state: m.state })),
+      end: { value: nominal, low, high, unit: "s", valueClass: "estimated", methodId: "engine:margin-6.6-grid-metric",
+        assumptionIds: [KV_PLACEHOLDER.assumption.id, SLOPE_LIMIT_ASSUMPTION.id, "A-T_EVA", "A-t_ops", "A-t_cont", "A-stop_duration"],
+        sourceIds: ["D1", "walkSpeedNominal", "walkSpeedRange"] },
     };
   }
 }

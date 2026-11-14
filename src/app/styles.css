@@ -56,3 +56,19 @@ body { background: var(--housing); color: var(--text); font-family: var(--sans);
 .est { font-style: italic; }
 .unknown { font-style: italic; color: var(--text-muted); }
 .problem, .message { font-size: 12px; }
+.time-row { margin: 8px 0; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+.time-head { display: flex; justify-content: space-between; gap: 8px; }
+.time-inputs { display: flex; gap: 6px; margin-top: 4px; }
+.time-inputs input { background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 4px;
+  padding: 3px 6px; font: inherit; min-width: 0; }
+.time-inputs label input { width: 64px; font-family: var(--mono); }
+.time-inputs input:not([inputmode]) { flex: 1; }
+.time-inputs button { background: var(--plan); color: var(--paper); border: 0; border-radius: 4px; padding: 3px 10px; cursor: pointer; font: inherit; }
+.time-inputs button:disabled { opacity: 0.45; cursor: not-allowed; }
+.time-inputs :focus-visible { outline: 2px solid var(--plan-hi); outline-offset: 1px; }
+.assumed { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.state { display: inline-flex; align-items: center; gap: 4px; font-weight: 600; }
+.state svg { width: 14px; height: 14px; }
+.state-OK { color: var(--ok); }
+.state-NEAR_LIMIT { color: var(--caution); }
+.state-OVER { color: var(--over); }

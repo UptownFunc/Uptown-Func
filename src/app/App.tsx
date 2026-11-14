@@ -63,7 +63,8 @@ export function App() {
       </header>
       <main className="well">
         <AreaSheet dataUrl={AREA_URL} plan={output} onPick={(p) => send("add_stop", { lat: p.lat, lon: p.lon })} />
-        <PlanPanel output={output} message={message} onDeleteStop={(id) => send("delete_stop", { stopId: id })} />
+        <PlanPanel output={output} message={message} onDeleteStop={(id) => send("delete_stop", { stopId: id })}
+          onSetTime={(id, value_s, rationale) => send("set_assumption", { id, value_s, rationale })} />
       </main>
       <footer className="footer">Independent student project; not affiliated with or endorsed by NASA.</footer>
     </div>

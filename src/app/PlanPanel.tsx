@@ -3,14 +3,17 @@
 // It never edits the plan: deleting a stop sends a Command to the engine through onCommand.
 import type { PlanOutput } from "../engine/planner";
 import { formatDuration, formatLength } from "./format";
+import { MarginState } from "./MarginState";
+import { PlanTimes } from "./PlanTimes";
 
 export interface PlanPanelProps {
   readonly output: PlanOutput | null;
   readonly message: string | null;
   readonly onDeleteStop: (stopId: string) => void;
+  readonly onSetTime: (id: string, value_s: number, rationale: string) => void;
 }
 
-export function PlanPanel({ output, message, onDeleteStop }: PlanPanelProps) {
+export function PlanPanel({ output, message, onDeleteStop, onSetTime }: PlanPanelProps) {
   if (!output) return (
     <aside className="console" aria-label="Plan">
       {message ? <p className="problem" role="alert" data-testid="engine-message">{message}</p> : <p className="muted">Engine loading…</p>}
@@ -19,6 +22,10 @@ export function PlanPanel({ output, message, onDeleteStop }: PlanPanelProps) {
   const { plan, geometry } = output;
   const name = (id: string) => (id === "habitat" ? "Habitat" : plan.stops.find((s) => s.id === id)?.letter ?? id);
   const end = formatDuration(plan.endMargin);
+  const last = plan.plannedMargins[plan.plannedMargins.length - 1];
+  const why = plan.stops.length === 0 ? "add a stop first."
+    : geometry.unreachable.length > 0 ? "a leg has no slope-screened path."
+    : "EVA duration, task, contingency and stop times are Assumed inputs not yet set below.";
   return (
     <aside className="console" aria-label="Plan">
       {output.kvPlaceholder && (
@@ -67,9 +74,17 @@ export function PlanPanel({ output, message, onDeleteStop }: PlanPanelProps) {
       )}
       <h2>Planned margin</h2>
       <p data-testid="end-margin">
-        End margin: <span className={end.unknown ? "unknown" : undefined}>{end.text}</span>
-        {end.unknown && <span className="muted"> - EVA duration, stop, task and contingency times are Assumed inputs the team has not set.</span>}
+        End margin: <span className={end.unknown ? "unknown" : end.estimated ? "est" : undefined}>{end.text}</span>
+        {last && <> <MarginState state={last.state} /></>}
+        {end.unknown && <span className="muted"> - {why}</span>}
       </p>
+      {last && (
+        <p className="muted small">
+          Estimate under stated assumptions, not a guarantee. Range = slow (0.64 m/s) to fast (0.97 m/s) bound; the state
+          uses the slow bound. On the grid path the margin never rises and is lowest at the end (AC-19).
+        </p>
+      )}
+      <PlanTimes assumptions={plan.assumptions} onSet={onSetTime} />
       <p className="muted small">Plan {plan.versionHash} · {plan.engineVersion} · suit life support not modelled</p>
       {message && <p className="message" role="status" data-testid="engine-message">{message}</p>}
     </aside>
