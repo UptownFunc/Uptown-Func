@@ -11,7 +11,7 @@ const unknown = { value: null, unit: "s", valueClass: "unknown" as const, method
 const plan: MissionPlan = {
   planId: "p", versionHash: "abc123", engineVersion: "engine-x", constantsVersion: "c-x",
   assumptions: [
-    { id: "A-kv", name: "Slope factors", value: 1, unit: "1", rationale: "placeholder", source: "team choice" },
+    { id: "A-kv", name: "Slope factors", value: 1, unit: "1", rationale: "kept", source: "team choice" },
     { id: "A-T_EVA", name: "Planned EVA duration, T_EVA", value: 14400, unit: "s", rationale: "why", source: "team choice" },
   ],
   stops: [{ id: "S1", letter: "A", f1: { lat: -4.8, lon: 137.39 }, name: "Ridge", tasks: [],

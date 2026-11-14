@@ -12,7 +12,7 @@ describe("constants register", () => {
   });
 
   it("lists exactly the known unresolved citations, so no new constant can ship without a page", () => {
-    expect(unresolvedCitations().sort()).toEqual(["skyObstructionM12", "slopeLimit"]);
+    expect(unresolvedCitations().sort()).toEqual(["skyObstructionM12"]);
   });
 
   it("does not present the nominal walking speed as an observation", () => {
@@ -23,6 +23,13 @@ describe("constants register", () => {
     expect(constant("slopeLimit").valueClass).toBe("assumed");
     expect(constant("slopeLimit").value).toBe(20);
     expect(constant("slopeLimit").unit).toBe("deg");
+  });
+
+  it("cites the slope limit to the xEVA concept of operations with its section and page (REG-01)", () => {
+    const s = constant("slopeLimit");
+    expect(s.citation.source).toContain("EVA-EXP-0042 Rev B");
+    expect(s.citation.location).toBe("4.2.1.3, p. 38");
+    expect(s.limitation).toMatch(/lunar/i);
   });
 
   it("holds the nominal walking speed with its NASA/TM citation", () => {

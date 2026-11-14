@@ -4,7 +4,7 @@ import { MissionPlan } from "../contracts";
 import { f1 } from "../geo";
 import { cellCentreF1 } from "../geo/grid";
 import { CLASS } from "./route";
-import { KV_PLACEHOLDER } from "./assumptions";
+import { KV_ASSUMED } from "./assumptions";
 import { Planner, type PlannerGrid } from "./planner";
 
 // 41 x 41 flat 2 m grid at the demo origin, with an excluded wall in column 20 except a gap at rows 30-32.
@@ -58,7 +58,7 @@ describe("engine planner (only writer of MissionPlan)", () => {
     expect(Math.floor(crossing / g.cols)).toBeLessThanOrEqual(32);
   });
 
-  it("labels leg times as estimated ranges that cite the speed range and the K-01 placeholder", () => {
+  it("labels leg times as estimated ranges that cite the speed range and the K-01 slope factors", () => {
     const { g, p } = plannerWithHabitat();
     p.apply(cmd("add_stop", { ...at(g, 2, 10), name: "A" }, p.current().plan.versionHash));
     const t = p.current().plan.legs[0]!.time;
@@ -66,7 +66,7 @@ describe("engine planner (only writer of MissionPlan)", () => {
     expect(t.unit).toBe("s");
     expect(t.low!).toBeLessThan(t.value!);
     expect(t.high!).toBeGreaterThan(t.value!);
-    expect(t.assumptionIds).toContain(KV_PLACEHOLDER.assumption.id);
+    expect(t.assumptionIds).toContain(KV_ASSUMED.assumption.id);
     expect(t.sourceIds).toContain("walkSpeedRange");
     // 8 orthogonal 2 m steps on flat ground: 16 m / 0.83 m/s nominal.
     expect(t.value!).toBeCloseTo(16 / 0.83, 6);
@@ -84,12 +84,14 @@ describe("engine planner (only writer of MissionPlan)", () => {
     expect(plan.stops[0]!.duration.valueClass).toBe("unknown");
   });
 
-  it("records the K-01 placeholder as a team-choice assumption", () => {
+  it("records the K-01 slope factors as a kept team-choice assumption that claims no source (REG-01)", () => {
     const { p } = plannerWithHabitat();
-    const a = p.current().plan.assumptions.find((x) => x.id === KV_PLACEHOLDER.assumption.id)!;
+    const a = p.current().plan.assumptions.find((x) => x.id === KV_ASSUMED.assumption.id)!;
     expect(a.source).toBe("team choice");
     expect(a.value).toBe(1);
-    expect(a.rationale).toMatch(/placeholder/i);
+    expect(a.rationale).toMatch(/K-01 kept \(REG-01\)/);
+    expect(a.rationale).toMatch(/no speed-versus-slope value/);
+    expect(a.rationale).not.toMatch(/placeholder/i);
   });
 
   it("rejects a stop off slope-screened ground without changing the plan", () => {
@@ -438,17 +440,17 @@ describe("review R-15 follow-ups", () => {
   });
 });
 
-describe("G3-01 preset applied through set_assumption commands", () => {
+describe("REG-01 preset applied through set_assumption commands", () => {
   it("is accepted by the engine and gives a computed end margin and sun values", async () => {
-    const { G3_PRESET } = await import("../app/demoPreset");
+    const { DEMO_PRESET } = await import("../app/demoPreset");
     const { g, p } = plannerWithHabitat();
     p.apply(cmd("add_stop", { ...at(g, 2, 38), name: "Far" }, p.current().plan.versionHash));
-    for (const a of G3_PRESET) expect(p.apply(cmd("set_assumption", { ...a }, p.current().plan.versionHash)).ok).toBe(true);
+    for (const a of DEMO_PRESET) expect(p.apply(cmd("set_assumption", { ...a }, p.current().plan.versionHash)).ok).toBe(true);
     const { plan, conditions } = p.current();
     expect(MissionPlan.safeParse(plan).success).toBe(true);
     expect(plan.endMargin.valueClass).toBe("estimated");
     expect(conditions.sunElevation.valueClass).toBe("model_derived");
-    expect(plan.assumptions.find((x) => x.id === "A-T_EVA")!.rationale).toMatch(/G3-01/);
+    expect(plan.assumptions.find((x) => x.id === "A-T_EVA")!.rationale).toMatch(/REG-01/);
   });
 });
 

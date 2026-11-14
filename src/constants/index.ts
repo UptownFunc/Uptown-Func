@@ -1,4 +1,4 @@
-// SI-assisted: drafted with Claude Code (Claude Opus 5.5); human Data and Science review pending.
+// SI-assisted: drafted with Claude Code (Claude Opus 5.5; revised with Claude Fable 5.2); human Data and Science review pending.
 // Science constants register (CLAUDE.md: source citation and page for every constant; SI units).
 // A location marked UNRESOLVED means this session could not read the page; it must be filled before release.
 import type { ValueClass } from "../contracts";
@@ -47,8 +47,8 @@ export const CONSTANTS = {
   },
   slopeLimit: {
     id: "slopeLimit", value: 20, unit: "deg", valueClass: "assumed",
-    citation: { source: "xEVA requirement to walk up, down and across 20 deg slopes (NASA presentation; plan 6.4)", location: "UNRESOLVED: the plan's reference list (both parts, read 14 Nov 13:10) names only 'xEVA 20 deg slope requirement (NASA presentation)', with no title, date or slide" },
-    limitation: "A lunar requirement applied to Mars; Assumed, not Mars-validated.",
+    citation: { source: "NASA EVA-EXP-0042 Rev B, Exploration EVA System Concept of Operations (19 Oct 2020): walking up/down/across a slope of up to 20 deg (plan 6.4)", location: "4.2.1.3, p. 38" },
+    limitation: "A lunar xEVA design capability applied to Mars; Assumed, not Mars-validated.",
   },
   skyObstructionM12: {
     id: "skyObstructionM12", value: 0.185, unit: "1", valueClass: "published_observation", // fraction of the 2 pi hemisphere

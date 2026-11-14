@@ -31,9 +31,10 @@ credited with the concept, the plan or any team decision.
 - **AREA sheet (2D):** a north-up map of a 3 x 3 km area at the boxwork (4.790-4.840 S, 137.365-137.415 E,
   planetocentric, east-positive) with the D2 orthophoto, a D1 hillshade and slope-screened terrain classes.
 - **Route engine (Web Worker):** time-optimal A* routes on a 2 m grid of slope-screened cells (slope limit 20 deg,
-  Assumed); leg lengths, climb and walking times as estimated ranges.
+  Assumed, from the lunar xEVA concept of operations); leg lengths, climb and walking times as estimated ranges.
 - **Planned margin:** time left in the planned EVA at every route point after walking, stops, tasks, the walk back and
-  contingency (OK / NEAR LIMIT / OVER; there is no "safe" state). Plan times are Assumed inputs entered by the team.
+  contingency (OK / NEAR LIMIT / OVER; there is no "safe" state). Plan times are Assumed inputs: the demo loads
+  6 h, 1 h, 1 h and 45 min from two cited lunar planning documents (see **Assumed demo inputs**), all editable.
 - **Briefing card:** printable A5 card, stamped with the plan version and marked STALE when the plan changes.
 - **Field View:** manual arrival/departure ticks and two field margins from those manual entries.
 - **Tier 2:** time-to-habitat contour lines and a simulated solar-event drill (assumed warning time; no dose).
@@ -55,6 +56,23 @@ metabolic workload (off), live data feeds, or 3D (cut at G1, see `DECISIONS.md`)
 
 Each record (product, URL, licence, CRS, vertical reference, resolution, checksum scope) is in
 `public/area/provenance.json`, written by the pipeline and shown in the Sources panel.
+
+## Assumed demo inputs and where they come from
+
+None of these is a measurement or a Mars-validated value. The four plan times are lunar planning figures applied to
+Mars; they load by default, show an "assumed" badge with this rationale, stay editable, and are skipped with
+`?preset=none`. Quotations, pages and checksums: `docs/data/reg-01-register-sources.md` (DECISIONS REG-01).
+
+| Input | Value | Basis |
+|---|---|---|
+| Planned EVA duration, T_EVA | 360 min | Centre of the 6±2 h EVA range: EVA-EXP-0042 Rev B, 4.1.4, p. 29 |
+| Operational tasks, t_ops | 60 min | "hour for egress/ingress": EVA-EXP-0042 Rev B, 4.1.4.3.2, p. 30 |
+| Contingency, t_cont | 60 min | "an additional hour for emergency and off-nominal situations": same page; held inside T_EVA; a time allowance, not life support |
+| Default stop duration | 45 min | 45 min of EVA per exploration site: NASA/TM-2010-216138, Tables 2-3, p. 12 |
+| Slope limit | 20 deg | "Walking up/down/across a slope of up to 20°": EVA-EXP-0042 Rev B, 4.2.1.3, p. 38 |
+| Scenario time | 2026-11-15 12:00 UTC | A scenario input with no possible source; a 6 h EVA from this start stays in daylight |
+| Slope factors k_v | 1 in every bin | No sourced speed-versus-slope value exists (EVA-EXP-0042 Rev B, p. 40; NASA SP-368, ch. 4, Table 4, p. 125 reaches only 7.9 deg); probably optimistic on 10-20 deg slopes |
+| Default habitat | 4.795211 S, 137.391845 E | Scenario input from the team plan and the D1 slope screen; not a proposed base site |
 
 ## Run it
 
@@ -93,14 +111,17 @@ The 2026 guides call AI "Super Intelligence (SI)". The dated, per-task record is
 it.
 
 - **Tool and model:** Claude Code (Anthropic) running **Claude Opus 5.5**, in two cloud sessions on Sat 14 Nov 2026
-  (directed by Eugene Ibañez Jr. from 10:21, and by John Malubay from 12:57). Claude Fable 5.2 was not used. The
+  (directed by Eugene Ibañez Jr. from 10:21, and by John Malubay from 12:57). Claude Fable 5.2 was not used in them. The
   Superpowers workflow skill was loaded in the first session; it was not installed in the second, where its
   test-first and verify-before-done practice was followed by hand. In the second session a Claude Code web-fetch
   subagent was used twice to read NASA's Mars24 algorithm page; both attempts failed and nothing from them is used.
   A third session (Sat 14 Nov 15:19-17:31, from parcilla13's account) used the Superpowers test-driven-development
   skill and drafted the Conditions panel (Mars24 sun, REMS snapshot), the D1/D2 coverage outlines, the IBM Plex font
   loading, the 10 m elevation contours and the screen-pixel terrain hatch, with their tests and code reviews; it
-  installed the GDAL command-line tools in its container to run gdal_contour. Details per task: `SI_LOG.md`.
+  installed the GDAL command-line tools in its container to run gdal_contour. Later sessions on Sat 14 Nov (18:29 to
+  22:50, Claude Opus 5.5, Superpowers not installed) ran the reproducibility check, the benchmarks, the sky layer and
+  the deploy. A session from about 23:07 ran on **Claude Fable 5.2** (Superpowers not installed): it read four NASA
+  documents and cleared the placeholder register (REG-01). Details per task: `SI_LOG.md`.
 - **What SI contributed:** drafted the data pipeline and its tests; the frame conversions and constants register;
   the route engine, margins and field-margin functions; the engine worker; the AREA sheet, console, profile, sources
   panel, briefing card and field view; accessibility and resilience tests; tier-2 contours and drill; this README and
@@ -110,14 +131,18 @@ it.
   Playwright, typecheck, build) and after review findings were fixed or recorded in `DECISIONS.md`; human review of
   the code is still pending (no module owner has signed it off).
 - **What people decided, not SI:** the concept and plan (the whole team); governance and scientific choices
-  such as G-01/G-02 (Yujin), G-05, K-01 (the k_v = 1 placeholder), G-06 and applying the plan's defaults (John
+  such as G-01/G-02 (Yujin), G-05, K-01 (k_v = 1 in every bin), G-06 and applying the plan's defaults (John
   Malubay), G-07 and the contract agreement C-AGREE (Christian Jesus Alcazar). Local Lead approvals were not chosen by SI.
-- **Values chosen by SI at a team member's direction (G3-01):** on Sat 14 Nov 2026 a team member asked the SI
-  session to choose the G3 inputs the plan leaves open ("for g3 needed you choose"). The demonstration plan times
-  (T_EVA 240 min, t_ops 30 min, t_cont 30 min, stop 45 min) and the scenario time (2026-11-15 12:00 UTC) were chosen
-  by SI; each is shown as an Assumed value whose rationale says so, and each stays editable. The same delegation
-  covered the stop name/tasks command design (C-19, option a) and the three Curiosity rover images (D6, C-22), which SI
-  selected from NASA's raw image archive (not generated). See `DECISIONS.md` G3-01, C-19 and C-22.
+- **Values picked by SI at a team member's direction (G3-01, then REG-01):** on Sat 14 Nov 2026 a team member asked
+  the SI session to choose the G3 inputs the plan leaves open ("for g3 needed you choose"); SI chose unsourced
+  demonstration values. Later that day a team member asked for every placeholder to be replaced by a sourced value
+  with its citation (REG-01). SI found the documents, read the pages and picked the values now loaded: T_EVA 360 min,
+  t_ops 60 min, t_cont 60 min and stop 45 min, plus the citation for the 20 deg slope limit. SI also drafted the
+  reasons for the values that were kept because no source exists (scenario time 2026-11-15 12:00 UTC, slope factors
+  k_v = 1, habitat point, display and method settings). Each is shown as an Assumed value whose rationale says so, and
+  each stays editable. The other team members have not yet reviewed REG-01. The G3-01 delegation also covered the
+  stop name/tasks command design (C-19, option a) and the three Curiosity rover images (D6, C-22), which SI selected
+  from NASA's raw image archive (not generated). See `DECISIONS.md` G3-01, REG-01, C-19 and C-22.
 - **Media:** no image, video or audio was generated by SI. The map and card images are rendered from NASA/USGS data.
 - **Markers:** SI-assisted source files carry an `SI-assisted` header line; SI-assisted commits carry an
   `SI-assisted:` trailer.
@@ -136,9 +161,13 @@ it.
 - D5: NASA/JPL MMGIS, Curiosity (MSL) traverse and waypoints, `https://mars.nasa.gov/mmgis-maps/MSL/Layers/json/MSL_traverse.json` and `MSL_waypoints.json`, retrieved 2026-11-14T11:32:31Z (sha256 in `docs/data/ac08-rover-path.json`). Used for the AC-08 consistency check only; localisation error unverified.
 - D12: USGS Astrogeology, Mars MOLA-HRSC blended DEM, global 200 m, v2 (`mosaic/Mars/HRSC_MOLA_Blend/Mars_HRSC_MOLA_BlendDEM_Global_200mp_v2.tif`). Far field for the AC-07 sky-obstruction benchmark.
 - Ehresmann, B. et al. (2021), JGR Planets, doi:10.1029/2021JE006851; Guo, J. et al. (2021), GRL, doi:10.1029/2021GL093912. Published sky obstruction at Butte M12 (about 19 %), used only as the AC-07 geometric benchmark, never as a dose factor; figures read from the abstracts (plan 19.6), page numbers pending.
-- D6: NASA/JPL-Caltech, Curiosity (MSL) raw images, Left Navigation Camera: NLB_806042016EDR_F1172490NCAM00259M_ (sol 4602), NLB_808343392EDR_F1180924NCAM00292M_ (sol 4628), NLB_810299631EDR_F1182304NCAM00271M_ (sol 4650), `https://mars.nasa.gov/msl/multimedia/raw-images/`; credit "NASA/JPL-Caltech"; raw, uncalibrated, downscaled to 480 px. Chosen by SI at a team member's direction (G3-01). Terrain evidence: NASA Curiosity blog posts for sols 4602-4603, 4627-4628 and 4649-4654 (`public/rover/images.json`). Use under the NASA/JPL image use guidelines with credit (team to confirm, DECISIONS C-22).
+- D6: NASA/JPL-Caltech, Curiosity (MSL) raw images, Left Navigation Camera: NLB_806042016EDR_F1172490NCAM00259M_ (sol 4602), NLB_808343392EDR_F1180924NCAM00292M_ (sol 4628), NLB_810299631EDR_F1182304NCAM00271M_ (sol 4650), `https://mars.nasa.gov/msl/multimedia/raw-images/`; credit "NASA/JPL-Caltech"; raw, uncalibrated, downscaled to 480 px. Chosen by SI at a team member's direction (G3-01). Terrain evidence: NASA Curiosity blog posts for sols 4602-4603, 4627-4628 and 4649-4654 (`public/rover/images.json`). Use under NASA's "Images and Media" guidelines with credit (educational, factual, no implied endorsement; DECISIONS REG-01 / V-08; JPL's own policy page not read).
 - D10: NASA GISS, Mars24 Sunclock "Algorithm and Worked Examples" (updated 2025-01-07), `https://www.giss.nasa.gov/tools/mars24/help/algorithm.html`; Allison, M., McEwen, M. (2000), Planet. Space Sci. 48, 215-235; Allison, M. (1997), Geophys. Res. Lett. 24, 1967-1970.
-- xEVA 20 deg slope requirement (NASA presentation; title and slide still to be identified, see `src/constants`).
+- NASA, *Exploration EVA System Concept of Operations*, EVA-EXP-0042, Revision B, 19 Oct 2020 (NTRS 20205008200), `https://www.nasa.gov/wp-content/uploads/2017/02/eva-exp-0042_xeva_system_con_ops_rev_b_final_dtd_10192020_ref_doc.pdf`: 4.1.4, p. 29 (EVA duration 6±2 h); 4.1.4.3.2 and 4.1.4.4, p. 30 (hour for egress/ingress; additional hour for off-nominal situations; Mars EVAs "still in work"); 4.2.1.3, p. 38 (walking slopes of up to 20°); 4.2.1.3.1.1, p. 40 (2 km/h pace, not accounting for slope). A lunar planning document; its figures are used as Assumed inputs.
+- Coan, D., *Exploration EVA System Concept of Operations Summary for Artemis Phase 1 Lunar Surface Mission*, EVA-EXP-0075, presentation, 18 Feb 2020 (NTRS 20200001071), slides 6 and 31 (20° slope; 6-hour design reference EVAs).
+- NASA/TM-2010-216138 (above), Tables 2-3, p. 12 (45 min of EVA per exploration site) and Table 1, p. 8.
+- Waligora, J. M., Horrigan, D. J. (1975), "Metabolism and Heat Dissipation During Apollo EVA Periods", ch. 4 in *Biomedical Results of Apollo*, NASA SP-368 (NTRS 19760005584), Table 4, p. 125: Apollo 14 walking rates and net slopes, used only to show that no slope factor can be derived (DECISIONS REG-01 / V-06).
+- NASA, "Images and Media" usage guidelines, `https://www.nasa.gov/nasa-brand-center/images-and-media/`, read 14 Nov 2026 (terms for the D6 images; DECISIONS IMG-01).
 
 ### Software
 
