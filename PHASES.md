@@ -921,7 +921,7 @@ Results: vitest 282/282 (28 files); tsc clean; build OK, main 208.16 kB gzip + w
   raw 1164 -> 11.6 %; the app shows 11.6 %.
 Known limitations or failures: h_obs 1 m is the session's choice (V-12); value is geometry, not dose; kept off the
   briefing card (SKY-3); ~0.4 KB of bundle headroom left.
-Review status: /code-review high R-20 of 8285658..2a65db1: 6 findings, all fixed in 7cf23b2
+Review status: /code-review high R-20 of 8285658..2a65db1: 6 findings, all fixed in 7cf23b2; low review of 7cf23b2: 0 findings
 Commit SHA: 2a65db1, 7cf23b2
 Next part / blocker owner: human PR review and merge; B-4 deploy (repository owner)
 ```
