@@ -103,12 +103,13 @@ body { background: var(--housing); color: var(--text); font-family: var(--sans);
 .card-stale > .card-col { opacity: 0.45; }
 .stale-stamp { position: absolute; top: 40%; left: 5%; right: 5%; text-align: center; font-weight: 700; font-size: 14pt;
   color: #b00020; border: 3px solid #b00020; background: rgba(243, 238, 228, 0.9); padding: 6px; transform: rotate(-6deg); }
+/* Card-only print applies only while "Print briefing" runs (body.print-card); Ctrl+P elsewhere prints the page as is. */
 @media print {
   @page { size: A5 portrait; margin: 12mm; }
-  body { background: #fff; }
-  body * { visibility: hidden; }
-  .card, .card * { visibility: visible; }
-  .card { position: absolute; left: 0; top: 0; width: 100%; min-height: 0; padding: 0; background: #fff; clip-path: none; }
+  body.print-card { background: #fff; }
+  body.print-card * { visibility: hidden; }
+  body.print-card .card, body.print-card .card * { visibility: visible; }
+  body.print-card .card { position: absolute; left: 0; top: 0; width: 100%; min-height: 0; padding: 0; background: #fff; clip-path: none; }
 }
 
 /* Elevation profile (plan 9.2: one of two charts). */
@@ -168,3 +169,19 @@ body { background: var(--housing); color: var(--text); font-family: var(--sans);
 .field-tick .primary:focus-visible, .field-tick input:focus-visible { outline: 3px solid var(--plan-hi); outline-offset: 2px; }
 .field-error { color: #b3261e; font-size: 16px; width: 100%; }
 .field-warning { font-size: 16px; background: #fff; border: 2px solid #b3261e; padding: 8px; }
+
+/* Phone width (UX-12; field use outdoors): no horizontal scroll, every view reachable, the page scrolls vertically. */
+@media (max-width: 800px) {
+  html, body, #root { height: auto; }
+  .housing { height: auto; min-height: 100%; }
+  .titlebar { flex-wrap: wrap; gap: 6px 12px; }
+  .titlebar .muted { flex-basis: 100%; order: 3; }
+  .nav { margin-left: 0; flex-wrap: wrap; }
+  .well { overflow: visible; }
+  .legend { max-width: calc(100% - 64px); font-size: 11px; }
+  .console { border-left: 0; border-top: 1px solid var(--border); }
+  /* Overlays stay inside the well, below the title bar, so the view buttons remain reachable. */
+  .field { max-width: none; box-shadow: none; }
+  .card { width: 100%; min-height: 0; grid-template-columns: 1fr; padding: 16px; }
+  .footer { padding-bottom: 8px; }
+}

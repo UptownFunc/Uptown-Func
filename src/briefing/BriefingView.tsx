@@ -25,6 +25,13 @@ export function BriefingView({ output, snapshot, hidden = false }: BriefingViewP
   currentRef.current = current;
   const stale = card ? isStale(card.model.versionHash, current) : false;
 
+  const printCard = () => {
+    document.body.classList.add("print-card");
+    const done = () => { document.body.classList.remove("print-card"); window.removeEventListener("afterprint", done); };
+    window.addEventListener("afterprint", done);
+    try { window.print(); } finally { setTimeout(done, 0); }
+  };
+
   const generate = async () => {
     if (!output) return;
     setBusy(true);
@@ -46,7 +53,7 @@ export function BriefingView({ output, snapshot, hidden = false }: BriefingViewP
         <button type="button" className="secondary" onClick={() => void generate()} disabled={!output || busy}>
           {card ? "Regenerate from current plan" : "Generate card from current plan"}
         </button>
-        <button type="button" className="primary" onClick={() => window.print()} disabled={!card || stale || busy}>
+        <button type="button" className="primary" onClick={printCard} disabled={!card || stale || busy}>
           Print briefing
         </button>
         {stale && <span className="muted">The plan changed: regenerate before printing.</span>}

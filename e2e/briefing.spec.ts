@@ -71,3 +71,25 @@ test("the briefing map is the real sheet, not a blank image", async ({ page }) =
   });
   expect(levels).toBeGreaterThan(50);
 });
+
+test("the printed card is one A5 page; printing from Planning is not blank", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
+  await clickAt(page, STOP);
+  await expect(page.getByTestId("legs")).toBeVisible({ timeout: 20_000 });
+  await page.getByRole("button", { name: "Briefing" }).click();
+  await page.getByRole("button", { name: "Generate card from current plan" }).click();
+  await expect(page.getByTestId("briefing-card").locator(".card-map img")).toBeVisible({ timeout: 20_000 });
+  await page.emulateMedia({ media: "print" });
+  const pages = (pdf: Buffer) => (pdf.toString("latin1").match(/\/Type\s*\/Page[^s]/g) ?? []).length;
+  const plain = await page.pdf({ preferCSSPageSize: true });
+  expect(pages(plain)).toBeGreaterThanOrEqual(1);
+  expect(plain.length).toBeGreaterThan(20_000); // the page content, not an empty sheet
+  await page.evaluate(() => document.body.classList.add("print-card"));
+  const card = await page.pdf({ preferCSSPageSize: true });
+  expect(pages(card)).toBe(1);
+  // A5 = 148 x 210 mm = 420 x 595 pt.
+  const box = card.toString("latin1").match(/\/MediaBox\s*\[\s*0 0 ([\d.]+) ([\d.]+)\s*\]/)!;
+  expect(Math.round(Number(box[1]))).toBe(420);
+  expect(Math.round(Number(box[2]))).toBe(595);
+});
