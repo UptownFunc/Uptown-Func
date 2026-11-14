@@ -92,7 +92,7 @@ Remaining: 33 h 11 min.
 | 2.3 | VERIFIED (human review pending) | Leg ranges use the cited 0.64-0.97 m/s range; L-01/L-02 still to confirm |
 | 2.4 | IN PROGRESS | Planned margin incl. per-stop durations and ticks (bf0524b..0aaae81); field-margin UI belongs to 3.3 |
 | 2.5 | VERIFIED (interim) | No smoothing: grid path for calculations and display; AC-19 on the grid metric |
-| 2.6 | IN PROGRESS | Parts 1-4 done (coverage outlines 7e7c459, fonts f329682, contours 0bf81f2, reviews e4cb7f6, 1d85b36); hatch aliasing and Design review open |
+| 2.6 | IN PROGRESS | Parts 1-5 done (coverage outlines 7e7c459, fonts f329682, contours 0bf81f2, hatch aliasing b40550c; reviews e4cb7f6, 1d85b36, c739bf4); only Design review open |
 | 2.7 | VERIFIED (Node, cloud Xeon) | k_v = 1: longest route 354-395 ms, field 426-470 ms; worker command 261 ms for 2 legs |
 | 3.1 | IN PROGRESS | Planner (only MissionPlan writer) + Comlink worker + all six commands; C-15 route geometry outside the contract |
 | 3.3 | IN PROGRESS (core done) | Field View: manual ticks, est. margins, stale guard (edf9492, 0acf9e7); phone width checked (b68dec1); outdoor daylight check needs a real phone |
@@ -144,7 +144,7 @@ Work on optional features only when it does not endanger this path. The AREA 2D 
 | 2.3 | Implement leg distance/time ranges and habitat time field. Keep seconds in the engine and display SI minutes. | Route Engine | VERIFIED (checks pass; L-01/L-02 confirmation pending) | Leg ranges now feed the plan: `Leg.time` is an estimated Quantity in seconds (low = 0.97 m/s, high = 0.64 m/s) with A-kv and A-slope-limit assumption ids; planner test checks 16 m -> 16/0.83 s nominal. UI shows SI minutes. | 9e9496c |
 | 2.4 | Implement planned margin and the manual-entry field-margin calculations without conflating `MissionPlan` and `MissionExecution`. | Route Engine + Design | IN PROGRESS (planned margin wired end to end; field-margin UI and per-stop durations open) | **13:15 (this session):** `set_assumption` { id: T_EVA, t_ops, t_cont, stop_duration; value_s; rationale } records team-choice Assumptions with no defaults (T-01). With all set and every leg reachable, the planner fills `plannedMargins` (slow bound, minutes, state) and `endMargin` (est. range slow..fast, nominal value). 8 new planner tests incl. exact end margins at all three bounds, AC-19 monotone profile, OVER state, unreachable leg -> unknown. Habitat field cached by its inputs; other bounds derived as 1/v (review R-03). **Open:** one duration applies to every stop (per-stop durations not yet); field margins UI belongs to 3.3. | bf0524b, 4420678 |
 | 2.5 | Resolve route smoothing at G2 with Route Engine owner and Data and Science agreement. Record the selected option in `DECISIONS.md`, plan log and O-22. | Route Engine | VERIFIED (interim rule kept) | At G2 no smoothing is implemented: calculations and the drawn line both use the grid path, which is the plan's stated interim rule (6.6 / D-04); AC-19 property tests hold on the grid metric (30 random grids). Options 1-3 remain open if the team wants smoothing later; any change needs matching tests. | 9e9496c (engine), 2.4 tests |
-| 2.6 | Build the OpenLayers **AREA-level 2D sheet** by G2. It is the permanent fallback and is never cut. | Design + Data and Science | IN PROGRESS (parts 1-4 done; hatch aliasing and Design review open) | **Part 2 (13:10):** `src/map/planLayer.ts` draws grid-path legs, habitat (H) and lettered stops via cell -> F1 -> F7 (`src/geo/grid.ts`); a click sends `add_stop` to the engine worker; refused clicks are reported. `npx playwright test` 4/4 (2 new: route drawn and listed with italic est. ranges; excluded ground refused). Screenshot `test-results/plan-route.png`. **Still open:** D1/D2 coverage outlines, 10 m contours, fonts (S-02), hatch aliasing. **Part 3 (14 Nov 16:27-16:47):** plan 7.8 coverage outlines (pipeline `run_coverage` -> `coverage.geojson` in F1, measured D1 and D2 100% valid on the window; dotted outline layer; layer list says "partly outside D2 colour coverage" for the current view; missing/invalid file labelled) and IBM Plex Sans/Mono from npm (S-02, S-06), both verified in the browser. **Still open:** 10 m contours (plan 7.8 AREA level), hatch aliasing, Design review (COV-01). **Part 4 (16:50-17:05):** 10 m elevation contours from D1 (gdal_contour 3.8.4 on D1 at 4 m, GeoJSON in F1; every fifth heavier and labelled with a Quantity; legend names source, interval and cell; on the card's layer list); positions verified with the map readout. **Still open:** hatch aliasing; Design review (COV-01, CON-03). | 88f8b9a, 19b7c68, 7e7c459, f329682, e4cb7f6, 0bf81f2, 1d85b36 |
+| 2.6 | Build the OpenLayers **AREA-level 2D sheet** by G2. It is the permanent fallback and is never cut. | Design + Data and Science | IN PROGRESS (parts 1-5 done; Design review open) | **Part 2 (13:10):** `src/map/planLayer.ts` draws grid-path legs, habitat (H) and lettered stops via cell -> F1 -> F7 (`src/geo/grid.ts`); a click sends `add_stop` to the engine worker; refused clicks are reported. `npx playwright test` 4/4 (2 new: route drawn and listed with italic est. ranges; excluded ground refused). Screenshot `test-results/plan-route.png`. **Still open:** D1/D2 coverage outlines, 10 m contours, fonts (S-02), hatch aliasing. **Part 3 (14 Nov 16:27-16:47):** plan 7.8 coverage outlines (pipeline `run_coverage` -> `coverage.geojson` in F1, measured D1 and D2 100% valid on the window; dotted outline layer; layer list says "partly outside D2 colour coverage" for the current view; missing/invalid file labelled) and IBM Plex Sans/Mono from npm (S-02, S-06), both verified in the browser. **Still open:** 10 m contours (plan 7.8 AREA level), hatch aliasing, Design review (COV-01). **Part 4 (16:50-17:05):** 10 m elevation contours from D1 (gdal_contour 3.8.4 on D1 at 4 m, GeoJSON in F1; every fifth heavier and labelled with a Quantity; legend names source, interval and cell; on the card's layer list); positions verified with the map readout. **Still open:** hatch aliasing; Design review (COV-01, CON-03). **Part 5 (17:11-17:24):** hatch aliasing fixed (HATCH-01): class masks from the pipeline, plan 9.2 symbols drawn in screen pixels and anchored to the ground; static, same under reduced motion; verified at 16, 4, 0.5 m/px, after wheel zoom and drag. **Still open:** Design review (COV-01, CON-03, HATCH-01 look). | 88f8b9a, 19b7c68, 7e7c459, f329682, e4cb7f6, 0bf81f2, 1d85b36, b40550c, c739bf4 |
 | 2.7 | Run the complete G2 engine test and latency gate; record all speed inputs as cited or Assumed. | Route Engine | VERIFIED on this machine (Node 22.23.4, cloud Xeon 2.1 GHz, 4 cores) | **13:00 re-run, k_v = 1 (K-01):** longest route 395/354/377 ms (< 500); time field 470/462/426 ms (< 3 s); A* equals the field every run. The decreasing placeholder also passed this run (349-429 ms) but is not used. In the browser worker, one `add_stop` (two A* legs, ~1.95 km each) took 261 ms. Not yet measured on a mid-range laptop. Workload off. **14:48 re-run (k_v = 1):** longest route 393/316/359 ms; time field 438/431/382 ms; A* equals the field each run. | 9e9496c |
 
 **G2 acceptance:** all listed engine tests pass and route is under 500 ms. If missed, move to a 4 m grid and show a visible Assumed-input banner. Do not turn on kJ workload without cited rates.
@@ -683,6 +683,41 @@ Not done: full run_display rebuild (not re-run; it now calls run_coverage and ru
 Review status: /code-review high R-13: 6 findings, 3 fixed (1d85b36), 3 recorded (P-05, CON-02, C-21)
 Commit SHA: 0bf81f2, 1d85b36 (branch claude/wizardly-lovelace-i2i0wa); not merged
 Next part / blocker owner: 2.6 hatch aliasing (code); Design review B-13; team inputs B-1, B-3, B-4, B-9, B-12
+```
+
+```text
+Part: 2.6 part 5 - terrain hatch aliasing ("The hatch patterns alias at coarse zoom", 2.6 part 1 note; plan 7.8, 9.2)
+Owner: team (G-05; plan owner Design + Data and Science); session operated from parcilla13's account, 17:11-17:24
+Status: VERIFIED for this scope (2.6 overall IN PROGRESS only for Design review)
+Interpretation (HATCH-01): a defect fix, not an animation: the plan's symbols are static and fixed in screen pixels.
+Scope completed: pipeline display.py (terrain_masks, write_mask_png, classes_f7) and run_terrain_masks.py (three
+  grey+alpha masks on a 2 m F7 grid, layers.json terrain entry `kind: "masks"`; terrain_overlay.png removed; local
+  files only); run_display uses it. App: src/map/terrainPattern.ts (plan tokens, tiles, ground-anchored phase, mask
+  placement), terrainLayer.ts (ImageCanvas, ratio 1.5, no smoothing, clipped to the data extent, failures reported).
+  index.html empty inline icon (ICON-01).
+Files changed: pipeline/sharpwalk/{display.py,run_display.py,run_terrain_masks.py}; pipeline/tests/{test_display.py,
+  test_area_outputs.py}; public/area/{layers.json,terrain_steep.png,terrain_excluded.png,terrain_unknown.png}
+  (terrain_overlay.png deleted); src/map/{terrainPattern.ts,terrainPattern.test.ts,terrainLayer.ts,loadArea.ts,
+  AreaSheet.tsx}; e2e/hatch.spec.ts; index.html
+Checks run (exact commands), at c739bf4:
+  npx vitest run                                   -> 255 passed / 255, 23 files
+  npx tsc --noEmit                                 -> clean
+  npm run build                                    -> OK; main 205.29 kB gzip + worker 40.9 kB (~246.2 of 250, B-01)
+  (cd pipeline && ../.venv/bin/python -m pytest)   -> 61 passed
+  PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome npx playwright test --trace off -> 43 passed / 43
+  (cd pipeline && ../.venv/bin/python -m sharpwalk.run_terrain_masks ../public/area) -> steep 274,772, excluded
+     537,101, unknown 7,514 mask cells
+Browser evidence (e2e/hatch.spec.ts): red first on the old overlay (amber on 2 residues, cross-hatch off-diagonal,
+  stipple on 4 columns at the load view); green after: every amber, neutral and bone pixel of the terrain canvas on its
+  screen lattice at 4 m/px, 16 m/px (two Zoom out clicks), 0.5 m/px (Zoom in clicks), after a wheel zoom and after a
+  mouse drag; reduced-motion emulation gives the identical canvas and no animations on the sheet; a stop is still
+  placed and the route drawn; a 404 mask is labelled "not loaded", draws no partial hatch, and route, readout,
+  contours and coverage still work; no console errors, failed requests or page errors.
+Measured: F6 class cells kept in the masks 100.000% (HATCH-03); frame pacing unchanged (HATCH-04).
+Not done: run_display end-to-end rebuild (not re-run; it now calls run_terrain_masks, run_coverage, run_contours)
+Review status: /code-review high R-14: 6 findings, 4 fixed (c739bf4), 1 no change (measured), 1 recorded (HATCH-02)
+Commit SHA: b40550c, c739bf4 (branch claude/wizardly-lovelace-i2i0wa); not merged
+Next part / blocker owner: Design review B-13; team inputs B-1, B-3, B-4, B-9, B-12; bundle headroom under 4 KB
 ```
 
 ## Phase-part completion record
