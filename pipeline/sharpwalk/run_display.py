@@ -2,7 +2,8 @@
 """Write the AREA sheet display layers in F7 next to an area build. Usage: python -m sharpwalk.run_display AREA_DIR
 
 Products (plan 7.7/7.8/9.2): D2 luminance JPEG at 1 m (linear stretch only), D1 hillshade JPEG at 1 m (native D1
-pixels, no resampling), terrain-class overlay PNG (F6 classes warped to F7 by nearest neighbour), layers.json.
+pixels, no resampling), terrain-class masks (run_terrain_masks: one PNG per plan 9.2 symbol; the sheet draws the
+hatch in screen pixels), layers.json.
 """
 import datetime as dt
 import hashlib, json, math, shutil, sys
@@ -11,14 +12,12 @@ import numpy as np
 import rasterio
 from affine import Affine
 from rasterio.enums import Resampling
-from rasterio.warp import reproject
 from rasterio.windows import from_bounds
 
-from .display import F7_CRS, class_overlay_rgba, f7_bounds_of_f6_grid, hillshade_u8, linear_stretch_u8
-from .geo import ortho_crs
-from .grids import dequantise
+from .display import F7_CRS, f7_bounds_of_f6_grid, hillshade_u8, linear_stretch_u8
 from .outputs import merge_provenance, sha256_file
 from .run_d1 import D1_URL
+from .run_terrain_masks import terrain_entry
 
 D2_URL = "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Mars/MSL/MSL_Gale_HiRISE-LRGB_78quads_sharp_cog.tif"
 ENV = dict(GDAL_DISABLE_READDIR_ON_OPEN="EMPTY_DIR", CPL_VSIL_CURL_ALLOWED_EXTENSIONS=".tif",
@@ -72,30 +71,11 @@ def main(area_dir: str) -> None:
     lo, hi = np.percentile(lum, [0.5, 99.5])
     base = linear_stretch_u8(lum, lo, hi)
 
-    grids = {g["name"]: g for g in rep["grids"]}
-    def load(name, dtype):
-        g = grids[name]
-        q = np.fromfile(out / g["path"], dtype=dtype).reshape(n, n)
-        return q, g
-    cls_f6, _ = load("terrain_class", "<u1")
-    qs, gs = load("slope", "<u2")
-    slope_f6 = dequantise(qs, gs["offset"], gs["scale"], gs["noData"])
-    f6_t = Affine(*rep["f6Transform"])
-    cls_f7 = np.zeros((rows, cols), dtype=np.uint8)  # 0 = unknown outside the F6 square
-    slope_f7 = np.full((rows, cols), np.nan)
-    for src, dst in ((cls_f6, cls_f7), (slope_f6, slope_f7)):
-        reproject(source=src, destination=dst, src_transform=f6_t, src_crs=ortho_crs(lat0, lon0),
-                  dst_transform=t, dst_crs=F7_CRS, resampling=Resampling.nearest,
-                  src_nodata=None, dst_nodata=None)
-    overlay = class_overlay_rgba(cls_f7, slope_f7)
-
     prof = dict(width=cols, height=rows, crs=F7_CRS, transform=t)
     with rasterio.open(out / "d2_luminance.jpg", "w", driver="JPEG", count=1, dtype="uint8", QUALITY=85, **prof) as f:
         f.write(base, 1)
     with rasterio.open(out / "d1_hillshade.jpg", "w", driver="JPEG", count=1, dtype="uint8", QUALITY=85, **prof) as f:
         f.write(hs, 1)
-    with rasterio.open(out / "terrain_overlay.png", "w", driver="PNG", count=4, dtype="uint8", **prof) as f:
-        f.write(np.moveaxis(overlay, -1, 0))
     today = dt.date.today().isoformat()
     layers = {
         "frame": "F7", "crs": F7_CRS.to_proj4(), "extentF7": [x0, y0, x1, y1], "pixel_m": t.a,
@@ -106,13 +86,13 @@ def main(area_dir: str) -> None:
              "nativeResolution_m": 0.25, "stretch": [round(float(lo), 2), round(float(hi), 2)], "builtOn": today},
             {"id": "hillshade", "path": "d1_hillshade.jpg", "name": "Hillshade (D1)", "unit": "8-bit shade",
              "valueClass": "model_derived", "source": "D1", "resolution_m": 1.0, "builtOn": today},
-            {"id": "terrain", "path": "terrain_overlay.png", "name": "Terrain classes (slope-screened only, no rock detection)",
-             "unit": "class", "valueClass": "model_derived", "source": "D1", "resolution_m": rep["cellSize_m"],
-             "slopeLimit_deg": rep["slopeLimit_deg"], "builtOn": today},
+            terrain_entry(out, rep, [x0, y0, x1, y1], today),
         ],
     }
     for L in layers["layers"]:
-        L["sha256"] = sha256_file(out / L["path"])
+        if "path" in L:  # the terrain entry lists its masks with their own sha256
+            L["sha256"] = sha256_file(out / L["path"])
+    (out / "terrain_overlay.png").unlink(missing_ok=True)  # replaced by the masks (run_terrain_masks)
     (out / "layers.json").write_text(json.dumps(layers, indent=2))
     # P-04: D2 is shown on the sheet, so it gets a provenance record (facts from docs/data/phase-1.1-source-audit.md).
     d2_record = {
@@ -129,7 +109,8 @@ def main(area_dir: str) -> None:
     prov_path.write_text(json.dumps(merge_provenance(existing, d2_record), indent=2))
     print(json.dumps({"extentF7": layers["extentF7"], "size": [cols, rows]}))
     for L in layers["layers"]:
-        print(L["id"], (out / L["path"]).stat().st_size, L["sha256"][:12])
+        if "path" in L:
+            print(L["id"], (out / L["path"]).stat().st_size, L["sha256"][:12])
     # Plan 7.8 coverage outlines and contours belong to these layers; rewriting layers.json above dropped their
     # registration, so write them again for the same display grid (each step also runs on its own).
     from .run_coverage import main as write_coverage

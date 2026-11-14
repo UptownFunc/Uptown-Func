@@ -27,6 +27,7 @@ import { coverageNote, coveragePolygonsF7, viewCoverage, type PolygonsF7 } from 
 import { createCoverageLayer, drawCoverage } from "./coverageLayer";
 import { contourLegend, contourLinesF7 } from "./elevationContours";
 import { createElevationLayer, drawElevationContours } from "./elevationLayer";
+import { createTerrainLayer } from "./terrainLayer";
 import type { Quantity } from "../contracts";
 
 /** Displays a Quantity: unknown stays "unknown" (CLAUDE.md); one decimal for metres. */
@@ -133,22 +134,31 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
       const report = () => datasetsRef.current?.([...new Set(a.display.layers.filter((l) => !failed.current.has(l.id)).map((l) => l.source))]);
       report();
       const extent = a.display.extentF7;
+      const fail = (L: { id: string; name: string }) => {
+        if (cancelled) return;
+        failed.current.add(L.id);
+        setLayerErrors((e) => (e.includes(L.name) ? e : [...e, L.name]));
+        report();
+      };
+      // Plan 9.2 symbols in screen pixels from the pipeline's class masks (plan 7.8; the baked hatch aliased).
+      const terrain = () => {
+        const L = a.display.layers.find((l) => l.id === "terrain")!;
+        if (L.kind !== "masks" || !L.masks || !L.maskExtentF7) throw new Error("terrain layer: masks missing from layers.json");
+        const m = L.masks;
+        return createTerrainLayer({ steep: dataUrl + m.steep.path, excluded: dataUrl + m.excluded.path, unknown: dataUrl + m.unknown.path },
+          L.maskExtentF7, "layer-terrain", () => fail(L));
+      };
       const image = (id: string, className: string) => {
         const L = a.display.layers.find((l) => l.id === id)!;
         // interpolate: false keeps source pixels crisp past native size (plan 7.8, honest zoom).
-        const source = new Static({ url: dataUrl + L.path, imageExtent: extent, projection: F7_PROJECTION, interpolate: false });
-        source.on("imageloaderror", () => {
-          if (cancelled) return;
-          failed.current.add(L.id);
-          setLayerErrors((e) => (e.includes(L.name) ? e : [...e, L.name]));
-          report();
-        });
+        const source = new Static({ url: dataUrl + L.path!, imageExtent: extent, projection: F7_PROJECTION, interpolate: false });
+        source.on("imageloaderror", () => fail(L));
         return new ImageLayer({ className, source });
       };
       const o = f1ToF7(a.grid.origin);
       map = new OlMap({
         target: target.current,
-        layers: [image("d2", "layer-d2"), image("hillshade", "layer-hillshade"), image("terrain", "layer-terrain"), elevationLayer.current!, coverageLayer.current!, contourLayer.current!, planLayer.current, markerLayerRef.current!, cursorLayer.current!],
+        layers: [image("d2", "layer-d2"), image("hillshade", "layer-hillshade"), terrain(), elevationLayer.current!, coverageLayer.current!, contourLayer.current!, planLayer.current, markerLayerRef.current!, cursorLayer.current!],
         controls: [new Zoom(), new ScaleLine({ units: "metric" })],
         view: new View({
           projection: F7_PROJECTION, center: [o.x, o.y], resolution: INITIAL_RESOLUTION_F7,

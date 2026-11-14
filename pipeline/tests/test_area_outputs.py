@@ -22,7 +22,9 @@ def test_grids_match_build_report():
 def test_display_layers_match_layers_json():
     layers = json.loads((AREA / "layers.json").read_text())
     for L in layers["layers"]:
-        assert _sha(AREA / L["path"]) == L["sha256"], L["id"]
+        files = list(L["masks"].values()) if L.get("kind") == "masks" else [L]
+        for f in files:
+            assert _sha(AREA / f["path"]) == f["sha256"], (L["id"], f["path"])
 
 
 def test_provenance_covers_every_dataset_used():

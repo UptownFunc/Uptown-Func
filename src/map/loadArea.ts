@@ -8,7 +8,11 @@ import { CoverageCollection } from "./coverage";
 import { ContourCollection } from "./elevationContours";
 import type { z } from "zod";
 
-interface RawLayer { id: string; path: string; name: string; unit: string; valueClass: string; source: string; resolution_m: number; builtOn: string }
+/** The terrain entry ships one mask per plan 9.2 symbol instead of one image (`kind: "masks"`); others have `path`. */
+interface RawLayer {
+  id: string; path?: string; name: string; unit: string; valueClass: string; source: string; resolution_m: number; builtOn: string;
+  kind?: "masks"; masks?: Record<"steep" | "excluded" | "unknown", { path: string }>; maskExtentF7?: [number, number, number, number];
+}
 /** A display layer; its resolution is a Quantity because it is shown in the legend. builtOn is the pipeline build date. */
 export interface DisplayLayer extends RawLayer { resolution: Quantity }
 export interface AreaDisplay { extentF7: [number, number, number, number]; pixel_m: number; layers: DisplayLayer[] }

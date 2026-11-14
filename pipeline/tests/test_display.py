@@ -5,10 +5,7 @@ import numpy as np
 from affine import Affine
 from rasterio.crs import CRS
 
-from sharpwalk.display import (
-    F7_CRS, f7_bounds_of_f6_grid, class_overlay_rgba, hillshade_u8, linear_stretch_u8,
-    HATCH_EXCLUDED, STIPPLE_UNKNOWN, HATCH_STEEP,
-)
+from sharpwalk.display import F7_CRS, f7_bounds_of_f6_grid, hillshade_u8, linear_stretch_u8, terrain_masks, write_mask_png
 from sharpwalk.geo import R_F1
 from sharpwalk.grids import CLASS_UNKNOWN, CLASS_CANDIDATE, CLASS_EXCLUDED
 
@@ -23,19 +20,29 @@ def test_f7_bounds_cover_the_f6_square():
     # East-west spans more F7 metres than ground metres (F7 stretches by 1/cos(lat)).
     assert (x1 - x0) > 3000.0 and abs((y1 - y0) - 3000.0) < 5.0
 
-def test_class_overlay_symbols():
-    # Each class fills an 8-pixel-wide block, wide enough for the hatch and stipple patterns.
-    row_c = np.repeat([CLASS_CANDIDATE, CLASS_EXCLUDED, CLASS_UNKNOWN, CLASS_CANDIDATE], 8).astype(np.uint8)
-    row_s = np.repeat([5.0, 30.0, np.nan, 17.0], 8)
-    classes, slope = np.tile(row_c, (16, 1)), np.tile(row_s, (16, 1))
-    rgba = class_overlay_rgba(classes, slope)
-    assert rgba.shape == (16, 32, 4) and rgba.dtype == np.uint8
-    block = lambda k: rgba[:, 8 * k:8 * k + 8].reshape(-1, 4)
-    assert (block(0)[:, 3] == 0).all()                                # candidate under 15 deg: untouched imagery
-    for k, rgb in ((1, HATCH_EXCLUDED), (2, STIPPLE_UNKNOWN), (3, HATCH_STEEP)):
-        b = block(k)
-        assert (b[:, 3] > 0).any() and (b[:, 3] == 0).any()           # a pattern, not a fill
-        assert {tuple(p[:3]) for p in b[b[:, 3] > 0]} == {rgb}
+def test_terrain_masks_follow_the_plan_classes():
+    """Plan 9.2: slope 15-20 deg (steep but allowed) amber hatch, known exclusion cross-hatch, unknown stipple. The
+    pipeline ships one mask per symbol; the sheet draws the pattern in screen pixels (plan 7.8), so no pattern here."""
+    classes = np.array([[CLASS_CANDIDATE, CLASS_CANDIDATE, CLASS_EXCLUDED, CLASS_UNKNOWN, CLASS_CANDIDATE]], dtype=np.uint8)
+    slope = np.array([[5.0, 17.0, 30.0, np.nan, 15.0]])
+    m = terrain_masks(classes, slope)
+    assert set(m) == {"steep", "excluded", "unknown"}
+    assert m["steep"].tolist() == [[False, True, False, False, True]]      # candidate at 15 deg or more
+    assert m["excluded"].tolist() == [[False, False, True, False, False]]
+    assert m["unknown"].tolist() == [[False, False, False, True, False]]
+    assert not (m["steep"] & m["excluded"]).any() and not (m["steep"] & m["unknown"]).any()
+
+
+def test_mask_png_is_grey_plus_alpha_with_alpha_on_the_class(tmp_path):
+    import rasterio, warnings
+    from rasterio.errors import NotGeoreferencedWarning
+    warnings.simplefilter("ignore", NotGeoreferencedWarning)  # the mask PNG carries no georeferencing by design
+    mask = np.array([[True, False], [False, True]])
+    write_mask_png(tmp_path / "m.png", mask)  # georeferencing lives in layers.json (maskExtentF7), not a sidecar
+    with rasterio.open(tmp_path / "m.png") as f:
+        assert f.count == 2 and f.dtypes[0] == "uint8"
+        assert f.read(2).tolist() == [[255, 0], [0, 255]] and (f.read(1) == 0).all()
+    assert not (tmp_path / "m.png.aux.xml").exists()
 
 def test_hillshade_flat_is_uniform_and_8_bit():
     hs = hillshade_u8(np.full((10, 10), -3500.0), dx=1.0, dy=1.0)

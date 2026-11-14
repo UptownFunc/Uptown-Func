@@ -43,7 +43,7 @@
     },
     {
       "id": "terrain",
-      "path": "terrain_overlay.png",
+      "kind": "masks",
       "name": "Terrain classes (slope-screened only, no rock detection)",
       "unit": "class",
       "valueClass": "model_derived",
@@ -51,7 +51,30 @@
       "resolution_m": 2.0,
       "slopeLimit_deg": 20.0,
       "builtOn": "2026-11-14",
-      "sha256": "d3925d882723f2cbe77362f8688cf9c4f5efd2f8d8799c8e451385078397f45e"
+      "masks": {
+        "steep": {
+          "path": "terrain_steep.png",
+          "sha256": "625240908dcaf3b5842bf6c69bc9bcd033ccf71e88def1074f9428677e417651",
+          "cells": 274772
+        },
+        "excluded": {
+          "path": "terrain_excluded.png",
+          "sha256": "5efa8dff82769096d78d4eb03e75ac286f06579b1901fd0f21d5fa85546b5469",
+          "cells": 537101
+        },
+        "unknown": {
+          "path": "terrain_unknown.png",
+          "sha256": "693d558f7aa4e4fdc804da4252c304df65fe9db1efeb622a1960f9a0e6182673",
+          "cells": 7514
+        }
+      },
+      "mask_m": 2.0,
+      "maskExtentF7": [
+        8142244.492786024,
+        -286909.075189438,
+        8145256.492786024,
+        -283907.075189438
+      ]
     }
   ],
   "coverage": {
