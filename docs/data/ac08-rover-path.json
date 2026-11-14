@@ -1,0 +1,48 @@
+{
+ "id": "AC-08",
+ "what": "Share of Curiosity path cells the slope screen classes as excluded (sanity check, not ground truth)",
+ "area": "boxwork-demo-D03",
+ "slopeLimit_deg": 20.0,
+ "densifyStep_m": 0.5,
+ "summary": {
+  "cells": 2412,
+  "excluded": 76,
+  "unknown": 1,
+  "excludedShare": 0.03150912106135987,
+  "threshold": 0.05,
+  "pass": true,
+  "slopeHistogram": {
+   "0-5": 397,
+   "5-10": 1105,
+   "10-15": 656,
+   "15-20": 177,
+   "20-25": 44,
+   "25-30": 13,
+   ">30": 19,
+   "unknown": 1
+  },
+  "slopeMax_deg": 47.699999999999996,
+  "slopeMedian_deg": 8.81
+ },
+ "drivesInArea": 157,
+ "waypointsInArea": 157,
+ "solRange": [
+  4469,
+  5073
+ ],
+ "d5FrameCheck_maxDiff_m": 0.0031820345160265594,
+ "source": {
+  "dataset": "D5",
+  "title": "NASA/JPL MMGIS Curiosity (MSL) traverse and waypoints",
+  "traverse": {
+   "url": "https://mars.nasa.gov/mmgis-maps/MSL/Layers/json/MSL_traverse.json",
+   "sha256": "c22752254772c8edaee295986cf6a188daf088957f29d042cd62862365cdf3f5"
+  },
+  "waypoints": {
+   "url": "https://mars.nasa.gov/mmgis-maps/MSL/Layers/json/MSL_waypoints.json",
+   "sha256": "5a32324f4b8ba22ebdfac50a503e195f47ccdc876ad4c15b19e29dc7cef15a09"
+  },
+  "retrievedAt": "2026-11-14T11:32:31Z",
+  "localisationError": "UNVERIFIED (plan O-17)"
+ }
+}
