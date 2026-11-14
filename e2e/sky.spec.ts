@@ -2,6 +2,7 @@
 // Plan 6.7 / 9.2 sky-obstruction layer (Tier 2): off by default; when shown, a single-hue ramp whose legend gives the
 // M12 benchmark and says "geometry, not dose"; never labelled safe; D12 listed among the sources in view.
 import { expect, test } from "@playwright/test";
+import { STOP, clickAt } from "./helpers";
 
 test("sky obstruction layer: off by default, legend states geometry not dose and the M12 benchmark", async ({ page }) => {
   await page.goto("/?preset=none");
@@ -40,4 +41,37 @@ test("a sky image that fails to load is named, and D12 is not claimed as in view
   await page.getByLabel(/Sky obstruction layer/).check();
   await expect(page.getByLabel("Layers").locator('[data-layer="sky"]')).toContainText("not loaded", { timeout: 10_000 });
   await expect(page.getByRole("region", { name: /Sources/ })).not.toContainText("D12");
+});
+
+test("a stop reads the nearest 20 m sky value only while the layer is shown (plan 6.7)", async ({ page }) => {
+  await page.goto("/?preset=none");
+  await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
+  await clickAt(page, STOP);
+  await expect(page.locator(".stops li")).toHaveCount(1, { timeout: 20_000 });
+  await expect(page.getByTestId("stop-sky")).toHaveCount(0);
+  const toggle = page.getByLabel(/Sky obstruction layer/);
+  await toggle.check();
+  const row = page.getByTestId("stop-sky");
+  await expect(row).toContainText("20 m sample (geometry, not dose)");
+  // Oracle: Python F1 -> F6 on the sphere puts STOP 43.0 m east, 7.0 m south of the origin: cell r75 c77 of
+  // sky_obstruction.uint16.bin = 1164 x 1e-4 = 11.6 % (computed in this session without the app code).
+  const q = row.locator("[data-quantity]");
+  await expect(q).toHaveText("11.6 %");
+  await expect(q).toHaveAttribute("data-value-class", "model_derived");
+  await expect(q).toHaveAttribute("data-source-ids", "D1 D12");
+  await toggle.uncheck();
+  await expect(page.getByTestId("stop-sky")).toHaveCount(0);
+});
+
+test("a sky grid that fails to load is named in the legend and stops read unknown, never zero", async ({ page }) => {
+  await page.route("**/area/sky_obstruction.uint16.bin", (r) => r.fulfill({ status: 404, body: "" }));
+  await page.goto("/?preset=none");
+  await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
+  await clickAt(page, STOP);
+  await expect(page.locator(".stops li")).toHaveCount(1, { timeout: 20_000 });
+  await page.getByLabel(/Sky obstruction layer/).check();
+  await expect(page.getByLabel("Layers").locator('[data-layer="sky"]')).toContainText("stop values unknown");
+  const q = page.getByTestId("stop-sky").locator("[data-quantity]");
+  await expect(q).toHaveText("unknown");
+  await expect(q).toHaveAttribute("data-value-class", "unknown");
 });

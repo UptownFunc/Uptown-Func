@@ -8,6 +8,7 @@ import { CONSTANTS } from "../constants";
 import { CoverageCollection } from "./coverage";
 import { ContourCollection } from "./elevationContours";
 import type { z } from "zod";
+import { decodeSkyGrid, type SkyGrid, type SkyGridMeta } from "./skySample";
 
 /** The terrain entry ships one mask per plan 9.2 symbol instead of one image (`kind: "masks"`); others have `path`. */
 interface RawLayer {
@@ -24,7 +25,8 @@ export type Optional<T> = { ok: true; collection: T } | { ok: false; reason: str
 export type AreaCoverage = Optional<CoverageCollection>;
 /** Plan 7.8 / 9 elevation contours; missing or invalid is a labelled state, like the coverage outlines. */
 export type AreaContours = Optional<ContourCollection>;
-export interface LoadedArea { grid: AreaGrid; display: AreaDisplay; coverage: AreaCoverage; contours: AreaContours }
+/** skyGrid: plan 6.7 per-stop "20 m sample"; when missing or invalid the reason is shown and stops read unknown. */
+export interface LoadedArea { grid: AreaGrid; display: AreaDisplay; coverage: AreaCoverage; contours: AreaContours; skyGrid: Optional<SkyGrid> }
 
 interface GridMeta { name: string; path: string; dtype: string; noData: number; scale: number; offset: number }
 
@@ -36,7 +38,7 @@ export async function loadArea(base: string): Promise<LoadedArea> {
   };
   const report = await (await get("build_report.json")).json();
   const raw = (await (await get("layers.json")).json()) as Omit<AreaDisplay, "layers"> & { layers: RawLayer[]; coverage?: { path: string }; contours?: { path: string };
-    sky?: { image: { path: string }; grid: { cell_m: number }; h_obs_m: number; benchmark: { f_obs: number; published: number } } };
+    sky?: { image: { path: string }; grid: SkyGridMeta & { path: string }; h_obs_m: number; benchmark: { f_obs: number; published: number } } };
   const md = (value: number, unit: string, methodId: string, sourceIds: string[], assumptionIds: string[] = []): Quantity =>
     ({ value, unit, valueClass: "model_derived", methodId, assumptionIds, sourceIds });
   const s = raw.sky;
@@ -52,16 +54,27 @@ export async function loadArea(base: string): Promise<LoadedArea> {
   const elevation = new Float64Array(q.length);
   for (let i = 0; i < q.length; i++) elevation[i] = q[i] === eg.noData ? Number.NaN : q[i]! * eg.scale + eg.offset;
   const o = report.origin.f1;
-  const [coverage, contours] = await Promise.all([
+  const origin = f1(o.lat, o.lon, o.h);
+  const loadSky = async (): Promise<Optional<SkyGrid>> => {
+    if (!s) return { ok: false, reason: "no sky grid listed in layers.json" };
+    try {
+      return { ok: true, collection: decodeSkyGrid(await (await get(s.grid.path)).arrayBuffer(), s.grid, origin) };
+    } catch (e) {
+      return { ok: false, reason: e instanceof Error ? e.message : `${s.grid.path} could not be loaded` };
+    }
+  };
+  const [coverage, contours, skyGrid] = await Promise.all([
     loadOptional(base, raw.coverage?.path, CoverageCollection, "coverage"),
     loadOptional(base, raw.contours?.path, ContourCollection, "contours"),
+    loadSky(),
   ]);
   return {
-    grid: { origin: f1(o.lat, o.lon, o.h), rows: report.rows, cols: report.cols, cell_m: report.cellSize_m, elevation,
+    grid: { origin, rows: report.rows, cols: report.cols, cell_m: report.cellSize_m, elevation,
       elevationSource: `D1, ${report.cellSize_m} m F6 grid` },
     display,
     coverage,
     contours,
+    skyGrid,
   };
 }
 

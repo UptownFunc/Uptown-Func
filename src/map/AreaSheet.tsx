@@ -28,6 +28,7 @@ import { createCoverageLayer, drawCoverage } from "./coverageLayer";
 import { contourLegend, contourLinesF7 } from "./elevationContours";
 import { createElevationLayer, drawElevationContours } from "./elevationLayer";
 import { createTerrainLayer } from "./terrainLayer";
+import { skySampleAt, type SkySampler } from "./skySample";
 import type { Quantity } from "../contracts";
 
 /** Displays a Quantity: unknown stays "unknown" (CLAUDE.md); one decimal for metres. */
@@ -64,8 +65,8 @@ export interface AreaSheetProps {
   readonly contours?: ContourDisplay | null;
   /** Plan 6.7 sky-obstruction layer (tier 2), off by default; geometry, not dose. */
   readonly showSky?: boolean;
-  /** Whether this area has a sky layer, and whether its image failed to load. */
-  readonly onSky?: (state: "none" | "ok" | "failed") => void;
+  /** Whether this area has a sky layer, and whether its image failed to load; with the per-stop 20 m sampler (plan 6.7). */
+  readonly onSky?: (state: "none" | "ok" | "failed", sample?: SkySampler) => void;
 }
 
 const cursorStyle = new Style({ image: new RegularShape({ points: 4, radius: 11, radius2: 0, angle: 0, stroke: new Stroke({ color: "#f3eee4", width: 2 }) }) });
@@ -106,6 +107,8 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
   const [sky, setSky] = useState<LoadedArea["display"]["sky"]>(undefined);
   const skyLayer = useRef<ImageLayer<Static> | null>(null);
   const [skyFailed, setSkyFailed] = useState(false);
+  /** Why the per-stop sky grid is missing (stops then read unknown), or null. */
+  const [skyGridError, setSkyGridError] = useState<string | null>(null);
   const skyRef = useRef(onSky);
   skyRef.current = onSky;
   const showSkyRef = useRef(showSky);
@@ -177,7 +180,9 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
         src.on("imageloaderror", () => { setSkyFailed(true); skyRef.current?.("failed"); });
         skyLayer.current = new ImageLayer({ className: "layer-sky", source: src, visible: showSkyRef.current });
       }
-      skyRef.current?.(a.display.sky ? "ok" : "none");
+      const sg = a.skyGrid.ok ? a.skyGrid.collection : null; // only the grid is captured, not the whole area
+      setSkyGridError(a.skyGrid.ok ? null : a.skyGrid.reason);
+      skyRef.current?.(a.display.sky ? "ok" : "none", (p) => skySampleAt(p, sg));
       const o = f1ToF7(a.grid.origin);
       map = new OlMap({
         target: target.current,
@@ -319,7 +324,7 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
             {showSky && sky && skyFailed && <li data-layer="sky" className="failed">Sky obstruction - not loaded</li>}
             {showSky && sky && !skyFailed && <li data-layer="sky">Sky obstruction, % of the upper hemisphere (geometry, not dose) - model derived, D1 near and
               D12 far, {fmt(sky.cell)} grid, observer {fmt(sky.hObs)} assumed; darker = more sky blocked. Checked at Butte M12: {fmt(sky.benchmark)}{" "}
-              vs {fmt(sky.published)} published (AC-07)</li>}
+              vs {fmt(sky.published)} published (AC-07){skyGridError && <span className="coverage-note"> · stop values unknown: {skyGridError}</span>}</li>}
             {legend.length > 0 && (coverageError
               ? <li className="failed" data-testid="coverage-status">Coverage outlines not available: {coverageError}</li>
               : <li className="muted" data-testid="coverage-status">{coverageDatasets.length

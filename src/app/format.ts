@@ -28,6 +28,7 @@ export function formatQuantity(q: Quantity): Formatted {
   if (q.valueClass === "unknown" || q.value === null) return { text: "unknown", estimated: false, unknown: true };
   const est = q.valueClass === "estimated";
   if (q.unit === "deg") return { text: `${est ? "est. " : ""}${q.value.toFixed(1)}°`, estimated: est, unknown: false };
+  if (q.unit === "%") return { text: `${est ? "est. " : ""}${q.value.toFixed(1)} %`, estimated: est, unknown: false };
   if (q.unit === MARS_CLOCK_UNIT) {
     const m = Math.floor(q.value * 60) % 1440;
     return { text: `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")} LMST`, estimated: false, unknown: false };

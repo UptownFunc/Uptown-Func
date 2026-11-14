@@ -212,6 +212,14 @@ All ten findings fixed, test-first where possible. Each of the three key tests w
 | R-12 | /code-review high of `2498856..f329682` | 6 findings: fixed in e4cb7f6 - run_display rewrote layers.json and dropped the coverage registration (run_display now writes the outlines too); legend key wording when no outline is drawn; card snapshot showed the unexplained outline; bare KeyError in the output test. Recorded: C-20 (schema location), S-06 (this entry). | Done |
 | B-01 | Bundle budget (update) | Main 203.10 KB + worker 40.9 KB gzipped = **~244 KB of 250 KB** after coverage outlines (+2.4 KB). Fonts are separate assets (woff2), not JS. | Watch - 6 KB headroom |
 
+## Session 14 Nov 20:41-20:55 (claude/clever-thompson-qowa8n): per-stop sky sample
+
+| ID | Topic | Decision / finding | Status |
+|---|---|---|---|
+| SKY-4 | Per-stop sky "20 m sample" (plan 6.7) | Each stop reads the containing cell of the committed 20 m grid (observers sit at cell centres, so that is the nearest observer); shown in the stop row only while the sky layer is on, with the label "20 m sample (geometry, not dose)"; Quantity model_derived, sources D1 D12, assumption V-12. Not on the briefing card (SKY-3 unchanged). Display rounds to 0.1 percentage points (presentation only; the Quantity keeps the grid value). | Done (2a65db1, 7cf23b2); Data and Science + Design review |
+| R-20 | /code-review high of 8285658..2a65db1 | 6 findings, all fixed in 7cf23b2: grid load failure now named in the legend ("stop values unknown: reason"); grid fetched in parallel; sampler captures only the grid; SkySampler type moved to skySample.ts; fmt doc comment restored; % shown to 0.1 pp. Low review of the fix commit 7cf23b2 (Sat 20:56): 0 findings. | Done |
+| B-01 | Bundle budget (update) | Main 208.16 kB + worker 41,460 B gzipped = **~249.6 of 250 KB** after the per-stop sky sample (+0.5 KB). Measured: Zod is ~92 KB minified in the main bundle and ~94 KB in the worker (contracts); only a contract change could recover it. | Watch - ~0.4 KB headroom |
+
 ## Plan defaults applied (Sat 14 Nov 2026, 14:15; operator instruction "do what is needed based on the plan")
 
 | ID | Decision applied | Plan / CLAUDE.md basis | Status |

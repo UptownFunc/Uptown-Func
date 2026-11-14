@@ -4,12 +4,13 @@ This file is the handoff between team members and Claude sessions. Keep it factu
 
 ## Current snapshot
 
-- **Last updated:** Sat 14 Nov 2026, 20:28 Asia/Manila (UTC+8), container clock (`TZ=Asia/Manila date`).
+- **Last updated:** Sat 14 Nov 2026, 20:58 Asia/Manila (UTC+8), container clock (`TZ=Asia/Manila date`). Session `claude/clever-thompson-qowa8n` (20:41-20:58); the 20:28 snapshot below is kept where still true.
+- **This session (20:41-20:58):** branch **`claude/clever-thompson-qowa8n`** = `main` **`8285658`** (PR #10 merged the 20:28 handoff) + 3 commits: `2a65db1` per-stop sky "20 m sample" (plan 6.7, part 4.1), `7cf23b2` /code-review R-20 fixes, and the log commit (run `git log -1`). **Pushed, no PR opened, not merged** (the session request said human review and merge are required). Operator not stated; the account email does not name a team member, so no owner is assumed (G-05: no per-module roles). Claude Opus 5.5 only; Fable 5.2 not used; Superpowers not installed (not used). Checks at 7cf23b2: vitest 282/282, tsc clean, build ~249.6 of 250 KB, Playwright 50/50, pytest 82 + 2 skipped (no gdal-bin), licences current.
 - **Deadline:** Sun 15 Nov 2026, 23:59 local (plan 19.3). The official Space Apps FAQ confirms the 14-15 Nov dates. The 23:59 close appears only on third-party pages: **a person must confirm it on the portal.** Remaining at 20:28: about 27 h 31 min.
 - **Current phase:** G4 work done; preparing for G5. G3 and G4 are met **except the first public deploy (B-4)**. G5 freeze: Sun 13:00.
 - **Branch:** `ccr-dbbcdd02-kqy23v`. **`main` = `38839d0`** holds all work (PRs #2-#9 merged this evening). This handoff commit sits on `ccr-dbbcdd02-kqy23v` on top of `38839d0` and is **not merged** (the handoff request said not to merge to main). Run `git log -1` for its SHA.
 - **Working tree:** clean after the handoff commit. No stashes. Only git-ignored caches remain (`node_modules/`, `.venv/`, `dist/`, `test-results/`, `__pycache__/`, `.pytest_cache/`).
-- **Open PRs:** none.
+- **Open PRs:** none at 20:41 (checked with the GitHub API). PR #10 merged as `8285658`. Older branches `claude/kind-ptolemy-1wdqf5` and `claude/lucid-ptolemy-nz6qpw` hold pre-rebase commits (Sat 10:36-12:18) whose content reached `main` by other branches; not touched. The plan PDFs are only on `claude/lucid-ptolemy-nz6qpw` (`docs/plan/`).
 - **Session:** cloud session `ccr-dbbcdd02-kqy23v`, Sat 18:29-20:30.
   - Operator not stated in the session; the account appears to be Christian Jesus Alcazar's (to be confirmed).
   - Claude Code with Claude Opus 5.5 throughout. Fable 5.2 not used.
@@ -126,10 +127,11 @@ Resolved this session: B-1 and B-9 (G3-01), B-3 (C-22), B-7 for AC-08 and AC-07 
 
 ## Exact next task
 
+0. **Review and merge `claude/clever-thompson-qowa8n`** (per-stop sky sample, 2a65db1 + 7cf23b2 + logs) through a PR, after a human review (merge checklist in CLAUDE.md step 6). Bundle headroom after it: ~0.4 KB.
 1. **B-4 deploy (a person with Vercel access).** Link the repository to Vercel, or deploy `dist/` from `npm run build`. Then a session runs 3.5 (deploy opens without login) and the G5 checks (two machines; 2D with Cesium blocked is trivially true since 3D is cut).
 2. **Merge this handoff commit** from `ccr-dbbcdd02-kqy23v` to `main` through a PR, if the team wants `main`'s logs current. It changes logs only.
 3. **Team review before Sun 13:00:** G-07 authorship; register V-01..V-14; G3-02; C-22 image terms.
-4. **Code, only with bundle savings first:** per-stop sky "20 m sample"; R-15 #7/#9 cleanups (they reduce code).
+4. ~~Per-stop sky "20 m sample"~~ **done on `claude/clever-thompson-qowa8n`** (fits the budget: ~249.6 of 250 KB). Remaining code options are cleanups only (R-15 #7/#9); new features need bundle savings first (Zod is ~25 KB gzip in each of main and worker; only a contract change could recover it).
 5. **Then G5 → video (Sun 17:00) → submission (internal target Sun 21:00):** 5.1-5.5.
 6. **Do not:**
    - touch the shared elevation decoder before P-01;
@@ -176,13 +178,13 @@ cd pipeline && export SSL_CERT_FILE=/root/.ccr/ca-bundle.crt
 cd ..
 ```
 
-Expected at this handoff:
-- vitest 274/274;
+Expected at this handoff (on `claude/clever-thompson-qowa8n`; `main` 8285658 gives vitest 274, Playwright 48):
+- vitest 282/282;
 - tsc clean;
 - build OK (~249.1 KB);
 - pytest 84;
 - licences current;
-- Playwright 48/48;
+- Playwright 50/50;
 - route bench < 500 ms.
 
 ## Last session report
