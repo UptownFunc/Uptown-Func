@@ -580,6 +580,27 @@ Commit SHA: 9ec2f70, 6e8ca00, 9608ecb (branch claude/wizardly-lovelace-i2i0wa); 
 Next part / blocker owner: team picks the scenario date/time (B-9); a person runs the Mars24 app for AC-09 date 3
 ```
 
+```text
+Part: Deferred review follow-ups R-02 items 8 and 10, R-04 item 6 (no plan part; supports 2.6/3.2 test quality)
+Owner: team (G-05); session operated from parcilla13's account, Sat 14 Nov 2026 15:37-15:45 Asia/Manila
+Status: VERIFIED (refactor; behaviour unchanged, checks green)
+Scope completed: e2e/helpers.ts (shared STOP, EXCLUDED, pixelAt, clickAt) derived from public/area/build_report.json,
+  src/map/view.ts INITIAL_RESOLUTION_F7 (now used by AreaSheet) and src/geo F1 -> F7; six specs de-duplicated;
+  new e2e pins helper pixels to the sheet's readout within 1e-4 deg; readoutAt uses src/geo/grid f1ToCell
+Files changed: e2e/{helpers.ts,a11y,area-sheet,briefing,drill,field,plan-route,resilience}.spec.ts; src/map/{view.ts,AreaSheet.tsx,readout.ts}
+Checks run (exact commands), at b0741fe:
+  npx vitest run      -> 235 passed / 235
+  npx tsc --noEmit    -> clean
+  npm run build       -> OK (main 200.74 kB gzip)
+  PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome npx playwright test --trace off -> 27 passed / 27
+Results: probe - with AreaSheet's resolution temporarily set to 8 the old specs still passed (clicks are not position-
+  sensitive); the new helper e2e failed (lat off by 1.2e-4 deg) and passed again once restored
+Known limitations or failures: R-02 item 7 still deferred (P-01 pending); C-19 found (no command edits stop tasks)
+Review status: self-reviewed diff (small refactor); no separate /code-review run on b0741fe
+Commit SHA: b0741fe
+Next part / blocker owner: team decisions (B-1, B-9, C-19); then 3.5 deploy when B-4 arrives
+```
+
 ## Phase-part completion record
 
 Copy this block for every phase part and update its table row above:
