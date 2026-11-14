@@ -18,15 +18,22 @@ SLOPE_SCALE_DEG = 0.01     # pipeline encoding choice, pending agreement (P-01)
 
 
 def build_area(src, src_transform, src_crs, src_nodata, lat0, lon0, *, cell_m, n, slope_limit_deg,
-               out_dir, area_id):
-    out = Path(out_dir)
-    out.mkdir(parents=True, exist_ok=True)
+               out_dir, area_id, source=None):
+    if n % 2:
+        raise ValueError("n must be even so the area origin sits on the shared corner of the four central cells")
     elev, f6_transform = warp_to_f6(src, src_transform, src_crs, src_nodata, lat0, lon0, cell_m, n)
+    c = n // 2
+    h0 = float(np.nanmean(elev[c - 1:c + 1, c - 1:c + 1])) if not np.isnan(elev[c - 1:c + 1, c - 1:c + 1]).all() else np.nan
+    if np.isnan(h0):
+        raise ValueError("no elevation at the area origin")
     slope = horn_slope_deg(elev, cell_m)
     classes = classify_terrain(slope, slope_limit_deg)
-
+    # Quantise everything before writing anything, so a failure leaves no partial outputs.
     qe, e_off, e_scale, e_nd = quantise(elev, ELEVATION_SCALE_M, np.uint16)
     qs, s_off, s_scale, s_nd = quantise(slope, SLOPE_SCALE_DEG, np.uint16)
+
+    out = Path(out_dir)
+    out.mkdir(parents=True, exist_ok=True)
     grids = [
         write_grid(out, "elevation", qe, unit="m", noData=e_nd, scale=e_scale, offset=e_off,
                    valueClass="directly_measured"),
@@ -36,10 +43,6 @@ def build_area(src, src_transform, src_crs, src_nodata, lat0, lon0, *, cell_m, n
                    valueClass="model_derived"),
     ]
 
-    c = n // 2
-    h0 = float(np.nanmean(elev[c - 1:c + 1, c - 1:c + 1]))
-    if np.isnan(h0):
-        raise ValueError("no elevation at the area origin")
     x, y, z = f1_to_f5(lat0, lon0, h0)
     report = {
         "areaId": area_id,
@@ -55,5 +58,7 @@ def build_area(src, src_transform, src_crs, src_nodata, lat0, lon0, *, cell_m, n
         "elevationRange_m": [round(float(np.nanmin(elev)), 3), round(float(np.nanmax(elev)), 3)],
         "slopeOver60_deg": int(np.nansum(slope > 60)),
     }
+    if source is not None:
+        report["source"] = source
     (out / "build_report.json").write_text(json.dumps(report, indent=2))
     return report

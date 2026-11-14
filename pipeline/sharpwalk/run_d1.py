@@ -30,9 +30,12 @@ def main(out_dir: str) -> None:
         src = ds.read(1, window=w)
         t, crs, nd = ds.window_transform(w), ds.crs, ds.nodata
         area_or_point = ds.tags().get("AREA_OR_POINT")
-    report = build_area(src, t, crs, nd, LAT0, LON0, cell_m=CELL_M, n=N, slope_limit_deg=SLOPE_LIMIT_DEG,
-                        out_dir=out, area_id="boxwork-demo-D03")
     window_sha = hashlib.sha256(src.astype("<f4").tobytes()).hexdigest()
+    source = {"d1Window": [w.col_off, w.row_off, w.width, w.height], "d1AreaOrPoint": area_or_point,
+              "sha256Scope": "sha256 of the float32 little-endian window read, not of the full D1 file",
+              "gdal": rasterio.__gdal_version__, "rasterio": rasterio.__version__}
+    report = build_area(src, t, crs, nd, LAT0, LON0, cell_m=CELL_M, n=N, slope_limit_deg=SLOPE_LIMIT_DEG,
+                        out_dir=out, area_id="boxwork-demo-D03", source=source)
     provenance = [{
         "id": "D1", "productId": "MSL_Gale_DEM_Mosaic_1m_v3", "url": D1_URL,
         "licence": "USGS Astrogeology: Use Constraints None; Access Constraints: please credit authors",
@@ -41,10 +44,6 @@ def main(out_dir: str) -> None:
         "retrievedOn": dt.date.today().isoformat(), "sha256": window_sha,
     }]
     (out / "provenance.json").write_text(json.dumps(provenance, indent=2))
-    report["source"] = {"d1Window": [w.col_off, w.row_off, w.width, w.height], "d1AreaOrPoint": area_or_point,
-                        "sha256Scope": "sha256 of the float32 little-endian window read, not of the full D1 file",
-                        "gdal": rasterio.__gdal_version__, "rasterio": rasterio.__version__}
-    (out / "build_report.json").write_text(json.dumps(report, indent=2))
     print(json.dumps({k: report[k] for k in ("counts", "elevationRange_m", "slopeOver60_deg", "origin")}, indent=1))
     for g in report["grids"]:
         print(g["name"], g["dtype"], g["sha256"])

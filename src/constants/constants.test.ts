@@ -1,7 +1,7 @@
 // SI-assisted: drafted with Claude Code (Claude Opus 5.5); human Data and Science review pending.
 // CLAUDE.md: every science constant needs a source citation and page; Assumed values are labelled.
 import { describe, expect, it } from "vitest";
-import { CONSTANTS, constant } from "./index";
+import { CONSTANTS, constant, unresolvedCitations } from "./index";
 
 describe("constants register", () => {
   it("cites a source and a location (or marks it UNRESOLVED) for every constant", () => {
@@ -9,6 +9,14 @@ describe("constants register", () => {
       expect(c.citation.source.length).toBeGreaterThan(0);
       expect(c.citation.location.length).toBeGreaterThan(0);
     }
+  });
+
+  it("lists exactly the known unresolved citations, so no new constant can ship without a page", () => {
+    expect(unresolvedCitations().sort()).toEqual(["slopeLimit", "walkSpeedRange"]);
+  });
+
+  it("does not present the nominal walking speed as an observation", () => {
+    expect(constant("walkSpeedNominal").valueClass).toBe("assumed");
   });
 
   it("labels the slope limit as Assumed, not measured", () => {

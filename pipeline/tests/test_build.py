@@ -59,3 +59,25 @@ def test_report_states_inputs_and_is_json(tmp_path):
     assert saved["rows"] == saved["cols"] == 300
     assert saved["origin"]["f1"]["lat"] == LAT0 and saved["slopeLimit_deg"] == 20.0
     assert "controlPoints" not in saved  # residuals are 1.5 work; never written as placeholders
+
+def test_nothing_is_written_when_the_area_has_no_elevation(tmp_path):
+    z, t = src_two_slopes()
+    z[:] = -32767.0
+    import pytest
+    with pytest.raises(ValueError):
+        build_area(z, t, EQC, -32767.0, LAT0, LON0, cell_m=2.0, n=300, slope_limit_deg=20.0,
+                   out_dir=tmp_path, area_id="empty")
+    assert list(tmp_path.iterdir()) == []
+
+def test_odd_grid_size_is_refused_so_the_origin_stays_on_a_cell_corner(tmp_path):
+    z, t = src_two_slopes()
+    import pytest
+    with pytest.raises(ValueError):
+        build_area(z, t, EQC, -32767.0, LAT0, LON0, cell_m=2.0, n=301, slope_limit_deg=20.0,
+                   out_dir=tmp_path, area_id="odd")
+
+def test_source_metadata_is_written_once_into_the_report(tmp_path):
+    z, t = src_two_slopes()
+    build_area(z, t, EQC, -32767.0, LAT0, LON0, cell_m=2.0, n=300, slope_limit_deg=20.0,
+               out_dir=tmp_path, area_id="test-area", source={"gdal": "x.y.z"})
+    assert json.loads((tmp_path / "build_report.json").read_text())["source"] == {"gdal": "x.y.z"}

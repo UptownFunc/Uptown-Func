@@ -39,10 +39,12 @@ def quantise(z: np.ndarray, scale: float, dtype=np.uint16):
     z = np.asarray(z, dtype=np.float64)
     nodata = int(np.iinfo(dtype).max)
     valid = ~np.isnan(z)
+    if not valid.any():
+        raise ValueError("cannot quantise a grid with no known values")
     offset = float(np.floor(np.nanmin(z) / scale) * scale)
     steps = np.zeros(z.shape, dtype=np.float64)
     steps[valid] = np.round((z[valid] - offset) / scale)
-    if valid.any() and steps[valid].max() >= nodata:
+    if steps[valid].max() >= nodata:
         raise ValueError(f"range {np.nanmax(z) - offset:.3f} does not fit {np.dtype(dtype).name} at scale {scale}")
     q = np.full(z.shape, nodata, dtype=dtype)
     q[valid] = steps[valid].astype(dtype)

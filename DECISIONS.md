@@ -55,6 +55,13 @@ Plan 19.9 lists fields but leaves these details open. The drafts below are in `s
 | C-12 | AreaManifest residual fields | Manifest not written | `controlPoints`, `rmsHorizontal_m`, `maxHorizontal_m` and `verticalBias_m` are required numbers, so a manifest written before 1.5 would need invented values. Options: make them nullable until measured, or write the manifest only after 1.5. | PENDING (contract change: both owners) |
 | C-13 | Provenance.sha256 scope | sha256 of the D1 window actually read (float32 LE) | The contract does not say whether the checksum covers the full source file (3.9 GB; USGS publishes only an md5) or the bytes used. | PENDING |
 
+## /code-review of 1.1-2.1 (Sat 14 Nov, ~11:30), medium, `3c372f4...ac7e61c`
+
+Ten findings. Eight were fixed, test-first where code was involved. One was fixed in part, and one was not changed:
+- **Not changed (recorded here):** the warped elevation grid and the D1 provenance stay `directly_measured`. Plan section 4 (Must table) classes D1 terrain as "Directly measured", and the repo rules do not let a session redesign the plan. The unverified vertical reference is carried separately (`verticalReference: "unknown"`, D-05). Data and Science may reclassify.
+- **Partly fixed:** the two UNRESOLVED citations (walkSpeedRange, slopeLimit) remain, because their pages are in plan section 19, which this session has not read. A test now pins the exact list, so any new uncited constant fails the suite.
+- **Fixed:** the vertical-reference check now uses CRS transforms, the D1 NoData value and edge guards (results unchanged: -8.62 m / -9.21 m); quantise refuses an all-unknown grid; the build validates before writing anything; odd grid sizes are refused; the report is written once with its source metadata; 0.83 m/s is classed `assumed`; the check scripts import the shared radius and URL; the alignment check refuses windows that contain D1 NoData.
+
 ## Governance decisions
 
 | ID | Topic | Decision | Decided by | Date/time (Asia/Manila) | Evidence |

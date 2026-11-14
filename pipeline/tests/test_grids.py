@@ -57,3 +57,7 @@ def test_quantise_round_trip_within_half_step():
 def test_quantise_refuses_a_range_that_does_not_fit():
     with pytest.raises(ValueError):
         quantise(np.array([0.0, 700.0]), scale=0.01, dtype=np.uint16)
+
+def test_quantise_refuses_an_all_unknown_grid():
+    with pytest.raises(ValueError):
+        quantise(np.full((3, 3), np.nan), scale=0.01, dtype=np.uint16)

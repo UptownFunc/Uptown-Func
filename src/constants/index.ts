@@ -31,7 +31,7 @@ export const CONSTANTS = {
     limitation: "Comparison reference only; never used to place data.",
   },
   walkSpeedNominal: {
-    id: "walkSpeedNominal", value: 0.83, unit: "m/s", valueClass: "published_observation",
+    id: "walkSpeedNominal", value: 0.83, unit: "m/s", valueClass: "assumed",
     citation: { source: "NASA/TM-2010-216138 (planning walking speed, 3.0 km/h)", location: "Table 4, p. 13" },
     limitation: "Planning value for suited walking; not validated at Mars gravity on natural terrain.",
   },
@@ -49,3 +49,7 @@ export const CONSTANTS = {
 
 export type ConstantId = keyof typeof CONSTANTS;
 export const constant = (id: ConstantId): Constant => CONSTANTS[id];
+
+/** Constants whose page/location is still UNRESOLVED; all must be resolved before release. */
+export const unresolvedCitations = (): ConstantId[] =>
+  (Object.keys(CONSTANTS) as ConstantId[]).filter((k) => CONSTANTS[k].citation.location.startsWith("UNRESOLVED"));

@@ -8,8 +8,11 @@ import rasterio
 from rasterio.windows import from_bounds
 from rasterio.enums import Resampling
 
-R = 3396190.0
-D1 = "/vsicurl/https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Mars/MSL/MSL_Gale_DEM_Mosaic_1m_v3.tif"
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+from sharpwalk.geo import R_F1 as R
+from sharpwalk.run_d1 import D1_URL
+D1 = "/vsicurl/" + D1_URL
 D2 = "/vsicurl/https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Mars/MSL/MSL_Gale_HiRISE-LRGB_78quads_sharp_cog.tif"
 SITES = {"NW": (-4.797, 137.372), "C": (-4.815, 137.390), "SE": (-4.833, 137.408)}
 HALF, MAXS = 200, 25
@@ -23,7 +26,10 @@ def read(url, lat, lon, half, shape=None):
         if shape:
             a = ds.read(window=w, out_shape=(ds.count, *shape), resampling=Resampling.average).astype(float)
             return a.mean(axis=0), ds.crs
-        return ds.read(1, window=w).astype(float), ds.crs
+        a = ds.read(1, window=w).astype(float)
+        if ds.nodata is not None and (a == ds.nodata).any():
+            raise ValueError(f"D1 NoData inside the site window at ({lat}, {lon}); choose another site")
+        return a, ds.crs
 
 
 def hillshade(z, az_deg, alt_deg=45.0):
