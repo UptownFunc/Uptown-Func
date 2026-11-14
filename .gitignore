@@ -11,7 +11,9 @@ work/
 __pycache__/
 *.pyc
 .pytest_cache/
-public/area/
+# public/area/ is committed (C-14, 14 Nov): the static app serves the pipeline outputs; checked by
+# pipeline/tests/test_area_outputs.py. GDAL sidecar files are not part of the outputs.
+*.aux.xml
 test-results/
 playwright-report/
 .venv/

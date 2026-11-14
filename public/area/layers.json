@@ -1,0 +1,57 @@
+{
+  "frame": "F7",
+  "crs": "+proj=eqc +lat_ts=0 +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 +R=3396190 +units=m +no_defs=True",
+  "extentF7": [
+    8142244.492786024,
+    -286908.075189438,
+    8145256.492786024,
+    -283907.075189438
+  ],
+  "pixel_m": 1.0,
+  "originF1": {
+    "lat": -4.815,
+    "lon": 137.39,
+    "h": -3506.337
+  },
+  "layers": [
+    {
+      "id": "d2",
+      "path": "d2_luminance.jpg",
+      "name": "Orthophoto (D2 colour mosaic, luminance)",
+      "unit": "8-bit luminance",
+      "valueClass": "directly_measured",
+      "source": "D2",
+      "resolution_m": 1.0,
+      "nativeResolution_m": 0.25,
+      "stretch": [
+        41.98,
+        200.23
+      ],
+      "builtOn": "2026-11-14",
+      "sha256": "08c9e4be8f51fba52ae0dfbebe11657e74231ddc19b379154a2eac311e5ba33a"
+    },
+    {
+      "id": "hillshade",
+      "path": "d1_hillshade.jpg",
+      "name": "Hillshade (D1)",
+      "unit": "8-bit shade",
+      "valueClass": "model_derived",
+      "source": "D1",
+      "resolution_m": 1.0,
+      "builtOn": "2026-11-14",
+      "sha256": "a8ca2a3ba91354c33e109d79a8f50ce72eb16e890d77d38ec6a164f70deaf95f"
+    },
+    {
+      "id": "terrain",
+      "path": "terrain_overlay.png",
+      "name": "Terrain classes (slope-screened only, no rock detection)",
+      "unit": "class",
+      "valueClass": "model_derived",
+      "source": "D1",
+      "resolution_m": 2.0,
+      "slopeLimit_deg": 20.0,
+      "builtOn": "2026-11-14",
+      "sha256": "d3925d882723f2cbe77362f8688cf9c4f5efd2f8d8799c8e451385078397f45e"
+    }
+  ]
+}

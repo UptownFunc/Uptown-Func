@@ -1,0 +1,84 @@
+{
+  "areaId": "boxwork-demo-D03",
+  "origin": {
+    "f1": {
+      "lat": -4.815,
+      "lon": 137.39,
+      "h": -3506.337
+    },
+    "f5": {
+      "x": -2488131.803,
+      "y": 2288756.065,
+      "z": -284777.53
+    }
+  },
+  "cellSize_m": 2.0,
+  "rows": 1500,
+  "cols": 1500,
+  "f6Transform": [
+    2.0,
+    0.0,
+    -1500.0,
+    0.0,
+    -2.0,
+    1500.0
+  ],
+  "slopeLimit_deg": 20.0,
+  "grids": [
+    {
+      "name": "elevation",
+      "unit": "m",
+      "dtype": "uint16",
+      "noData": 65535,
+      "scale": 0.01,
+      "offset": -3871.61,
+      "valueClass": "directly_measured",
+      "path": "elevation.uint16.bin",
+      "sha256": "a93aa209a51fd3568d777b6bec70b7273a4ee376e4cf3e5317e752df1399a3ef"
+    },
+    {
+      "name": "slope",
+      "unit": "deg",
+      "dtype": "uint16",
+      "noData": 65535,
+      "scale": 0.01,
+      "offset": 0.01,
+      "valueClass": "model_derived",
+      "path": "slope.uint16.bin",
+      "sha256": "aa366e6f7756dbb724fb94b3a4d9d80ac50cce7b26d110f59569581c2018bdc0"
+    },
+    {
+      "name": "terrain_class",
+      "unit": "class",
+      "dtype": "uint8",
+      "noData": 0,
+      "scale": 1.0,
+      "offset": 0.0,
+      "valueClass": "model_derived",
+      "path": "terrain_class.uint8.bin",
+      "sha256": "c9c06b3ee74e1b85a0ed095d567ee2d7d2a39e4dfdc533fd319cf58ff358ae21"
+    }
+  ],
+  "counts": {
+    "unknown": 5996,
+    "candidate": 1709324,
+    "excluded": 534680
+  },
+  "elevationRange_m": [
+    -3871.609,
+    -3234.268
+  ],
+  "slopeOver60_deg": 2423,
+  "source": {
+    "d1Window": [
+      13507,
+      38376,
+      4500,
+      4500
+    ],
+    "d1AreaOrPoint": "Point",
+    "sha256Scope": "sha256 of the float32 little-endian window read, not of the full D1 file",
+    "gdal": "3.10.3",
+    "rasterio": "1.4.4"
+  }
+}
