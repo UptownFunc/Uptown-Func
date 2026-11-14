@@ -200,3 +200,5 @@ body { background: var(--housing); color: var(--text); font-family: var(--sans);
 .drill .check { display: flex; gap: 6px; align-items: flex-start; margin: 4px 0; font-size: 12px; }
 .drill select { background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 4px; font: inherit; }
 .sim-banner + .legend { top: 52px; }
+.layer-errors { position: absolute; left: 16px; bottom: 48px; z-index: 3; max-width: 60%; padding: 6px 10px; font-size: 12px;
+  background: var(--paper); color: var(--housing); border: 2px solid var(--over); border-radius: 6px; }

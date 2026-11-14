@@ -94,6 +94,8 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
   const [readout, setReadout] = useState<Readout | null>(null);
   const [legend, setLegend] = useState<LoadedArea["display"]["layers"]>([]);
   const [error, setError] = useState<string | null>(null);
+  /** AC-31: display layers that failed to load are named; the sheet keeps working without them. */
+  const [layerErrors, setLayerErrors] = useState<string[]>([]);
 
   useEffect(() => {
     let map: OlMap | null = null;
@@ -107,7 +109,9 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
       const image = (id: string, className: string) => {
         const L = a.display.layers.find((l) => l.id === id)!;
         // interpolate: false keeps source pixels crisp past native size (plan 7.8, honest zoom).
-        return new ImageLayer({ className, source: new Static({ url: dataUrl + L.path, imageExtent: extent, projection: F7_PROJECTION, interpolate: false }) });
+        const source = new Static({ url: dataUrl + L.path, imageExtent: extent, projection: F7_PROJECTION, interpolate: false });
+        source.on("imageloaderror", () => { if (!cancelled) setLayerErrors((e) => (e.includes(L.name) ? e : [...e, L.name])); });
+        return new ImageLayer({ className, source });
       };
       const o = f1ToF7(a.grid.origin);
       map = new OlMap({
@@ -209,6 +213,11 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
         {contours?.drill_s != null && (
           <div className="sim-banner" role="note" data-testid="simulation-banner">
             SIMULATION · SIMULATED DRILL · ASSUMED {Math.round(contours.drill_s / 60)} MIN WARNING · not a live alert, not a measurement
+          </div>
+        )}
+        {layerErrors.length > 0 && (
+          <div className="layer-errors" role="status" data-testid="layer-errors">
+            {layerErrors.map((n) => `${n} could not be loaded`).join("; ")}. The sheet, the route and the readout work without it.
           </div>
         )}
         <div className="legend" aria-label="Layers">
