@@ -9,11 +9,24 @@ import { f7PointResolution } from "../geo";
 
 export interface MapSnapshot { readonly dataUrl: string; readonly widthGround_m: number }
 
-export function snapshotMap(map: OlMap, plan: VectorLayer<VectorSource>, latDeg: number): Promise<MapSnapshot | null> {
-  return new Promise((resolve) => {
+/** Never hangs: resolves null on any error or after timeout_ms. The planner's view is restored afterwards. */
+export function snapshotMap(map: OlMap, plan: VectorLayer<VectorSource>, latDeg: number, timeout_ms = 10_000): Promise<MapSnapshot | null> {
+  const view = map.getView();
+  const saved = { center: view.getCenter(), resolution: view.getResolution() };
+  const restore = () => { if (saved.center) view.setCenter(saved.center); if (saved.resolution) view.setResolution(saved.resolution); };
+  return new Promise<MapSnapshot | null>((resolve) => {
+    let done = false;
+    const finish = (v: MapSnapshot | null) => { if (!done) { done = true; clearTimeout(timer); resolve(v); } };
+    const timer = setTimeout(() => finish(null), timeout_ms);
+    try { capture(map, plan, latDeg, finish); } catch { finish(null); }
+  }).finally(restore);
+}
+
+function capture(map: OlMap, plan: VectorLayer<VectorSource>, latDeg: number, resolve: (v: MapSnapshot | null) => void): void {
+  {
     const ext = plan.getSource()!.getExtent();
     if (ext && ext.every(Number.isFinite) && ext[2]! > ext[0]!) map.getView().fit(ext, { padding: [48, 48, 48, 48] });
-    map.once("rendercomplete", () => {
+    map.once("rendercomplete", () => { try {
       const size = map.getSize();
       const el = map.getTargetElement();
       if (!size || !el) return resolve(null);
@@ -36,7 +49,7 @@ export function snapshotMap(map: OlMap, plan: VectorLayer<VectorSource>, latDeg:
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       const res = map.getView().getResolution() ?? 0;
       resolve({ dataUrl: out.toDataURL("image/png"), widthGround_m: size[0]! * f7PointResolution(res, latDeg) });
-    });
+    } catch { resolve(null); } });
     map.render();
-  });
+  }
 }

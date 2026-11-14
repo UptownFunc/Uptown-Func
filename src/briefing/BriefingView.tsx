@@ -2,7 +2,7 @@
 // Briefing (plan 3.3, UX-10/11, AC-06, module 04C): one action builds the card from the engine's current plan copy and
 // stamps it with that plan version. When the plan changes the card shows STALE at once and cannot be printed until it
 // is regenerated. Print layout: A5 portrait, two columns, 12 mm margins, black on white (plan 9.2).
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { PlanOutput } from "../engine/planner";
 import type { MapSnapshot } from "../map/snapshot";
 import { MarginState } from "../app/MarginState";
@@ -19,7 +19,10 @@ export interface BriefingViewProps {
 export function BriefingView({ output, snapshot, hidden = false }: BriefingViewProps) {
   const [card, setCard] = useState<Card | null>(null);
   const [busy, setBusy] = useState(false);
+  const [note, setNote] = useState<string | null>(null);
   const current = output?.plan.versionHash ?? null;
+  const currentRef = useRef(current);
+  currentRef.current = current;
   const stale = card ? isStale(card.model.versionHash, current) : false;
 
   const generate = async () => {
@@ -28,6 +31,9 @@ export function BriefingView({ output, snapshot, hidden = false }: BriefingViewP
     try {
       const model = briefingModel(output.plan);
       const map = snapshot ? await snapshot() : null;
+      // The map must show the same plan version as the stamp; if the plan moved on meanwhile, do not mix them.
+      if (currentRef.current !== model.versionHash) { setNote("The plan changed while the card was built; generate again."); return; }
+      setNote(map ? null : "Map export failed; the card has no map.");
       setCard({ model, map, builtAt: new Date().toISOString().slice(0, 16).replace("T", " ") + " UTC" });
     } finally {
       setBusy(false);
@@ -44,6 +50,7 @@ export function BriefingView({ output, snapshot, hidden = false }: BriefingViewP
           Print briefing
         </button>
         {stale && <span className="muted">The plan changed: regenerate before printing.</span>}
+        {note && <span className="muted" role="status">{note}</span>}
       </div>
       {!card ? <p className="muted">No card yet. The card is built from the engine's current plan and stamped with its version.</p> : (
         <article className={`card${stale ? " card-stale" : ""}`} data-testid="briefing-card">
