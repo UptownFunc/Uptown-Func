@@ -878,7 +878,7 @@ Review: /code-review medium R-19 (10 findings, all fixed): explicit --cell (no m
   f_obs 6.2-43.5 %; pytest 84; vitest 274; build ~249.1 of 250 KB; Playwright 48/48
 Known limitations: the graphite ramp is hard to see on dark imagery (Design review, V-14); per-stop sky value
   ("20 m sample", plan 6.7) not shown: bundle headroom ~0.9 KB; h_obs 1 m (V-12); D12 licence terms not read
-Commit SHA: d8351d4 and the R-19 commit (PR #8)
+Commit SHA: d8351d4, 48db58d (R-19). **Merged: PR #8 merge commit 706cc1a (Sat 14 Nov 20:24)**
 Next part / blocker owner: Design review of the ramp (B-13); B-4 deploy (human)
 ```
 
