@@ -10,6 +10,7 @@ export interface ContourLevel { readonly level_s: number; readonly lines: [numbe
 
 export function timeContours(field: Float64Array, rows: number, cols: number,
   opt: { factor: number; levels_s: readonly number[]; minArea_cells: number }): ContourLevel[] {
+  if (opt.levels_s.length === 0) return [];
   const k = Math.max(1, Math.floor(opt.factor));
   const w = Math.ceil(cols / k), h = Math.ceil(rows / k);
   const v = new Float64Array(w * h).fill(Infinity);

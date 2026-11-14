@@ -142,10 +142,9 @@ export function drawContours(layer: VectorLayer<VectorSource>, c: ContourDisplay
   const features: Feature[] = [];
   for (const lvl of c.levels) {
     const min = Math.round(lvl.level_s / 60), drill = c.drill_s !== null && Math.abs(lvl.level_s - c.drill_s) < 1;
-    if (!drill && c.drill_s !== null && min % 5 !== 0) continue;
     for (const line of lvl.lines) {
       const f = new Feature({ geometry: new LineString(line.map(xy)), kind: drill ? "drill" : "contour", level_min: min });
-      f.setStyle(drill ? drillStyle(min) : contourStyle(`${min} min`));
+      f.setStyle(drill ? drillStyle(min) : contourStyle(`est. ${min} min`));
       features.push(f);
     }
   }

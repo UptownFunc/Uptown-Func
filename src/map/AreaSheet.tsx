@@ -173,7 +173,8 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     const a = area.current, m = mapRef.current;
-    if (!a || !m) return;
+    // Only keys pressed on the sheet itself; the zoom buttons inside it keep their own keyboard behaviour.
+    if (!a || !m || e.target !== e.currentTarget) return;
     const steps: Record<string, [number, number]> = { ArrowUp: [0, 1], ArrowDown: [0, -1], ArrowLeft: [-1, 0], ArrowRight: [1, 0] };
     if (e.key in steps) {
       e.preventDefault(); e.stopPropagation();

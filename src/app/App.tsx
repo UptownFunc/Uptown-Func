@@ -40,9 +40,10 @@ export function App() {
   const [levels, setLevels] = useState<ContourLevel[] | null>(null);
   const [contourBusy, setContourBusy] = useState(false);
   const wantContours = showContours || drillMin !== null;
+  const engineReady = output !== null;
   useEffect(() => {
     const e = engine.current;
-    if (!wantContours || levels || !e || !output) return;
+    if (!wantContours || levels || !e || !engineReady) return;
     let live = true;
     setContourBusy(true);
     const mins = Array.from({ length: 18 }, (_, i) => (i + 1) * 5); // 5 ... 90 min; includes the 10, 20, 30 drill lines
@@ -50,7 +51,7 @@ export function App() {
       .catch((err: unknown) => { if (live) setMessage(`Contours unavailable: ${err instanceof Error ? err.message : String(err)}`); })
       .finally(() => { if (live) setContourBusy(false); });
     return () => { live = false; };
-  }, [wantContours, levels, output]);
+  }, [wantContours, levels, engineReady]); // not on every plan change: the field depends only on the habitat
   const contourDisplay = levels && wantContours
     ? { levels: showContours ? levels : levels.filter((l) => drillMin !== null && Math.abs(l.level_s - drillMin * 60) < 1), drill_s: drillMin === null ? null : drillMin * 60 }
     : null;

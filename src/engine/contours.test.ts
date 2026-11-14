@@ -48,6 +48,10 @@ it("cuts a line where the region meets the grid border, keeping only the isoline
   for (const [x] of l!.lines[0]!) expect(x).toBeCloseTo(20.5, 0); // a north-south line near column 20
 });
 
+it("returns nothing for an empty level list", () => {
+  expect(timeContours(radial(10), 10, 10, { factor: 1, levels_s: [], minArea_cells: 0 })).toEqual([]);
+});
+
 it("draws no line along the edge of unreachable ground (that is a barrier, not an isoline)", () => {
   const n = 60, f = radial(n);
   // A large unreachable block inside the 200 s disc: only the 200 s circle may be drawn, not the block's outline.
