@@ -156,6 +156,19 @@ Known limitations or failures: plan PDF not available to this session; data host
 Review status: /code-review done for G0; human review and merge still required
 Commit SHA: see the commit after 8986d70 on claude/kind-ptolemy-1wdqf5
 Next part / blocker owner: 1.1 Data and Science, on a machine with the plan and GIS tools
+```text
+Part: Governance (G-01 attribution, G-02 merge rule), PR parcilla13/Uptown-Func#1
+Owner: Team member Yujin (direction); Claude Code session (drafting)
+Status: VERIFIED (docs only)
+Scope completed: CLAUDE.md credits the concept and plan to the whole team; the human-merge rule is replaced by
+  the completeness checklist in step 6; HANDOFF.md and SESSION_PROMPTS.md aligned; G-01/G-02 in DECISIONS.md
+Files changed: CLAUDE.md, DECISIONS.md, HANDOFF.md, SESSION_PROMPTS.md, PHASES.md, SI_LOG.md
+Checks run (exact commands): no package scripts on main (docs-only); /code-review low on origin/main...claude/team-attribution
+Results: 2 review findings (PR failed its own 'Logged' item; 'Checks green' unrunnable on docs-only main); both fixed in this PR
+Known limitations or failures: none
+Review status: /code-review done
+Commit SHA: 444728b (PR head); merged to main as bb473b7
+Next part / blocker owner: merge PR #1; G0 branch claude/kind-ptolemy-1wdqf5 then needs a rebase on main
 ```
 
 ## Phase-part completion record

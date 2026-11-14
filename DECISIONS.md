@@ -45,6 +45,12 @@ Plan 19.9 lists fields but leaves these details open. The drafts below are in `s
 | C-09 | Quantity | `sourceIds` must be non-empty even for `unknown`, which pushes producers to invent a source. | Allow empty `sourceIds` when `valueClass` is `unknown`. | Data and Science | PENDING |
 | C-10 | AreaManifest.grids | A list of names only; the `Grid` metadata (dtype, noData, scale, offset) is not referenced by any contract. | Make `grids` an array of `Grid`. | Data and Science + contracts owner | PENDING |
 | C-11 | MissionExecution.ticks | No checks that a stop exists in the plan, that departure follows arrival, or that elapsed time increases. | Add the in-record checks in the schema; leave the cross-record stop check to the field view. | Design + Route Engine | PENDING |
+## Governance decisions
+
+| ID | Topic | Decision | Decided by | Date/time (Asia/Manila) | Evidence |
+|---|---|---|---|---|---|
+| G-01 | Attribution | The project concept, challenge framing, solution direction, requirements and plan are credited to the whole four-member team. | Team member Yujin, in the Claude Code session | Sat 14 Nov 2026 | `CLAUDE.md` Authorship section; PR parcilla13/Uptown-Func#1 |
+| G-02 | Merging | Human approval is no longer required to merge. A human or the AI agent may merge a PR only when it meets the completeness checklist in `CLAUDE.md` step 6. | Team member Yujin, in the Claude Code session | Sat 14 Nov 2026 | `CLAUDE.md` step 6; PR parcilla13/Uptown-Func#1 |
 
 ## Fixed technical / presentation constraints
 
