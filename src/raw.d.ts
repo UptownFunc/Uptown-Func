@@ -3,3 +3,6 @@ declare module "*?raw" {
   const text: string;
   export default text;
 }
+
+// Vite handles CSS side-effect imports.
+declare module "*.css";

@@ -85,6 +85,16 @@ Ten findings: seven fixed, two partly fixed, one skipped.
 |---|---|---|---|---|
 | G-03 | Plan 7.8 F7 test vector (137.4 E, -4.8) | x = 8,144,343.5 m | 8,144,343.44 m (k = pi x 3,396,190 / 180 = 59,274.6975 m/deg) | 0.06 m, below display precision. The code uses the exact formula; the test accepts the plan's value at its printed 0.1 m precision. Data and Science to note. |
 
+## App scaffold decisions (2.6, need the owners' confirmation)
+
+| ID | Topic | Choice | Why | Status |
+|---|---|---|---|---|
+| S-01 | `@types/react` 19.3.0 and `@types/react-dom` 19.3.0 (dev only) | Added at exact versions | React 19 ships no TypeScript types; TypeScript 7 needs them for JSX. Type definitions only, not a runtime library. | PENDING confirmation (Captain / Design) |
+| S-02 | IBM Plex fonts | Not bundled yet; the CSS stacks fall back to system fonts | No font files or font package in the pinned stack. Bundling the OFL font files is needed before G3. | OPEN (Design) |
+| S-03 | Playwright browser | @playwright/test 1.65.0 runs here with the machine's Chromium (from Playwright 1.63) via `PW_CHROMIUM` | This cloud machine ships 1.63 browsers; installing other browsers is not allowed here. CI should use the 1.65.0 browsers. | NOTED |
+| S-04 | No geotiff.js / COG source in the browser | Display layers are F7 PNG/JPEG with a known extent (OpenLayers ImageStatic); grids are binary | Plan 10.1 rejects geotiff.js in the browser. `ol` still installs geotiff as its own dependency, but the app does not import it. | DONE; Captain to confirm |
+| C-14 | Delivery of area data | `public/area/` is git-ignored and filled by the pipeline | Grids (11 MB) plus display layers (4.8 MB) are generated. Committing them, publishing them as a release asset, or building them in CI is a Captain decision before the first deploy (G3). | OPEN (Captain) |
+
 ## Governance decisions
 
 | ID | Topic | Decision | Decided by | Date/time (Asia/Manila) | Evidence |

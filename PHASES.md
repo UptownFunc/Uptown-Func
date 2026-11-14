@@ -72,7 +72,7 @@ Work on optional features only when it does not endanger this path. The AREA 2D 
 | 2.3 | Implement leg distance/time ranges and habitat time field. Keep seconds in the engine and display SI minutes. | Route Engine | UNVERIFIED | Known-grid oracle tests; range and unit tests; benchmark under 500 ms | - |
 | 2.4 | Implement planned margin and the manual-entry field-margin calculations without conflating `MissionPlan` and `MissionExecution`. | Route Engine + Design | UNVERIFIED | Margin boundary tests; stop arrival/departure tests; AC-19 on the grid metric | - |
 | 2.5 | Resolve route smoothing at G2 with Route Engine owner and Data and Science agreement. Record the selected option in `DECISIONS.md`, plan log and O-22. | Route Engine | UNVERIFIED | Written option and matching tests; until decided, calculations use grid paths only | - |
-| 2.6 | Build the OpenLayers **AREA-level 2D sheet** by G2. It is the permanent fallback and is never cut. | Design + Data and Science | UNVERIFIED | Loads local grid; displays route/stops/unknown/slope states; works without Cesium | - |
+| 2.6 | Build the OpenLayers **AREA-level 2D sheet** by G2. It is the permanent fallback and is never cut. | Design + Data and Science | IN PROGRESS (part 1 done: sheet, layers, readout; stops and route not yet drawn) | Pipeline `run_display` writes F7 layers (D2 luminance 2.6 MB, D1 hillshade 1.7 MB, terrain overlay 0.56 MB, `layers.json` with sha256). The app (Vite 8.3.7, React 19.3.1, OpenLayers 10.11.0) registers F7 as its own projection (true scale bar), draws D2 + multiplied hillshade + class overlay, stops zoom at twice the native pixel, and shows a status line (F1 to 5 decimals, F6 E/N, elevation from the F6 grid, source, "vertical reference unverified") and the NASA footer. Checks: vitest 88/88; tsc clean; `vite build` JS 130.7 KB gzipped (budget 250); `npx playwright test` 2/2, including a check that no Cesium request is made and an error state when data is missing. **Not yet:** stops, route and habitat symbols (need 2.3/2.4 and the worker); D1/D2 coverage outlines; 10 m contours; the hatch aliases at coarse zoom (Design to review); fonts not bundled (S-02). | see 2.6 record |
 | 2.7 | Run the complete G2 engine test and latency gate; record all speed inputs as cited or Assumed. | Route Engine | IN PROGRESS (latency measured; not yet on the target hardware) | `bench/route-bench.ts` on the real 1,500 x 1,500 grid, Node 22.23.4, Xeon 2.1 GHz, main thread, placeholder factors: longest route in the main region 365-402 ms with unity placeholder factors and **447-478 ms with decreasing placeholder factors [1, 0.8, 0.6, 0.4]** (target < 500; thin margin); habitat time field over 1,307,532 cells 448-494 ms (target < 3 s). Risk: on a mid-range laptop or in a Worker the longest leg may exceed 500 ms; the G2 fallback is a 4 m grid (D-08), and reusing scratch buffers is the first optimisation to try. The A* route time equals the Dijkstra field time. **Not yet:** a mid-range laptop, in a Web Worker, with the real k_v values. | see 2.2 record |
 
 **G2 acceptance:** all listed engine tests pass and route is under 500 ms. If missed, move to a 4 m grid and show a visible Assumed-input banner. Do not turn on kJ workload without cited rates.
@@ -258,6 +258,22 @@ Known limitations: k_v values missing (K-01); one test expectation was corrected
   the corner rule makes the hand solution 4, not 2*sqrt(2)); latency not yet on target hardware
 Commit SHA: see the 2.2 commit on claude/kind-ptolemy-1wdqf5
 Next: Route Engine supplies the k_v bin values with their source (plan 6.5 / 19), then 2.3 leg ranges
+```
+
+```text
+Part: 2.6 part 1 (not VERIFIED: stops/route not drawn yet)
+Owner: Design + Data and Science (TBA); written in Yujin's session
+Files changed: src/geo (F7), src/map/{f7,readout,loadArea,AreaSheet}.ts(x), src/app/*, index.html, vite.config.ts,
+  playwright.config.ts, e2e/area-sheet.spec.ts, pipeline/sharpwalk/{display,run_display}.py, pipeline/tests/test_display.py,
+  package.json/package-lock.json (react 19.3.1, react-dom 19.3.1, ol 10.11.0, vite 8.3.7, @playwright/test 1.65.0,
+  @types/react 19.3.0, @types/react-dom 19.3.0), tsconfig.json (jsx), .gitignore (public/area, test-results)
+Checks run: npx vitest run ; npx tsc --noEmit ; npx vite build ; cd pipeline && python -m pytest ;
+  python -m sharpwalk.run_display <area> ; PW_CHROMIUM=<chromium> npx playwright test --trace off
+Results: vitest 88/88; tsc clean; build OK (JS 130.7 KB gz); pytest 38/38; playwright 2/2
+To run the app locally: build the area (python -m sharpwalk.run_d1 ../public/area && python -m sharpwalk.run_display
+  ../public/area from pipeline/), then npm run dev. public/area is git-ignored (C-14: data delivery not decided).
+Commit SHA: see the 2.6 part 1 commit on claude/kind-ptolemy-1wdqf5
+Next: 2.3 leg ranges and 2.4 margins (need K-01), engine worker (3.1), then stops/route on the sheet (2.6 part 2)
 ```
 
 ## Phase-part completion record

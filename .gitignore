@@ -11,3 +11,6 @@ work/
 __pycache__/
 *.pyc
 .pytest_cache/
+public/area/
+test-results/
+playwright-report/

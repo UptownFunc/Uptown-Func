@@ -1,0 +1,32 @@
+/* SI-assisted: drafted with Claude Code (Claude Opus 5.5); human Design review pending.
+   Plan 9.1 tokens. IBM Plex files are not bundled yet (S-02); the stacks fall back to system fonts. */
+:root {
+  --housing: #191b20; --raised: #292b31; --bg: #101216; --border: #33363d;
+  --text: #e8e1d5; --text-muted: #aeb5b3; --plan: #722a3e; --plan-hi: #a65367; --paper: #f3eee4;
+  --ok: #3fb68b; --caution: #e8b341; --over: #f0645a;
+  --sans: "IBM Plex Sans", system-ui, sans-serif; --mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; margin: 0; }
+body { background: var(--housing); color: var(--text); font-family: var(--sans); }
+.housing { display: grid; grid-template-rows: auto 1fr auto; height: 100%; padding: 8px; gap: 8px; }
+.titlebar { display: flex; gap: 16px; align-items: baseline; padding: 4px 8px; }
+.wordmark { font-weight: 600; letter-spacing: 0.02em; }
+.muted { color: var(--text-muted); font-size: 13px; }
+.well { background: var(--bg); border-radius: 12px; overflow: hidden; display: grid; grid-template-rows: 1fr auto; min-height: 0; }
+.sheet { position: relative; min-height: 0; }
+.sheet .map { position: absolute; inset: 8px; border-radius: 4px; overflow: hidden; background: #000; }
+.layer-hillshade canvas { mix-blend-mode: multiply; }
+.status { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 12px; color: var(--text);
+  display: flex; flex-wrap: wrap; gap: 16px; padding: 6px 12px; border-top: 1px solid var(--border); }
+.status .label { color: var(--text-muted); }
+.legend { position: absolute; left: 16px; top: 16px; background: rgba(16, 18, 22, 0.85); border-radius: 8px;
+  padding: 8px 10px; font-size: 12px; max-width: 320px; }
+.legend li { list-style: none; margin: 2px 0; }
+.legend ul { margin: 0; padding: 0; }
+.footer { color: var(--text-muted); font-size: 12px; padding: 0 8px; }
+.ol-scale-line { background: var(--raised); left: 16px; bottom: 16px; }
+.ol-scale-line-inner { color: var(--text); border-color: var(--text); font-family: var(--mono); }
+.ol-zoom { top: 16px; right: 16px; left: auto; }
+.ol-zoom button { background: var(--raised); color: var(--text); }
+.error { padding: 16px; color: var(--over); }
