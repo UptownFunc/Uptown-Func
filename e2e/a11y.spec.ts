@@ -5,7 +5,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { STOP, clickAt } from "./helpers";
 
 async function setup(page: Page) {
-  await page.goto("/");
+  await page.goto("/?preset=none");
   await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
   await clickAt(page, STOP);
   await expect(page.getByTestId("legs")).toBeVisible({ timeout: 20_000 });
@@ -38,7 +38,7 @@ test("Field View has no serious or critical axe violations", async ({ page }) =>
 });
 
 test("AC-32: place, move and delete a stop by keyboard alone; leg table is the non-map equivalent", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/?preset=none");
   await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
   await page.getByTestId("area-map").focus();
   // From the view centre (the area origin), 4 x 10 m east lands on slope-screened ground in the habitat's region.
@@ -67,7 +67,7 @@ test("AC-32: place, move and delete a stop by keyboard alone; leg table is the n
 test("AC-32: the console works at 1280 and 1920 px wide", async ({ page }) => {
   for (const width of [1280, 1920]) {
     await page.setViewportSize({ width, height: 900 });
-    await page.goto("/");
+    await page.goto("/?preset=none");
     await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
     await expect(page.getByLabel("Plan", { exact: true })).toBeInViewport();

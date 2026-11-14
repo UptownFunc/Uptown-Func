@@ -123,8 +123,8 @@ describe("Command", () => {
     issuedAt: "2026-11-14T02:00:00Z",
     planVersion: "v0",
   };
-  it("accepts the six command types", () => {
-    for (const type of ["add_stop", "move_stop", "delete_stop", "reorder_stops", "set_assumption", "recompute"]) {
+  it("accepts the seven command types (edit_stop added by C-19)", () => {
+    for (const type of ["add_stop", "move_stop", "delete_stop", "reorder_stops", "set_assumption", "recompute", "edit_stop"]) {
       expect(ok(Command, { ...cmd, type })).toBe(true);
     }
   });

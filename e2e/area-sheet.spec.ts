@@ -6,7 +6,7 @@ import { EXCLUDED, STOP, pixelAt } from "./helpers";
 test("AREA sheet loads, reads out F1/F6/elevation and carries the footer", async ({ page }) => {
   const cesium: string[] = [];
   page.on("request", (r) => { if (/cesium/i.test(r.url())) cesium.push(r.url()); });
-  await page.goto("/");
+  await page.goto("/?preset=none");
   await expect(page.getByText("Independent student project; not affiliated with or endorsed by NASA.")).toBeVisible();
   const map = page.getByTestId("area-map");
   await expect(map.locator("canvas").first()).toBeVisible();
@@ -26,12 +26,12 @@ test("AREA sheet loads, reads out F1/F6/elevation and carries the footer", async
 
 test("shows an error instead of a blank map when area data is missing", async ({ page }) => {
   await page.route("**/area/build_report.json", (r) => r.fulfill({ status: 404, body: "" }));
-  await page.goto("/");
+  await page.goto("/?preset=none");
   await expect(page.getByRole("alert")).toContainText("Area data could not be loaded");
 });
 
 test("the map does not change size when the pointer moves over it or a stop is added", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/?preset=none");
   const map = page.getByTestId("area-map");
   await expect(map.locator("canvas").first()).toBeVisible();
   const before = (await map.boundingBox())!;
@@ -41,7 +41,7 @@ test("the map does not change size when the pointer moves over it or a stop is a
 });
 
 test("the shared e2e helper maps each F1 test point to the pixel the sheet reads back (R-02 item 10)", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/?preset=none");
   await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
   const status = page.getByTestId("status-line");
   /** Largest of |lat - point.lat| and |lon - point.lon| read from the status line, or Infinity if it has no coordinates. */

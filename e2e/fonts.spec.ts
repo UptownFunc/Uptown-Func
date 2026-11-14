@@ -24,7 +24,7 @@ async function widths(page: Page, text: string, fonts: string[]) {
 test("IBM Plex Sans and Mono load from this origin and are what the console renders with", async ({ page }) => {
   const fontResponses: { url: string; status: number }[] = [];
   page.on("response", (r) => { if (/\.woff2?(\?|$)/.test(r.url())) fontResponses.push({ url: r.url(), status: r.status() }); });
-  await page.goto("/");
+  await page.goto("/?preset=none");
   await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
   await page.getByTestId("area-map").hover(); // the status line (Plex Mono) appears with the pointer
   await expect(page.getByTestId("status-line")).toContainText("elev");
@@ -63,7 +63,7 @@ test("if the font files cannot load, the console falls back to system fonts and 
   page.on("pageerror", (e) => errors.push(e.message));
   // Both formats: each face lists a .woff fallback after its .woff2 (Fontsource CSS).
   await page.route(/\.woff2?(\?|$)/, (r) => r.abort());
-  await page.goto("/");
+  await page.goto("/?preset=none");
   await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
   const faces = await plexFaces(page);
   expect(faces.some((f) => f.status === "loaded"), JSON.stringify(faces)).toBe(false);
@@ -80,7 +80,7 @@ test("if the font files cannot load, the console falls back to system fonts and 
 
 test("if only the .woff2 files fail, the .woff fallback still loads IBM Plex", async ({ page }) => {
   await page.route(/\.woff2(\?|$)/, (r) => r.abort());
-  await page.goto("/");
+  await page.goto("/?preset=none");
   await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
   const faces = await plexFaces(page);
   expect(faces.some((f) => f.family === "IBM Plex Sans" && f.weight === "400" && f.status === "loaded"), JSON.stringify(faces)).toBe(true);

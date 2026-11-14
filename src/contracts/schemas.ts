@@ -78,6 +78,8 @@ export const CommandType = z.enum([
   "reorder_stops",
   "set_assumption",
   "recompute",
+  // C-19 (DECISIONS): renames a stop and sets its tasks for the briefing card; payload { stopId, name?, tasks? }.
+  "edit_stop",
 ]);
 export type CommandType = z.infer<typeof CommandType>;
 

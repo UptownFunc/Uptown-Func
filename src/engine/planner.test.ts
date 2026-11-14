@@ -437,3 +437,68 @@ describe("review R-15 follow-ups", () => {
     expect(geometry.marginTicks).toEqual([]);
   });
 });
+
+describe("G3-01 preset applied through set_assumption commands", () => {
+  it("is accepted by the engine and gives a computed end margin and sun values", async () => {
+    const { G3_PRESET } = await import("../app/demoPreset");
+    const { g, p } = plannerWithHabitat();
+    p.apply(cmd("add_stop", { ...at(g, 2, 38), name: "Far" }, p.current().plan.versionHash));
+    for (const a of G3_PRESET) expect(p.apply(cmd("set_assumption", { ...a }, p.current().plan.versionHash)).ok).toBe(true);
+    const { plan, conditions } = p.current();
+    expect(MissionPlan.safeParse(plan).success).toBe(true);
+    expect(plan.endMargin.valueClass).toBe("estimated");
+    expect(conditions.sunElevation.valueClass).toBe("model_derived");
+    expect(plan.assumptions.find((x) => x.id === "A-T_EVA")!.rationale).toMatch(/G3-01/);
+  });
+});
+
+describe("edit_stop: stop name and tasks for the briefing card (C-19 option a)", () => {
+  it("sets a stop's name and tasks, changes the version hash and keeps the plan Zod-valid", () => {
+    const { g, p } = plannerWithHabitat();
+    p.apply(cmd("add_stop", { ...at(g, 2, 10), name: "A" }, p.current().plan.versionHash));
+    const before = p.current().plan;
+    const id = before.stops[0]!.id;
+    const r = p.apply(cmd("edit_stop", { stopId: id, name: "  Boxwork ridge  ", tasks: ["Image ridge crest", " Sample vein fill "] }, before.versionHash));
+    expect(r.ok, JSON.stringify(r)).toBe(true);
+    const plan = p.current().plan;
+    expect(MissionPlan.safeParse(plan).success).toBe(true);
+    expect(plan.stops[0]).toMatchObject({ name: "Boxwork ridge", tasks: ["Image ridge crest", "Sample vein fill"] });
+    expect(plan.versionHash).not.toBe(before.versionHash);
+    // Tasks alone can be changed, and cleared.
+    expect(p.apply(cmd("edit_stop", { stopId: id, tasks: [] }, plan.versionHash)).ok).toBe(true);
+    expect(p.current().plan.stops[0]).toMatchObject({ name: "Boxwork ridge", tasks: [] });
+  });
+
+  it("refuses an unknown stop, a blank name, non-text or blank tasks, too many or too long entries, and an empty edit", () => {
+    const { g, p } = plannerWithHabitat();
+    p.apply(cmd("add_stop", { ...at(g, 2, 10), name: "A" }, p.current().plan.versionHash));
+    const id = p.current().plan.stops[0]!.id;
+    const v = () => p.current().plan.versionHash;
+    const bad = [
+      { stopId: "S99", name: "x" },
+      { stopId: id, name: "   " },
+      { stopId: id, tasks: "not a list" },
+      { stopId: id, tasks: ["ok", " "] },
+      { stopId: id, tasks: [3] },
+      { stopId: id, tasks: Array.from({ length: 11 }, (_, i) => `t${i}`) },
+      { stopId: id, name: "x".repeat(61) },
+      { stopId: id, tasks: ["x".repeat(121)] },
+      { stopId: id },
+    ];
+    for (const payload of bad) expect(p.apply(cmd("edit_stop", payload, v())).ok, JSON.stringify(payload)).toBe(false);
+    expect(p.current().plan.stops[0]).toMatchObject({ name: "A", tasks: [] });
+  });
+});
+
+describe("R-16: add_stop name follows the edit_stop rules", () => {
+  it("trims a given name and refuses a blank or overlong one; no name gets the default", () => {
+    const { g, p } = plannerWithHabitat();
+    const v = () => p.current().plan.versionHash;
+    expect(p.apply(cmd("add_stop", { ...at(g, 2, 10), name: "   " }, v())).ok).toBe(false);
+    expect(p.apply(cmd("add_stop", { ...at(g, 2, 10), name: "x".repeat(61) }, v())).ok).toBe(false);
+    expect(p.apply(cmd("add_stop", { ...at(g, 2, 10), name: "  Ridge  " }, v())).ok).toBe(true);
+    expect(p.apply(cmd("add_stop", { ...at(g, 4, 10) }, v())).ok).toBe(true);
+    expect(p.apply(cmd("add_stop", { ...at(g, 6, 10), name: null }, v())).ok).toBe(true);
+    expect(p.current().plan.stops.map((s) => s.name)).toEqual(["Ridge", "Stop S2", "Stop S3"]);
+  });
+});

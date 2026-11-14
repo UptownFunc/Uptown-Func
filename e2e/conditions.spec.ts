@@ -5,7 +5,7 @@
 import { expect, test } from "@playwright/test";
 
 test("scenario time drives the Mars24 sun values, each traceable to D10", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/?preset=none");
   const panel = page.getByRole("region", { name: "Conditions" });
   await expect(panel).toBeVisible();
   await expect(page.getByTestId("current-scenario")).toHaveText("not set");
@@ -33,7 +33,7 @@ test("scenario time drives the Mars24 sun values, each traceable to D10", async 
 });
 
 test("D7: the dated Curiosity reading is shown for context and opens its source with the provider's disclaimer", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/?preset=none");
   const rems = page.getByTestId("rems");
   await expect(rems).toContainText(/Conditions at Curiosity on \d{4}-\d{2}-\d{2} \(sol \d+\), for context/);
   await expect(rems).toContainText("not at the boxwork");
@@ -49,6 +49,6 @@ test("D7: the dated Curiosity reading is shown for context and opens its source 
 
 test("D7: a missing snapshot is labelled unavailable, not filled in", async ({ page }) => {
   await page.route("**/conditions/rems.json", (r) => r.fulfill({ status: 404, body: "" }));
-  await page.goto("/");
+  await page.goto("/?preset=none");
   await expect(page.getByTestId("rems")).toHaveText("Curiosity weather snapshot (D7) unavailable.");
 });

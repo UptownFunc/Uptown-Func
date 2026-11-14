@@ -10,12 +10,15 @@ import { RouteProfile } from "./RouteProfile";
 import { SourcePanel } from "./SourcePanel";
 import { DrillPanel } from "./DrillPanel";
 import { ConditionsPanel } from "./ConditionsPanel";
+import { RoverImages, roverSource } from "./rover";
+import { RoverView } from "./RoverView";
 import { RemsSnapshot, remsSource } from "./rems";
 import type { ContourLevel } from "../engine/contours";
 import { Provenance, type Quantity } from "../contracts";
 import { BriefingView } from "../briefing/BriefingView";
 import { FieldView } from "../field/FieldView";
 import type { MapSnapshot } from "../map/snapshot";
+import { G3_PRESET, presetEnabled } from "./demoPreset";
 
 const AREA_URL = "area/";
 /** H-01 (DECISIONS.md, pending team confirmation): the slope-screened cell nearest the plan 19.2 suggestion
@@ -64,10 +67,17 @@ export function App() {
       .then((j: unknown) => { const p = RemsSnapshot.safeParse(j); setRems(p.success ? p.data : "failed"); })
       .catch(() => setRems("failed"));
   }, []);
-  const extraSources = rems && rems !== "failed" ? [remsSource(rems)] : [];
+  // D6: the rover views (G3-01), validated; a missing or invalid file is shown as unavailable.
+  const [rover, setRover] = useState<RoverImages | "failed" | null>(null);
+  useEffect(() => {
+    fetch(new URL("rover/images.json", document.baseURI)).then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then((j: unknown) => { const p = RoverImages.safeParse(j); setRover(p.success ? p.data : "failed"); })
+      .catch(() => setRover("failed"));
+  }, []);
+  const extraSources = [...(rems && rems !== "failed" ? [remsSource(rems)] : []), ...(rover && rover !== "failed" ? [roverSource(rover)] : [])];
   // UX-15: every dataset in the current view = the sheet's layer sources plus the datasets the plan's numbers use.
   // D10 (sun) and D7 (REMS) are always in the Planning view through the Conditions panel.
-  const datasetsInView = [...new Set([...layerDatasets, ...(output?.plan.provenanceIds ?? []), "D10", ...(extraSources.length ? ["D7"] : [])])].sort((a, b) => Number(a.slice(1)) - Number(b.slice(1)));
+  const datasetsInView = [...new Set([...layerDatasets, ...(output?.plan.provenanceIds ?? []), "D10", ...extraSources.map((x) => x.id)])].sort((a, b) => Number(a.slice(1)) - Number(b.slice(1)));
   useEffect(() => {
     // provenance.json is the pipeline's record (UX-15); it is validated against the shared contract.
     fetch(new URL(AREA_URL + "provenance.json", document.baseURI)).then((r) => (r.ok ? r.json() : []))
@@ -78,6 +88,7 @@ export function App() {
   const [snapshot, setSnapshot] = useState<(() => Promise<MapSnapshot | null>) | null>(null);
   const outputRef = useRef(output);
   outputRef.current = output;
+  const sendRef = useRef<((type: string, payload: Record<string, unknown>) => void) | null>(null);
 
   useEffect(() => {
     const e = createEngine();
@@ -85,7 +96,13 @@ export function App() {
     let live = true;
     // Resolve against the page, not the worker script (whose URL differs in dev and build).
     e.api.init(new URL(AREA_URL, document.baseURI).href, DEFAULT_HABITAT)
-      .then((o) => { if (live) setOutput(o); })
+      .then((o) => {
+        if (!live) return;
+        outputRef.current = o;
+        setOutput(o);
+        // G3-01: the demonstration plan times and scenario time, as logged Commands (skipped with ?preset=none).
+        if (presetEnabled(window.location.search)) for (const a of G3_PRESET) sendRef.current?.("set_assumption", { ...a });
+      })
       .catch((err: unknown) => { if (live) setMessage(`Engine could not start: ${err instanceof Error ? err.message : String(err)}`); });
     return () => { live = false; e.terminate(); engine.current = null; };
   }, []);
@@ -113,6 +130,7 @@ export function App() {
       }
     });
   }, []);
+  sendRef.current = send;
 
   return (
     <div className="housing">
@@ -130,15 +148,17 @@ export function App() {
           onSnapshotReady={(fn) => setSnapshot(() => fn)} hoverIndex={hover} onHoverIndex={setHover} onDatasets={setLayerDatasets} onCursor={setCursor} contours={contourDisplay} />
         <RouteProfile output={output} hoverIndex={hover} onHoverIndex={setHover} />
         {/* Kept mounted so a built card keeps its version stamp and shows STALE after a plan change. */}
-        <BriefingView output={output} snapshot={snapshot} hidden={view !== "briefing"} />
+        <BriefingView output={output} snapshot={snapshot} hidden={view !== "briefing"} rover={rover} />
         {/* Kept mounted: the field view alone holds MissionExecution, so ticks survive switching views. */}
         <FieldView output={output} hidden={view !== "field"} />
         <PlanPanel output={output} message={message} onDeleteStop={(id) => send("delete_stop", { stopId: id })}
+          onEditStop={(stopId, name, tasks) => send("edit_stop", { stopId, name, tasks })}
           onSetTime={(id, value_s, rationale, stopId) => send("set_assumption", { id, value_s, rationale, ...(stopId ? { stopId } : {}) })}
           onOpenSource={setSelected}
           onMoveToCursor={cursor ? (stopId) => send("move_stop", { stopId, lat: cursor.lat, lon: cursor.lon }) : undefined}>
           <ConditionsPanel output={output} onOpenSource={setSelected} rems={rems}
             onSet={(id, value_s, rationale) => send("set_assumption", { id, value_s, rationale })} />
+          <RoverView data={rover} />
           <DrillPanel output={output} showContours={showContours} onShowContours={setShowContours}
             drillMin={drillMin} onDrillMin={setDrillMin} busy={contourBusy} />
           <SourcePanel selected={selected} provenance={provenance} assumptions={output?.plan.assumptions ?? []}

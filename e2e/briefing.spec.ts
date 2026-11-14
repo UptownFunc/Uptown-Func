@@ -5,7 +5,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { STOP, clickAt } from "./helpers";
 
 test("briefing card: built from the current plan, then STALE and unprintable after a change", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/?preset=none");
   await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
   await clickAt(page, STOP);
   await expect(page.getByTestId("legs")).toBeVisible({ timeout: 20_000 });
@@ -48,7 +48,7 @@ test("briefing card: built from the current plan, then STALE and unprintable aft
 });
 
 test("the briefing map is the real sheet, not a blank image", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/?preset=none");
   await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
   await clickAt(page, STOP);
   await expect(page.getByTestId("legs")).toBeVisible({ timeout: 20_000 });
@@ -68,7 +68,7 @@ test("the briefing map is the real sheet, not a blank image", async ({ page }) =
 });
 
 test("the printed card is one A5 page; printing from Planning is not blank", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/?preset=none");
   await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
   await clickAt(page, STOP);
   await expect(page.getByTestId("legs")).toBeVisible({ timeout: 20_000 });
