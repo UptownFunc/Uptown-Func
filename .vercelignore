@@ -1,0 +1,13 @@
+# SI-assisted: drafted with Claude Code (Claude Opus 5.5).
+# Files Vercel does not upload for the build (DEP-01). SharpWalk deploys as one static Vite site; the Python
+# pipeline is run offline and its outputs are committed in public/ (C-14), so it is not part of the deployment.
+pipeline/
+bench/
+e2e/
+scripts/
+docs/
+playwright.config.ts
+test-results/
+playwright-report/
+coverage/
+.venv/
