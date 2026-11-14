@@ -12,7 +12,7 @@ The plan is the project authority. **Section 19 overrides earlier sections where
 
 ## Authorship and attribution
 
-- The user is the originator and owner of the SharpWalk project concept, challenge framing, solution direction, requirements, and project plan. Attribute these to the user only.
+- The SharpWalk team (all four members) originated and owns the project concept, challenge framing, solution direction, requirements and project plan. Attribute these to the team only.
 - Do not credit Claude or another SI tool with originating the concept, framing, solution approach, or user/team decisions. Do not present SI as the source of the project idea.
 - Record actual SI assistance transparently where required by the challenge, using `SI_LOG.md` and the submission disclosure. This operational disclosure does not transfer authorship or ownership of the project concept to an SI tool. Never invent, omit, or misstate what a tool contributed.
 
