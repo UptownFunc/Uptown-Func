@@ -10,6 +10,7 @@ const RANGE = CONSTANTS.walkSpeedRange;
 import { MarginState } from "./MarginState";
 import { PlanTimes, TimeRow } from "./PlanTimes";
 import { QuantityText } from "./QuantityText";
+import type { SkySampler } from "../map/AreaSheet";
 import type { Quantity, Stop } from "../contracts";
 import { STOP_LIMITS } from "../engine/assumptions";
 import { parseTasks } from "./stopTasks";
@@ -24,10 +25,12 @@ export interface PlanPanelProps {
   readonly onOpenSource?: (q: Quantity) => void;
   /** Moves a stop to the map's keyboard cursor (AC-32); undefined while there is no cursor. */
   readonly onMoveToCursor?: ((stopId: string) => void) | undefined;
+  /** Plan 6.7: the nearest 20 m sky-obstruction value at a stop, given only while the sky layer is shown. */
+  readonly skyAt?: SkySampler | null;
   readonly children?: React.ReactNode;
 }
 
-export function PlanPanel({ output, message, onDeleteStop, onEditStop, onSetTime, onOpenSource, onMoveToCursor, children }: PlanPanelProps) {
+export function PlanPanel({ output, message, onDeleteStop, onEditStop, onSetTime, onOpenSource, onMoveToCursor, skyAt, children }: PlanPanelProps) {
   if (!output) return (
     <aside className="console" aria-label="Plan">
       {message ? <p className="problem" role="alert" data-testid="engine-message">{message}</p> : <p className="muted">Engine loading…</p>}
@@ -64,6 +67,8 @@ export function PlanPanel({ output, message, onDeleteStop, onEditStop, onSetTime
               <TimeRow id="stop_duration" stopId={s.id} label={`Stop ${s.letter} duration`} onSet={onSetTime}
                 current={plan.assumptions.find((a) => a.id === `A-stop_duration-${s.id}`)}
                 inherited={plan.assumptions.some((a) => a.id === "A-stop_duration") ? "uses the default" : "not set"} />
+              {skyAt && <p className="muted" data-testid="stop-sky">Sky blocked, 20 m sample (geometry, not dose):{" "}
+                <QuantityText q={skyAt(s.f1)} onOpen={onOpenSource} label={`Stop ${s.letter} sky blocked`} /></p>}
               {onEditStop && <StopEdit key={s.id} stop={s} onSave={onEditStop} />}
             </li>
           ))}

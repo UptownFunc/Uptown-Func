@@ -2,7 +2,7 @@
 // Tier 1 shell: the AREA sheet is the largest, brightest surface (plan 9). Every view carries the footer.
 // The engine worker is the only writer of MissionPlan; the console sends it Commands and shows the copies it returns.
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AreaSheet } from "../map/AreaSheet";
+import { AreaSheet, type SkySampler } from "../map/AreaSheet";
 import { createEngine, type EngineClient } from "../engine/client";
 import type { LatLon, PlanOutput } from "../engine/planner";
 import { PlanPanel } from "./PlanPanel";
@@ -43,6 +43,7 @@ export function App() {
   const [showContours, setShowContours] = useState(false);
   const [showSky, setShowSky] = useState(false);
   const [skyState, setSkyState] = useState<"none" | "ok" | "failed">("none");
+  const [skyAt, setSkyAt] = useState<SkySampler | null>(null);
   const [drillMin, setDrillMin] = useState<number | null>(null);
   const [levels, setLevels] = useState<ContourLevel[] | null>(null);
   const [contourBusy, setContourBusy] = useState(false);
@@ -147,7 +148,7 @@ export function App() {
       </header>
       <main className="well">
         <AreaSheet dataUrl={AREA_URL} plan={output} onPick={(p) => send("add_stop", { lat: p.lat, lon: p.lon })}
-          onSnapshotReady={(fn) => setSnapshot(() => fn)} hoverIndex={hover} onHoverIndex={setHover} onDatasets={setLayerDatasets} onCursor={setCursor} contours={contourDisplay} showSky={showSky} onSky={setSkyState} />
+          onSnapshotReady={(fn) => setSnapshot(() => fn)} hoverIndex={hover} onHoverIndex={setHover} onDatasets={setLayerDatasets} onCursor={setCursor} contours={contourDisplay} showSky={showSky} onSky={(st, f) => { setSkyState(st); if (f) setSkyAt(() => f); }} />
         <RouteProfile output={output} hoverIndex={hover} onHoverIndex={setHover} />
         {/* Kept mounted so a built card keeps its version stamp and shows STALE after a plan change. */}
         <BriefingView output={output} snapshot={snapshot} hidden={view !== "briefing"} rover={rover} />
@@ -156,7 +157,7 @@ export function App() {
         <PlanPanel output={output} message={message} onDeleteStop={(id) => send("delete_stop", { stopId: id })}
           onEditStop={(stopId, name, tasks) => send("edit_stop", { stopId, name, tasks })}
           onSetTime={(id, value_s, rationale, stopId) => send("set_assumption", { id, value_s, rationale, ...(stopId ? { stopId } : {}) })}
-          onOpenSource={setSelected}
+          onOpenSource={setSelected} skyAt={showSky && skyState === "ok" ? skyAt : null}
           onMoveToCursor={cursor ? (stopId) => send("move_stop", { stopId, lat: cursor.lat, lon: cursor.lon }) : undefined}>
           <ConditionsPanel output={output} onOpenSource={setSelected} rems={rems}
             onSet={(id, value_s, rationale) => send("set_assumption", { id, value_s, rationale })} />

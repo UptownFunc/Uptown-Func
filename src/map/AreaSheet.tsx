@@ -28,9 +28,12 @@ import { createCoverageLayer, drawCoverage } from "./coverageLayer";
 import { contourLegend, contourLinesF7 } from "./elevationContours";
 import { createElevationLayer, drawElevationContours } from "./elevationLayer";
 import { createTerrainLayer } from "./terrainLayer";
+import { skySampleAt } from "./skySample";
 import type { Quantity } from "../contracts";
 
 /** Displays a Quantity: unknown stays "unknown" (CLAUDE.md); one decimal for metres. */
+export type SkySampler = (p: { lat: number; lon: number }) => Quantity;
+
 function fmt(q: Quantity): string {
   return q.value === null ? "unknown" : `${q.value.toFixed(1)} ${q.unit}`;
 }
@@ -64,8 +67,8 @@ export interface AreaSheetProps {
   readonly contours?: ContourDisplay | null;
   /** Plan 6.7 sky-obstruction layer (tier 2), off by default; geometry, not dose. */
   readonly showSky?: boolean;
-  /** Whether this area has a sky layer, and whether its image failed to load. */
-  readonly onSky?: (state: "none" | "ok" | "failed") => void;
+  /** Whether this area has a sky layer, and whether its image failed to load; with the per-stop 20 m sampler (plan 6.7). */
+  readonly onSky?: (state: "none" | "ok" | "failed", sample?: SkySampler) => void;
 }
 
 const cursorStyle = new Style({ image: new RegularShape({ points: 4, radius: 11, radius2: 0, angle: 0, stroke: new Stroke({ color: "#f3eee4", width: 2 }) }) });
@@ -177,7 +180,7 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
         src.on("imageloaderror", () => { setSkyFailed(true); skyRef.current?.("failed"); });
         skyLayer.current = new ImageLayer({ className: "layer-sky", source: src, visible: showSkyRef.current });
       }
-      skyRef.current?.(a.display.sky ? "ok" : "none");
+      skyRef.current?.(a.display.sky ? "ok" : "none", (p) => skySampleAt(p, a.skyGrid));
       const o = f1ToF7(a.grid.origin);
       map = new OlMap({
         target: target.current,
