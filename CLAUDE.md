@@ -55,6 +55,8 @@ These values were **not given by the plan or a cited source**. A session or a te
 | V-09 | Stop name and task limits | name 60 chars; 10 tasks of 120 chars | SI | `src/engine/assumptions.ts` `STOP_LIMITS` | C-19 | OPEN |
 | V-10 | Time-to-habitat contour display | 5-min levels (plan) up to 90 min; 4 m display grid; minimum area 400 cells | Session (display) | `src/app/App.tsx`, `src/engine/worker.ts` | R-08 | OPEN |
 | V-11 | AC-08 path rule | a 2 m cell counts if the D5 line enters it (exact traversal); share over known cells | Session (method) | `pipeline/sharpwalk/rover_path.py` | AC-08 record | OPEN |
+| V-12 | AC-07 base observer height h_obs | 1 m (the plan sweeps 0-2 m; RAD's reference height UNVERIFIED, R-13) | Session (method) | `pipeline/sharpwalk/run_sky_benchmark.py` `BASE` | AC-07 record | OPEN |
+| V-13 | AC-07 sampling | D1 to 3 km (plan: to the D1 edge), 1 m steps; D12 beyond, 100 m steps | Session (method) | `pipeline/sharpwalk/run_sky_benchmark.py` | AC-07 record | OPEN |
 
 **Plan values whose source is still unresolved** (the value comes from the plan; the citation or reference is missing):
 - 20 deg slope limit: page or slide UNRESOLVED (`src/constants`; the release check lists it).
