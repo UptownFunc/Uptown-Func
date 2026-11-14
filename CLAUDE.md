@@ -36,6 +36,32 @@ The plan is the project authority. **Section 19 overrides earlier sections where
 - Radiation values are only cited published observations. The `12%` figure is a model prediction for downward dose only. Obstruction must never be converted into dose.
 - Do not present generated Mars imagery as scientific data. Do not use NASA logos, flags, or mission identifiers. Every view carries the footer: “Independent student project; not affiliated with or endorsed by NASA.”
 
+## Placeholder and invented values register - fix before the site is final
+
+These values were **not given by the plan or a cited source**. A session or a team member chose them so the app could run. Each is shown in the app as assumed or placeholder where it appears. **Before the G5 freeze (Sun 15 Nov 13:00 Asia/Manila), or as soon as the site is nearly done**, every row must be either replaced with a team-chosen or sourced value (code, tests and `DECISIONS.md` updated), or explicitly kept by the team with the reason recorded in `DECISIONS.md`. Then mark the row FIXED or KEPT here.
+
+**Any session that introduces a new invented or placeholder value must add a row here in the same commit.** Never present a row's value as measured, cited or Mars-validated.
+
+| # | Value | Current setting | Chosen by | Where | Decision | Status |
+|---|---|---|---|---|---|---|
+| V-01 | Planned EVA duration T_EVA | 240 min | SI at a team member's direction | `src/app/demoPreset.ts` | G3-01, G3-02 | OPEN |
+| V-02 | Operational tasks t_ops | 30 min | SI, as V-01 | `src/app/demoPreset.ts` | G3-01 | OPEN |
+| V-03 | Contingency t_cont | 30 min | SI, as V-01 | `src/app/demoPreset.ts` | G3-01 | OPEN |
+| V-04 | Default stop duration | 45 min | SI, as V-01 | `src/app/demoPreset.ts` | G3-01 | OPEN |
+| V-05 | Scenario date and time (sun values) | 2026-11-15 12:00 UTC | SI, as V-01 | `src/app/demoPreset.ts` | G3-01 | OPEN |
+| V-06 | Slope factors k_v, all four bins | 1 (placeholder, ASSUMED banner shown) | Session operator | `src/engine/assumptions.ts` | K-01 | OPEN |
+| V-07 | Default habitat position | 4.795211 S, 137.391845 E (nearest slope-screened cell, 15.6 m from the plan 19.2 point) | Session | `src/app/App.tsx` `DEFAULT_HABITAT` | H-01 | OPEN |
+| V-08 | Rover point-of-view images | Navcam frames from sols 4602, 4628, 4650 | SI, as V-01 | `public/rover/images.json` | C-22 | OPEN (picks and image-use terms) |
+| V-09 | Stop name and task limits | name 60 chars; 10 tasks of 120 chars | SI | `src/engine/assumptions.ts` `STOP_LIMITS` | C-19 | OPEN |
+| V-10 | Time-to-habitat contour display | 5-min levels (plan) up to 90 min; 4 m display grid; minimum area 400 cells | Session (display) | `src/app/App.tsx`, `src/engine/worker.ts` | R-08 | OPEN |
+
+**Plan values whose source is still unresolved** (the value comes from the plan; the citation or reference is missing):
+- 20 deg slope limit: page or slide UNRESOLVED (`src/constants`; the release check lists it).
+- D1 vertical reference: unverified (D-05); shown as "vertical reference unverified".
+- REMS units read as degrees C and Pa, not labelled in the feed (REMS-01).
+
+**Conventions pending confirmation** (no displayed science value invented): P-01, P-02, K-02, L-01, L-02, F-01, CON-01, CON-03, COV-01, HATCH-01 in `DECISIONS.md`.
+
 ## Architecture - do not bypass these boundaries
 
 - Static web app; no backend. A one-time Python pipeline prepares the data. The TypeScript mission engine runs in a Web Worker via Comlink.

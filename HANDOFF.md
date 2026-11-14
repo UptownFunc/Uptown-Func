@@ -24,6 +24,15 @@ Do not interpret blank fields as proof that no work exists. Inspect GitHub and t
 - No code, data, contract or decision changed. No PR opened, nothing merged. Open PRs: none (PR #1 merged earlier).
 - **Resolved 18:52:** G-07 restores team credit (G-01). Contracts accepted as drafted for the merge (C-AGREE). The operator authorised the merge of the branch work into `main` and delegated the G3 input choices to the session.
 
+## Session update 19:27 (both PRs merged)
+
+- **`main` = a761afd** (PR #3 merge: G3 inputs + R-16 fixes), on top of 1da70b5 (PR #2). Checks at 56b261b: vitest 274/274, tsc clean, build OK (~247.9 of 250 KB), pytest 62, Playwright 46/46.
+- Operator approvals recorded: G-07 (team credit), C-AGREE (contracts as drafted), G3-02 (edit_stop contract change; SI-chosen defaults load by default, labelled).
+- **G3 status: Tier 1 end-to-end green including planned margin; first public deploy NOT done (B-4: needs Vercel access, a human).** G3 baseline time Sun 01:00.
+- Next for a session: B-4 deploy as soon as a person links Vercel; then G4: B-7 rover positions for AC-07/AC-08 (team input), AC-09 third date (B-10), design review B-13. Code-only: R-15 items 7/9 cleanup if bundle allows (~2.1 KB headroom).
+- **19:29: CLAUDE.md now has the placeholder register V-01..V-10 (G-08).** Every invented value must be FIXED or KEPT by the team before the G5 freeze (Sun 13:00); new ones are added there in the same commit.
+- Team to confirm: G-07 (Patrick's G-06 statement said otherwise), G3-01 values, C-22 image picks and image-use terms, H-01 habitat.
+
 ## Session update 19:15 (G3 inputs)
 
 - **PR #2 merged into `main` at 19:00: merge commit `1da70b5`** (all branch work + G-07 + C-AGREE + R-15 fixes).
