@@ -8,7 +8,7 @@ const base = { methodId: "m", assumptionIds: ["A-kv"], sourceIds: ["D1"] };
 describe("quantity formatting (CLAUDE.md: estimates are ranges, italic, marked est.; unknown stays unknown)", () => {
   it("shows an estimated time as an est. range in SI minutes", () => {
     const q: Quantity = { value: 600, low: 540, high: 780, unit: "s", valueClass: "estimated", ...base };
-    expect(formatDuration(q)).toEqual({ text: "est. 9.0-13.0 min", estimated: true, unknown: false });
+    expect(formatDuration(q)).toEqual({ text: "est. 9.0 to 13.0 min", estimated: true, unknown: false });
   });
 
   it("refuses an estimate without a range rather than showing it as a bare number", () => {

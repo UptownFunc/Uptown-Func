@@ -32,7 +32,7 @@ test("a click adds a stop through the engine worker and the route is drawn and l
   await expect(legs).toContainText("A → Habitat");
   // Walking times are estimated ranges in SI minutes, italic.
   const time = legs.locator("tbody tr").first().locator("td").nth(3);
-  await expect(time).toHaveText(/^est\. \d+\.\d-\d+\.\d min$/);
+  await expect(time).toHaveText(/^est\. \d+\.\d to \d+\.\d min$/);
   await expect(time).toHaveCSS("font-style", "italic");
   await expect(page.getByTestId("end-margin")).toContainText("unknown");
   await expect(page.getByTestId("engine-message")).toContainText(/Plan updated in \d+ ms/);
@@ -70,7 +70,7 @@ test("planned margin stays unknown until every Assumed time is entered, then sho
   await expect(page.getByTestId("end-margin")).toContainText("unknown");
   await setTime(page, "Duration at each stop", "15");
   const end = page.getByTestId("end-margin");
-  await expect(end).toContainText(/est\. -?\d+\.\d--?\d+\.\d min/, { timeout: 20_000 });
+  await expect(end).toContainText(/est\. -?\d+\.\d to -?\d+\.\d min/, { timeout: 20_000 });
   await expect(page.getByTestId("margin-state")).toHaveText("OK");
   await page.screenshot({ path: "test-results/plan-margin.png" });
 
@@ -85,4 +85,39 @@ test("a time without a rationale cannot be submitted", async ({ page }) => {
   await expect(page.getByTestId("current-T_EVA")).toHaveText("not set");
   await page.getByLabel("Planned EVA duration (T_EVA), minutes").fill("240");
   await expect(page.getByRole("button", { name: "Set" }).first()).toBeDisabled();
+});
+
+test("profile scrubs both ways with the map, and margin ticks appear when the plan runs over", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
+  await clickAt(page, STOP);
+  const profile = page.getByTestId("profile");
+  await expect(profile).toBeVisible({ timeout: 20_000 });
+  const readout = page.getByTestId("profile-readout");
+
+  // Profile -> readout (and map marker): hover the middle of the profile.
+  const box = (await profile.locator("svg").boundingBox())!;
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await expect(readout).toContainText(/s \d+ m/);
+  await expect(readout).toContainText("planned margin unknown");
+
+  // Map -> profile: hovering the route at the stop selects a profile sample.
+  await page.mouse.move(0, 0);
+  await expect(readout).toContainText("Hover the profile");
+  const map = (await page.getByTestId("area-map").boundingBox())!;
+  await page.mouse.move(map.x + map.width / 2 + (K * (STOP.lon - ORIGIN.lon)) / RES, map.y + map.height / 2 - (K * (STOP.lat - ORIGIN.lat)) / RES);
+  await expect(readout).toContainText(/s \d+ m/);
+
+  // A per-stop duration overrides; a short T_EVA makes the plan run over and draws both ticks.
+  await setTime(page, "Planned EVA duration (T_EVA)", "90");
+  await setTime(page, "Operational tasks (t_ops)", "10");
+  await setTime(page, "Contingency (t_cont)", "10");
+  await setTime(page, "Stop A duration", "20");
+  await expect(page.getByTestId("current-stop_duration").first()).toBeVisible();
+  await expect(page.getByTestId("margin-state")).toHaveText("OVER", { timeout: 20_000 });
+  await expect(page.getByTestId("profile-tick-NEAR_LIMIT")).toHaveText("margin 10% here");
+  await expect(page.getByTestId("profile-tick-OVER")).toHaveText("margin 0 here");
+  await page.mouse.move(box.x + box.width * 0.9, box.y + box.height / 2);
+  await expect(readout).toContainText(/planned margin est\. -?\d+\.\d to -?\d+\.\d min/);
+  await page.screenshot({ path: "test-results/plan-profile.png" });
 });

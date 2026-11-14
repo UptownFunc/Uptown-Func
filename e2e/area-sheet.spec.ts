@@ -28,3 +28,13 @@ test("shows an error instead of a blank map when area data is missing", async ({
   await page.goto("/");
   await expect(page.getByRole("alert")).toContainText("Area data could not be loaded");
 });
+
+test("the map does not change size when the pointer moves over it or a stop is added", async ({ page }) => {
+  await page.goto("/");
+  const map = page.getByTestId("area-map");
+  await expect(map.locator("canvas").first()).toBeVisible();
+  const before = (await map.boundingBox())!;
+  await page.mouse.move(before.x + before.width / 2, before.y + before.height / 2);
+  await expect(page.getByTestId("status-line")).toContainText("elev");
+  expect((await map.boundingBox())!.height).toBe(before.height);
+});

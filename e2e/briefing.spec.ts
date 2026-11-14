@@ -28,7 +28,7 @@ test("briefing card: built from the current plan, then STALE and unprintable aft
   await expect(page.getByTestId("card-version")).toHaveText(`Plan ${version}`);
   await expect(card.locator("tbody tr")).toHaveCount(2);
   await expect(card).toContainText("H → A");
-  await expect(card.locator("td.est").first()).toHaveText(/^est\. \d+\.\d-\d+\.\d min$/);
+  await expect(card.locator("td.est").first()).toHaveText(/^est\. \d+\.\d to \d+\.\d min$/);
   await expect(page.getByTestId("card-assumptions")).toContainText("Slope factors k_v");
   await expect(page.getByTestId("card-margin")).toContainText("unknown");
   await expect(card).toContainText("Independent student project; not affiliated with or endorsed by NASA.");

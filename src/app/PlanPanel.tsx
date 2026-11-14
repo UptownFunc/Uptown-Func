@@ -7,13 +7,13 @@ import { formatDuration, formatLength } from "./format";
 
 const RANGE = CONSTANTS.walkSpeedRange;
 import { MarginState } from "./MarginState";
-import { PlanTimes } from "./PlanTimes";
+import { PlanTimes, TimeRow } from "./PlanTimes";
 
 export interface PlanPanelProps {
   readonly output: PlanOutput | null;
   readonly message: string | null;
   readonly onDeleteStop: (stopId: string) => void;
-  readonly onSetTime: (id: string, value_s: number, rationale: string) => void;
+  readonly onSetTime: (id: string, value_s: number, rationale: string, stopId?: string) => void;
 }
 
 export function PlanPanel({ output, message, onDeleteStop, onSetTime }: PlanPanelProps) {
@@ -44,9 +44,14 @@ export function PlanPanel({ output, message, onDeleteStop, onSetTime }: PlanPane
         <ol className="stops">
           {plan.stops.map((s) => (
             <li key={s.id}>
-              <span className="letter">{s.letter}</span> {s.name}
-              <span className="muted"> · duration {formatDuration(s.duration).text}</span>
-              <button type="button" onClick={() => onDeleteStop(s.id)} aria-label={`Delete stop ${s.letter}`}>Delete</button>
+              <div className="stop-head">
+                <span className="letter">{s.letter}</span> {s.name}
+                <span className="muted"> · duration {formatDuration(s.duration).text}</span>
+                <button type="button" onClick={() => onDeleteStop(s.id)} aria-label={`Delete stop ${s.letter}`}>Delete</button>
+              </div>
+              <TimeRow id="stop_duration" stopId={s.id} label={`Stop ${s.letter} duration`} onSet={onSetTime}
+                current={plan.assumptions.find((a) => a.id === `A-stop_duration-${s.id}`)}
+                inherited={plan.assumptions.some((a) => a.id === "A-stop_duration") ? "uses the default" : "not set"} />
             </li>
           ))}
         </ol>
@@ -54,7 +59,10 @@ export function PlanPanel({ output, message, onDeleteStop, onSetTime }: PlanPane
       {plan.legs.length > 0 && (
         <table className="legs" data-testid="legs">
           <caption className="muted">Legs on the 2 m grid path (D1 heights)</caption>
-          <thead><tr><th>Leg</th><th>Length</th><th>Climb</th><th>Walking time</th></tr></thead>
+          <thead><tr><th>Leg</th>
+            <th>Length <span className="badge" title="Model-derived from D1 on the 2 m grid path">model · D1</span></th>
+            <th>Climb <span className="badge" title="Model-derived from D1 heights">model · D1</span></th>
+            <th>Walking time <span className="badge" title="Estimated range: 0.64-0.97 m/s suited range, k_v placeholder">est.</span></th></tr></thead>
           <tbody>
             {plan.legs.map((l) => {
               const t = formatDuration(l.time);

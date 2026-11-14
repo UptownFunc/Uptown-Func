@@ -6,6 +6,7 @@ import { AreaSheet } from "../map/AreaSheet";
 import { createEngine, type EngineClient } from "../engine/client";
 import type { LatLon, PlanOutput } from "../engine/planner";
 import { PlanPanel } from "./PlanPanel";
+import { RouteProfile } from "./RouteProfile";
 import { BriefingView } from "../briefing/BriefingView";
 import type { MapSnapshot } from "../map/snapshot";
 
@@ -23,6 +24,7 @@ export function App() {
   const engine = useRef<EngineClient | null>(null);
   const [output, setOutput] = useState<PlanOutput | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [hover, setHover] = useState<number | null>(null);
   const [view, setView] = useState<"planning" | "briefing">("planning");
   const [snapshot, setSnapshot] = useState<(() => Promise<MapSnapshot | null>) | null>(null);
   const outputRef = useRef(output);
@@ -72,11 +74,12 @@ export function App() {
       </header>
       <main className="well">
         <AreaSheet dataUrl={AREA_URL} plan={output} onPick={(p) => send("add_stop", { lat: p.lat, lon: p.lon })}
-          onSnapshotReady={(fn) => setSnapshot(() => fn)} />
+          onSnapshotReady={(fn) => setSnapshot(() => fn)} hoverIndex={hover} onHoverIndex={setHover} />
+        <RouteProfile output={output} hoverIndex={hover} onHoverIndex={setHover} />
         {/* Kept mounted so a built card keeps its version stamp and shows STALE after a plan change. */}
         <BriefingView output={output} snapshot={snapshot} hidden={view !== "briefing"} />
         <PlanPanel output={output} message={message} onDeleteStop={(id) => send("delete_stop", { stopId: id })}
-          onSetTime={(id, value_s, rationale) => send("set_assumption", { id, value_s, rationale })} />
+          onSetTime={(id, value_s, rationale, stopId) => send("set_assumption", { id, value_s, rationale, ...(stopId ? { stopId } : {}) })} />
       </main>
       <footer className="footer">Independent student project; not affiliated with or endorsed by NASA.</footer>
     </div>

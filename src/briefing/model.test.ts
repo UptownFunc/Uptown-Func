@@ -34,7 +34,7 @@ describe("briefing model (plan UX-10: from the current plan, with version and as
 
   it("gives each leg a heading, distance and est. time range, with stop letters", () => {
     const [a, b] = briefingModel(plan).legs;
-    expect(a).toMatchObject({ label: "H → A", heading: "165°", distance: "1.95 km", time: "est. 33.5-50.8 min", estimated: true });
+    expect(a).toMatchObject({ label: "H → A", heading: "165°", distance: "1.95 km", time: "est. 33.5 to 50.8 min", estimated: true });
     expect(b!.label).toBe("A → H");
   });
 
@@ -44,7 +44,7 @@ describe("briefing model (plan UX-10: from the current plan, with version and as
   });
 
   it("carries the end margin and its slow-bound state, or unknown", () => {
-    expect(briefingModel(plan).margin).toEqual({ text: "est. 73.6-108.1 min", state: "OK", unknown: false });
+    expect(briefingModel(plan).margin).toEqual({ text: "est. 73.6 to 108.1 min", state: "OK", unknown: false });
     const m = briefingModel({ ...plan, plannedMargins: [], endMargin: unknown }).margin;
     expect(m).toEqual({ text: "unknown", state: null, unknown: true });
   });

@@ -142,6 +142,7 @@ describe("engine planner (only writer of MissionPlan)", () => {
     expect(r.ok).toBe(true);
     const { plan, geometry } = p.current();
     expect(plan.legs).toEqual([]);
+    expect(geometry.profile).toEqual([]);
     expect(geometry.unreachable).toEqual([{ fromId: "habitat", toId: plan.stops[0]!.id }, { fromId: plan.stops[0]!.id, toId: "habitat" }]);
   });
 
@@ -244,5 +245,94 @@ describe("Assumed plan times via set_assumption (plan 6.6, UX-03; T-01: no value
     p.apply(cmd("add_stop", { ...at(g, 2, 38), name: "Far" }, p.current().plan.versionHash));
     setTimes(p, ALL);
     expect(p.current().plan.endMargin.valueClass).toBe("unknown");
+  });
+});
+
+describe("per-stop durations (plan 6.6 sums each stop's own t_stop)", () => {
+  const set = (p: Planner, payload: Record<string, unknown>) =>
+    p.apply(cmd("set_assumption", { rationale: "test", ...payload }, p.current().plan.versionHash));
+  const base = (p: Planner) => {
+    for (const [id, value_s] of Object.entries({ T_EVA: 14400, t_ops: 1200, t_cont: 1800 })) expect(set(p, { id, value_s }).ok).toBe(true);
+  };
+
+  it("lets one stop override the default duration and sums each stop's own value", () => {
+    const { g, p } = plannerWithHabitat();
+    p.apply(cmd("add_stop", { ...at(g, 2, 10), name: "A" }, p.current().plan.versionHash));
+    p.apply(cmd("add_stop", { ...at(g, 10, 10), name: "B" }, p.current().plan.versionHash));
+    base(p);
+    expect(set(p, { id: "stop_duration", value_s: 600 }).ok).toBe(true);
+    const sB = p.current().plan.stops[1]!.id;
+    const withDefault = p.current().plan.endMargin.low!;
+    expect(set(p, { id: "stop_duration", stopId: sB, value_s: 3000 }).ok).toBe(true);
+    const plan = p.current().plan;
+    expect(plan.stops.map((s) => s.duration.value)).toEqual([600, 3000]);
+    expect(plan.stops[1]!.duration.assumptionIds).toEqual([`A-stop_duration-${sB}`]);
+    expect(plan.endMargin.low!).toBeCloseTo(withDefault - 2400, 6);
+    expect(plan.assumptions.find((a) => a.id === `A-stop_duration-${sB}`)!.name).toContain("stop B");
+  });
+
+  it("computes margins when every stop has its own duration and there is no default", () => {
+    const { g, p } = plannerWithHabitat();
+    p.apply(cmd("add_stop", { ...at(g, 2, 10), name: "A" }, p.current().plan.versionHash));
+    base(p);
+    expect(p.current().plan.endMargin.valueClass).toBe("unknown");
+    expect(set(p, { id: "stop_duration", stopId: p.current().plan.stops[0]!.id, value_s: 300 }).ok).toBe(true);
+    expect(p.current().plan.endMargin.valueClass).toBe("estimated");
+  });
+
+  it("refuses an override for a stop that does not exist and drops an override when its stop is deleted", () => {
+    const { g, p } = plannerWithHabitat();
+    expect(set(p, { id: "stop_duration", stopId: "S9", value_s: 60 }).ok).toBe(false);
+    p.apply(cmd("add_stop", { ...at(g, 2, 10), name: "A" }, p.current().plan.versionHash));
+    const id = p.current().plan.stops[0]!.id;
+    set(p, { id: "stop_duration", stopId: id, value_s: 60 });
+    p.apply(cmd("delete_stop", { stopId: id }, p.current().plan.versionHash));
+    expect(p.current().plan.assumptions.some((a) => a.id === `A-stop_duration-${id}`)).toBe(false);
+  });
+});
+
+describe("route profile and margin ticks (plan 9.4, UX-06)", () => {
+  const ALL = { T_EVA: 4 * 3600, t_ops: 1200, t_cont: 1800, stop_duration: 900 };
+  const setAll = (p: Planner, v: Record<string, number>) => {
+    for (const [id, value_s] of Object.entries(v))
+      expect(p.apply(cmd("set_assumption", { id, value_s, rationale: "test" }, p.current().plan.versionHash)).ok).toBe(true);
+  };
+
+  it("gives one sample per route cell with distance and elevation, margins null while unknown", () => {
+    const g = testGrid();
+    for (let c = 0; c < g.cols; c++) g.elevation[2 * g.cols + c] = c * 0.1; // gentle rise along row 2
+    const p = new Planner(g, at(g, 2, 2));
+    p.apply(cmd("add_stop", { ...at(g, 2, 10), name: "A" }, p.current().plan.versionHash));
+    const prof = p.current().geometry.profile;
+    expect(prof.length).toBe(9 + 8); // 9 cells out, then 8 more back (the stop cell is shared)
+    expect(prof[0]).toMatchObject({ s_m: 0, z_m: 0.2, margin_min: null, marginHigh_min: null });
+    expect(prof[8]!.z_m).toBeCloseTo(1.0, 9);
+    for (let i = 1; i < prof.length; i++) expect(prof[i]!.s_m).toBeGreaterThan(prof[i - 1]!.s_m);
+    expect(p.current().geometry.marginTicks).toEqual([]);
+  });
+
+  it("places the 10% and 0 ticks at the first samples past each threshold, with no tick when the plan fits", () => {
+    const { g, p } = plannerWithHabitat();
+    p.apply(cmd("add_stop", { ...at(g, 2, 38), name: "Far" }, p.current().plan.versionHash));
+    setAll(p, ALL);
+    expect(p.current().geometry.marginTicks).toEqual([]);
+    // T_EVA just above the fixed costs: the margin crosses 10% and then 0 somewhere along the walk.
+    setAll(p, { T_EVA: 1200 + 1800 + 900 + 150 });
+    const { geometry, plan } = p.current();
+    const ticks = geometry.marginTicks;
+    expect(ticks.map((t) => t.kind)).toEqual(["NEAR_LIMIT", "OVER"]);
+    const tEvaMin = (1200 + 1800 + 900 + 150) / 60;
+    const idx = (s: number) => geometry.profile.findIndex((x) => x.s_m === s);
+    const ten = idx(ticks[0]!.s_m), zero = idx(ticks[1]!.s_m);
+    expect(geometry.profile[ten]!.margin_min!).toBeLessThan(0.1 * tEvaMin);
+    expect(geometry.profile[ten - 1]!.margin_min!).toBeGreaterThanOrEqual(0.1 * tEvaMin);
+    expect(geometry.profile[zero]!.margin_min!).toBeLessThan(0);
+    expect(geometry.profile[zero - 1]!.margin_min!).toBeGreaterThanOrEqual(0);
+    expect(plan.plannedMargins.length).toBeGreaterThan(0);
+    // Each sample is an est. range; the last one matches the end margin's low and high.
+    const last = geometry.profile[geometry.profile.length - 1]!;
+    expect(last.margin_min! * 60).toBeCloseTo(plan.endMargin.low!, 6);
+    expect(last.marginHigh_min! * 60).toBeCloseTo(plan.endMargin.high!, 6);
+    for (const x of geometry.profile) expect(x.marginHigh_min!).toBeGreaterThanOrEqual(x.margin_min!);
   });
 });

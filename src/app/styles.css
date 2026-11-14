@@ -14,12 +14,13 @@ body { background: var(--housing); color: var(--text); font-family: var(--sans);
 .wordmark { font-weight: 600; letter-spacing: 0.02em; }
 .muted { color: var(--text-muted); font-size: 13px; }
 .well { background: var(--bg); border-radius: 12px; overflow: hidden; display: grid; min-height: 0;
-  grid-template-columns: minmax(0, 1fr) 340px; grid-template-rows: 1fr auto; grid-template-areas: "sheet console" "status console"; }
+  grid-template-columns: minmax(0, 1fr) 340px; grid-template-rows: 1fr auto auto; grid-template-areas: "sheet console" "status console" "profile console"; }
+.well > .profile { grid-area: profile; }
 .well > .sheet { grid-area: sheet; }
 .well > .status { grid-area: status; }
 .well > .console { grid-area: console; }
 @media (max-width: 800px) {
-  .well { grid-template-columns: 1fr; grid-template-rows: 60vh auto auto; grid-template-areas: "sheet" "status" "console"; }
+  .well { grid-template-columns: 1fr; grid-template-rows: 60vh auto auto auto; grid-template-areas: "sheet" "status" "profile" "console"; }
 }
 .sheet { position: relative; min-height: 0; }
 .sheet .map { position: absolute; inset: 8px; border-radius: 4px; overflow: hidden; background: #000; }
@@ -44,7 +45,7 @@ body { background: var(--housing); color: var(--text); font-family: var(--sans);
 .console .small { font-size: 11px; }
 .banner { background: var(--paper); color: var(--housing); border-radius: 6px; padding: 8px 10px; line-height: 1.4; }
 .stops { padding-left: 0; list-style: none; margin: 0; }
-.stops li { display: flex; gap: 6px; align-items: center; margin: 4px 0; }
+.stops li { margin: 4px 0; }
 .stops .letter { background: var(--plan); color: var(--paper); border-radius: 50%; width: 20px; height: 20px;
   display: inline-grid; place-items: center; font-weight: 600; font-size: 12px; }
 .stops button { margin-left: auto; background: transparent; color: var(--text); border: 1px solid var(--plan-hi);
@@ -109,3 +110,29 @@ body { background: var(--housing); color: var(--text); font-family: var(--sans);
   .card, .card * { visibility: visible; }
   .card { position: absolute; left: 0; top: 0; width: 100%; min-height: 0; padding: 0; background: #fff; clip-path: none; }
 }
+
+/* Elevation profile (plan 9.2: one of two charts). */
+.profile { padding: 4px 12px 6px; border-top: 1px solid var(--border); font-size: 12px; }
+.profile.empty { padding: 8px 12px; }
+.profile-head, .profile-readout { display: flex; gap: 16px; flex-wrap: wrap; color: var(--text-muted); }
+.profile-readout { font-family: var(--mono); font-variant-numeric: tabular-nums; color: var(--text); min-height: 16px; }
+.profile-plot { position: relative; height: 96px; margin: 14px 0 2px; }
+.profile-plot svg { width: 100%; height: 100%; display: block; cursor: crosshair; }
+.profile-line { fill: none; stroke: var(--plan-hi); stroke-width: 2; vector-effect: non-scaling-stroke; }
+.profile-line.over { stroke: var(--over); stroke-dasharray: 6 3; }
+.profile-stop { stroke: var(--text-muted); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.profile-tick { stroke-width: 2; vector-effect: non-scaling-stroke; }
+.profile-tick.NEAR_LIMIT { stroke: var(--caution); }
+.profile-tick.OVER { stroke: var(--over); }
+.profile-marker { stroke: var(--paper); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+.profile-label { position: absolute; top: -14px; transform: translateX(-50%); font-size: 11px; white-space: nowrap; }
+.profile-label.tick.NEAR_LIMIT { color: var(--caution); top: auto; bottom: 14px; }
+.profile-label.tick.OVER { color: var(--over); top: auto; bottom: -2px; }
+.badge { font-size: 10px; font-family: var(--sans); color: var(--text-muted); border: 1px solid var(--border); border-radius: 3px; padding: 0 3px; margin-left: 2px; }
+.stops li { display: block; }
+.stop-head { display: flex; gap: 6px; align-items: center; }
+
+/* Fixed heights: the map must not resize while the pointer moves or a stop is added, or a click lands on ground
+   other than the one under the cursor (the status line wraps to two lines on first hover; the profile appears). */
+.well > .status { height: 52px; overflow: hidden; align-content: flex-start; }
+.well > .profile { height: 158px; overflow: hidden; }

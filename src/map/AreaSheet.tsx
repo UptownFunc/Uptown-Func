@@ -9,8 +9,9 @@ import Static from "ol/source/ImageStatic";
 import ScaleLine from "ol/control/ScaleLine";
 import Zoom from "ol/control/Zoom";
 import { f1ToF7, f7ToF1 } from "../geo";
+import { cellCentreF1, type GridDef } from "../geo/grid";
 import type { LatLon, PlanOutput } from "../engine/planner";
-import { createPlanLayer, drawPlan } from "./planLayer";
+import { createMarkerLayer, createPlanLayer, drawMarker, drawPlan } from "./planLayer";
 import { snapshotMap, type MapSnapshot } from "./snapshot";
 import { F7_PROJECTION } from "./f7";
 import { loadArea, type LoadedArea } from "./loadArea";
@@ -22,6 +23,16 @@ function fmt(q: Quantity): string {
   return q.value === null ? "unknown" : `${q.value.toFixed(1)} ${q.unit}`;
 }
 
+function profileXY(plan: PlanOutput | null, grid: GridDef): Float64Array {
+  const prof = plan?.geometry.profile ?? [];
+  const out = new Float64Array(prof.length * 2);
+  prof.forEach((p, i) => {
+    const x = f1ToF7(cellCentreF1({ r: Math.floor(p.cell / grid.cols), c: p.cell % grid.cols }, grid));
+    out[2 * i] = x.x; out[2 * i + 1] = x.y;
+  });
+  return out;
+}
+
 export interface AreaSheetProps {
   readonly dataUrl: string;
   /** The engine's latest plan (a copy); the sheet only draws it. */
@@ -30,9 +41,12 @@ export interface AreaSheetProps {
   readonly onPick?: (p: LatLon) => void;
   /** Receives a function that exports the current sheet with the plan for the briefing card (plan 7.8). */
   readonly onSnapshotReady?: (snapshot: () => Promise<MapSnapshot | null>) => void;
+  /** Index into plan.geometry.profile under the pointer (shared with the profile chart, UX-06). */
+  readonly hoverIndex?: number | null;
+  readonly onHoverIndex?: (i: number | null) => void;
 }
 
-export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady }: AreaSheetProps) {
+export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hoverIndex = null, onHoverIndex }: AreaSheetProps) {
   const target = useRef<HTMLDivElement>(null);
   const area = useRef<LoadedArea | null>(null);
   const planLayerRef = useRef<ReturnType<typeof createPlanLayer> | null>(null);
@@ -42,6 +56,12 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady }: Are
   planRef.current = plan;
   const pickRef = useRef(onPick);
   pickRef.current = onPick;
+  const markerLayerRef = useRef<ReturnType<typeof createMarkerLayer> | null>(null);
+  markerLayerRef.current ??= createMarkerLayer();
+  const hoverRef = useRef(onHoverIndex);
+  hoverRef.current = onHoverIndex;
+  /** F7 x, y of each profile sample, for nearest-sample lookup on pointer move. */
+  const profXY = useRef<Float64Array>(new Float64Array(0));
   const snapRef = useRef(onSnapshotReady);
   snapRef.current = onSnapshotReady;
   const [readout, setReadout] = useState<Readout | null>(null);
@@ -64,7 +84,7 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady }: Are
       const o = f1ToF7(a.grid.origin);
       map = new OlMap({
         target: target.current,
-        layers: [image("d2", "layer-d2"), image("hillshade", "layer-hillshade"), image("terrain", "layer-terrain"), planLayer.current],
+        layers: [image("d2", "layer-d2"), image("hillshade", "layer-hillshade"), image("terrain", "layer-terrain"), planLayer.current, markerLayerRef.current!],
         controls: [new Zoom(), new ScaleLine({ units: "metric" })],
         view: new View({
           projection: F7_PROJECTION, center: [o.x, o.y], resolution: 4,
@@ -73,6 +93,7 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady }: Are
         }),
       });
       drawPlan(planLayer.current, planRef.current, a.grid);
+      profXY.current = profileXY(planRef.current, a.grid);
       const m = map;
       snapRef.current?.(() => snapshotMap(m, planLayer.current, a.grid.origin.lat));
       map.on("singleclick", (e) => {
@@ -81,13 +102,23 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady }: Are
       });
       // The frame is computed once; readouts are throttled to one per animation frame.
       const frame = gridFrame(a.grid);
-      let pending: number[] | null = null, raf = 0;
+      let pending: number[] | null = null, raf = 0, lastHover: number | null = null;
       map.on("pointermove", (e) => {
         pending = e.coordinate;
         if (raf) return;
         raf = requestAnimationFrame(() => {
           raf = 0;
-          if (pending && area.current) setReadout(readoutAt(pending, area.current.grid, frame));
+          if (!pending || !area.current) return;
+          setReadout(readoutAt(pending, area.current.grid, frame));
+          // Nearest profile sample within 10 screen pixels drives the shared scrub marker (UX-06).
+          const xy = profXY.current, tol = 10 * (m.getView().getResolution() ?? 1);
+          let best = -1, bestD = tol * tol;
+          for (let i = 0; i < xy.length; i += 2) {
+            const dx = xy[i]! - pending[0]!, dy = xy[i + 1]! - pending[1]!, d = dx * dx + dy * dy;
+            if (d < bestD) { bestD = d; best = i / 2; }
+          }
+          const next = best >= 0 ? best : null;
+          if (next !== lastHover) { lastHover = next; hoverRef.current?.(next); }
         });
       });
     }).catch((e: unknown) => setError(e instanceof Error ? e.message : String(e)));
@@ -95,8 +126,15 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady }: Are
   }, [dataUrl]);
 
   useEffect(() => {
-    if (area.current) drawPlan(planLayer.current, plan, area.current.grid);
+    if (!area.current) return;
+    drawPlan(planLayer.current, plan, area.current.grid);
+    profXY.current = profileXY(plan, area.current.grid);
   }, [plan]);
+
+  useEffect(() => {
+    const prof = plan?.geometry.profile;
+    if (area.current) drawMarker(markerLayerRef.current!, hoverIndex !== null && prof?.[hoverIndex] ? prof[hoverIndex].cell : null, area.current.grid);
+  }, [hoverIndex, plan]);
 
   if (error) return <div className="error" role="alert">Area data could not be loaded: {error}</div>;
   return (

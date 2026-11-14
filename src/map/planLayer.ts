@@ -13,12 +13,24 @@ import { f1ToF7 } from "../geo";
 import { cellCentreF1, type GridDef } from "../geo/grid";
 import type { PlanOutput } from "../engine/planner";
 
-const PLAN = "#722a3e", PAPER = "#f3eee4", INK = "#191b20";
+const PLAN = "#722a3e", PAPER = "#f3eee4", INK = "#191b20", OVER = "#f0645a", CAUTION = "#e8b341";
 
 const routeStyle = [
   new Style({ stroke: new Stroke({ color: PAPER, width: 5 }) }),
   new Style({ stroke: new Stroke({ color: PLAN, width: 3 }) }),
 ];
+// Plan 9.4: route beyond the 0 tick takes the over colour and its word.
+const overRouteStyle = [
+  new Style({ stroke: new Stroke({ color: PAPER, width: 5 }) }),
+  new Style({ stroke: new Stroke({ color: OVER, width: 3, lineDash: [8, 4] }) }),
+];
+const tickStyle = (kind: "NEAR_LIMIT" | "OVER") => new Style({
+  image: new RegularShape({ points: 2, radius: 12, angle: Math.PI / 2, stroke: new Stroke({ color: kind === "OVER" ? OVER : CAUTION, width: 4 }) }),
+  text: new Text({ text: kind === "OVER" ? "margin 0 here · OVER beyond" : "margin 10% here", offsetY: -16,
+    font: "600 11px 'IBM Plex Sans', system-ui", fill: new Fill({ color: INK }), backgroundFill: new Fill({ color: PAPER }), padding: [1, 3, 1, 3] }),
+});
+const markerStyle = new Style({ image: new CircleStyle({ radius: 6, fill: new Fill({ color: PAPER }), stroke: new Stroke({ color: INK, width: 2 }) }) });
+
 const habitatStyle = new Style({
   image: new RegularShape({ points: 4, radius: 9, angle: Math.PI / 4, fill: new Fill({ color: PAPER }), stroke: new Stroke({ color: INK, width: 2 }) }),
   text: new Text({ text: "H", font: "600 11px 'IBM Plex Sans', system-ui", fill: new Fill({ color: INK }) }),
@@ -41,10 +53,32 @@ export function drawPlan(layer: VectorLayer<VectorSource>, out: PlanOutput | nul
     return [p.x, p.y];
   };
   const features: Feature[] = [];
-  for (const leg of out.geometry.legs) {
-    if (leg.cells.length < 2) continue;
-    const f = new Feature({ geometry: new LineString(leg.cells.map(xy)), kind: "leg", fromId: leg.fromId, toId: leg.toId });
-    f.setStyle(routeStyle);
+  // Split the walk at the OVER tick: everything after it is drawn in the over colour.
+  const over = out.geometry.marginTicks.find((t) => t.kind === "OVER");
+  const prof = out.geometry.profile;
+  const overAt = over ? prof.findIndex((p) => p.s_m >= over.s_m) : -1;
+  const cut = overAt >= 0 ? overAt : prof.length;
+  const line = (from: number, to: number, style: Style[], kind: string) => {
+    if (to - from < 1) return;
+    const f = new Feature({ geometry: new LineString(prof.slice(from, to + 1).map((p) => xy(p.cell))), kind });
+    f.setStyle(style);
+    features.push(f);
+  };
+  if (prof.length) {
+    line(0, Math.min(cut, prof.length - 1), routeStyle, "route");
+    if (overAt >= 0) line(overAt, prof.length - 1, overRouteStyle, "route-over");
+  } else {
+    // No whole-walk profile (a leg is unreachable): draw the legs that exist, each on its own.
+    for (const leg of out.geometry.legs) {
+      if (leg.cells.length < 2) continue;
+      const f = new Feature({ geometry: new LineString(leg.cells.map(xy)), kind: "leg" });
+      f.setStyle(routeStyle);
+      features.push(f);
+    }
+  }
+  for (const t of out.geometry.marginTicks) {
+    const f = new Feature({ geometry: new Point(xy(t.cell)), kind: `tick-${t.kind}` });
+    f.setStyle(tickStyle(t.kind));
     features.push(f);
   }
   const h = new Feature({ geometry: new Point(xy(out.geometry.habitatCell)), kind: "habitat" });
@@ -58,4 +92,19 @@ export function drawPlan(layer: VectorLayer<VectorSource>, out: PlanOutput | nul
     features.push(f);
   }
   src.addFeatures(features);
+}
+
+/** Separate small layer for the scrub marker, so hovering never redraws the plan. */
+export function createMarkerLayer(): VectorLayer<VectorSource> {
+  return new VectorLayer({ source: new VectorSource(), className: "layer-marker" });
+}
+
+export function drawMarker(layer: VectorLayer<VectorSource>, cell: number | null, grid: GridDef): void {
+  const src = layer.getSource()!;
+  src.clear();
+  if (cell === null) return;
+  const p = f1ToF7(cellCentreF1({ r: Math.floor(cell / grid.cols), c: cell % grid.cols }, grid));
+  const f = new Feature({ geometry: new Point([p.x, p.y]) });
+  f.setStyle(markerStyle);
+  src.addFeature(f);
 }

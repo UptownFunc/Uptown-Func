@@ -11,7 +11,8 @@ import { cellCentreF1, f1ToCell, type GridDef } from "../geo/grid";
 import { KV_PLACEHOLDER, SLOPE_LIMIT_ASSUMPTION } from "./assumptions";
 import { legMetrics, type SpeedRange } from "./leg";
 import { plannedMarginProfile } from "./margin";
-import { CLASS, routeAStar, timeField, type RouteGrid } from "./route";
+import { CLASS, edgeCost, routeAStar, timeField, type RouteGrid } from "./route";
+import type { MarginSample } from "./margin";
 
 export const ENGINE_VERSION = "engine-0.3.0";
 export const CONSTANTS_VERSION = "constants-2026-11-14b";
@@ -20,11 +21,23 @@ export interface PlannerGrid extends GridDef { readonly elevation: Float64Array;
 export interface LatLon { readonly lat: number; readonly lon: number }
 export interface LegGeometry { readonly fromId: string; readonly toId: string; readonly cells: number[] }
 /** Display data that goes with a plan version. Cells index the F6 grid; the map converts them through src/geo. */
+/** One sample per route cell along the whole walk (stop cells once). z_m is D1 elevation on the F6 grid (directly
+ *  measured; vertical reference unverified, D-05); s_m is cumulative 3D length (model-derived); margin_min is the
+ *  slow-bound planned margin after any stop at that cell (null while unknown). */
+export interface ProfileSample {
+  readonly cell: number; readonly s_m: number; readonly z_m: number;
+  /** Slow-bound (low) and fast-bound (high) planned margin in minutes: an est. range; both null while unknown. */
+  readonly margin_min: number | null; readonly marginHigh_min: number | null;
+}
+/** Where the slow-bound margin first falls below 10% of T_EVA (NEAR_LIMIT) and below 0 (OVER), plan 9.4. */
+export interface MarginTick { readonly kind: "NEAR_LIMIT" | "OVER"; readonly cell: number; readonly s_m: number }
 export interface PlanGeometry {
   readonly habitatCell: number;
   readonly stopCells: Record<string, number>;
   readonly legs: LegGeometry[];
   readonly unreachable: { fromId: string; toId: string }[];
+  readonly profile: ProfileSample[];
+  readonly marginTicks: MarginTick[];
 }
 export interface PlanOutput { readonly plan: MissionPlan; readonly geometry: PlanGeometry; readonly kvPlaceholder: boolean }
 export type ApplyResult = { ok: true; versionHash: string } | { ok: false; reason: string };
@@ -69,6 +82,8 @@ export class Planner {
   private nextStop = 1;
   private cached: PlanOutput | null = null;
   private planTimes: Partial<Record<PlanTimeId, Assumption>> = {};
+  /** Per-stop duration overrides (seconds, rationale); the stop's letter is applied at compute time. */
+  private stopDurations: Record<string, { value: number; rationale: string }> = {};
   /** Slow-bound time-to-habitat field, keyed by the inputs it depends on (habitat, k_v, slope limit, speed). */
   private slowField: { key: string; field: Float64Array } | null = null;
 
@@ -133,6 +148,7 @@ export class Planner {
       case "delete_stop": {
         const k = find(p.stopId);
         if (k < 0) return { ok: false, reason: `no stop ${String(p.stopId)}` };
+        delete this.stopDurations[this.stops[k]!.id];
         this.stops.splice(k, 1);
         break;
       }
@@ -154,7 +170,13 @@ export class Planner {
         if (!num(v) || v < 0 || (PLAN_TIME_IDS[id].min === "positive" && v === 0))
           return { ok: false, reason: `${id} must be a finite ${PLAN_TIME_IDS[id].min === "positive" ? "positive" : "non-negative"} number of seconds` };
         if (!str(p.rationale) || !p.rationale.trim()) return { ok: false, reason: "every Assumed value needs a one-line rationale" };
-        this.planTimes[id] = { id: `A-${id}`, name: PLAN_TIME_IDS[id].name, value: v, unit: "s", rationale: p.rationale.trim(), source: "team choice" };
+        if (p.stopId !== undefined) {
+          if (id !== "stop_duration") return { ok: false, reason: "only stop_duration can be set per stop" };
+          if (find(p.stopId) < 0) return { ok: false, reason: `no stop ${String(p.stopId)}` };
+          this.stopDurations[p.stopId as string] = { value: v, rationale: p.rationale.trim() };
+        } else {
+          this.planTimes[id] = { id: `A-${id}`, name: PLAN_TIME_IDS[id].name, value: v, unit: "s", rationale: p.rationale.trim(), source: "team choice" };
+        }
         break;
       }
     }
@@ -166,14 +188,22 @@ export class Planner {
     const g = this.grid, cols = g.cols;
     const latLon = (i: number) => { const p = cellCentreF1({ r: Math.floor(i / cols), c: i % cols }, g); return { lat: p.lat, lon: p.lon }; };
     const times = (Object.keys(PLAN_TIME_IDS) as PlanTimeId[]).map((k) => this.planTimes[k]).filter((a): a is Assumption => !!a);
-    const assumptions = [KV_PLACEHOLDER.assumption, SLOPE_LIMIT_ASSUMPTION, ...times];
-    const sd = this.planTimes.stop_duration;
-    const duration: Quantity = sd
-      ? { value: sd.value, unit: "s", valueClass: "assumed", methodId: "plan-6.6:team-choice", assumptionIds: [sd.id], sourceIds: ["team choice"] }
-      : { ...PLAN_TIMES_UNSET, unit: "s" };
-    const stops: Stop[] = this.stops.map((s, k) => ({
-      id: s.id, letter: LETTERS[k]!, f1: latLon(s.cell), name: s.name, duration, tasks: [],
-    }));
+    const own: Assumption[] = [];
+    const durA = this.stops.map((s, k) => {
+      const o = this.stopDurations[s.id];
+      if (!o) return this.planTimes.stop_duration ?? null;
+      const a: Assumption = { id: `A-stop_duration-${s.id}`, name: `Planned duration at stop ${LETTERS[k]} (${s.id})`, value: o.value, unit: "s", rationale: o.rationale, source: "team choice" };
+      own.push(a);
+      return a;
+    });
+    const assumptions = [KV_PLACEHOLDER.assumption, SLOPE_LIMIT_ASSUMPTION, ...times, ...own];
+    const stops: Stop[] = this.stops.map((s, k) => {
+      const a = durA[k];
+      const duration: Quantity = a
+        ? { value: a.value, unit: "s", valueClass: "assumed", methodId: "plan-6.6:team-choice", assumptionIds: [a.id], sourceIds: ["team choice"] }
+        : { ...PLAN_TIMES_UNSET, unit: "s" };
+      return { id: s.id, letter: LETTERS[k]!, f1: latLon(s.cell), name: s.name, duration, tasks: [] };
+    });
     const nodes = [{ id: HABITAT_ID, cell: this.habitat }, ...this.stops, ...(this.stops.length ? [{ id: HABITAT_ID, cell: this.habitat }] : [])];
     const model = { vLevel_mps: this.speeds.nominal_mps, kBins: this.speeds.kBins, slopeLimit_deg: this.speeds.slopeLimit_deg };
     const legs: Leg[] = [], geomLegs: LegGeometry[] = [], unreachable: PlanGeometry["unreachable"] = [];
@@ -192,7 +222,9 @@ export class Planner {
       });
       geomLegs.push({ fromId: a.id, toId: b.id, cells: route.cells });
     }
-    const margins = unreachable.length === 0 && this.stops.length > 0 ? this.margins(geomLegs.map((l) => l.cells)) : null;
+    const margins = unreachable.length === 0 && this.stops.length > 0 ? this.margins(geomLegs.map((l) => l.cells), durA) : null;
+    // A gap (unreachable leg) would join non-adjacent legs, so there is no whole-walk profile then.
+    const { profile, marginTicks } = unreachable.length ? { profile: [], marginTicks: [] } : this.profile(geomLegs, margins?.samples ?? null);
     const versionHash = contentHash(JSON.stringify({ e: ENGINE_VERSION, c: CONSTANTS_VERSION, h: this.habitat,
       s: this.stops, a: assumptions, k: this.speeds }));
     const plan: MissionPlan = MissionPlan.parse({
@@ -202,17 +234,18 @@ export class Planner {
     });
     return {
       plan, kvPlaceholder: KV_PLACEHOLDER.isPlaceholder,
-      geometry: { habitatCell: this.habitat, stopCells: Object.fromEntries(this.stops.map((s) => [s.id, s.cell])), legs: geomLegs, unreachable },
+      geometry: { habitatCell: this.habitat, stopCells: Object.fromEntries(this.stops.map((s) => [s.id, s.cell])), legs: geomLegs, unreachable,
+        profile, marginTicks },
     };
   }
 
   /** Plan 6.6 margins at the slow, nominal and fast speed bounds, or null while any plan time is unset.
    *  The profile and the state use the slow bound (conservative, AC-19); the end margin is an est. range. */
-  private margins(legCells: number[][]): { profile: PlannedMargin[]; end: Quantity } | null {
+  private margins(legCells: number[][], durA: (Assumption | null)[]): { profile: PlannedMargin[]; samples: MarginSample[]; end: Quantity } | null {
     const t = this.planTimes;
-    if (!t.T_EVA || !t.t_ops || !t.t_cont || !t.stop_duration) return null;
+    if (!t.T_EVA || !t.t_ops || !t.t_cont || durA.some((a) => !a)) return null;
     const times = { tEva_s: t.T_EVA.value, tOps_s: t.t_ops.value, tCont_s: t.t_cont.value };
-    const stopDur = this.stops.map(() => t.stop_duration!.value);
+    const stopDur = durA.map((a) => a!.value);
     const g = this.routeGrid, sp = this.speeds;
     const key = JSON.stringify([this.habitat, sp.kBins, sp.slopeLimit_deg, sp.low_mps]);
     if (this.slowField?.key !== key) {
@@ -229,9 +262,46 @@ export class Planner {
     const nominal = at(sp.nominal_mps), high = at(sp.high_mps);
     return {
       profile: slow.map((m) => ({ s_m: m.s_m, margin_min: m.margin_s / 60, state: m.state })),
+      samples: slow,
       end: { value: nominal, low, high, unit: "s", valueClass: "estimated", methodId: "engine:margin-6.6-grid-metric",
-        assumptionIds: [KV_PLACEHOLDER.assumption.id, SLOPE_LIMIT_ASSUMPTION.id, "A-T_EVA", "A-t_ops", "A-t_cont", "A-stop_duration"],
+        assumptionIds: [...new Set([KV_PLACEHOLDER.assumption.id, SLOPE_LIMIT_ASSUMPTION.id, "A-T_EVA", "A-t_ops", "A-t_cont", ...durA.map((a) => a!.id)])],
         sourceIds: ["D1", "walkSpeedNominal", "walkSpeedRange"] },
     };
+  }
+
+  /** Profile samples along the whole walk and the margin ticks (plan 9.4). Stop cells appear once, carrying the
+   *  margin after the stop (the "depart" sample); ticks are found on all samples, so a stop can hold a tick. */
+  private profile(legs: LegGeometry[], samples: MarginSample[] | null): { profile: ProfileSample[]; marginTicks: MarginTick[] } {
+    const t = this.planTimes, sp = this.speeds;
+    const g = this.routeGrid, out: ProfileSample[] = [];
+    let s = 0;
+    legs.forEach((leg, li) => {
+      leg.cells.forEach((cell, j) => {
+        if (j === 0 && li > 0) return; // shared with the previous leg's end
+        if (j > 0) s += edgeCost(g, leg.cells[j - 1]!, cell, this.speeds).length3d_m;
+        out.push({ cell, s_m: s, z_m: g.elevation[cell]!, margin_min: null, marginHigh_min: null });
+      });
+    });
+    const ticks: MarginTick[] = [];
+    if (samples) {
+      const withMargin: ProfileSample[] = [];
+      // Walking and the walk back scale as 1/v; stops, t_ops and t_cont do not. Stop time so far is recovered from
+      // each arrive/depart pair, so the fast-bound margin follows from the slow one as for the end margin.
+      const base = t.T_EVA!.value - t.t_ops!.value - t.t_cont!.value;
+      let k = 0, stopsSoFar = 0, arrive = 0;
+      for (const m of samples) {
+        if (m.kind === "arrive") { arrive = m.margin_s; continue; } // the following "depart" sample carries the stop
+        if (m.kind === "depart") stopsSoFar += arrive - m.margin_s;
+        const fixed = base - stopsSoFar, travelSlow = fixed - m.margin_s;
+        const p = out[k++]!;
+        withMargin.push({ ...p, margin_min: m.margin_s / 60, marginHigh_min: (fixed - (travelSlow * sp.low_mps) / sp.high_mps) / 60 });
+      }
+      out.splice(0, out.length, ...withMargin);
+      for (const kind of ["NEAR_LIMIT", "OVER"] as const) {
+        const hit = samples.find((m) => (kind === "OVER" ? m.state === "OVER" : m.state !== "OK"));
+        if (hit) ticks.push({ kind, cell: hit.cell, s_m: hit.s_m });
+      }
+    }
+    return { profile: out, marginTicks: ticks };
   }
 }

@@ -13,20 +13,22 @@ const FIELDS = [
 
 export interface PlanTimesProps {
   readonly assumptions: readonly Assumption[];
-  readonly onSet: (id: string, value_s: number, rationale: string) => void;
+  readonly onSet: (id: string, value_s: number, rationale: string, stopId?: string) => void;
 }
 
-function Row({ id, label, current, onSet }: { id: string; label: string; current: Assumption | undefined; onSet: PlanTimesProps["onSet"] }) {
+export function TimeRow({ id, label, current, onSet, stopId, inherited }: {
+  id: string; label: string; current: Assumption | undefined; onSet: PlanTimesProps["onSet"]; stopId?: string; inherited?: string;
+}) {
   const [minutes, setMinutes] = useState("");
   const [why, setWhy] = useState("");
   const n = Number(minutes);
   const valid = minutes.trim() !== "" && Number.isFinite(n) && n >= 0 && why.trim() !== "";
   return (
-    <form className="time-row" onSubmit={(e) => { e.preventDefault(); if (valid) onSet(id, n * 60, why.trim()); }}>
+    <form className="time-row" onSubmit={(e) => { e.preventDefault(); if (valid) onSet(id, n * 60, why.trim(), stopId); }}>
       <div className="time-head">
         <span>{label}</span>
         <span data-testid={`current-${id}`} className={current ? "assumed" : "unknown"}>
-          {current ? `${(current.value / 60).toFixed(1)} min · assumed` : "not set"}
+          {current ? `${(current.value / 60).toFixed(1)} min · assumed` : inherited ?? "not set"}
         </span>
       </div>
       {current && <div className="muted small">Rationale: {current.rationale}</div>}
@@ -44,7 +46,7 @@ export function PlanTimes({ assumptions, onSet }: PlanTimesProps) {
     <section aria-label="Assumed plan times">
       <h2>Assumed plan times <span className="muted">team choices, not measurements</span></h2>
       {FIELDS.map((f) => (
-        <Row key={f.id} id={f.id} label={f.label} current={assumptions.find((a) => a.id === `A-${f.id}`)} onSet={onSet} />
+        <TimeRow key={f.id} id={f.id} label={f.label} current={assumptions.find((a) => a.id === `A-${f.id}`)} onSet={onSet} />
       ))}
     </section>
   );
