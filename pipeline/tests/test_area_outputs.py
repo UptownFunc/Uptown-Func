@@ -50,3 +50,21 @@ def test_coverage_outlines_match_their_checksum_and_cover_every_layer():
         x0, _, x1, _ = layers["extentF7"]
         # The outline lies on this sheet's display window (F7 -> F1 is x / k).
         assert min(lons) >= x0 / k - 1e-7 and max(lons) <= x1 / k + 1e-7
+
+
+def test_contours_match_their_checksum_and_the_sheet_spec():
+    """Plan 7.8 / 9: D1 contours at 10 m, every fifth an index line, in F1 inside this sheet's display window."""
+    layers = json.loads((AREA / "layers.json").read_text())
+    assert "contours" in layers, "layers.json lists no contours: run `python -m sharpwalk.run_contours` after run_display"
+    c = layers["contours"]
+    assert _sha(AREA / c["path"]) == c["sha256"]
+    fc = json.loads((AREA / c["path"]).read_text())
+    assert fc["frame"] == "F1" and fc["properties"]["source"] == "D1" == c["source"]
+    assert fc["properties"]["interval_m"] == c["interval_m"] == 10.0 and fc["properties"]["indexEvery"] == c["indexEvery"] == 5
+    k = 3.141592653589793 * 3_396_190 / 180
+    x0, y0, x1, y1 = layers["extentF7"]
+    for f in fc["features"]:
+        e = f["properties"]["elev_m"]
+        assert e % 10.0 == 0.0 and f["properties"]["index"] == (e % 50.0 == 0.0)
+        for lon, lat in f["geometry"]["coordinates"]:
+            assert x0 / k - 1e-7 <= lon <= x1 / k + 1e-7 and y0 / k - 1e-7 <= lat <= y1 / k + 1e-7

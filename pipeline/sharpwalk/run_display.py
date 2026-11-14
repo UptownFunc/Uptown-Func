@@ -127,10 +127,13 @@ def main(area_dir: str) -> None:
     print(json.dumps({"extentF7": layers["extentF7"], "size": [cols, rows]}))
     for L in layers["layers"]:
         print(L["id"], (out / L["path"]).stat().st_size, L["sha256"][:12])
-    # Plan 7.8 coverage outlines belong to these layers; rewriting layers.json above dropped their registration, so
-    # write them again for the same display grid (sharpwalk.run_coverage, which also runs on its own).
+    # Plan 7.8 coverage outlines and contours belong to these layers; rewriting layers.json above dropped their
+    # registration, so write them again for the same display grid (each step also runs on its own).
     from .run_coverage import main as write_coverage
     write_coverage(area_dir)
+    # The 10 m contours (plan 7.8) are registered in layers.json the same way.
+    from .run_contours import main as write_contours
+    write_contours(area_dir)
 
 
 if __name__ == "__main__":
