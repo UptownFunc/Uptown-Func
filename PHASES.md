@@ -71,6 +71,33 @@ the 23:59 close is only on third-party pages: **a person must confirm it on the 
 | Video | Sun 17:00 | Not started (Design, human) | Video or 7-slide fallback | Unchanged |
 | Internal submit | Sun 21:00 | Not started | Every field; links open without login | Unchanged |
 
+## Schedule reconciliation (Sat 14 Nov 2026, 22:48 Asia/Manila; container clock 14:48 UTC; previous 20:27)
+
+Deadline still Sun 15 Nov 23:59 local (portal confirmation by a person still pending). **Remaining: about 25 h 11 min.**
+
+| Gate | Planned | Status now | What is incomplete | Next |
+|---|---|---|---|---|
+| G3 | Sun 01:00 | **Met** (deploy public Sat ~22:30, before the gate) | - | - |
+| G4 | Sun 10:00 | **Met** | V-14 sky-ramp Design review (not a gate criterion) | Design |
+| G5 | Sun 13:00 | Not started | Two-machine check **deferred to 5.5 (G5-DEFER)**; register V-01..V-14 (REG-DEFER, another session) | Freeze at 13:00 |
+| Video | Sun 17:00 | Not started (Design, human) | Video or 7-slide fallback | Unchanged |
+| Internal submit | Sun 21:00 | Not started | 5.5 incl. two-machine check and FortiGuard | Unchanged |
+
+## Handoff checks (Sat 14 Nov 2026, 22:40-22:48, branch claude/optimistic-darwin-dxdct4 = main d5488de)
+
+| Command | Result |
+|---|---|
+| `npm ci` | 83 packages added |
+| `npx vitest run` | 282 passed / 282, 28 files |
+| `npx tsc --noEmit` | clean |
+| `rm -rf dist && npm run build` | OK; main 208.16 kB gzip (Vite) + worker 41,460 B (`gzip -9`): ~249.6 of 250 KB |
+| `PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome npx playwright test --trace off` | 50 passed / 50 (local build) |
+| Same 50 specs, baseURL https://uptown-func.vercel.app (temporary config, deleted) | 50 passed / 50 (live deploy f48697e, Sat ~22:30) |
+| `python3.11 -m venv .venv && .venv/bin/pip install -r pipeline/requirements.txt pytest==9.2.0` | OK (fresh container) |
+| `(cd pipeline && ../.venv/bin/python -m pytest -rs)` | 82 passed, 2 skipped (gdal_contour not installed in this container) |
+| `.venv/bin/python scripts/licences.py \| diff -q - docs/licences.md` | no difference |
+| `SHARPWALK_AREA=public/area node --experimental-strip-types bench/route-bench.ts` (twice) | **Longest route 476-585 ms: 5 of the 9 recorded runs over the 500 ms target** (first run: only the placeholder lines were kept); time field 486-593 ms (< 3 s). The 20:26 runs gave 309-436 ms. No engine code changed since then; this container had just restarted (load average 2.27, 4 cores). **Not a pass on this machine; re-measure on a laptop (G2 note "laptop timing at G5").** |
+
 ## Status at handoff (Sat 14 Nov 2026, 20:27 Asia/Manila container clock; previous 17:31). Branch ccr-dbbcdd02-kqy23v = main 38839d0
 
 | Part | Status | One-line reason / evidence |
@@ -179,11 +206,11 @@ Work on optional features only when it does not endanger this path. The AREA 2D 
 
 | Part | Task | Owner | Status | Checks / evidence | Commit |
 |---|---|---|---|---|---|
-| 5.1 | Freeze features. Run the demo from public deploy on two machines and verify the AREA 2D map with Cesium blocked. | Captain + all owners | UNVERIFIED | Two-machine evidence; Cesium-blocked fallback works; known defects logged | - |
-| 5.2 | After freeze, allow bug fixes only. Re-run core tests and validate all displayed quantities, citations, assumptions and warnings. **Clear the CLAUDE.md placeholder register (V-01..V-10): each row FIXED or KEPT by the team (G-08).** | Module owners | UNVERIFIED | Regression suite; provenance review; no new feature scope | - |
+| 5.1 | Freeze features. Run the demo from public deploy on two machines and verify the AREA 2D map with Cesium blocked. | Captain + all owners | PENDING (freeze Sun 13:00; two-machine check deferred to 5.5) | **G5-DEFER (Sat 22:48, operator):** the two-machine check of https://uptown-func.vercel.app moves to 5.5. Cesium-blocked criterion trivially true (3D cut, 1.6). Single-machine evidence so far: Playwright 50/50 against the live URL (3.5). | - |
+| 5.2 | After freeze, allow bug fixes only. Re-run core tests and validate all displayed quantities, citations, assumptions and warnings. **Clear the CLAUDE.md placeholder register (V-01..V-10): each row FIXED or KEPT by the team (G-08).** | Module owners | UNVERIFIED (register deferred to another session, REG-DEFER) | Regression suite; provenance review; no new feature scope | - |
 | 5.3 | Lock the <=30-second subtitled video with every on-screen claim sourced and limitation caption present. If not ready by the video gate, switch to the 7-slide format. | Design | UNVERIFIED | Final asset reviewed; SI watermark if applicable; sources captured | - |
 | 5.4 | Complete README `SI use`, dependency/dataset/image licences, submission references and SI form data from `SI_LOG.md`. | Captain | IN PROGRESS (draft written; team review and concept-origin text pending) | **14:39:** README.md: summary and limits, dataset-to-number table (19.3), run/check commands, "SI use" reconciled with SI_LOG.md, references with exact versions and licences for every bundled, dev and pipeline package (read from installed metadata), datasets with credit, cited publications, images. **Pending:** the team's concept-origin account in SI_LOG.md, then the submission SI field from the same facts; human review of the disclosure. **14:47:** authorship per G-06 (concept and plan: Patrick Ezekiel A. Arcilla; team credited only for recorded contributions); "SI use" audited against SI_LOG; `docs/licences.md` generated by `scripts/licences.py` (130 lockfile entries: 31 production, 99 development-only including @axe-core/playwright MPL-2.0; 16 pipeline distributions; 31 bundled native libraries marked NOT VERIFIED), cross-checked with `npm ls --omit=dev` (31) and kept current by `pipeline/tests/test_licences.py`. | bdb889e, f38f824 |
-| 5.5 | Verify every submission field; public app and repository links open without login; submit the frozen version by the internal target. | Captain | UNVERIFIED | Link checks; submission receipt or confirmation captured | - |
+| 5.5 | Verify every submission field; public app and repository links open without login; submit the frozen version by the internal target. **Deferred here (G5-DEFER):** (a) open https://uptown-func.vercel.app on two machines (private window; map, footer, a stop with route and margin, Briefing, Field View; DevTools Network all 200); (b) request the FortiGuard web-filter classification for the URL (plan 19.3) and record the result. | Captain | UNVERIFIED | Link checks; two-machine evidence; FortiGuard request and result; submission receipt or confirmation captured | - |
 
 **G5 acceptance:** demo runs from public deploy on two machines and the 2D map works with Cesium blocked. From G5 onward, bug fixes only.
 
