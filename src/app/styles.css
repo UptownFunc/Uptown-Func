@@ -186,3 +186,8 @@ body { background: var(--housing); color: var(--text); font-family: var(--sans);
   .card { width: 100%; min-height: 0; grid-template-columns: 1fr; padding: 16px; }
   .footer { padding-bottom: 8px; }
 }
+
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.sheet .map:focus-visible { outline: 3px solid var(--plan-hi); outline-offset: -3px; }
+.stops .stop-head button + button { margin-left: 4px; }
+.stops button:disabled { opacity: 0.45; cursor: not-allowed; }

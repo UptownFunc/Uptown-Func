@@ -8,7 +8,13 @@ import ImageLayer from "ol/layer/Image";
 import Static from "ol/source/ImageStatic";
 import ScaleLine from "ol/control/ScaleLine";
 import Zoom from "ol/control/Zoom";
-import { f1ToF7, f7ToF1 } from "../geo";
+import { f1ToF7, f7ToF1, offsetF1, type F1Point } from "../geo";
+import Feature from "ol/Feature";
+import Point from "ol/geom/Point";
+import VectorLayer from "ol/layer/Vector";
+import VectorSource from "ol/source/Vector";
+import { Stroke, Style } from "ol/style";
+import RegularShape from "ol/style/RegularShape";
 import { cellCentreF1, type GridDef } from "../geo/grid";
 import type { LatLon, PlanOutput } from "../engine/planner";
 import { createMarkerLayer, createPlanLayer, drawMarker, drawPlan } from "./planLayer";
@@ -46,9 +52,13 @@ export interface AreaSheetProps {
   readonly onHoverIndex?: (i: number | null) => void;
   /** Dataset ids of the layers drawn on the sheet (from layers.json), for the sources panel (UX-15). */
   readonly onDatasets?: (ids: string[]) => void;
+  /** The keyboard cursor position (AC-32), so stops can be moved to it by keyboard. */
+  readonly onCursor?: (p: LatLon | null) => void;
 }
 
-export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hoverIndex = null, onHoverIndex, onDatasets }: AreaSheetProps) {
+const cursorStyle = new Style({ image: new RegularShape({ points: 4, radius: 11, radius2: 0, angle: 0, stroke: new Stroke({ color: "#f3eee4", width: 2 }) }) });
+
+export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hoverIndex = null, onHoverIndex, onDatasets, onCursor }: AreaSheetProps) {
   const target = useRef<HTMLDivElement>(null);
   const area = useRef<LoadedArea | null>(null);
   const planLayerRef = useRef<ReturnType<typeof createPlanLayer> | null>(null);
@@ -58,6 +68,14 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
   planRef.current = plan;
   const pickRef = useRef(onPick);
   pickRef.current = onPick;
+  // Keyboard cursor (AC-32): arrow keys step it in ground metres through src/geo; Enter adds a stop there.
+  const cursor = useRef<F1Point | null>(null);
+  const cursorLayer = useRef<VectorLayer<VectorSource> | null>(null);
+  cursorLayer.current ??= new VectorLayer({ source: new VectorSource(), className: "layer-cursor" });
+  const mapRef = useRef<OlMap | null>(null);
+  const [announce, setAnnounce] = useState("");
+  const cursorRef = useRef(onCursor);
+  cursorRef.current = onCursor;
   const markerLayerRef = useRef<ReturnType<typeof createMarkerLayer> | null>(null);
   markerLayerRef.current ??= createMarkerLayer();
   const hoverRef = useRef(onHoverIndex);
@@ -88,7 +106,7 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
       const o = f1ToF7(a.grid.origin);
       map = new OlMap({
         target: target.current,
-        layers: [image("d2", "layer-d2"), image("hillshade", "layer-hillshade"), image("terrain", "layer-terrain"), planLayer.current, markerLayerRef.current!],
+        layers: [image("d2", "layer-d2"), image("hillshade", "layer-hillshade"), image("terrain", "layer-terrain"), planLayer.current, markerLayerRef.current!, cursorLayer.current!],
         controls: [new Zoom(), new ScaleLine({ units: "metric" })],
         view: new View({
           projection: F7_PROJECTION, center: [o.x, o.y], resolution: 4,
@@ -99,6 +117,7 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
       drawPlan(planLayer.current, planRef.current, a.grid);
       profXY.current = profileXY(planRef.current, a.grid);
       const m = map;
+      mapRef.current = map;
       snapRef.current?.(() => snapshotMap(m, planLayer.current, a.grid.origin.lat));
       map.on("singleclick", (e) => {
         const p = f7ToF1({ frame: "F7", x: e.coordinate[0]!, y: e.coordinate[1]! }, 0);
@@ -141,11 +160,40 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
     if (area.current) drawMarker(markerLayerRef.current!, hoverIndex !== null && prof?.[hoverIndex] ? prof[hoverIndex].cell : null, area.current.grid);
   }, [hoverIndex, plan]);
 
+  const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const a = area.current, m = mapRef.current;
+    if (!a || !m) return;
+    const steps: Record<string, [number, number]> = { ArrowUp: [0, 1], ArrowDown: [0, -1], ArrowLeft: [-1, 0], ArrowRight: [1, 0] };
+    if (e.key in steps) {
+      e.preventDefault(); e.stopPropagation();
+      const s = e.shiftKey ? 100 : 10, [dx, dy] = steps[e.key]!;
+      const c = m.getView().getCenter()!;
+      const from = cursor.current ?? f7ToF1({ frame: "F7", x: c[0]!, y: c[1]! }, 0);
+      const next = offsetF1(from, dx * s, dy * s); // the cursor starts at the view centre; every press steps
+      cursor.current = next;
+      const xy = f1ToF7(next);
+      const src = cursorLayer.current!.getSource()!;
+      src.clear();
+      const f = new Feature({ geometry: new Point([xy.x, xy.y]) }); f.setStyle(cursorStyle); src.addFeature(f);
+      const ext = m.getView().calculateExtent(m.getSize());
+      if (xy.x < ext[0]! || xy.x > ext[2]! || xy.y < ext[1]! || xy.y > ext[3]!) m.getView().setCenter([xy.x, xy.y]);
+      const r = readoutAt([xy.x, xy.y], a.grid);
+      setReadout(r);
+      setAnnounce(`Cursor at latitude ${r.lat}, longitude ${r.lon} east, elevation ${fmt(r.elevation)}. Enter adds a stop here.`);
+      cursorRef.current?.({ lat: next.lat, lon: next.lon });
+    } else if (e.key === "Enter" && cursor.current) {
+      e.preventDefault();
+      pickRef.current?.({ lat: cursor.current.lat, lon: cursor.current.lon });
+    }
+  };
+
   if (error) return <div className="error" role="alert">Area data could not be loaded: {error}</div>;
   return (
     <>
       <div className="sheet">
-        <div className="map" ref={target} data-testid="area-map" />
+        <div className="map" ref={target} data-testid="area-map" tabIndex={0} onKeyDownCapture={onKeyDown} role="application"
+          aria-label="Traverse sheet. Arrow keys move a cursor 10 m, Shift plus arrow 100 m; Enter adds a stop at the cursor." />
+        <div className="sr-only" aria-live="polite" data-testid="cursor-announce">{announce}</div>
         <div className="legend" aria-label="Layers">
           <ul>{legend.map((l) => <li key={l.id}>{l.name} - {l.valueClass.replace("_", " ")}, {l.source}, {fmt(l.resolution)}, built {l.builtOn}</li>)}</ul>
         </div>

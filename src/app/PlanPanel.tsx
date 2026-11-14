@@ -17,10 +17,12 @@ export interface PlanPanelProps {
   readonly onDeleteStop: (stopId: string) => void;
   readonly onSetTime: (id: string, value_s: number, rationale: string, stopId?: string) => void;
   readonly onOpenSource?: (q: Quantity) => void;
+  /** Moves a stop to the map's keyboard cursor (AC-32); undefined while there is no cursor. */
+  readonly onMoveToCursor?: ((stopId: string) => void) | undefined;
   readonly children?: React.ReactNode;
 }
 
-export function PlanPanel({ output, message, onDeleteStop, onSetTime, onOpenSource, children }: PlanPanelProps) {
+export function PlanPanel({ output, message, onDeleteStop, onSetTime, onOpenSource, onMoveToCursor, children }: PlanPanelProps) {
   if (!output) return (
     <aside className="console" aria-label="Plan">
       {message ? <p className="problem" role="alert" data-testid="engine-message">{message}</p> : <p className="muted">Engine loading…</p>}
@@ -51,6 +53,7 @@ export function PlanPanel({ output, message, onDeleteStop, onSetTime, onOpenSour
               <div className="stop-head">
                 <span className="letter">{s.letter}</span> {s.name}
                 <span className="muted"> · duration </span><QuantityText q={s.duration} onOpen={onOpenSource} label={`Stop ${s.letter} duration`} />
+                <button type="button" disabled={!onMoveToCursor} onClick={() => onMoveToCursor?.(s.id)} aria-label={`Move stop ${s.letter} to the map cursor`}>Move</button>
                 <button type="button" onClick={() => onDeleteStop(s.id)} aria-label={`Delete stop ${s.letter}`}>Delete</button>
               </div>
               <TimeRow id="stop_duration" stopId={s.id} label={`Stop ${s.letter} duration`} onSet={onSetTime}

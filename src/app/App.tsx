@@ -31,6 +31,7 @@ export function App() {
   const [selected, setSelected] = useState<Quantity | null>(null);
   const [provenance, setProvenance] = useState<Provenance[]>([]);
   const [layerDatasets, setLayerDatasets] = useState<string[]>([]);
+  const [cursor, setCursor] = useState<LatLon | null>(null);
   // UX-15: every dataset in the current view = the sheet's layer sources plus the datasets the plan's numbers use.
   const datasetsInView = [...new Set([...layerDatasets, ...(output?.plan.provenanceIds ?? [])])].sort((a, b) => Number(a.slice(1)) - Number(b.slice(1)));
   useEffect(() => {
@@ -92,7 +93,7 @@ export function App() {
       </header>
       <main className="well">
         <AreaSheet dataUrl={AREA_URL} plan={output} onPick={(p) => send("add_stop", { lat: p.lat, lon: p.lon })}
-          onSnapshotReady={(fn) => setSnapshot(() => fn)} hoverIndex={hover} onHoverIndex={setHover} onDatasets={setLayerDatasets} />
+          onSnapshotReady={(fn) => setSnapshot(() => fn)} hoverIndex={hover} onHoverIndex={setHover} onDatasets={setLayerDatasets} onCursor={setCursor} />
         <RouteProfile output={output} hoverIndex={hover} onHoverIndex={setHover} />
         {/* Kept mounted so a built card keeps its version stamp and shows STALE after a plan change. */}
         <BriefingView output={output} snapshot={snapshot} hidden={view !== "briefing"} />
@@ -100,7 +101,8 @@ export function App() {
         <FieldView output={output} hidden={view !== "field"} />
         <PlanPanel output={output} message={message} onDeleteStop={(id) => send("delete_stop", { stopId: id })}
           onSetTime={(id, value_s, rationale, stopId) => send("set_assumption", { id, value_s, rationale, ...(stopId ? { stopId } : {}) })}
-          onOpenSource={setSelected}>
+          onOpenSource={setSelected}
+          onMoveToCursor={cursor ? (stopId) => send("move_stop", { stopId, lat: cursor.lat, lon: cursor.lon }) : undefined}>
           <SourcePanel selected={selected} provenance={provenance} assumptions={output?.plan.assumptions ?? []}
             datasetsInView={datasetsInView} onClose={() => setSelected(null)} />
         </PlanPanel>

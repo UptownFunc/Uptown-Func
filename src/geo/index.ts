@@ -75,3 +75,12 @@ export function f7ToF1(p: F7Point, h: number): F1Point {
 export function f7PointResolution(resolution: number, latDeg: number): number {
   return resolution * Math.cos(rad(latDeg));
 }
+
+/** The F1 point east_m / north_m ground metres from p (on the sphere surface, h kept), via F5 and p's own F6 frame. */
+export function offsetF1(p: F1Point, east_m: number, north_m: number): F1Point {
+  const s = f1(p.lat, p.lon, 0), fr = localFrame(s);
+  // u is the drop from the tangent plane to the sphere at horizontal distance d (negligible for cursor steps).
+  const d = Math.hypot(east_m, north_m);
+  const q = f5ToF1(f6ToF5({ frame: "F6", e: east_m, n: north_m, u: Math.sqrt(R_F1 * R_F1 - d * d) - R_F1 }, fr));
+  return f1(q.lat, q.lon, p.h);
+}

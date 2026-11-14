@@ -1,7 +1,7 @@
 // SI-assisted: drafted with Claude Code (Claude Opus 5.5); human Data and Science review pending.
 // Plan 7.3: F1 -> F5 -> F6 on the F1 sphere (R = 3,396,190 m). The formulas are the test oracle.
 import { describe, expect, it } from "vitest";
-import { R_F1, f1, f1ToF5, f5ToF1, f5ToF6, f6ToF5, localFrame } from "./index";
+import { R_F1, f1, f1ToF5, f5ToF1, f5ToF6, f6ToF5, localFrame, offsetF1 } from "./index";
 
 const close = (a: number, b: number, tol: number) => expect(Math.abs(a - b)).toBeLessThanOrEqual(tol);
 
@@ -91,5 +91,16 @@ describe("F1 <-> F7 (display projection, plan 7.8)", () => {
   it("gives a point resolution of resolution x cos(lat) so the scale bar is true", async () => {
     const { f7PointResolution } = await import("./index");
     close(f7PointResolution(2, -4.8), 2 * Math.cos((4.8 * Math.PI) / 180), 1e-12);
+  });
+});
+
+describe("offsetF1 (keyboard cursor steps in ground metres, through F5/F6)", () => {
+  it("moves north and east by the given metres on the F1 sphere", () => {
+    const o = f1(-4.815, 137.39, 0);
+    const n = offsetF1(o, 0, 100), e = offsetF1(o, 100, 0);
+    const k = (Math.PI * 3_396_190) / 180;
+    expect((n.lat - o.lat) * k).toBeCloseTo(100, 3);
+    expect(n.lon).toBeCloseTo(o.lon, 9);
+    expect((e.lon - o.lon) * k * Math.cos((o.lat * Math.PI) / 180)).toBeCloseTo(100, 3);
   });
 });
