@@ -151,6 +151,22 @@ All ten findings fixed, test-first where possible. Each of the three key tests w
 | X-01 | Superpowers skill | Not installed in this cloud session (no skill or plugin present). Its test-first and verify-before-marking practice was followed manually; the skill is not claimed as used. | Install for future sessions if required |
 | D-04 note | Smoothing | Still undecided; the map draws the grid path itself (option 3 behaviour by default). Decide by G2 (19:00). | PENDING |
 
+## Session 14 Nov 15:19-15:40 (claude/wizardly-lovelace-i2i0wa): Conditions panel
+
+| ID | Topic | Decision / finding | Status |
+|---|---|---|---|
+| SUN-01 | Mars24 site convention | The plan's D10 frame row says "Planetocentric", but the GISS page's D-5 takes **planetographic** latitude and C-3 takes **west-positive** longitude. Implemented as the source states: the area centre goes F1 -> planetographic/west through `src/geo/planetographic.ts` (plan 7.3 step 4 formula). Effect at the area centre: latitude -4.815 -> -4.8719 deg (under 0.06 deg of sun angle). | Applied; Data and Science to confirm |
+| SUN-02 | GISS worked example 2 | The page's D-1 on the table's own L_s gives -13.42040 deg, not the tabulated -13.42065; D-5 with the tabulated declination gives 151.93935, not 151.93895. Example 1 reproduces exactly. Test holds those three example-2 steps to 1e-3 deg with this reason; gap 0.00065 deg vs AC-09's 0.1 deg. | Recorded |
+| SUN-03 | Mars24 coefficients and the constants register | CLAUDE.md asks for every science constant in the constants file. The ~40 algorithm coefficients are labelled by GISS step in `src/engine/sun.ts` and cited in `docs/data/d10-mars24-source.md`; only TT-UTC (`ttMinusUtc2017`) is in the register. Options: register one entry per step, or accept the algorithm-level citation. | PENDING - team / Data and Science (review finding 3) |
+| SUN-04 | Scenario time and the field view | `scenario_utc` is a plan assumption, so changing it changes the plan version; Field View ticks then show as stale (same as any plan change). Kept: the plan changed. | Recorded (review finding 5) |
+| T-02 | Scenario date and time (plan 19.11 weakness 27, "Assumed input at G0") | **No value chosen by SI.** The console has a UTC date-time input with a required rationale; sun values stay "unknown" until set. Only dates from 2017-01-01 are accepted (TT-UTC table limit). | BLOCKING for the G3 demo - team (B-9) |
+| AC-09 | Sun model vs Mars24, 3 dates, 0.1 deg | 2 of 3 dates pass (the two GISS worked examples). The third needs the Mars24 app (Java, GISS) run by a person at the area centre (4.8719 S planetographic, 222.61 W). | PENDING - person with the app |
+| C-18 | D7 snapshot schema | `RemsSnapshot` (Zod) is local to `src/app/rems.ts`; the Python writer has no shared contract. Moving it to `src/contracts` (and a Provenance-style record for D7) needs team agreement. | PENDING (contract, review finding 4) |
+| REMS-01 | REMS units | The feed's JSON gives no unit per field. Read as degrees C and Pa from the feed's pressure description ("about 700 Pascals") and the value ranges in CAB's REMS reports (-100 to +15.9 C, ~685-780 Pa). Not a labelled unit. | PENDING - Data and Science |
+| REMS-02 | REMS disclaimer / licence | The feed says it is CAB data "intended for outreach purposes only. Any other use is discouraged." The console shows it as context only, with the full disclaimer in the sources panel. Whether this fits the submission's terms is a team call; licence entry for `docs/licences.md`/README references to add. | PENDING - team |
+| B-01 | Bundle budget (update) | ~241.6 KB of 250 KB after the Conditions panel (was 235). | Watch |
+| R-10 | /code-review high of `091866a..6e8ca00` | 7 findings: fixed in 9608ecb - briefing card printed scenario time as raw seconds; duplicated assumption formatter (now `formatAssumptionValue`); REMS non-integer sol crash; UI format importing the sun module. Recorded: SUN-03, C-18, SUN-04. | Done |
+
 ## Plan defaults applied (Sat 14 Nov 2026, 14:15; operator instruction "do what is needed based on the plan")
 
 | ID | Decision applied | Plan / CLAUDE.md basis | Status |

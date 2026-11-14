@@ -4,13 +4,13 @@ This file is the handoff between team members and Claude sessions. Keep it factu
 
 ## Current snapshot
 
-- Last updated: **Sat 14 Nov 2026, 14:58 Asia/Manila (UTC+8)** (container clock, `TZ=Asia/Manila date`).
-- Deadline: **Sun 15 Nov 2026, 23:59 local** (plan 19.3 reading of the 2026 Project Submission Guide). **Not verified on the live portal from this session: a person must confirm it.** Remaining: about 33 h.
-- Gates: G0 (11:00) and G1 (14:00) **expired and passed only under their fallbacks** (2D only; 3D cut). G2 (Sat 19:00): **criteria met** on the cloud machine at 14:48. G3 (Sun 01:00): **at risk** on external inputs (blocker register below). Details: PHASES.md "Schedule reconciliation".
-- **Branch: `claude/trusting-fermi-c5pc0s`. HEAD: the handoff log commit directly after `cb7e24c`** (run `git log -1`). Working tree clean; pushed; 0 ahead / 0 behind origin at handoff.
-- History: `claude/kind-ptolemy-1wdqf5` (204a9c4, the previous handoff) **plus 37 commits** from this session (including the handoff commit; `git rev-list --count 204a9c4..HEAD` before this correction); `kind-ptolemy` itself is unchanged. `main` is **bb473b7**, unchanged. **No open PRs** (checked at 14:53). Nothing merged.
-- Session: operated by **John Malubay**; Claude Code with **Claude Opus 5.5**; Fable 5.2 not used; the Superpowers skill was not installed in this session (X-01), so its test-first and verify-before-done practice was followed by hand.
-- **Authorship: SharpWalk's concept and project plan originated with Patrick Ezekiel A. Arcilla (parcilla13)** (DECISIONS G-06, which supersedes G-01; the team should review this in the PR before merge). Do not credit the concept or plan to the team or to SI. SI assistance is recorded only in SI_LOG.md.
+- Last updated: **Sat 14 Nov 2026, 15:40 Asia/Manila (UTC+8)** (container clock, `TZ=Asia/Manila date`).
+- Deadline: **Sun 15 Nov 2026, 23:59 local** (plan 19.3 reading of the 2026 Project Submission Guide). **Still not verified on the live portal: a person must confirm it.** Remaining: about 32 h 19 min.
+- Gates: G0 and G1 expired, passed only under their fallbacks (2D only; 3D cut). G2 (Sat 19:00): criteria met at 14:48. G3 (Sun 01:00, ~9 h 20 min away): **at risk on human inputs only**; the Conditions Must is now built (3.6), leaving rover point of view (B-3), planned-margin values (B-1), scenario time (B-9) and the public deploy (B-4).
+- **Branch: `claude/wizardly-lovelace-i2i0wa`, HEAD = the handoff log commit after `9608ecb`** (run `git log -1`). It is `claude/trusting-fermi-c5pc0s` (091866a, previous handoff, fast-forwarded, nothing overwritten) plus 4 commits. Pushed; working tree clean. `main` is still **bb473b7**. **No open PRs; nothing merged** (operator instruction this session: do not merge; human review and merge required).
+- Session: operated from **parcilla13's account** (the member at the keyboard was not stated; four members share accounts); Claude Code with **Claude Opus 5.5**; Fable 5.2 not used; **Superpowers installed and its TDD skill used** this session.
+- Environment: this session's "Space App" environment now allows `www.giss.nasa.gov` and `mars.nasa.gov` (approved in-session 15:21); that resolves B-2 for sessions on this environment.
+- **Authorship:** `main`'s CLAUDE.md credits the concept and plan to the whole team (G-01); this branch carries G-06 (from the previous session), which credits Patrick Ezekiel A. Arcilla and supersedes G-01. **Unresolved: the team must settle G-01 vs G-06 in review before merge.** This session did not change either.
 
 Do not interpret blank fields as proof that no work exists. Inspect GitHub and the working tree.
 
@@ -28,19 +28,20 @@ changes still need the team's recorded agreement (CLAUDE.md step 6).
 | State | Parts |
 |---|---|
 | VERIFIED | 0.1, 0.2; 2.2, 2.3, 2.5 (interim rule), 2.7 (cloud machine); 4.4 (automated checks) |
-| IN PROGRESS (built, checks green, not complete) | 0.3 (contracts unagreed); 1.1, 1.2 (GDAL 3.12.3 rerun), 1.4; 2.1 (20 deg source unresolved); 2.4; 2.6 (coverage outlines, contours on sheet, fonts); 3.1; 3.2; 3.3; 3.4 (paper/Safari print, fixed-scale map); 4.1 (contours, drill, AC-31 done; sky obstruction deferred); 5.4 (README draft) |
+| IN PROGRESS (built, checks green, not complete) | 0.3 (contracts unagreed); 1.1, 1.2 (GDAL 3.12.3 rerun), 1.4; 2.1 (20 deg source unresolved); 2.4; 2.6 (coverage outlines, contours on sheet, fonts); 3.1; 3.2; 3.3; 3.4 (paper/Safari print, fixed-scale map); **3.6 Conditions (new: AC-09 2/3 dates, scenario time unset)**; 4.1 (contours, drill, AC-31 done; sky obstruction deferred); 5.4 (README draft) |
 | BLOCKED | 0.4 (Local Lead answers); 1.3 (C-12); 4.2 AC-07 and 4.3 AC-08 (D5) |
 | NOT STARTED | 1.5 (control points); 3.5 (deploy); 4.5; 5.1-5.3, 5.5 |
 | CUT | 1.6 (3D view, D-10) |
 
-Missing for G3 (Tier 1 Musts): **Conditions panel** (D10 Mars24, D7 REMS), **rover point of view** (D6), **planned
-margin values** (T-01), **first public deploy** (3.5).
+Missing for G3 (Tier 1 Musts): **rover point of view** (D6, B-3), **planned margin values** (T-01, B-1), **scenario
+time** for the sun values (T-02, B-9), **first public deploy** (3.5, B-4). Conditions (D10, D7) is built (3.6).
 
 ## What exists and passes its tests
 
 - `src/contracts` (Zod, frozen as drafted, unagreed); `src/geo` (F1/F5/F6/F7, grid cell <-> F1, metre offsets); `src/constants` (cited register; drill default 30 min).
 - `src/engine`: A* routing, time field, leg ranges, plan 6.6 margins; **Planner** (only MissionPlan writer; Commands incl. per-stop durations); Comlink worker; contour lines.
 - `src/map` + `src/app`: AREA sheet with route, stops, keyboard cursor, margin ticks, contours, drill line; console with ASSUMED banner, plan-time inputs (blank until entered), end margin and state, sources panel; elevation profile with two-way scrub.
+- **Conditions (3.6, this session):** `src/engine/sun.ts` (Mars24, both GISS worked examples), `src/geo/planetographic.ts`, scenario time `scenario_utc` as a plan assumption, `PlanOutput.conditions`, `src/app/ConditionsPanel.tsx`; D7 `pipeline/sharpwalk/run_rems.py` -> `public/conditions/rems.json` (sol 4995, 2026-08-25). Evidence: `docs/data/d10-mars24-source.md`.
 - `src/briefing`: A5 card, version stamp, STALE + print blocked after edits. `src/field`: Field View (only MissionExecution writer).
 - `pipeline`: D1 grids, F7 display layers, provenance for D1 and D2; `public/area` committed and checked by pytest.
 - `docs/licences.md` generated by `scripts/licences.py`; `README.md` with authorship, SI use and references.
@@ -58,16 +59,16 @@ margin values** (T-01), **first public deploy** (3.5).
 `src/field/{FieldView.tsx,execution.ts,execution.test.ts}`; `src/geo/{index,geo.test,grid,grid.test}.ts`;
 `src/map/{AreaSheet.tsx,planLayer.ts,snapshot.ts}`; and 9 generated files in `public/area/`.
 
-## Tests run at handoff (Sat 14 Nov 14:53-14:57, exact commands and results)
+## Tests run at handoff (Sat 14 Nov 15:36-15:38 at 9608ecb, exact commands and results; previous handoff values in brackets)
 
 | Command | Result |
 |---|---|
 | `npm ci` | OK, 0 vulnerabilities |
-| `npx vitest run` | **209 passed / 209**, 16 files |
+| `npx vitest run` | **235 passed / 235**, 21 files [209 / 16] |
 | `npx tsc --noEmit` | clean |
-| `npm run build` | OK; JS gzipped: main 196 KB + worker 39 KB = **235 KB** (budget 250) |
-| `(cd pipeline && ../.venv/bin/python -m pytest -q)` | **44 passed** (includes area checksums and licence-inventory staleness) |
-| `PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome npx playwright test --trace off` | First run after `npm ci`: **2 failed / 21 passed** (area-sheet, a11y Planning). Cause reproduced: a cold Vite dev-server cache re-optimised dependencies and reloaded the page. Fixed in `cb7e24c` (E2E now runs on the production build via `vite preview`). After the fix: **23 passed / 23** on a cold run (cache and dist deleted) and on a warm run |
+| `npm run build` | OK; JS gzipped: main 200.7 KB + worker 40.9 KB = **~241.6 KB** (budget 250) [235] |
+| `(cd pipeline && ../.venv/bin/python -m pytest -q)` | **48 passed** [44] (includes area checksums, licence-inventory staleness, REMS snapshot) |
+| `PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome npx playwright test --trace off` | **26 passed / 26** at 9608ecb (3 new Conditions specs). Previous handoff: first run after `npm ci`: **2 failed / 21 passed** (area-sheet, a11y Planning). Cause reproduced: a cold Vite dev-server cache re-optimised dependencies and reloaded the page. Fixed in `cb7e24c` (E2E now runs on the production build via `vite preview`). After the fix: **23 passed / 23** on a cold run (cache and dist deleted) and on a warm run |
 | `SHARPWALK_AREA=public/area node --experimental-strip-types bench/route-bench.ts` (14:48) | longest route 316-393 ms (< 500); time field 382-438 ms (< 3 s) |
 
 ## Known failures and limitations
@@ -89,7 +90,7 @@ margin values** (T-01), **first public deploy** (3.5).
 | Local Lead (via the team) | D-01 pre-event wireframes; D-02 GSAP / Cesium Mars |
 | Data and Science work (team) | 1.1 sign-off; D-05 vertical reference; D-06; P-03 GDAL rerun; 1.4 trust grid; 20 deg slope-limit source |
 
-## External blocker register (Sat 14 Nov 2026, 14:58 Asia/Manila)
+## External blocker register (Sat 14 Nov 2026, 15:40 Asia/Manila; previous 14:58)
 
 Nothing below is marked approved or filled in by SI. "Needed by" times are the latest that still leave time to build
 and check the dependent work before G3 (Sun 01:00).
@@ -97,26 +98,29 @@ and check the dependent work before G3 (Sun 01:00).
 | # | Blocker | Owner | Input required | Impact if missing | Needed by |
 |---|---|---|---|---|---|
 | B-1 | EVA, task, contingency and stop durations (T-01) | Team (decided together; G-05) | T_EVA, t_ops, t_cont, default stop duration (and any per-stop values), each with a one-line rationale; enter in the console or record in DECISIONS | Planned margin and field margins show "unknown"; G3 acceptance "including planned margin" fails | Sat 22:00 |
-| B-2 | NASA Mars24 and MSL weather access (D10, D7) | John Malubay (environment owner) | Start a session on the "Uptown-Func" environment (allows www.giss.nasa.gov, mars.nasa.gov) or allow the download in this session | Tier 1 Conditions panel (sun elevation, LMST label, dated REMS reading) cannot be built or checked against the Mars24 worked example (AC-09) | Sat 20:00 (about 3 h of build and checks) |
+| B-2 | **RESOLVED 15:21 for the "Space App" environment** (hosts added in-session; Conditions built). Kept for history: NASA Mars24 and MSL weather access (D10, D7) | John Malubay (environment owner) | Start a session on the "Uptown-Func" environment (allows www.giss.nasa.gov, mars.nasa.gov) or allow the download in this session | Tier 1 Conditions panel (sun elevation, LMST label, dated REMS reading) cannot be built or checked against the Mars24 worked example (AC-09) | Sat 20:00 (about 3 h of build and checks) |
 | B-3 | 3-5 Curiosity images and metadata (D6) | Team | Image IDs or URLs with sol, camera, credit line; which stop or terrain each illustrates ("similar terrain") | Tier 1 rover point-of-view feature missing at G3 | Sat 22:00 |
 | B-4 | Vercel deployment access (R-17) | Patrick Ezekiel A. Arcilla (repository owner) | Vercel project linked to the repository, or a deploy done by a member; then the FortiGuard classification request (plan 19.3) | No public deploy: G3 and G5 acceptance fail; judges cannot open the app | Sun 00:00 |
 | B-5 | Concept-formation account (SI_LOG, README) | Patrick Ezekiel A. Arcilla | How and when the concept was formed, pre-event research, confirmation and date | SI disclosure incomplete; submission SI field cannot be prepared truthfully | Sun 17:00 |
 | B-6 | Contract agreement C-12, C-16, C-17 | Team (all members) | Agree or reject: nullable manifest residuals (C-12); Quantity fields for leg length and climb (C-16); nullable field margins (C-17) | No AreaManifest (G1 item 1 stays open); leg length/climb shown without Quantity metadata; stored field margins cannot be "unknown" | Sat 22:00 |
 | B-7 | D5 rover positions | Team, plus John Malubay for network access | Curiosity positions for sols 1456-1467 (Butte M12) and the reference period, from D5, with the host allowed | AC-07 and AC-08 cannot run; sky-obstruction layer stays hidden (SKY-1) | Sun 06:00 (G4) |
-| B-8 | Merge of this branch | Any human (CLAUDE.md step 6) | Review including G-06 (supersedes the merged G-01) | Work stays off `main`; G4 "Tier 2 merged" fails | Sun 10:00 |
+| B-9 | Scenario date and time (T-02, plan 19.11 weakness 27) | Team | A UTC date and time from 2017 on, with a one-line rationale; enter in the console's Conditions panel or record under T-02 | Sun elevation, LMST and L_s show "unknown" in the demo | Sat 22:00 |
+| B-10 | AC-09 third date | Any member with Java | Run the GISS Mars24 app at 4.8719 S (planetographic), 222.61 W for a chosen date; compare its sun elevation with the console's for the same scenario time (pass: within 0.1 deg); record in PHASES 3.6 | AC-09 stays 2 of 3 | Sun 10:00 (G4) |
+| B-11 | REMS units and outreach terms (REMS-01, REMS-02) | Team (Data and Science) | Confirm degrees C / Pa and whether CAB's "outreach purposes only" terms fit the submission | D7 shown with unconfirmed units / terms | Sun 13:00 (G5) |
+| B-8 | Merge of `claude/wizardly-lovelace-i2i0wa` (contains `trusting-fermi`) | A human (operator instruction: no AI merge this session) | Review including G-06 vs G-01, C-18, SUN-01..04; open a PR when the team wants one (none opened) | Work stays off `main`; G4 "Tier 2 merged" fails | Sun 10:00 |
 
 ## Exact next task
 
-1. **Smallest human action (unblocks G3's planned margin): B-1.** The team enters T_EVA, t_ops, t_cont and the stop duration, each with a one-line rationale, in the console's "Assumed plan times", or records them in DECISIONS.md under T-01 so a session can pre-set them as logged team-choice Assumptions. Do not invent them.
-2. **If a session runs on the "Uptown-Func" environment (B-2):** build the Conditions panel. D10: Mars24 solar longitude, LMST clock label and sun elevation at the area centre, constants cited to the GISS algorithm page, tested against its published worked example (AC-09), "terrain shadowing not modelled" shown. D7: a dated, build-time REMS snapshot labelled as the rover site, not the boxwork.
-3. **Code-only work while waiting:** deduplicate the e2e click helper into one module (R-02 item 10, R-04 item 6), then R-02 items 7-8 (shared elevation decoder; readout via `f1ToCell`).
-4. **When access arrives:** 3.5 first public deploy (B-4), then G5 checks. Rover images (B-3) into the stop panel and the card, labelled "similar terrain".
-5. Do not build the sky-obstruction layer until D5 positions allow AC-07 (SKY-1). Do not fabricate the Butte M12 position or any benchmark result.
+1. **Human inputs for G3 (smallest first):** B-9 scenario time and B-1 plan times (each a value + one-line rationale in the console, or recorded under T-02 / T-01 in DECISIONS so a session can pre-set them as logged team choices); B-3 rover images; B-4 Vercel. Do not invent any of them.
+2. **Code-only work while waiting (next session):** deduplicate the e2e click helper (R-02 item 10, R-04 item 6), then R-02 items 7-8 (shared elevation decoder; readout via `f1ToCell`). Optionally show the scenario time and sun elevation on the briefing card once B-9 is set (the card already lists the scenario assumption).
+3. **When images arrive (B-3):** rover point of view in the stop panel and the card, labelled "similar terrain".
+4. **When deploy access arrives (B-4):** 3.5 first public deploy, then G5 checks. Re-take the REMS snapshot at build time (command below) so the dated reading is the latest.
+5. Do not build the sky-obstruction layer until D5 positions allow AC-07 (SKY-1). Do not fabricate the Butte M12 position, any benchmark result, the scenario time or the AC-09 third date.
 
 ## Exact commands for the next session
 
 ```bash
-git fetch origin && git checkout claude/trusting-fermi-c5pc0s && git pull
+git fetch origin && git checkout claude/wizardly-lovelace-i2i0wa && git pull
 ```
 
 ```bash
@@ -147,34 +151,40 @@ SHARPWALK_AREA=public/area node --experimental-strip-types bench/route-bench.ts
 
 (Only after changing dependencies; the pytest check fails if docs/licences.md is stale.)
 
+Re-take the D7 REMS snapshot (needs `mars.nasa.gov`; in this container also `SSL_CERT_FILE=/root/.ccr/ca-bundle.crt`):
+
+```bash
+cd pipeline && ../.venv/bin/python -m sharpwalk.run_rems ../public/conditions && cd ..
+```
+
 `public/area` is committed. Rebuild only if the pipeline changes (needs the USGS bucket host):
 
 ```bash
 cd pipeline && ../.venv/bin/python -m sharpwalk.run_d1 ../public/area && ../.venv/bin/python -m sharpwalk.run_display ../public/area && cd ..
 ```
 
-Expected at this handoff: vitest 209/209 in 16 files; tsc clean; build OK (235 KB gzipped JS); pytest 44 passed;
-playwright 23/23; route 316-393 ms. Open DECISIONS.md "Plan defaults applied" and the blocker register before editing.
+Expected at this handoff: vitest 235/235 in 21 files; tsc clean; build OK (~241.6 KB gzipped JS); pytest 48 passed;
+playwright 26/26; route bench not re-run this session (engine routing unchanged; last 316-393 ms). Open DECISIONS.md "Plan defaults applied" and the blocker register before editing.
 
 ## Last session report
 
 ```text
-Session / member: John Malubay (operator), cloud session_018Xnznho5hoLyC49RJSn7oD
-Model / tools: Claude Code, Claude Opus 5.5 (Fable 5.2 not used; Superpowers not installed; two failed web-fetch attempts)
-Start and end time (Asia/Manila, container clock): Sat 14 Nov 12:57 - 14:58
-Branch: claude/trusting-fermi-c5pc0s (fast-forwarded from claude/kind-ptolemy-1wdqf5 at 204a9c4; nothing overwritten)
-Starting commit: 204a9c4
-Ending commit: the handoff log commit after cb7e24c (git log -1)
-Phase parts: VERIFIED 2.2, 2.3, 2.5 (interim), 2.7, 4.4 (automated); CUT 1.6; IN PROGRESS 2.1, 2.4, 2.6, 3.1-3.4, 4.1, 5.4;
-  BLOCKED 4.2, 4.3 (D5); NOT STARTED 3.5
-Files changed: see "Files changed this session"
-Checks run: see "Tests run at handoff" (all green after cb7e24c)
-Failures / limitations: see "Known failures and limitations"
-Decisions made by humans this session: G-05 (no roles), K-01 (k_v = 1 placeholder + banner), "apply the plan's
-  defaults" (D-10 3D cut, D-04 interim, H-01, F-01, C-14), G-06 (authorship), network environment "Uptown-Func"
-SI_LOG.md entries added: 11 rows
-Uncommitted changes left: none (.venv/, node_modules/, dist/, work/, test-results/ are git-ignored)
-Next owner: the team (blocker register), then the next session from "Exact next task"
+Session / member: operated from parcilla13's account (member not stated); cloud session_01NVSLpGshQsBW5eL1eQzMgw
+Model / tools: Claude Code, Claude Opus 5.5; Superpowers test-driven-development skill; Fable 5.2 not used;
+  one web search (REMS units); environment hosts www.giss.nasa.gov, mars.nasa.gov added with the user's approval
+Start and end time (Asia/Manila, container clock): Sat 14 Nov 15:19 - 15:40
+Branch: claude/wizardly-lovelace-i2i0wa (fast-forwarded from claude/trusting-fermi-c5pc0s at 091866a; nothing overwritten)
+Starting commit: 091866a
+Ending commit: the handoff log commit after 9608ecb (git log -1)
+Phase parts: 3.6 Conditions IN PROGRESS (built, green; AC-09 2/3; T-02 unset). No part newly VERIFIED.
+Files changed: see PHASES.md 3.6 completion record, plus HANDOFF/PHASES/DECISIONS/SI_LOG/README
+Checks run: see "Tests run at handoff" (all green at 9608ecb)
+Failures / limitations: e2e caught a sources-panel crash on degree Quantities (fixed in 9ec2f70); review found the
+  briefing card printing raw scenario seconds (fixed in 9608ecb); open items SUN-01..04, C-18, REMS-01/02, AC-09
+Decisions made by humans this session: environment host allowlist change (approved via prompt); "do not merge PRs"
+SI_LOG.md entries added: 1 row
+Uncommitted changes left: none (.venv/, node_modules/, dist/, test-results/ are git-ignored)
+Next owner: the team (B-1, B-3, B-4, B-9 to B-11), then the next session from "Exact next task"
 ```
 
 ## Outgoing handoff checklist

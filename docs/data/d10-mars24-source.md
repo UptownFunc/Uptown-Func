@@ -1,6 +1,6 @@
 # D10 Mars24 algorithm: source record and AC-09 evidence
 
-SI-assisted: source read and record drafted with Claude Code (Claude Opus 5.5) on Sat 14 Nov 2026, 15:20-16:10 Asia/Manila. Human Data and Science review is pending.
+SI-assisted: source read and record drafted with Claude Code (Claude Opus 5.5) on Sat 14 Nov 2026, 15:20-15:36 Asia/Manila (container clock). Human Data and Science review is pending.
 
 ## Source
 

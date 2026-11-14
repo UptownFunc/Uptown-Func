@@ -47,6 +47,8 @@ metabolic workload (off), live data feeds, or 3D (cut at G1, see `DECISIONS.md`)
 |---|---|---|
 | D1 - MSL Gale DEM mosaic, 1 m (USGS Astrogeology) | Heights on the 2 m F6 grid, slope, terrain classes, hillshade | Elevation readout, slope screening, route length and climb, walking times, planned and field margins, time-to-habitat contours |
 | D2 - MSL Gale HiRISE colour orthophoto COG, 0.25 m (USGS Astrogeology) | Base image of the sheet and the briefing map | Display only; no number is derived from it |
+| D7 - MSL REMS daily weather summary (CAB, via mars.nasa.gov) | Build-time snapshot of the latest sol with air temperature and pressure | "Conditions at Curiosity on [date], for context": air temperature range and pressure, at the rover, not the boxwork |
+| D10 - Mars24 algorithm (NASA GISS) | Computed at the area centre for the team's Assumed scenario time | Local mean solar time (clock label), solar longitude, sun elevation (terrain shadowing not modelled) |
 
 Each record (product, URL, licence, CRS, vertical reference, resolution, checksum scope) is in
 `public/area/provenance.json`, written by the pipeline and shown in the Sources panel.
@@ -92,6 +94,8 @@ it.
   Superpowers workflow skill was loaded in the first session; it was not installed in the second, where its
   test-first and verify-before-done practice was followed by hand. In the second session a Claude Code web-fetch
   subagent was used twice to read NASA's Mars24 algorithm page; both attempts failed and nothing from them is used.
+  A third session (Sat 14 Nov from 15:19, from parcilla13's account) loaded the Superpowers test-driven-development
+  skill and built the Conditions panel (Mars24 sun, REMS snapshot) after the page and feed were reachable.
 - **What SI contributed:** drafted the data pipeline and its tests; the frame conversions and constants register;
   the route engine, margins and field-margin functions; the engine worker; the AREA sheet, console, profile, sources
   panel, briefing card and field view; accessibility and resilience tests; tier-2 contours and drill; this README and
@@ -118,6 +122,8 @@ it.
 - NASA/TP-2010-216125, pp. 2-3, 10, 70-71, 79, 83-86 (limits of the suited-walking tests), as summarised in the team plan section 19.5.
 - IAU 2015 Mars sphere (R = 3,396,190 m), as used by D1 and D2.
 - Drill warning time (Assumed 30 min default): team plan section 6.9, informed by Loewe et al. 2025 (arXiv preprint) and the NESC assessment (Parker et al.).
+- D7: Centro de Astrobiologia (CAB), MSL REMS weather summary feed, `https://mars.nasa.gov/rss/api/?feed=weather&category=msl&feedtype=json`, retrieved 2026-11-14T07:32:00Z. Provider's terms: "intended for outreach purposes only. Any other use is discouraged" (DECISIONS REMS-02).
+- D10: NASA GISS, Mars24 Sunclock "Algorithm and Worked Examples" (updated 2025-01-07), `https://www.giss.nasa.gov/tools/mars24/help/algorithm.html`; Allison, M., McEwen, M. (2000), Planet. Space Sci. 48, 215-235; Allison, M. (1997), Geophys. Res. Lett. 24, 1967-1970.
 - xEVA 20 deg slope requirement (NASA presentation; title and slide still to be identified, see `src/constants`).
 
 ### Software
