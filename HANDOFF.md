@@ -11,7 +11,7 @@ This file is the handoff between team members and Claude sessions. Keep it factu
 - History: `claude/trusting-fermi-c5pc0s` at 091866a (previous handoff) fast-forwarded, nothing overwritten, **plus 18 commits** from this session (17 before this handoff commit). `main` is **bb473b7**, unchanged. **No open PRs; nothing merged** (operator instruction: no merge, no PR without authorization).
 - Session: operated from **parcilla13's account**; Claude Code with **Claude Opus 5.5** throughout; Fable 5.2 not used; the Superpowers skill was installed and its test-driven-development workflow used.
 - Environment ("Space App", personal): allows `www.giss.nasa.gov` and `mars.nasa.gov` (added with the user's approval at 15:21); the USGS bucket and package registries were reachable. **`gdal-bin` 3.8.4 was installed in this container only** (P-05); a new container needs it again for contour rebuilds.
-- **Authorship:** SharpWalk's concept and project plan are **Patrick Ezekiel A. Arcilla's (parcilla13)**. This branch's CLAUDE.md says so (G-06), and the account owner restated it in this session's handoff request ("preserve the user's sole authorship of the concept and plan"; DECISIONS G-06 note). `main` still carries the older G-01 wording (team credit); the change reaches `main` only through a reviewed PR. SI assistance is recorded separately in SI_LOG.md and never as the origin of the concept or plan.
+- **Authorship:** the concept and project plan are credited to the **whole four-member team** (G-01, restored by G-07 at ~19:00 on the session operator's instruction; G-06's sole-authorship wording is superseded). The team, including Patrick, should confirm G-07. SI assistance is recorded separately in SI_LOG.md and never as the origin of the concept or plan.
 
 Do not interpret blank fields as proof that no work exists. Inspect GitHub and the working tree.
 
@@ -22,11 +22,11 @@ Do not interpret blank fields as proof that no work exists. Inspect GitHub and t
 - Baseline re-run on a fresh container at 82babb6: vitest 255/255 (23 files), tsc clean, build OK, pytest 59 passed + 2 skipped (before gdal-bin), licence inventory current, Playwright 43/43.
 - **RUN-01 (1.2):** full rebuild from the USGS sources reproduces all 13 committed area outputs (PHASES completion record). P-03 is still open.
 - No code, data, contract or decision changed. No PR opened, nothing merged. Open PRs: none (PR #1 merged earlier).
-- Still open, unchanged: G-01 (`main`, team credit) vs G-06 (this branch, Patrick's sole authorship). The team must settle it before any merge to `main`.
+- **Resolved ~19:00:** G-07 restores team credit (G-01). Contracts accepted as drafted for the merge (C-AGREE). The operator authorised the merge of the branch work into `main` and delegated the G3 input choices to the session.
 
 ## Team and module ownership
 
-Team: Patrick Ezekiel A. Arcilla (parcilla13; concept and plan), Christian Jesus Alcazar, Eugene Ibañez Jr. ("Yujin"), John Malubay.
+Team: Patrick Ezekiel A. Arcilla (parcilla13), Christian Jesus Alcazar, Eugene Ibañez Jr. ("Yujin"), John Malubay.
 **No per-module roles (G-05):** each session takes the earliest incomplete phase parts in order, on its own branch.
 Where the plan names an owner role (Captain, Data and Science, Route Engine, Design), read it as "the team". Contract
 changes still need the team's recorded agreement (CLAUDE.md step 6). Credit for implementation, data, design, review

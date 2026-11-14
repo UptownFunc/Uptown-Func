@@ -6,11 +6,11 @@ This log supports the 2026 submission disclosure and README `SI use` section. Ke
 
 **Human team must complete this section truthfully.** The 2026 guide says SI should not be used to come up with the idea of how to solve the challenge. Do not infer or invent who originated the idea, what was discussed, or how the concept was formed. Record the actual human-origin story and distinguish it from later SI assistance.
 
-- Concept and project plan originated with: **Patrick Ezekiel A. Arcilla (parcilla13)** (stated by team member John Malubay, Sat 14 Nov 2026, 14:47 Asia/Manila; DECISIONS G-06, superseding G-01).
-- Who proposed it and when: Patrick Ezekiel A. Arcilla; **date and circumstances pending Patrick's own account**.
-- Human research and decisions that led to it: **pending Patrick's account** (the plan's sections 16 and 19 record pre-event research dated 10-14 Nov 2026; this log does not infer more).
+- Concept and project plan credited to: **the whole four-member team** (DECISIONS G-01, restored by G-07 on Sat 14 Nov 2026, ~19:00 Asia/Manila at the direction of the session operator; G-06's sole-authorship wording, 14:47, is superseded).
+- Who proposed it and when: **pending the team's own account**.
+- Human research and decisions that led to it: **pending the team's account** (the plan's sections 16 and 19 record pre-event research dated 10-14 Nov 2026; this log does not infer more).
 - SI use after the concept was formed: see the entries below (Claude Code with Claude Opus 5.5, from Sat 14 Nov 2026).
-- Human confirmation and date: **pending Patrick's confirmation.**
+- Human confirmation and date: **pending the team's confirmation.**
 
 ## SI-assisted work entries
 
