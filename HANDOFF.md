@@ -4,16 +4,25 @@ This file is the handoff between team members and Claude sessions. Keep it factu
 
 ## Current snapshot
 
-- Last updated: **Sat 14 Nov 2026, 17:31 Asia/Manila (UTC+8)** (container clock, `TZ=Asia/Manila date`).
-- Deadline: **Sun 15 Nov 2026, 23:59 local** (plan 19.3 reading of the 2026 Project Submission Guide). **Not yet confirmed on the live portal: a person must check it.** Remaining: about 30 h 28 min.
+- Last updated: **Sat 14 Nov 2026, ~18:45 Asia/Manila (UTC+8)** (container clock). Previous full handoff: 17:31 (session on `claude/wizardly-lovelace-i2i0wa`); this session only appended RUN-01 (see "Session update 18:45" below).
+- Deadline: **Sun 15 Nov 2026, 23:59 local** (plan 19.3). Re-checked 18:40: the official Space Apps FAQ confirms the 14-15 Nov 2026 dates; the 23:59 local close is still only on third-party pages. **A person must confirm it on the live portal.** Remaining at 18:45: about 29 h 14 min.
 - Gates: G0 and G1 expired and passed only under their fallbacks (2D only; 3D cut). G2 (Sat 19:00): criteria met at 14:48; latency margin thinner on this machine at 17:30 (see Known failures 2). **G3 (Sun 01:00, about 7 h 29 min away): at risk on human inputs only** (B-1, B-3, B-4, B-9, B-12).
-- **Branch `claude/wizardly-lovelace-i2i0wa`, HEAD = the handoff commit after `d9bd3bd`** (run `git log -1`; equal to origin after push). Working tree clean; no stashes; only git-ignored caches (`.venv/`, `node_modules/`, `dist/`, `test-results/`, `__pycache__/`, `.pytest_cache/`).
+- **Branch `ccr-dbbcdd02-kqy23v`** (this session's designated branch), fast-forwarded from `claude/wizardly-lovelace-i2i0wa` at 82babb6 (nothing overwritten) plus this session's log commit. `claude/wizardly-lovelace-i2i0wa` itself is unchanged at 82babb6. Working tree clean after the commit.
 - History: `claude/trusting-fermi-c5pc0s` at 091866a (previous handoff) fast-forwarded, nothing overwritten, **plus 18 commits** from this session (17 before this handoff commit). `main` is **bb473b7**, unchanged. **No open PRs; nothing merged** (operator instruction: no merge, no PR without authorization).
 - Session: operated from **parcilla13's account**; Claude Code with **Claude Opus 5.5** throughout; Fable 5.2 not used; the Superpowers skill was installed and its test-driven-development workflow used.
 - Environment ("Space App", personal): allows `www.giss.nasa.gov` and `mars.nasa.gov` (added with the user's approval at 15:21); the USGS bucket and package registries were reachable. **`gdal-bin` 3.8.4 was installed in this container only** (P-05); a new container needs it again for contour rebuilds.
 - **Authorship:** SharpWalk's concept and project plan are **Patrick Ezekiel A. Arcilla's (parcilla13)**. This branch's CLAUDE.md says so (G-06), and the account owner restated it in this session's handoff request ("preserve the user's sole authorship of the concept and plan"; DECISIONS G-06 note). `main` still carries the older G-01 wording (team credit); the change reaches `main` only through a reviewed PR. SI assistance is recorded separately in SI_LOG.md and never as the origin of the concept or plan.
 
 Do not interpret blank fields as proof that no work exists. Inspect GitHub and the working tree.
+
+## Session update 18:45 (ccr-dbbcdd02-kqy23v)
+
+- Operator: not stated in the session (the account appears to be Christian Jesus Alcazar's; to be confirmed). Claude Code, Claude Opus 5.5. **The Superpowers skill is not installed in this container and was not used.** Fable 5.2 not used.
+- The user supplied the plan PDFs (parts 1-2). Their sha256 match `docs/plan/*.pdf` on `claude/lucid-ptolemy-nz6qpw` (c1ae51be..., 74b67ac6...). They are not on this branch (`*.pdf` is git-ignored).
+- Baseline re-run on a fresh container at 82babb6: vitest 255/255 (23 files), tsc clean, build OK, pytest 59 passed + 2 skipped (before gdal-bin), licence inventory current, Playwright 43/43.
+- **RUN-01 (1.2):** full rebuild from the USGS sources reproduces all 13 committed area outputs (PHASES completion record). P-03 is still open.
+- No code, data, contract or decision changed. No PR opened, nothing merged. Open PRs: none (PR #1 merged earlier).
+- Still open, unchanged: G-01 (`main`, team credit) vs G-06 (this branch, Patrick's sole authorship). The team must settle it before any merge to `main`.
 
 ## Team and module ownership
 
@@ -77,7 +86,7 @@ time** for the sun values (T-02, B-9), **per-stop tasks on the card** (C-19, B-1
 2. **Latency margin:** one of six "decreasing placeholder" route runs took 523 ms (> 500 ms) under load; unity factors (used by the app) stayed under 500 ms (369-463 ms). At 14:48 the same benchmark gave 316-393 ms. The engine is unchanged, so this is machine load; confirm on a mid-range laptop at G5 before calling G2 latency safe.
 3. Planned and field margins show "unknown" until plan times are entered (B-1); sun values show "unknown" until a scenario time is set (B-9).
 4. **Bundle: ~246.2 KB of 250 KB** (B-01). Check size before adding code.
-5. Pipeline: outputs built with rasterio's GDAL 3.10.3 (P-03) and contours with the GDAL 3.8.4 CLI (P-05), not the pinned 3.12.3. `run_display` gained calls to `run_terrain_masks`, `run_coverage` and `run_contours` and **has not been re-run end to end** (each step was run on its own and checked).
+5. Pipeline: outputs built with rasterio's GDAL 3.10.3 (P-03) and contours with the GDAL 3.8.4 CLI (P-05), not the pinned 3.12.3. **18:35 RUN-01: `run_d1` + `run_display` re-run end to end into an empty directory reproduce all 13 committed `public/area` files byte for byte** (same stack). A conda-forge GDAL 3.12.3 env was refused again by the permission classifier, so P-03 stays open.
 6. 31 native libraries bundled in the pipeline wheels: licences not verified (docs/licences.md).
 7. Hatch: during a button zoom (~250 ms) the terrain canvas is briefly scaled before re-rendering (HATCH-02, accepted).
 8. Deferred review findings still open: R-02 (4 = C-16; 7 waits for P-01), R-03 (5), R-04 (7 = C-16), R-05 (5, 6), R-06 (5), R-07 (3), R-08 (5), R-11 (4, skipped), R-13 (CON-02 timing at G5).
@@ -118,7 +127,7 @@ B-2 (NASA host access) was resolved at 15:21 for the "Space App" environment.
 ## Exact next task
 
 1. **Human inputs for G3, smallest first:** B-9 scenario time and B-1 plan times (a value + one-line rationale each, in the console or recorded under T-02 / T-01 so a session can pre-set them as logged team choices); B-12 stop-tasks option; B-3 images; B-4 Vercel. Do not invent any of them.
-2. **Next code-only work (no approval needed):** G5 preparation that does not add bundle weight: measure route latency, contour load (CON-02) and frame pacing (HATCH-04) on a mid-range laptop; re-run `run_display` end to end once (needs the USGS bucket and gdal-bin) and confirm the committed outputs reproduce, or record the differences.
+2. **Next code-only work (no approval needed):** G5 preparation that does not add bundle weight: measure route latency, contour load (CON-02) and frame pacing (HATCH-04) on a mid-range laptop (needs a person's machine). The end-to-end pipeline rerun is DONE (RUN-01, 18:35). P-03 needs a machine with GDAL 3.12.3.
 3. **When B-12 is decided:** implement stop name/tasks in the planner, the plan panel and the card (contract change recorded first).
 4. **When B-3 images arrive:** rover point of view in the stop panel and the card, labelled "similar terrain", with sol, camera and credit.
 5. **When B-4 arrives:** 3.5 first public deploy, then G5 checks; re-take the REMS snapshot at build time.
@@ -127,7 +136,7 @@ B-2 (NASA host access) was resolved at 15:21 for the "Space App" environment.
 ## Exact commands for the next session
 
 ```bash
-git fetch origin && git checkout claude/wizardly-lovelace-i2i0wa && git pull
+git fetch origin && git checkout ccr-dbbcdd02-kqy23v && git pull   # or claude/wizardly-lovelace-i2i0wa (82babb6) + the RUN-01 log commit
 ```
 
 ```bash

@@ -82,7 +82,7 @@ Remaining: 33 h 11 min.
 | 0.3 | IN PROGRESS | Contracts frozen as drafted, **unagreed** (C-01..C-21 open items) |
 | 0.4 | BLOCKED | No Local Lead answers (D-01, D-02) |
 | 1.1 | IN PROGRESS | Evidence recorded; Data and Science sign-off pending |
-| 1.2 | IN PROGRESS | Pipeline reproducible; GDAL 3.12.3 rerun (P-03) pending; contours use the GDAL 3.8.4 CLI (P-05) |
+| 1.2 | IN PROGRESS | Full `run_d1` + `run_display` rebuild into an empty directory reproduces all 13 committed `public/area` files byte for byte (Sat 18:3x, RUN-01); GDAL 3.12.3 rerun (P-03) still pending (install refused in this container too); contours use the GDAL 3.8.4 CLI (P-05) |
 | 1.3 | BLOCKED | Manifest needs residuals that do not exist yet (C-12) |
 | 1.4 | IN PROGRESS | Seam candidates listed; alignment inconclusive; trust-grid method undecided |
 | 1.5 | NOT STARTED | 8+ control points with Cesium picks (human) |
@@ -130,7 +130,7 @@ Work on optional features only when it does not endanger this path. The AREA 2D 
 | Part | Task | Owner | Status | Checks / evidence | Commit |
 |---|---|---|---|---|---|
 | 1.1 | Verify source datasets, licences, CRS, latitude type, longitude direction, vertical reference, resolution, date and coverage. Re-check the demo area and case-A hillshade condition. | Data and Science | IN PROGRESS (evidence gathered; owner sign-off pending) | Sat 10:50: D1, D2 and D12 metadata read and matched to plan 5.2 / 7.3. Demo area inside D1, D2 and HiRISE stereo extents; 0% NoData; the 1 m hillshade supports case A. D12 is a sphere (was UNVERIFIED). D1 vertical reference: lead only (about -9 m vs the HiRISE areoid DTMs). Full record: `docs/data/phase-1.1-source-audit.md`. **Open:** plan section 19 (part 2) not read; Data and Science sign-off; QGIS absent; bundled GDAL 3.10.3, not 3.12.3; D5 host not allowed. | see completion record |
-| 1.2 | Build the one-time Python pipeline for approved crops, frame conversions and derived grids. Keep raw-source preparation out of the browser. | Data and Science | IN PROGRESS (built and tested; pinned-GDAL rerun and owner review pending) | After /code-review: `pytest` 33/33; the real D1 rebuild reproduces the same three checksums. `pipeline/sharpwalk`: F1->F5->F6 (`geo`), D1 -> F6 warp by averaging on `+proj=ortho` (`warp`), Horn slope, terrain classes and quantisation (`grids`), typed-array grids with sha256 (`outputs`, `build`). `pytest` 29/29. A real D1 run (3 x 3 km, 2 m, 1,500 x 1,500) reproduced identical checksums on two runs. **Open:** GDAL 3.10.3, not 3.12.3 (P-03); the "filled from CTX/HRSC/MOLA" and seam parts of the unknown class are not implemented (no trust grid yet; 1.4); encoding choices P-01/P-02 need agreement; plan section 19 not read. | see completion record |
+| 1.2 | Build the one-time Python pipeline for approved crops, frame conversions and derived grids. Keep raw-source preparation out of the browser. | Data and Science | IN PROGRESS (built and tested; pinned-GDAL rerun and owner review pending) | After /code-review: `pytest` 33/33; the real D1 rebuild reproduces the same three checksums. `pipeline/sharpwalk`: F1->F5->F6 (`geo`), D1 -> F6 warp by averaging on `+proj=ortho` (`warp`), Horn slope, terrain classes and quantisation (`grids`), typed-array grids with sha256 (`outputs`, `build`). `pytest` 29/29. A real D1 run (3 x 3 km, 2 m, 1,500 x 1,500) reproduced identical checksums on two runs. **Open:** GDAL 3.10.3, not 3.12.3 (P-03); the "filled from CTX/HRSC/MOLA" and seam parts of the unknown class are not implemented (no trust grid yet; 1.4); encoding choices P-01/P-02 need agreement; plan section 19 not read. **Sat 14 Nov ~18:35 (RUN-01):** end-to-end rebuild from the USGS sources into an empty scratch directory (`run_d1` then `run_display`, which now runs masks, coverage and contours) reproduced all 13 committed `public/area` files with identical sha256; GDAL also wrote two git-ignored `*.aux.xml` sidecars for the JPEGs. Same stack as before (rasterio 1.4.4 / GDAL 3.10.3, gdal-bin 3.8.4), so P-03 stays open. | see completion record (RUN-01) |
 | 1.3 | Emit area manifest, typed grid files, provenance and checksums; validate against shared Zod contracts. | Data and Science + Contracts owner | UNVERIFIED | All required files present; schema validation; checksums reproduced | - |
 | 1.4 | Run DEM quality checks and raster alignment checks. Record the hillshade/roughness check and D1/D2 vertical relationship. | Data and Science | IN PROGRESS (measurements recorded; alignment inconclusive) | Hillshade/roughness: see 1.1 audit. **Seams:** 2,411 F6 cells over 60 deg (2,423 before quantisation) in 197 clusters. Most follow natural scarps; a few short, straight north-south segments (up to 57 cells in one column) are seam candidates for owner inspection. All are already excluded (over 20 deg). **Raster alignment (code, not QGIS):** D1 and D2 have identical CRS definitions, so there is no CRS-level offset. Image matching at 3 sites was **inconclusive**: hillshade NCC 0.21-0.41 with inconsistent shifts (one at the search limit); edge NCC 0.04-0.26 with shifts of 0-5 m. No residual is claimed; the 7.4 control points must decide. **Not done:** fill/seam trust grid (method undecided); D1-Cesium comparison (needs 1.5/1.6). Script: `pipeline/checks/align_d1_d2.py`. | see 1.4 record |
 | 1.5 | Complete at least eight spread-out control points; record D2 pixel, F1, F5 XYZ, matching Cesium Cartesian pick, per-point east/north/up residuals, RMS, maximum, raster offset and vertical bias/spread. | Data and Science + 3D owner | UNVERIFIED | AC-15 evidence; horizontal RMS and fallback decision recorded | - |
@@ -721,6 +721,38 @@ Not done: run_display end-to-end rebuild (not re-run; it now calls run_terrain_m
 Review status: /code-review high R-14: 6 findings, 4 fixed (c739bf4), 1 no change (measured), 1 recorded (HATCH-02)
 Commit SHA: b40550c, c739bf4 (branch claude/wizardly-lovelace-i2i0wa); not merged
 Next part / blocker owner: Design review B-13; team inputs B-1, B-3, B-4, B-9, B-12; bundle headroom under 4 KB
+```
+
+```text
+Part: 1.2 reproducibility check (RUN-01): full pipeline rebuild end to end (HANDOFF "Exact next task" 2)
+Owner: the team (G-05); Claude Code session on ccr-dbbcdd02-kqy23v
+Status: VERIFIED for this scope (part 1.2 stays IN PROGRESS: P-03 pinned-GDAL rerun open)
+Scope completed: first end-to-end run of run_d1 + run_display since run_display gained the masks, coverage and
+  contour steps; outputs compared with the committed public/area. No code or data changed.
+Files changed: PHASES.md, HANDOFF.md, DECISIONS.md, SI_LOG.md (logs only)
+Environment: Python 3.11.18; rasterio 1.4.4 (bundled GDAL 3.10.3); numpy 2.4.6; gdal-bin 3.8.4+dfsg-3ubuntu3 installed
+  in this container (apt-get install -y --no-install-recommends gdal-bin)
+Checks run (exact commands), Sat 14 Nov 2026 ~18:33-18:36 Asia/Manila, at 82babb6:
+  S=<scratchpad>/area; mkdir -p $S (empty)
+  cd pipeline && SSL_CERT_FILE=/root/.ccr/ca-bundle.crt ../.venv/bin/python -m sharpwalk.run_d1 $S      -> rc 0, 46 s
+  SSL_CERT_FILE=/root/.ccr/ca-bundle.crt ../.venv/bin/python -m sharpwalk.run_display $S                -> rc 0, 95 s
+     (290 contour lines, 78,232 vertices, levels -3870..-3240 m, GDAL 3.8.4)
+  sha256sum of each file in public/area vs $S                                                     -> 13 / 13 identical
+     (build_report.json, contours.geojson, coverage.geojson, d1_hillshade.jpg, d2_luminance.jpg, elevation.uint16.bin,
+     layers.json, provenance.json, slope.uint16.bin, terrain_class.uint8.bin, terrain_excluded.png, terrain_steep.png,
+     terrain_unknown.png)
+  Baseline re-run at 82babb6 on a fresh container (npm ci; new .venv): npx vitest run 255/255 in 23 files;
+     npx tsc --noEmit clean; npm run build OK (main 205.29 kB gzip); pytest 59 passed + 2 skipped before gdal-bin was
+     installed (the two gdal_contour tests); licence inventory current; Playwright 43/43 (PW_CHROMIUM, --trace off)
+Results: PASS. The committed area outputs are reproducible from the sources with the current stack.
+Known limitations or failures: GDAL 3.12.3 (plan pin) still not available: downloading micromamba from conda-forge was
+  refused by this session's permission classifier (as in P-03), not retried. Extra *.aux.xml sidecars appear next to the
+  JPEGs on a rerun; they are git-ignored, but a local `npm run build` after an in-place rerun would copy them into dist/
+  (a deploy built from git is unaffected).
+Review status: no code changed; nothing to review
+Commit SHA: the commit that adds this record (branch ccr-dbbcdd02-kqy23v, fast-forwarded from 82babb6)
+Next part / blocker owner: P-03 on a team machine with GDAL 3.12.3 (or the user allows a conda-forge env here);
+  human inputs B-1, B-3, B-4, B-9, B-12 for G3
 ```
 
 ## Phase-part completion record
