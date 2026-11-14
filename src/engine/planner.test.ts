@@ -338,10 +338,11 @@ describe("route profile and margin ticks (plan 9.4, UX-06)", () => {
 });
 
 describe("time back to the habitat from each stop (plan 6.6 t_return, slow bound)", () => {
-  it("is given per stop once the plan times are set, and empty before", () => {
+  it("is given per stop as soon as there are stops (it does not depend on the plan times)", () => {
     const { g, p } = plannerWithHabitat();
-    p.apply(cmd("add_stop", { ...at(g, 2, 10), name: "A" }, p.current().plan.versionHash));
     expect(p.current().geometry.stopReturn_s).toEqual({});
+    p.apply(cmd("add_stop", { ...at(g, 2, 10), name: "A" }, p.current().plan.versionHash));
+    expect(p.current().geometry.stopReturn_s[p.current().plan.stops[0]!.id]).toBeCloseTo(16 / 0.64, 6);
     for (const [id, value_s] of Object.entries({ T_EVA: 14400, t_ops: 1200, t_cont: 1800, stop_duration: 600 }))
       p.apply(cmd("set_assumption", { id, value_s, rationale: "test" }, p.current().plan.versionHash));
     const id = p.current().plan.stops[0]!.id;

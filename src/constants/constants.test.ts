@@ -48,11 +48,18 @@ describe("constants register", () => {
     expect(constant("walkSpeedRange").limitation).toMatch(/along the surface/i);
   });
 
+  it("holds the drill warning time as an Assumed 30 min default, cited to plan 6.9", () => {
+    const d = constant("drillWarningDefault");
+    expect([d.value, d.unit, d.valueClass]).toEqual([1800, "s", "assumed"]);
+    expect(d.citation.location).toBe("Plan 6.9, p. 32");
+    expect(d.limitation).toMatch(/Simulated/);
+  });
+
   it("does not hold a workload rate (kJ workload is off)", () => {
     expect(Object.keys(CONSTANTS).some((k) => /workload|metabolic|kj/i.test(k))).toBe(false);
   });
 
   it("uses SI units only", () => {
-    for (const c of Object.values(CONSTANTS)) expect(["m", "m/s", "deg", "1"]).toContain(c.unit);
+    for (const c of Object.values(CONSTANTS)) expect(["m", "m/s", "deg", "1", "s"]).toContain(c.unit);
   });
 });

@@ -9,7 +9,7 @@ export interface Constant {
   readonly value: number;
   readonly low?: number;
   readonly high?: number;
-  readonly unit: "m" | "m/s" | "deg" | "1";
+  readonly unit: "m" | "m/s" | "deg" | "1" | "s";
   readonly valueClass: ValueClass;
   readonly citation: Citation;
   readonly limitation?: string;
@@ -44,6 +44,11 @@ export const CONSTANTS = {
     id: "slopeLimit", value: 20, unit: "deg", valueClass: "assumed",
     citation: { source: "xEVA requirement to walk up, down and across 20 deg slopes (NASA presentation; plan 6.4)", location: "UNRESOLVED: the plan's reference list (both parts, read 14 Nov 13:10) names only 'xEVA 20 deg slope requirement (NASA presentation)', with no title, date or slide" },
     limitation: "A lunar requirement applied to Mars; Assumed, not Mars-validated.",
+  },
+  drillWarningDefault: {
+    id: "drillWarningDefault", value: 1800, unit: "s", valueClass: "assumed",
+    citation: { source: "SharpWalk plan 6.9 (drill default 30 min, Assumed; stress cases 10 and 20 min), informed by Loewe et al. 2025 (arXiv preprint: at least 30 min to avoid the peak) and the NESC assessment (Parker et al.: operations should give 10-30 min of warning; at least 30 min for SEPs)", location: "Plan 6.9, p. 32" },
+    limitation: "Simulated drill only: an assumed warning time, not a forecast, a live alert or a measurement. Habitat shielding is Assumed, not modelled; no dose is computed.",
   },
 } as const satisfies Record<string, Constant>;
 

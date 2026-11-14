@@ -17,7 +17,7 @@ import { Stroke, Style } from "ol/style";
 import RegularShape from "ol/style/RegularShape";
 import { cellCentreF1, type GridDef } from "../geo/grid";
 import type { LatLon, PlanOutput } from "../engine/planner";
-import { createMarkerLayer, createPlanLayer, drawMarker, drawPlan } from "./planLayer";
+import { createContourLayer, createMarkerLayer, createPlanLayer, drawContours, drawMarker, drawPlan, type ContourDisplay } from "./planLayer";
 import { snapshotMap, type MapSnapshot } from "./snapshot";
 import { F7_PROJECTION } from "./f7";
 import { loadArea, type LoadedArea } from "./loadArea";
@@ -54,11 +54,13 @@ export interface AreaSheetProps {
   readonly onDatasets?: (ids: string[]) => void;
   /** The keyboard cursor position (AC-32), so stops can be moved to it by keyboard. */
   readonly onCursor?: (p: LatLon | null) => void;
+  /** Tier 2 time-to-habitat contours and the simulated drill line; null hides them. */
+  readonly contours?: ContourDisplay | null;
 }
 
 const cursorStyle = new Style({ image: new RegularShape({ points: 4, radius: 11, radius2: 0, angle: 0, stroke: new Stroke({ color: "#f3eee4", width: 2 }) }) });
 
-export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hoverIndex = null, onHoverIndex, onDatasets, onCursor }: AreaSheetProps) {
+export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hoverIndex = null, onHoverIndex, onDatasets, onCursor, contours = null }: AreaSheetProps) {
   const target = useRef<HTMLDivElement>(null);
   const area = useRef<LoadedArea | null>(null);
   const planLayerRef = useRef<ReturnType<typeof createPlanLayer> | null>(null);
@@ -76,6 +78,10 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
   const [announce, setAnnounce] = useState("");
   const cursorRef = useRef(onCursor);
   cursorRef.current = onCursor;
+  const contourLayer = useRef<ReturnType<typeof createContourLayer> | null>(null);
+  contourLayer.current ??= createContourLayer();
+  const contoursRef = useRef(contours);
+  contoursRef.current = contours;
   const markerLayerRef = useRef<ReturnType<typeof createMarkerLayer> | null>(null);
   markerLayerRef.current ??= createMarkerLayer();
   const hoverRef = useRef(onHoverIndex);
@@ -106,7 +112,7 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
       const o = f1ToF7(a.grid.origin);
       map = new OlMap({
         target: target.current,
-        layers: [image("d2", "layer-d2"), image("hillshade", "layer-hillshade"), image("terrain", "layer-terrain"), planLayer.current, markerLayerRef.current!, cursorLayer.current!],
+        layers: [image("d2", "layer-d2"), image("hillshade", "layer-hillshade"), image("terrain", "layer-terrain"), contourLayer.current!, planLayer.current, markerLayerRef.current!, cursorLayer.current!],
         controls: [new Zoom(), new ScaleLine({ units: "metric" })],
         view: new View({
           projection: F7_PROJECTION, center: [o.x, o.y], resolution: 4,
@@ -115,6 +121,7 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
         }),
       });
       drawPlan(planLayer.current, planRef.current, a.grid);
+      target.current.dataset.contourLines = String(drawContours(contourLayer.current!, contoursRef.current, a.grid));
       profXY.current = profileXY(planRef.current, a.grid);
       const m = map;
       mapRef.current = map;
@@ -156,6 +163,10 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
   }, [plan]);
 
   useEffect(() => {
+    if (area.current && target.current) target.current.dataset.contourLines = String(drawContours(contourLayer.current!, contours, area.current.grid));
+  }, [contours]);
+
+  useEffect(() => {
     const prof = plan?.geometry.profile;
     if (area.current) drawMarker(markerLayerRef.current!, hoverIndex !== null && prof?.[hoverIndex] ? prof[hoverIndex].cell : null, area.current.grid);
   }, [hoverIndex, plan]);
@@ -194,6 +205,11 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
         <div className="map" ref={target} data-testid="area-map" tabIndex={0} onKeyDownCapture={onKeyDown} role="application"
           aria-label="Traverse sheet. Arrow keys move a cursor 10 m, Shift plus arrow 100 m; Enter adds a stop at the cursor." />
         <div className="sr-only" aria-live="polite" data-testid="cursor-announce">{announce}</div>
+        {contours?.drill_s != null && (
+          <div className="sim-banner" role="note" data-testid="simulation-banner">
+            SIMULATION · SIMULATED DRILL · ASSUMED {Math.round(contours.drill_s / 60)} MIN WARNING · not a live alert, not a measurement
+          </div>
+        )}
         <div className="legend" aria-label="Layers">
           <ul>{legend.map((l) => <li key={l.id}>{l.name} - {l.valueClass.replace("_", " ")}, {l.source}, {fmt(l.resolution)}, built {l.builtOn}</li>)}</ul>
         </div>

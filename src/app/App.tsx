@@ -8,6 +8,8 @@ import type { LatLon, PlanOutput } from "../engine/planner";
 import { PlanPanel } from "./PlanPanel";
 import { RouteProfile } from "./RouteProfile";
 import { SourcePanel } from "./SourcePanel";
+import { DrillPanel } from "./DrillPanel";
+import type { ContourLevel } from "../engine/contours";
 import { Provenance, type Quantity } from "../contracts";
 import { BriefingView } from "../briefing/BriefingView";
 import { FieldView } from "../field/FieldView";
@@ -32,6 +34,26 @@ export function App() {
   const [provenance, setProvenance] = useState<Provenance[]>([]);
   const [layerDatasets, setLayerDatasets] = useState<string[]>([]);
   const [cursor, setCursor] = useState<LatLon | null>(null);
+  // Tier 2: contour lines from the engine worker (computed once per habitat), shown as lines only.
+  const [showContours, setShowContours] = useState(false);
+  const [drillMin, setDrillMin] = useState<number | null>(null);
+  const [levels, setLevels] = useState<ContourLevel[] | null>(null);
+  const [contourBusy, setContourBusy] = useState(false);
+  const wantContours = showContours || drillMin !== null;
+  useEffect(() => {
+    const e = engine.current;
+    if (!wantContours || levels || !e || !output) return;
+    let live = true;
+    setContourBusy(true);
+    const mins = Array.from({ length: 18 }, (_, i) => (i + 1) * 5); // 5 ... 90 min; includes the 10, 20, 30 drill lines
+    e.api.contours(mins).then((l) => { if (live) setLevels(l); })
+      .catch((err: unknown) => { if (live) setMessage(`Contours unavailable: ${err instanceof Error ? err.message : String(err)}`); })
+      .finally(() => { if (live) setContourBusy(false); });
+    return () => { live = false; };
+  }, [wantContours, levels, output]);
+  const contourDisplay = levels && wantContours
+    ? { levels: showContours ? levels : levels.filter((l) => drillMin !== null && Math.abs(l.level_s - drillMin * 60) < 1), drill_s: drillMin === null ? null : drillMin * 60 }
+    : null;
   // UX-15: every dataset in the current view = the sheet's layer sources plus the datasets the plan's numbers use.
   const datasetsInView = [...new Set([...layerDatasets, ...(output?.plan.provenanceIds ?? [])])].sort((a, b) => Number(a.slice(1)) - Number(b.slice(1)));
   useEffect(() => {
@@ -66,7 +88,7 @@ export function App() {
   const send = useCallback((type: string, payload: Record<string, unknown>) => {
     queue.current = queue.current.then(async () => {
       const e = engine.current, cur = outputRef.current;
-      if (!e || !cur) return;
+      if (!e || !cur) { setMessage("Not changed: the engine is still loading the area; try again in a moment."); return; }
       try {
         const { result, output: next, elapsed_ms } = await e.api.apply({
           id: commandId(), type, payload, issuedAt: new Date().toISOString(), planVersion: cur.plan.versionHash,
@@ -93,7 +115,7 @@ export function App() {
       </header>
       <main className="well">
         <AreaSheet dataUrl={AREA_URL} plan={output} onPick={(p) => send("add_stop", { lat: p.lat, lon: p.lon })}
-          onSnapshotReady={(fn) => setSnapshot(() => fn)} hoverIndex={hover} onHoverIndex={setHover} onDatasets={setLayerDatasets} onCursor={setCursor} />
+          onSnapshotReady={(fn) => setSnapshot(() => fn)} hoverIndex={hover} onHoverIndex={setHover} onDatasets={setLayerDatasets} onCursor={setCursor} contours={contourDisplay} />
         <RouteProfile output={output} hoverIndex={hover} onHoverIndex={setHover} />
         {/* Kept mounted so a built card keeps its version stamp and shows STALE after a plan change. */}
         <BriefingView output={output} snapshot={snapshot} hidden={view !== "briefing"} />
@@ -103,6 +125,8 @@ export function App() {
           onSetTime={(id, value_s, rationale, stopId) => send("set_assumption", { id, value_s, rationale, ...(stopId ? { stopId } : {}) })}
           onOpenSource={setSelected}
           onMoveToCursor={cursor ? (stopId) => send("move_stop", { stopId, lat: cursor.lat, lon: cursor.lon }) : undefined}>
+          <DrillPanel output={output} showContours={showContours} onShowContours={setShowContours}
+            drillMin={drillMin} onDrillMin={setDrillMin} busy={contourBusy} />
           <SourcePanel selected={selected} provenance={provenance} assumptions={output?.plan.assumptions ?? []}
             datasetsInView={datasetsInView} onClose={() => setSelected(null)} />
         </PlanPanel>

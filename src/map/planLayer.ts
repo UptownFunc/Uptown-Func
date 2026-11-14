@@ -12,6 +12,7 @@ import CircleStyle from "ol/style/Circle";
 import { f1ToF7 } from "../geo";
 import { cellCentreF1, type GridDef } from "../geo/grid";
 import type { PlanOutput } from "../engine/planner";
+import type { ContourLevel } from "../engine/contours";
 
 const PLAN = "#722a3e", PAPER = "#f3eee4", INK = "#191b20", OVER = "#f0645a", CAUTION = "#e8b341";
 
@@ -107,4 +108,47 @@ export function drawMarker(layer: VectorLayer<VectorSource>, cell: number | null
   const f = new Feature({ geometry: new Point([p.x, p.y]) });
   f.setStyle(markerStyle);
   src.addFeature(f);
+}
+
+// Tier 2 time-to-habitat contours (plan 9.2: labelled lines, never filled) and the simulated drill line (plan 6.9).
+
+export interface ContourDisplay { readonly levels: readonly ContourLevel[]; readonly drill_s: number | null }
+
+const contourStyle = (label: string) => new Style({
+  stroke: new Stroke({ color: "rgba(243, 238, 228, 0.7)", width: 1 }),
+  text: new Text({ text: label, placement: "line", font: "10px 'IBM Plex Mono', monospace", fill: new Fill({ color: PAPER }),
+    stroke: new Stroke({ color: INK, width: 3 }) }),
+});
+const drillStyle = (min: number) => [
+  new Style({ stroke: new Stroke({ color: INK, width: 6 }) }),
+  new Style({ stroke: new Stroke({ color: PAPER, width: 3, lineDash: [10, 5] }),
+    text: new Text({ text: `SIMULATED DRILL · ASSUMED ${min} MIN WARNING`, placement: "line", font: "600 11px 'IBM Plex Sans', system-ui",
+      fill: new Fill({ color: INK }), stroke: new Stroke({ color: PAPER, width: 4 }) }) }),
+];
+
+export function createContourLayer(): VectorLayer<VectorSource> {
+  return new VectorLayer({ source: new VectorSource(), className: "layer-contours" });
+}
+
+/** Contour lines arrive in fine-grid cell-edge coordinates (x = column edge, y = row edge); src/geo places them. */
+export function drawContours(layer: VectorLayer<VectorSource>, c: ContourDisplay | null, grid: GridDef): number {
+  const src = layer.getSource()!;
+  src.clear();
+  if (!c) return 0;
+  const xy = ([x, y]: [number, number]) => {
+    const p = f1ToF7(cellCentreF1({ r: y - 0.5, c: x - 0.5 }, grid));
+    return [p.x, p.y];
+  };
+  const features: Feature[] = [];
+  for (const lvl of c.levels) {
+    const min = Math.round(lvl.level_s / 60), drill = c.drill_s !== null && Math.abs(lvl.level_s - c.drill_s) < 1;
+    if (!drill && c.drill_s !== null && min % 5 !== 0) continue;
+    for (const line of lvl.lines) {
+      const f = new Feature({ geometry: new LineString(line.map(xy)), kind: drill ? "drill" : "contour", level_min: min });
+      f.setStyle(drill ? drillStyle(min) : contourStyle(`${min} min`));
+      features.push(f);
+    }
+  }
+  src.addFeatures(features);
+  return features.length;
 }

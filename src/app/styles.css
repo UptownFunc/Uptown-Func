@@ -191,3 +191,12 @@ body { background: var(--housing); color: var(--text); font-family: var(--sans);
 .sheet .map:focus-visible { outline: 3px solid var(--plan-hi); outline-offset: -3px; }
 .stops .stop-head button + button { margin-left: 4px; }
 .stops button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* Simulation banner (plan 6.1: hatched SIMULATION banner on every drill screen). */
+.sim-banner { position: absolute; left: 8px; right: 8px; top: 8px; z-index: 3; padding: 6px 10px; font-weight: 600; font-size: 12px;
+  color: var(--housing); letter-spacing: 0.04em; text-align: center;
+  background: repeating-linear-gradient(135deg, var(--paper) 0 10px, #d9d2c4 10px 20px); border: 2px solid var(--housing); }
+.drill { border-top: 1px solid var(--border); margin-top: 10px; }
+.drill .check { display: flex; gap: 6px; align-items: flex-start; margin: 4px 0; font-size: 12px; }
+.drill select { background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 4px; font: inherit; }
+.sim-banner + .legend { top: 52px; }
