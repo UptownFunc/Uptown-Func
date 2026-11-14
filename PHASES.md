@@ -43,10 +43,10 @@ Work on optional features only when it does not endanger this path. The AREA 2D 
 
 | Part | Task | Owner | Status | Checks / evidence | Commit |
 |---|---|---|---|---|---|
-| 0.1 | Inspect repository, branch state, toolchain, challenge portal deadline, and required Superpowers skill. Record actual start/deadline and repo state. | Captain | VERIFIED (portal deadline not re-checked) | Repo: `main` held only the six log files, no code. Toolchain: Node 22.23.4, npm 10.9.9, Python 3.11 and 3.13.18 present; GDAL/QGIS **not installed** in the cloud container. All pinned npm versions in 10.5 resolve on the registry (`npm view`). Superpowers loaded. Plan baseline deadline Sun 15 Nov 23:59 used; **live portal deadline not verified by this session**. | 5e9cbdd |
+| 0.1 | Inspect repository, branch state, toolchain, challenge portal deadline, and required Superpowers skill. Record actual start/deadline and repo state. | Captain | VERIFIED; deadline partly confirmed | **Sat 14 Nov, 10:23 re-check:** the official Space Apps participant FAQ confirms the event runs 14-15 Nov 2026. The 23:59 local closing time appears only on third-party pages. **Captain: confirm it in the official submission guide or portal.** Until then, 23:59 Sun 15 Nov Asia/Manila is used. Original evidence: Repo: `main` held only the six log files, no code. Toolchain: Node 22.23.4, npm 10.9.9, Python 3.11 and 3.13.18 present; GDAL/QGIS **not installed** in the cloud container. All pinned npm versions in 10.5 resolve on the registry (`npm view`). Superpowers loaded. Plan baseline deadline Sun 15 Nov 23:59 used; **live portal deadline not verified by this session**. | 5e9cbdd |
 | 0.2 | Create/verify root instructions and shared logs: `CLAUDE.md`, `PHASES.md`, `HANDOFF.md`, `DECISIONS.md`, `SI_LOG.md`. | Captain | VERIFIED | All five files on `main` (393723e) plus `SESSION_PROMPTS.md`; read against plan 19.10, no contradictions found. MIT `LICENSE` added (19.3). | 5e9cbdd |
-| 0.3 | Agree contracts from plan Section 19.9 and module owners. Establish one owner per module and separate working branches. | Captain + Data and Science + Route Engine + Design | IN PROGRESS | Zod schemas for all nine 19.9 contracts in `src/contracts`; `npx vitest run` 44/44 pass; `npx tsc --noEmit` clean. **Pending:** Data and Science agreement on the drafted details (C-01..C-05 in DECISIONS.md) and owner/branch names in HANDOFF.md. If not agreed by 11:00, G0 fallback: freeze as drafted. | 5e9cbdd |
-| 0.4 | Ask/verify Local Lead decisions on pre-event wireframes and R-04 (GSAP/Cesium Mars); record exact responses in `SI_LOG.md` and `DECISIONS.md`. | Captain | BLOCKED (human) | No answer yet (Captain, 14 Nov 10:00). Defaults retained: wireframes not cleared, no GSAP, no Cesium ion. | - |
+| 0.3 | Agree contracts from plan Section 19.9 and module owners. Establish one owner per module and separate working branches. | Captain + Data and Science + Route Engine + Design | IN PROGRESS | Zod schemas for all nine 19.9 contracts in `src/contracts`; `npx vitest run` 44/44 pass; `npx tsc --noEmit` clean. **10:23:** /code-review run. Six contract issues were logged as C-06..C-11 and not changed; the non-contract fixes were applied (see completion record). No owner agreement on C-01..C-05, so the G0 fallback at 11:00 freezes them as drafted and unagreed. **Pending:** Data and Science agreement on the drafted details (C-01..C-05 in DECISIONS.md) and owner/branch names in HANDOFF.md. If not agreed by 11:00, G0 fallback: freeze as drafted. | 5e9cbdd |
+| 0.4 | Ask/verify Local Lead decisions on pre-event wireframes and R-04 (GSAP/Cesium Mars); record exact responses in `SI_LOG.md` and `DECISIONS.md`. | Captain | BLOCKED (human) | No answer yet (Captain, 14 Nov 10:00; still none recorded at 10:23). Defaults retained: wireframes not cleared, no GSAP, no Cesium ion. | - |
 
 **G0 acceptance:** repository and instructions exist; contracts and ownership are agreed. The G0 plan default is to freeze contracts as drafted if time is short.
 
@@ -54,7 +54,7 @@ Work on optional features only when it does not endanger this path. The AREA 2D 
 
 | Part | Task | Owner | Status | Checks / evidence | Commit |
 |---|---|---|---|---|---|
-| 1.1 | Verify source datasets, licences, CRS, latitude type, longitude direction, vertical reference, resolution, date and coverage. Re-check the demo area and case-A hillshade condition. | Data and Science | UNVERIFIED | Source register; AOI decision; hillshade/roughness evidence; unresolved metadata labelled | - |
+| 1.1 | Verify source datasets, licences, CRS, latitude type, longitude direction, vertical reference, resolution, date and coverage. Re-check the demo area and case-A hillshade condition. | Data and Science | BLOCKED (Sat 10:23) | (1) This session cannot read the plan PDF: it is not in the repo or on the connected Google Drive. The D1-D13 dataset register, product IDs and AOI details cannot be checked against the plan. (2) The egress proxy refused HTTPS connections to hirise-pds.lpl.arizona.edu, trek.nasa.gov, astrogeology.usgs.gov, planetarymaps.usgs.gov and pds-imaging.jpl.nasa.gov. (3) Python 3.11.18 is present. Wheels for rasterio 1.4.4, numpy 2.4.6 and pytest 9.2.0 resolve from PyPI. The rasterio wheel bundles its own GDAL, which is not confirmed to be the pinned 3.12.3. QGIS is unavailable. **Unblock:** run on a team machine with the plan and the GIS tools, or give this session the plan and allowed data hosts. No pipeline results exist. | - |
 | 1.2 | Build the one-time Python pipeline for approved crops, frame conversions and derived grids. Keep raw-source preparation out of the browser. | Data and Science | UNVERIFIED | Pipeline tests; reproducible outputs; no unapproved source substitutions | - |
 | 1.3 | Emit area manifest, typed grid files, provenance and checksums; validate against shared Zod contracts. | Data and Science + Contracts owner | UNVERIFIED | All required files present; schema validation; checksums reproduced | - |
 | 1.4 | Run DEM quality checks and raster alignment checks. Record the hillshade/roughness check and D1/D2 vertical relationship. | Data and Science | UNVERIFIED | DEM checks and outputs stored with source IDs and assumptions | - |
@@ -137,6 +137,25 @@ Known limitations or failures: GDAL/QGIS absent in cloud container (needed at G1
 Review status: /code-review not yet run; Data and Science agreement pending
 Commit SHA: 5e9cbdd
 Next part / blocker owner: agree C-01..C-05 (Data and Science); Local Lead answers (Captain); then 1.1
+```
+
+```text
+Part: G0 /code-review follow-up (0.1, 0.3) and 1.1 readiness
+Owner: Captain (parcilla13); session operated by Yujin
+Status: 0.3 IN PROGRESS (contracts frozen as drafted, unagreed, at 11:00 fallback); 1.1 BLOCKED
+Scope completed: /code-review (medium) on main...8986d70 -> 10 findings. Fixed: SI-assisted headers
+  no longer claim an owner review that has not happened; .gitignore now excludes
+  .claude/settings.local.json, not the shared settings.json; deadline evidence updated; SI_LOG model
+  recorded. Logged, not changed (contract changes need owners): C-06..C-11 in DECISIONS.md.
+Files changed: .gitignore, src/contracts/{index,quantity,schemas}.ts and both test files (header
+  comment only), DECISIONS.md, PHASES.md, SI_LOG.md, HANDOFF.md
+Checks run (exact commands): npm ci ; npx vitest run ; npx tsc --noEmit
+Results: npm ci exit 0; 2 test files, 44/44 pass; tsc exit 0
+Known limitations or failures: plan PDF not available to this session; data hosts blocked by the
+  egress proxy; QGIS absent; GDAL 3.12.3 not confirmed; official closing time not confirmed
+Review status: /code-review done for G0; human review and merge still required
+Commit SHA: see the commit after 8986d70 on claude/kind-ptolemy-1wdqf5
+Next part / blocker owner: 1.1 Data and Science, on a machine with the plan and GIS tools
 ```
 
 ## Phase-part completion record

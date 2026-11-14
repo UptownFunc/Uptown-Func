@@ -1,4 +1,4 @@
-// SI-assisted: drafted with Claude Code (Anthropic); reviewed by the contracts owner.
+// SI-assisted: drafted with Claude Code (Anthropic); human contracts-owner review pending.
 // Plan 19.9 (Quantity) and CLAUDE.md hard rules.
 import { describe, expect, it } from "vitest";
 import { Quantity, ValueClass } from "./index";

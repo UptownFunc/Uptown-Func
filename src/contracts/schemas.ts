@@ -1,4 +1,4 @@
-// SI-assisted: drafted with Claude Code (Anthropic); reviewed by the contracts owner.
+// SI-assisted: drafted with Claude Code (Anthropic); human contracts-owner review pending.
 // Contracts from plan 19.9. Units: metres, degrees, SI minutes; coordinates in F1
 // (planetocentric latitude, east-positive longitude, sphere R = 3,396,190 m) unless named.
 import { z } from "zod";

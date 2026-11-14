@@ -1,4 +1,4 @@
-// SI-assisted: drafted with Claude Code (Anthropic); reviewed by the contracts owner.
+// SI-assisted: drafted with Claude Code (Anthropic); human contracts-owner review pending.
 // Plan 19.9 contract list: Provenance, Grid, AreaManifest, Command, Assumption,
 // MissionPlan, MissionExecution, mapState.
 import { describe, expect, it } from "vitest";

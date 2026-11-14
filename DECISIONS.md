@@ -6,8 +6,8 @@ Record decisions that affect science, eligibility, architecture, scope or delive
 
 | ID | Topic | Plan default / permitted options | Owner | Resolve by | Status / evidence |
 |---|---|---|---|---|---|
-| D-01 / O-23 | Pre-event wireframes and challenge-integrity concern | Existing pre-event wireframes are **not treated as cleared**. Ask the Local Lead. Redraw screens from the approved tokens after kickoff; describe prior work honestly as research/planning. | Captain | G0 | PENDING - record exact question, answer, date and source in `SI_LOG.md` |
-| D-02 / R-04 / O-21 | GSAP and Cesium Mars eligibility | Default: no GSAP; Motion owns all motion. Default: no Cesium Mars/ion; use own D1 heights with Mars Trek imagery. Include either only after the Local Lead confirms in writing. | Captain | G0 | PENDING - no written approval recorded in this starter file |
+| D-01 / O-23 | Pre-event wireframes and challenge-integrity concern | Existing pre-event wireframes are **not treated as cleared**. Ask the Local Lead. Redraw screens from the approved tokens after kickoff; describe prior work honestly as research/planning. | Captain | G0 | PENDING. No Local Lead answer was recorded as of Sat 14 Nov, 10:23. Silence is not approval, so the default stands. Record the exact question, answer, date and source in `SI_LOG.md`. |
+| D-02 / R-04 / O-21 | GSAP and Cesium Mars eligibility | Default: no GSAP; Motion owns all motion. Default: no Cesium Mars/ion; use own D1 heights with Mars Trek imagery. Include either only after the Local Lead confirms in writing. | Captain | G0 | PENDING. No written approval as of Sat 14 Nov, 10:23. Defaults stand: no GSAP, no Cesium ion. |
 | D-03 / R-06 | Demo area and DEM case | Proposed area: 4.790-4.840 S, 137.365-137.415 E, planetocentric and east-positive; likely case A, pending hillshade/roughness verification. Grid cell 2 m. | Data and Science | G1 | PENDING - verify data coverage and hillshade before treating case A as confirmed |
 | D-04 / O-22 | Route smoothing and the “margin never rises” guarantee | Decide at G2: (1) smooth outbound and return consistently; (2) relax AC-19 to allow rises up to 8% and reword the guarantee; or (3) use grid paths for calculations and smooth only the displayed line with a visible note. Until decided, all calculations use grid paths and the guarantee is only claimed on the grid metric. | Route Engine, with Data and Science agreement | G2 | PENDING - record chosen option and tests here |
 | D-05 / O-02 | D1 vertical reference and Cesium height conversion | Must be verified; do not assume an ellipsoid/datum. The plan's own-terrain alternative adds a 105-159 m sphere-to-ellipsoid correction and also requires D1's still-unknown vertical reference to be resolved; control points determine whether the conversion is right. | Data and Science | G1 | PENDING - record source, reference, correction method, control-point evidence and residuals |
@@ -28,6 +28,23 @@ Plan 19.9 lists fields but leaves these details open. The drafts below are in `s
 | C-03 | Command | Payload shape per command type | Generic object; the route engine owner defines per-type payloads before G2 | PENDING - Route Engine |
 | C-04 | MissionPlan | `terrainClassSummary` shape | Map of terrain class to share of route length (0..1) | PENDING agreement |
 | C-05 | AreaManifest / Grid / Assumption | Small typing choices | `cellSize_m` any positive number (allows D-08's 4 m fallback); `grids[]` hold `Grid.name`; F1 longitude -180..180 east-positive (D12 domain); `Assumption.value` numeric; `Assumption.source` is `D1`-`D13` or `"team choice"` | PENDING agreement |
+
+**C-01 note (Sat 14 Nov, 10:23).** The plan types `Quantity.value` as a number; the draft allows `null`, but only when `valueClass` is `unknown`. Both readings are on record. Neither the plan nor the code has been changed. The Data and Science and contracts owners must choose one: (a) keep `number | null`, restricted to `unknown`, and record it as an agreed deviation from 19.9; or (b) make `value` always numeric, so that an unknown quantity is either not emitted or carried by a separate field. Until they decide, the draft stands.
+
+**Status at G0 (11:00).** No owner names for Data and Science, Route Engine or Design have been recorded in HANDOFF.md, so nobody has agreed C-01 to C-05. At 11:00 the plan's G0 fallback applies: the contracts are **frozen as drafted, unagreed**. The fallback is not consent. Any later change still needs both responsible owners to agree.
+
+## Contract issues raised by /code-review (Sat 14 Nov, 10:23; need owner agreement, not changed in code)
+
+/code-review at medium effort on `main...8986d70` raised these. Each one changes a shared contract, so under CLAUDE.md it needs both responsible owners to agree. None has been applied.
+
+| ID | Contract | Issue | Proposed change | Owner | Status |
+|---|---|---|---|---|---|
+| C-06 | PlannedMargin, MissionExecution.fieldMargins, Leg, Assumption | `margin_min`, `continue_min`, `returnNow_min`, `distance_m`, `climb_m`, `heading_deg` and `Assumption.value` are bare numbers, not `Quantity`. CLAUDE.md requires every displayed number to be a `Quantity`. | Make the displayed fields `Quantity`, or document that the UI wraps them from a stated source. Margins are estimates, so they need ranges and assumption IDs. | Route Engine + Data and Science | PENDING. Check against the 19.9 field list first. |
+| C-07 | Assumption.source | Only `D1`-`D13` or `"team choice"` are accepted, so a literature citation such as NASA/TM-2010-216138, Table 4, p. 13 cannot be recorded. | Allow a citation ID that points to the constants file. | Data and Science | PENDING |
+| C-08 | Quantity | `assumed` and `simulated` values may have an empty `assumptionIds`. | Require at least one assumption ID for `assumed` (and possibly `simulated`). | Data and Science | PENDING |
+| C-09 | Quantity | `sourceIds` must be non-empty even for `unknown`, which pushes producers to invent a source. | Allow empty `sourceIds` when `valueClass` is `unknown`. | Data and Science | PENDING |
+| C-10 | AreaManifest.grids | A list of names only; the `Grid` metadata (dtype, noData, scale, offset) is not referenced by any contract. | Make `grids` an array of `Grid`. | Data and Science + contracts owner | PENDING |
+| C-11 | MissionExecution.ticks | No checks that a stop exists in the plan, that departure follows arrival, or that elapsed time increases. | Add the in-record checks in the schema; leave the cross-record stop check to the field view. | Design + Route Engine | PENDING |
 
 ## Fixed technical / presentation constraints
 

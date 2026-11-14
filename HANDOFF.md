@@ -4,16 +4,16 @@ This file is the handoff between team members and Claude sessions. Keep it factu
 
 ## Current snapshot
 
-- Last updated: **Sat 14 Nov 2026, 10:05 Asia/Manila**
-- Current local time / time zone: **Sat 14 Nov 2026, 10:05, Asia/Manila (UTC+8)**
-- Actual challenge deadline: **Plan baseline Sun 15 Nov 2026, 23:59 Asia/Manila; live portal NOT re-verified this session**
-- Remaining time: **37 h 54 min to the deadline; 55 min to G0 (11:00); 3 h 55 min to G1 (14:00)**
-- Current gate: **G0 (due Sat 11:00)**
-- Active branch: **`claude/lucid-ptolemy-nz6qpw`** (cloud session branch; merge to `main` by a human)
-- Last verified commit: **5e9cbdd** (scaffold + contracts; tests 44/44, typecheck clean)
-- Current owner / member: **parcilla13, Captain + contracts draft**
-- Repository state: **`main` = 393723e (logs only). Branch adds package scaffold, `src/contracts`, LICENSE and log updates.**
-- Active phase part: **0.3 contracts agreement (pending Data and Science); 0.4 Local Lead answers pending**
+- Last updated: **Sat 14 Nov 2026, 10:30 Asia/Manila**
+- Current local time / time zone: **Sat 14 Nov 2026, ~10:30, Asia/Manila (UTC+8)**
+- Actual challenge deadline: **Sun 15 Nov 2026, 23:59 local.** The official Space Apps FAQ confirms the 14-15 Nov dates; the 23:59 closing time is from third-party pages only. Captain to confirm on the portal.
+- Remaining time: **about 37 h 29 min to the deadline; 30 min to G0 (11:00); 3 h 30 min to G1 (14:00)**
+- Current gate: **G0 (due Sat 11:00). Contracts freeze as drafted and unagreed under the G0 fallback.**
+- Active branches: **`claude/kind-ptolemy-1wdqf5`** (this session; fast-forwarded onto `claude/lucid-ptolemy-nz6qpw` at 8986d70, then adds the review follow-up commit). `claude/lucid-ptolemy-nz6qpw` is unchanged at 8986d70. A human merges to `main`.
+- Last verified commit: **the review follow-up commit after 8986d70 on `claude/kind-ptolemy-1wdqf5`** (tests 44/44, typecheck clean)
+- Current owner / member: **parcilla13 (Captain, project owner); this session is operated by Yujin**
+- Repository state: **`main` = 393723e (logs only). The G0 branches add the package scaffold, `src/contracts`, LICENSE and the log updates.**
+- Active phase part: **0.3 frozen as drafted (unagreed); 0.4 blocked on the Local Lead; 1.1 BLOCKED (plan PDF not available here, data hosts blocked, QGIS absent)**
 
 Do not interpret blank fields as proof that no work exists. Inspect GitHub and the working tree.
 
@@ -33,30 +33,29 @@ Avoid simultaneous edits to the same files. Agree on shared contract changes bef
 
 ## Current work
 
-- **Verified complete:** 0.1 repo/toolchain audit; 0.2 logs and LICENSE.
-- **In progress:** 0.3 contracts drafted in `src/contracts` (44 tests pass); needs Data and Science agreement on C-01..C-05 and owner names for the other modules.
-- **Blocked:** 0.4 Local Lead answers (D-01, D-02); defaults retained. G1 needs GDAL, rasterio and QGIS, which are not installed in the cloud container: run the pipeline on a team laptop or install them first.
+- **Verified complete:** 0.1 repo/toolchain audit (deadline partly confirmed); 0.2 logs and LICENSE; G0 /code-review with the non-contract fixes applied.
+- **In progress:** 0.3. Contracts are frozen as drafted under the G0 fallback; C-01..C-11 await owner agreement (DECISIONS.md). Owner names are still TBA.
+- **Blocked:** 0.4 (Local Lead answers for D-01 and D-02; none recorded, defaults kept). 1.1: the plan PDF is not readable by this session, and the egress proxy refused the HiRISE, Mars Trek and USGS hosts. QGIS is absent. rasterio 1.4.4 bundles its own GDAL, which is not confirmed to be the pinned 3.12.3.
 - **Cut:** none.
-- **Next action:** at 11:00 freeze contracts (agreed or as drafted), merge the branch to `main` after review, then start 1.1 (Data and Science).
+- **Next action:** Data and Science run 1.1 on a team machine with the plan PDF, GDAL 3.12.3, rasterio 1.4.4 and QGIS 4.2.3. Alternatively, give a cloud session the plan and allow the data hosts. In parallel, a human reviews and merges the G0 branch.
 
 ## Last session report
 
 ```text
-Session / member: parcilla13 (Captain), Claude Code cloud session
-Model used: Claude Code (Anthropic); team to record exact model in SI_LOG.md
-Start and end time (Asia/Manila): Sat 14 Nov 09:49 - 10:05
-Branch: claude/lucid-ptolemy-nz6qpw
-Starting commit: 393723e
-Ending commit: see `git log -1` on the branch (logs commit after 5e9cbdd)
-Phase parts completed: 0.1, 0.2 (VERIFIED); 0.3 drafted (IN PROGRESS)
-Files changed: package.json, package-lock.json, tsconfig.json, .gitignore, LICENSE, src/contracts/{index,quantity,schemas}.ts and tests, PHASES.md, HANDOFF.md, DECISIONS.md, SI_LOG.md
-Checks run (exact commands and results): npx vitest run -> 2 files, 44/44 pass; npx tsc --noEmit -> clean
-Failures / limitations: portal deadline not re-verified; GDAL/QGIS missing in cloud container; /code-review not yet run
-Decisions made (link DECISIONS.md IDs): C-01..C-05 drafted (pending); D-01, D-02 defaults kept
-SI_LOG.md entries added: 1 (G0 contracts)
-Uncommitted changes left (file + reason): none
-Next exact commands: npm ci && npx vitest run && npx tsc --noEmit
-Next owner: Data and Science (agree contracts, start 1.1)
+Session / member: Yujin (operator) for parcilla13 (Captain); Claude Code cloud session, Claude Opus 5.5
+Start and end time (Asia/Manila): Sat 14 Nov 10:21 - 10:30
+Branch: claude/kind-ptolemy-1wdqf5
+Starting commit: 8986d70 (fast-forward from 393723e)
+Ending commit: review follow-up commit (see git log -1 on the branch)
+Phase parts: G0 /code-review done; 0.3 frozen as drafted; 0.4 BLOCKED; 1.1 BLOCKED
+Files changed: .gitignore, src/contracts/* (header comment only), DECISIONS.md, PHASES.md, SI_LOG.md, HANDOFF.md
+Checks run: npm ci (exit 0); npx vitest run (44/44); npx tsc --noEmit (exit 0)
+Failures / limitations: plan PDF unavailable; data hosts blocked by egress proxy; QGIS absent
+Decisions made: none by humans. C-06..C-11 logged; G0 fallback freeze recorded as not consent
+SI_LOG.md entries added: 1
+Uncommitted changes left: none
+Next exact commands (team machine): git fetch origin && git checkout claude/kind-ptolemy-1wdqf5 && npm ci && npx vitest run && npx tsc --noEmit
+Next owner: Data and Science (1.1); Captain (portal deadline, Local Lead, owner names, merge review)
 ```
 
 ## Outgoing handoff checklist

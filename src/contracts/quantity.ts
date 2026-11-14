@@ -1,4 +1,4 @@
-// SI-assisted: drafted with Claude Code (Anthropic); reviewed by the contracts owner.
+// SI-assisted: drafted with Claude Code (Anthropic); human contracts-owner review pending.
 // Quantity contract, plan 19.9. Every number shown in the UI is one of these.
 import { z } from "zod";
 
