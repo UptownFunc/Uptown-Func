@@ -24,6 +24,13 @@ Do not interpret blank fields as proof that no work exists. Inspect GitHub and t
 - No code, data, contract or decision changed. No PR opened, nothing merged. Open PRs: none (PR #1 merged earlier).
 - **Resolved 18:52:** G-07 restores team credit (G-01). Contracts accepted as drafted for the merge (C-AGREE). The operator authorised the merge of the branch work into `main` and delegated the G3 input choices to the session.
 
+## Session update 20:25 (sky-obstruction layer merged)
+
+- **`main` = 706cc1a** (PR #8: plan 6.7 sky-obstruction layer, 20 m grid, off by default, legend "geometry, not dose" with the M12 benchmark; R-19 fixes). PR #7 40f3aef (handoff). No open PRs.
+- Checks at 48db58d: pytest 84, vitest 274/274, tsc clean, build OK, **bundle ~249.1 of 250 KB (about 0.9 KB left: treat as full)**, Playwright 48/48.
+- Rebuild note: `run_display` keeps the sky registration; recompute the sky layer with `python -m sharpwalk.run_display ../public/area --sky` or `python -m sharpwalk.run_sky_grid ../public/area` (about 5 min, network).
+- Register rows V-12..V-14 added this evening (AC-07 observer height and sampling; sky ramp). New constant `skyObstructionM12` has an UNRESOLVED page (release check lists it with `slopeLimit`).
+
 ## Session update 19:55 (register, AC-08, AC-07; all merged)
 
 - **`main` = 234d0cf.** Merged this evening: PR #2 1da70b5 (branch work, G-07, R-15), PR #3 a761afd (G3 inputs, R-16), PR #4 304d87c (CLAUDE.md placeholder register, G-08), PR #5 31270cf (AC-08, R-17), PR #6 234d0cf (AC-07, R-18).
@@ -160,14 +167,14 @@ B-2 (NASA host access) was resolved at 15:21 for the "Space App" environment.
 
 1. **B-4 deploy (a person with Vercel access):** link the repository to Vercel (or deploy `dist/` from `npm run build`), then run 3.5 and the G5 checks (two machines, Cesium blocked). Only blocker left for G3.
 2. **Team review before the G5 freeze (Sun 13:00):** clear the CLAUDE.md register V-01..V-13 (each FIXED or KEPT, G-08); confirm G-07 (team credit; Patrick's account had stated otherwise), G3-02 (edit_stop, SI-chosen defaults), C-22 image picks and image-use terms, H-01, REMS-01/02.
-3. **Code-only, optional (Tier 2):** sky-obstruction layer over the demo area (plan 6.7: 20 m grid, "geometry, not dose" label; allowed now that AC-07 has a result). Mind the JS budget (~2.1 KB headroom): the layer should be a pipeline raster drawn like the terrain masks, with little new app code.
+3. **Done 20:24:** sky-obstruction layer (PR #8). **Open:** Design review of its ramp (V-14, hard to see on dark imagery); per-stop "20 m sample" value not shown (no bundle room). Any further app code needs bundle savings first (B-01).
 4. **Human:** AC-09 third date with the Mars24 app (B-10); P-03 rerun on a machine with GDAL 3.12.3; 1.5 control points; reference-period sols for AC-07 (R-13, needs the papers' full text).
 5. **Do not:** touch the shared elevation decoder before P-01; fabricate any position, benchmark, plan time, image or AC-09 date; add an invented value without a CLAUDE.md register row.
 
 ## Exact commands for the next session
 
 ```bash
-git fetch origin && git checkout main && git pull   # all work is on main (234d0cf at 19:55)
+git fetch origin && git checkout main && git pull   # all work is on main (706cc1a at 20:25)
 ```
 
 ```bash
