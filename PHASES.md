@@ -101,8 +101,8 @@ Remaining: 33 h 11 min.
 | 3.5 | NOT STARTED | Needs Vercel access (B-4) |
 | 3.6 | IN PROGRESS | Conditions built (9ec2f70, 6e8ca00, 9608ecb); AC-09 2 of 3 dates (B-10); scenario time set by G3-01 (2026-11-15 12:00 UTC, assumed) |
 | 4.1 | IN PROGRESS | Contours, drill, AC-31 done; sky obstruction deferred (SKY-1) |
-| 4.2 | BLOCKED | AC-07 needs D5 positions (B-7) |
-| 4.3 | BLOCKED | AC-08 needs D5 (B-7) |
+| 4.2 | BLOCKED | D5 is now fetched (AC-08); AC-07 still needs the sky-obstruction run with the D12 far field and the reference-period sols (UNVERIFIED, R-13) |
+| 4.3 | VERIFIED (result recorded; Data and Science review pending) | AC-08 PASS: 83 of 2,537 known path cells excluded (3.27 % ≤ 5 % Assumed), 1 unknown; waypoints sols 4469-5073; `docs/data/ac-08-rover-path.md` |
 | 4.4 | VERIFIED (automated) | axe, keyboard and width checks still pass in the 43-test Playwright run |
 | 4.5 | NOT STARTED | Needs the branch merged (B-8) |
 | 5.1-5.3, 5.5 | NOT STARTED | After G4 |
@@ -171,7 +171,7 @@ Work on optional features only when it does not endanger this path. The AREA 2D 
 |---|---|---|---|---|---|
 | 4.1 | Complete Tier 2 features that do not threaten Tier 1. Contour display is optional; sky-obstruction grid runs after G1 and stays off the critical path. | Assigned module owners | IN PROGRESS (contours and drill done; sky obstruction not started) | **14:27:** time-to-habitat contour lines (d3-contour 4.0.3 in the worker; slow-bound field on a 4 m display grid by block minimum; lines only, labelled "est. N min"; no lines along the grid border or unreachable ground) and the simulated solar-event drill (plan 6.9: 30 min Assumed default in the constants register, 20/10 min stress cases, hatched SIMULATION banner, labelled drill line, stops outside named; no dose, no shelter wording). e2e `drill.spec.ts`. **Not started:** sky-obstruction grid (pipeline, needs D12) and its AC-07 benchmark. | 10ec506, 48e2774 |
 | 4.2 | Run AC-07 sky-obstruction benchmark and preserve the interpretation “geometry, not dose.” | Data and Science | BLOCKED (input missing) / layer deferred by plan rule | **14:35:** AC-07 needs Curiosity's position at Butte M12 for sols 1456-1467 from D5, which the plan marks UNVERIFIED; the D5 host is not reachable from this session. The plan says "AC-07 off -> Hide the layer" and the layer enters the video only with a recorded AC-07 result, so the sky-obstruction layer is deferred rather than built hidden. Feasibility evidence: D1 (32,980 x 57,440, float32) and D12 (106,694 x 53,347, int16) are 1-row strips with **no overviews**, so a near-field D1 read costs whole 33 km rows (about 1 GB for +-4 km); the plan's max-aggregated overview must be built by the pipeline itself. Method (plan 6.7) unchanged when the input arrives. | - |
-| 4.3 | Run AC-08 rover-path consistency checks and document results. | Data and Science + Route Engine | UNVERIFIED | Reproducible results and limitations | - |
+| 4.3 | Run AC-08 rover-path consistency checks and document results. | Data and Science + Route Engine | VERIFIED (Sat 19:33; review pending) | **PASS: 83 / 2,537 known path cells excluded = 3.27 % (≤ 5 %, Assumed; after review R-17)**; slope median 8.8°, 83 cells > 20°; 157 D5 drives, sols 4469-5073; D5 frame check 3 mm. Sanity check only (weakness 64). Report `docs/data/ac-08-rover-path.md`; offline reproduction test in `pipeline/tests/test_rover_path.py`. Reproducible results and limitations | - |
 | 4.4 | Run accessibility checks, including serious axe violations and keyboard/reduced-motion behaviour. | Design | VERIFIED (automated checks); manual checks due at G5 | @axe-core/playwright 4.14.0: 0 serious/critical violations on Planning, Briefing (with card) and Field View (AC-11). AC-32: place, move and delete a stop by keyboard alone (map cursor: arrows 10 m, Shift 100 m, Enter adds; "Move stop X to the map cursor"; Delete), leg table as the non-map equivalent, console at 1280 and 1920 px without sideways scroll. No animations exist yet, so reduced motion has nothing to reduce. Manual projector/outdoor/slow-network checks are a G5 item. | 6bdb98e, 48e2774 |
 | 4.5 | Merge only passing Tier 2 items and produce the integrated G4 build. | Captain | UNVERIFIED | Merged commit SHAs; benchmark and accessibility results | - |
 
@@ -807,6 +807,26 @@ R-16 fix checks (Sat 14 Nov ~19:18-19:22): npx vitest run 274/274 (28 files); np
   seen failing: add_stop name rule (accepted a blank name), parseTasks (module missing)
 Commit SHA: 34ccda0 (G3-01 preset), fdc64e7 (C-19), c72157d (D6), aecf8d5 + 56b261b (R-16). **Merged: PR #3 merge commit a761afd (Sat 14 Nov 19:27)**
 Next part / blocker owner: B-4 deploy (human); then G4 items (B-7 rover positions for AC-07/AC-08)
+```
+
+```text
+Part: 4.3 AC-08 rover-path consistency check
+Owner: the team (G-05); Claude Code session on ccr-dbbcdd02-kqy23v
+Status: VERIFIED (result recorded; Data and Science review pending)
+Scope completed: D5 (MMGIS traverse + waypoints) fetched with sha256; pipeline/sharpwalk/{rover_path.py,run_rover_path.py};
+  docs/data/{ac08-rover-path.json,d5-traverse-in-area.geojson,ac-08-rover-path.md}; README D5 reference; CLAUDE.md V-11
+Tests written first and seen failing (module missing): pipeline/tests/test_rover_path.py (6 unit tests; one test value
+  corrected: 25 deg belongs to the 25-30 bin under lower-inclusive bins) + an offline reproduction test
+Checks run (exact commands), Sat 14 Nov 2026 19:30-19:33 Asia/Manila:
+  cd pipeline && SSL_CERT_FILE=/root/.ccr/ca-bundle.crt ../.venv/bin/python -m sharpwalk.run_rover_path ../public/area ../docs/data
+     -> 2,412 path cells, 76 excluded (3.15 %), 1 unknown; PASS at <= 5 % (Assumed)
+  (cd pipeline && ../.venv/bin/python -m pytest)   -> 69 passed
+Results: PASS. Sanity check, not validation (plan weakness 64). After /code-review R-17 (exact traversal, known-cell share,
+  upper-inclusive bins, geo F1->F5->F6 mapping, grid checksums, MultiLineString): re-run 11:36 UTC -> 83 / 2,537 known
+  cells excluded (3.27 %), 1 unknown; same D5 sha256 c22752254772...; pytest 68 passed
+Known limitations: D5 localisation error UNVERIFIED (O-17); the line-through-cell rule is a session choice (V-11)
+Commit SHA: the commit that adds this record
+Next part / blocker owner: 4.2 AC-07 (sky-obstruction run; reference-period sols need the papers' full text, R-13)
 ```
 
 ## Phase-part completion record

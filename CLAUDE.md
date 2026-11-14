@@ -54,6 +54,7 @@ These values were **not given by the plan or a cited source**. A session or a te
 | V-08 | Rover point-of-view images | Navcam frames from sols 4602, 4628, 4650 | SI, as V-01 | `public/rover/images.json` | C-22 | OPEN (picks and image-use terms) |
 | V-09 | Stop name and task limits | name 60 chars; 10 tasks of 120 chars | SI | `src/engine/assumptions.ts` `STOP_LIMITS` | C-19 | OPEN |
 | V-10 | Time-to-habitat contour display | 5-min levels (plan) up to 90 min; 4 m display grid; minimum area 400 cells | Session (display) | `src/app/App.tsx`, `src/engine/worker.ts` | R-08 | OPEN |
+| V-11 | AC-08 path rule | a 2 m cell counts if the D5 line enters it (exact traversal); share over known cells | Session (method) | `pipeline/sharpwalk/rover_path.py` | AC-08 record | OPEN |
 
 **Plan values whose source is still unresolved** (the value comes from the plan; the citation or reference is missing):
 - 20 deg slope limit: page or slide UNRESOLVED (`src/constants`; the release check lists it).
