@@ -228,6 +228,7 @@ All ten findings fixed, test-first where possible. Each of the three key tests w
 | G-02 | Merging | Human approval is no longer required to merge. A human or the AI agent may merge a PR only when it meets the completeness checklist in `CLAUDE.md` step 6. | Team member Yujin, in the Claude Code session | Sat 14 Nov 2026 | `CLAUDE.md` step 6; PR parcilla13/Uptown-Func#1 |
 
 | G-06 | Concept and plan authorship | **Supersedes G-01.** SharpWalk's concept and project plan originated with Patrick Ezekiel A. Arcilla (parcilla13). Not credited to the team or to Claude/SI. Team members credited for recorded contributions: Patrick Ezekiel A. Arcilla, Christian Jesus Alcazar, Eugene Ibañez Jr. (Yujin), John Malubay. How the concept was formed: pending Patrick's own account. | John Malubay (session operator), in this Claude Code session, choosing "supersede G-01 everywhere" | Sat 14 Nov 2026, 14:47 | `CLAUDE.md` Authorship section, `README.md`; **flag for the team's review before merge** (G-01 was a team decision recorded by Yujin) |
+| G-06 note | Authorship reaffirmed | In this session's handoff request (Sat 14 Nov, about 17:27), sent from parcilla13's account, the user wrote: "Preserve the user's sole authorship of the concept and plan." Recorded as the account owner's (Patrick Ezekiel A. Arcilla's) statement; it matches G-06 on this branch. `main` still has the older G-01 wording until a reviewed PR merges. SI is never credited with the concept or plan. | Recorded |
 
 ## Fixed technical / presentation constraints
 

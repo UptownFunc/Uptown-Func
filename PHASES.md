@@ -73,37 +73,40 @@ Remaining: 33 h 11 min.
 | Video | Sun 17:00 | Not started (Design, human) | Video or 7-slide fallback | Unchanged |
 | Internal submit | Sun 21:00 | Not started | Every field; links open without login | Unchanged |
 
-## Status at handoff (Sat 14 Nov 2026, 14:58 Asia/Manila container clock; previous 12:20). Full per-part table: HANDOFF.md "Current phase and status"
+## Status at handoff (Sat 14 Nov 2026, 17:31 Asia/Manila container clock; previous 14:58). Branch claude/wizardly-lovelace-i2i0wa
 
-| Part | Status | One-line reason |
+| Part | Status | One-line reason / evidence |
 |---|---|---|
-| 0.1 | VERIFIED | Official closing time still to be confirmed on the portal (Captain) |
+| 0.1 | VERIFIED | Portal closing time still to be confirmed by a person |
 | 0.2 | VERIFIED | |
-| 0.3 | IN PROGRESS | G0 fallback applied: contracts frozen as drafted and **unagreed** (C-01..C-13) |
+| 0.3 | IN PROGRESS | Contracts frozen as drafted, **unagreed** (C-01..C-21 open items) |
 | 0.4 | BLOCKED | No Local Lead answers (D-01, D-02) |
-| 1.1 | IN PROGRESS | Evidence recorded; Data and Science sign-off and plan section 19 pending |
-| 1.2 | IN PROGRESS | Pipeline built and reproducible; GDAL 3.12.3 rerun (P-03) and owner review pending |
-| 1.3 | BLOCKED | Manifest cannot be written without invented residuals (C-12) |
+| 1.1 | IN PROGRESS | Evidence recorded; Data and Science sign-off pending |
+| 1.2 | IN PROGRESS | Pipeline reproducible; GDAL 3.12.3 rerun (P-03) pending; contours use the GDAL 3.8.4 CLI (P-05) |
+| 1.3 | BLOCKED | Manifest needs residuals that do not exist yet (C-12) |
 | 1.4 | IN PROGRESS | Seam candidates listed; alignment inconclusive; trust-grid method undecided |
-| 1.5 | NOT STARTED | Needs 8+ control points with Cesium picks (human + 3D owner) |
-| 1.6 | CUT | 3D view cut at G1 under the plan rule (no residuals, no D-02 approval); AREA 2D sheet kept |
-| 2.1 | IN PROGRESS | Range citation resolved from plan 19.5 (3d0e68c); 20 deg slide still UNRESOLVED (plan names only "NASA presentation") |
-| 2.2 | VERIFIED (human review pending) | K-01 decided: k_v = 1 placeholder with ASSUMED banner (9e9496c) |
-| 2.3 | VERIFIED (human review pending) | Leg ranges use the cited 0.64-0.97 m/s range; L-01/L-02 still to confirm |
-| 2.4 | IN PROGRESS | Planned margin incl. per-stop durations and ticks (bf0524b..0aaae81); field-margin UI belongs to 3.3 |
-| 2.5 | VERIFIED (interim) | No smoothing: grid path for calculations and display; AC-19 on the grid metric |
-| 2.6 | IN PROGRESS | Parts 1-5 done (coverage outlines 7e7c459, fonts f329682, contours 0bf81f2, hatch aliasing b40550c; reviews e4cb7f6, 1d85b36, c739bf4); only Design review open |
-| 2.7 | VERIFIED (Node, cloud Xeon) | k_v = 1: longest route 354-395 ms, field 426-470 ms; worker command 261 ms for 2 legs |
-| 3.1 | IN PROGRESS | Planner (only MissionPlan writer) + Comlink worker + all six commands; C-15 route geometry outside the contract |
-| 3.3 | IN PROGRESS (core done) | Field View: manual ticks, est. margins, stale guard (edf9492, 0acf9e7); phone width checked (b68dec1); outdoor daylight check needs a real phone |
-| 4.1 | IN PROGRESS | Contours + drill done; AC-31 resilience done (a1e9173); sky obstruction deferred (plan hides the layer while AC-07 is off; AC-07 needs D5) |
-| 4.4 | VERIFIED (automated) | 0 serious/critical axe on 3 views; AC-32 keyboard place/move/delete; 1280/1920 px (6bdb98e, 48e2774); manual checks (projector, outdoors) at G5 |
-| 4.2 | BLOCKED | AC-07 needs the M12 rover position (D5); layer stays hidden (SKY-1); nothing fabricated |
-| 5.4 | IN PROGRESS | README authorship per G-06, audited SI use, generated licence inventory (f38f824); native-library licences and Patrick's concept account pending |
-| 3.4 | IN PROGRESS (core done) | Card + STALE + print; Chromium PDF = one A5 page (b68dec1, a7cb260); paper print and fixed-scale map open |
-| 3.6 | IN PROGRESS | Conditions built and green (15:36): AC-09 2/3 dates; needs the team's scenario time (B-9) and a Mars24-app third date |
-| 3.2 | IN PROGRESS (nearly done) | + sources panel (UX-15) and AC-05 quantity labelling (66c373e, 0acf9e7); remaining: stop renaming/tasks, datasets-in-view derived from layers |
-| 3.x-5.x | NOT STARTED | |
+| 1.5 | NOT STARTED | 8+ control points with Cesium picks (human) |
+| 1.6 | CUT | 3D view cut at G1 under the plan rule (D-10); AREA 2D sheet kept |
+| 2.1 | IN PROGRESS | 20 deg slope-limit source UNRESOLVED (plan names only "NASA presentation") |
+| 2.2 | VERIFIED (human review pending) | K-01: k_v = 1 placeholder with ASSUMED banner |
+| 2.3 | VERIFIED (human review pending) | L-01/L-02 conventions to confirm |
+| 2.4 | IN PROGRESS | Planned margin built; values wait for T-01 (B-1) |
+| 2.5 | VERIFIED (interim) | Grid path for calculations and display (D-04 interim) |
+| 2.6 | IN PROGRESS (code-complete) | Parts 1-5: sheet, route/stops, coverage outlines (7e7c459), Plex fonts (f329682), 10 m contours (0bf81f2), hatch aliasing fix (b40550c); reviews e4cb7f6, 1d85b36, c739bf4. Only Design review (B-13) open |
+| 2.7 | VERIFIED (cloud Xeon) | Unity factors under 500 ms; at handoff one placeholder run hit 523 ms under load (HANDOFF Known failures 2); laptop timing at G5 |
+| 3.1 | IN PROGRESS | Planner + worker + six commands; C-15 route geometry outside the contract |
+| 3.2 | IN PROGRESS | Console complete apart from stop renaming/tasks, which wait for C-19 (B-12) |
+| 3.3 | IN PROGRESS (core done) | Outdoor/phone daylight check needs a real phone |
+| 3.4 | IN PROGRESS (core done) | Paper print and fixed-scale map open; card lists contours |
+| 3.5 | NOT STARTED | Needs Vercel access (B-4) |
+| 3.6 | IN PROGRESS | Conditions built (9ec2f70, 6e8ca00, 9608ecb); AC-09 2 of 3 dates (B-10); scenario time T-02 unset (B-9) |
+| 4.1 | IN PROGRESS | Contours, drill, AC-31 done; sky obstruction deferred (SKY-1) |
+| 4.2 | BLOCKED | AC-07 needs D5 positions (B-7) |
+| 4.3 | BLOCKED | AC-08 needs D5 (B-7) |
+| 4.4 | VERIFIED (automated) | axe, keyboard and width checks still pass in the 43-test Playwright run |
+| 4.5 | NOT STARTED | Needs the branch merged (B-8) |
+| 5.1-5.3, 5.5 | NOT STARTED | After G4 |
+| 5.4 | IN PROGRESS | README SI use and references current to this handoff; Patrick's concept account (B-5) and native-library licences open |
 
 ## Critical path
 

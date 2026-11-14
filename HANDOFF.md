@@ -4,123 +4,125 @@ This file is the handoff between team members and Claude sessions. Keep it factu
 
 ## Current snapshot
 
-- Last updated: **Sat 14 Nov 2026, 17:26 Asia/Manila (UTC+8)** (container clock, `TZ=Asia/Manila date`).
-- Deadline: **Sun 15 Nov 2026, 23:59 local** (plan 19.3 reading of the 2026 Project Submission Guide). **Still not verified on the live portal: a person must confirm it.** Remaining: about 30 h 33 min.
-- Gates: G0 and G1 expired, passed only under their fallbacks (2D only; 3D cut). G2 (Sat 19:00): criteria met at 14:48. G3 (Sun 01:00, ~7 h 34 min away): **at risk on human inputs only**; the Conditions Must is now built (3.6), leaving rover point of view (B-3), planned-margin values (B-1), scenario time (B-9) and the public deploy (B-4).
-- **Branch: `claude/wizardly-lovelace-i2i0wa`, HEAD = the log commit after `c739bf4`** (run `git log -1`). It is `claude/trusting-fermi-c5pc0s` (091866a, previous handoff, fast-forwarded, nothing overwritten) plus 17 commits; the latest part added b40550c, c739bf4 and the log commit. Pushed; working tree clean. `main` is still **bb473b7**. **No open PRs; nothing merged** (operator instruction this session: do not merge; human review and merge required).
-- Session: operated from **parcilla13's account** (the member at the keyboard was not stated; four members share accounts); Claude Code with **Claude Opus 5.5**; Fable 5.2 not used; **Superpowers installed and its TDD skill used** this session.
-- Environment: this session's "Space App" environment now allows `www.giss.nasa.gov` and `mars.nasa.gov` (approved in-session 15:21); that resolves B-2 for sessions on this environment.
-- **Authorship:** `main`'s CLAUDE.md credits the concept and plan to the whole team (G-01); this branch carries G-06 (from the previous session), which credits Patrick Ezekiel A. Arcilla and supersedes G-01. **Unresolved: the team must settle G-01 vs G-06 in review before merge.** This session did not change either.
+- Last updated: **Sat 14 Nov 2026, 17:31 Asia/Manila (UTC+8)** (container clock, `TZ=Asia/Manila date`).
+- Deadline: **Sun 15 Nov 2026, 23:59 local** (plan 19.3 reading of the 2026 Project Submission Guide). **Not yet confirmed on the live portal: a person must check it.** Remaining: about 30 h 28 min.
+- Gates: G0 and G1 expired and passed only under their fallbacks (2D only; 3D cut). G2 (Sat 19:00): criteria met at 14:48; latency margin thinner on this machine at 17:30 (see Known failures 2). **G3 (Sun 01:00, about 7 h 29 min away): at risk on human inputs only** (B-1, B-3, B-4, B-9, B-12).
+- **Branch `claude/wizardly-lovelace-i2i0wa`, HEAD = the handoff commit after `d9bd3bd`** (run `git log -1`; equal to origin after push). Working tree clean; no stashes; only git-ignored caches (`.venv/`, `node_modules/`, `dist/`, `test-results/`, `__pycache__/`, `.pytest_cache/`).
+- History: `claude/trusting-fermi-c5pc0s` at 091866a (previous handoff) fast-forwarded, nothing overwritten, **plus 18 commits** from this session (17 before this handoff commit). `main` is **bb473b7**, unchanged. **No open PRs; nothing merged** (operator instruction: no merge, no PR without authorization).
+- Session: operated from **parcilla13's account**; Claude Code with **Claude Opus 5.5** throughout; Fable 5.2 not used; the Superpowers skill was installed and its test-driven-development workflow used.
+- Environment ("Space App", personal): allows `www.giss.nasa.gov` and `mars.nasa.gov` (added with the user's approval at 15:21); the USGS bucket and package registries were reachable. **`gdal-bin` 3.8.4 was installed in this container only** (P-05); a new container needs it again for contour rebuilds.
+- **Authorship:** SharpWalk's concept and project plan are **Patrick Ezekiel A. Arcilla's (parcilla13)**. This branch's CLAUDE.md says so (G-06), and the account owner restated it in this session's handoff request ("preserve the user's sole authorship of the concept and plan"; DECISIONS G-06 note). `main` still carries the older G-01 wording (team credit); the change reaches `main` only through a reviewed PR. SI assistance is recorded separately in SI_LOG.md and never as the origin of the concept or plan.
 
 Do not interpret blank fields as proof that no work exists. Inspect GitHub and the working tree.
 
 ## Team and module ownership
 
-Team: Patrick Ezekiel A. Arcilla (parcilla13), Christian Jesus Alcazar, Eugene Ibañez Jr. ("Yujin"), John Malubay.
+Team: Patrick Ezekiel A. Arcilla (parcilla13; concept and plan), Christian Jesus Alcazar, Eugene Ibañez Jr. ("Yujin"), John Malubay.
 **No per-module roles (G-05):** each session takes the earliest incomplete phase parts in order, on its own branch.
 Where the plan names an owner role (Captain, Data and Science, Route Engine, Design), read it as "the team". Contract
-changes still need the team's recorded agreement (CLAUDE.md step 6).
+changes still need the team's recorded agreement (CLAUDE.md step 6). Credit for implementation, data, design, review
+and delivery follows git and the logs.
 
 ## Current phase and status
 
-**Current phase: G3 (Tier 1 integration), with G4 items done ahead where unblocked.** Status per part (evidence in PHASES.md):
+**Current phase: G3 (Tier 1 integration); G4 items done ahead where unblocked.** Evidence per part in PHASES.md.
 
 | State | Parts |
 |---|---|
-| VERIFIED | 0.1, 0.2; 2.2, 2.3, 2.5 (interim rule), 2.7 (cloud machine); 4.4 (automated checks) |
-| IN PROGRESS (built, checks green, not complete) | 0.3 (contracts unagreed); 1.1, 1.2 (GDAL 3.12.3 rerun), 1.4; 2.1 (20 deg source unresolved); 2.4; 2.6 (coverage outlines, Plex fonts, 10 m contours and the hatch aliasing fix done by 17:24; Design review open); 3.1; 3.2; 3.3; 3.4 (paper/Safari print, fixed-scale map); **3.6 Conditions (new: AC-09 2/3 dates, scenario time unset)**; 4.1 (contours, drill, AC-31 done; sky obstruction deferred); 5.4 (README draft) |
+| VERIFIED | 0.1, 0.2; 2.2, 2.3, 2.5 (interim rule), 2.7 (cloud machine); 4.4 (automated checks); review follow-ups R-02/8, R-02/10, R-04/6, R-11 |
+| IN PROGRESS (built, checks green, not complete) | 0.3 (contracts unagreed); 1.1, 1.2 (GDAL 3.12.3 rerun), 1.4; 2.1 (20 deg source unresolved); 2.4; **2.6 (code-complete: parts 1-5 incl. coverage outlines, Plex fonts, 10 m contours, hatch aliasing fix; Design review B-13 open)**; 3.1; 3.2; 3.3; 3.4 (paper/Safari print, fixed-scale map); **3.6 Conditions (built; AC-09 2 of 3 dates; scenario time T-02 unset)**; 4.1 (contours, drill, AC-31; sky obstruction deferred); 5.4 (README draft) |
 | BLOCKED | 0.4 (Local Lead answers); 1.3 (C-12); 4.2 AC-07 and 4.3 AC-08 (D5) |
-| NOT STARTED | 1.5 (control points); 3.5 (deploy); 4.5; 5.1-5.3, 5.5 |
+| NOT STARTED | 1.5 (control points); 3.5 (deploy, B-4); 4.5; 5.1-5.3, 5.5 |
 | CUT | 1.6 (3D view, D-10) |
 
 Missing for G3 (Tier 1 Musts): **rover point of view** (D6, B-3), **planned margin values** (T-01, B-1), **scenario
-time** for the sun values (T-02, B-9), **first public deploy** (3.5, B-4). Conditions (D10, D7) is built (3.6).
+time** for the sun values (T-02, B-9), **per-stop tasks on the card** (C-19, B-12), **first public deploy** (3.5, B-4).
 
 ## What exists and passes its tests
 
-- `src/contracts` (Zod, frozen as drafted, unagreed); `src/geo` (F1/F5/F6/F7, grid cell <-> F1, metre offsets); `src/constants` (cited register; drill default 30 min).
-- `src/engine`: A* routing, time field, leg ranges, plan 6.6 margins; **Planner** (only MissionPlan writer; Commands incl. per-stop durations); Comlink worker; contour lines.
-- `src/map` + `src/app`: AREA sheet with route, stops, keyboard cursor, margin ticks, contours, drill line; console with ASSUMED banner, plan-time inputs (blank until entered), end margin and state, sources panel; elevation profile with two-way scrub.
-- **2.6 part 5 (17:11-17:24):** hatch aliasing fixed (HATCH-01): `pipeline/sharpwalk/run_terrain_masks.py` writes three class masks; `src/map/terrainPattern.ts` + `terrainLayer.ts` draw the plan 9.2 symbols in screen pixels, static (reduced motion identical); empty inline favicon (ICON-01).
-- **2.6 part 4 (16:50-17:05):** 10 m elevation contours from D1 (`pipeline/sharpwalk/run_contours.py` -> `public/area/contours.geojson`, gdal_contour 3.8.4 on D1 at 4 m; `src/map/elevationContours.ts`, `elevationLayer.ts`; every 50 m heavier and labelled; legend and card name them).
-- **2.6 part 3 (16:27-16:47):** plan 7.8 coverage outlines (`pipeline/sharpwalk/run_coverage.py` -> `public/area/coverage.geojson`; `src/map/coverage.ts`, `coverageLayer.ts`; layer list says "partly outside D2 colour coverage"), and IBM Plex Sans/Mono from `@fontsource/*` 5.3.0 via `src/app/fonts.css` (S-02, S-06: IBM's own packages removed for their telemetry postinstall).
-- **Conditions (3.6, this session):** `src/engine/sun.ts` (Mars24, both GISS worked examples), `src/geo/planetographic.ts`, scenario time `scenario_utc` as a plan assumption, `PlanOutput.conditions`, `src/app/ConditionsPanel.tsx`; D7 `pipeline/sharpwalk/run_rems.py` -> `public/conditions/rems.json` (sol 4995, 2026-08-25). Evidence: `docs/data/d10-mars24-source.md`.
-- `src/briefing`: A5 card, version stamp, STALE + print blocked after edits. `src/field`: Field View (only MissionExecution writer).
-- `pipeline`: D1 grids, F7 display layers, provenance for D1 and D2; `public/area` committed and checked by pytest.
-- `docs/licences.md` generated by `scripts/licences.py`; `README.md` with authorship, SI use and references.
+- `src/contracts` (Zod, frozen as drafted, unagreed); `src/geo` (F1/F5/F6/F7, planetographic for the sun input, grid cell <-> F1 with one cached grid frame); `src/constants` (cited register incl. TT-UTC).
+- `src/engine`: A* routing, time field, leg ranges, plan 6.6 margins; Planner (only MissionPlan writer; Commands incl. per-stop durations and `scenario_utc`); Mars24 sun (`sun.ts`); Comlink worker; time-to-habitat contour lines.
+- `src/map`: AREA sheet with D2 base, D1 hillshade, **terrain symbols drawn in screen pixels from class masks** (`terrainLayer.ts`, `terrainPattern.ts`), **10 m elevation contours** (`elevationContours.ts`, `elevationLayer.ts`), **D1/D2 coverage outlines** with layer-list notes (`coverage.ts`, `coverageLayer.ts`), route, stops, keyboard cursor, readout, margin ticks, drill line; briefing snapshot.
+- `src/app`: console with ASSUMED banner, plan-time inputs, end margin and state, **Conditions panel** (LMST, sun elevation, L_s; dated REMS reading), sources panel (D7, D10 described), elevation profile; **IBM Plex Sans/Mono** self-hosted (`fonts.css`).
+- `src/briefing`: A5 card, version stamp, STALE + print blocked; lists contours. `src/field`: Field View (only MissionExecution writer).
+- `pipeline`: D1 grids, F7 display layers, provenance; `run_rems` (D7), `run_coverage`, `run_contours` (needs the GDAL CLI), `run_terrain_masks` (local files only); `run_display` calls the last three. `public/area` and `public/conditions` committed and checksummed by pytest.
+- `docs/licences.md` (generated, current); `docs/data/d10-mars24-source.md`; `README.md` (authorship, SI use, references incl. D7, D10, fonts).
 
-## Files changed this session (vs 204a9c4)
+## Files changed this session (git diff 091866a..HEAD: 42 added, 42 modified, 1 deleted)
 
-`.gitignore`, `CLAUDE.md`, `DECISIONS.md`, `HANDOFF.md`, `PHASES.md`, `README.md`, `SI_LOG.md`, `docs/licences.md`,
-`scripts/licences.py`, `package.json`, `package-lock.json`, `playwright.config.ts`;
-`e2e/{a11y,area-sheet,briefing,drill,field,phone,plan-route,resilience}.spec.ts`;
-`pipeline/sharpwalk/{outputs,run_display}.py`, `pipeline/tests/{test_area_outputs,test_licences,test_outputs}.py`;
-`src/app/{App,DrillPanel,MarginState,PlanPanel,PlanTimes,QuantityText,RouteProfile,SourcePanel}.tsx`,
-`src/app/{format,format.test,sources,sources.test}.ts`, `src/app/styles.css`;
-`src/briefing/{BriefingView.tsx,model.ts,model.test.ts}`; `src/constants/{index,constants.test}.ts`;
-`src/engine/{assumptions,client,contours,contours.test,loadGrid,loadGrid.test,planner,planner.test,worker}.ts`;
-`src/field/{FieldView.tsx,execution.ts,execution.test.ts}`; `src/geo/{index,geo.test,grid,grid.test}.ts`;
-`src/map/{AreaSheet.tsx,planLayer.ts,snapshot.ts}`; and 9 generated files in `public/area/`.
+- Logs and docs: `DECISIONS.md`, `HANDOFF.md`, `PHASES.md`, `README.md`, `SI_LOG.md`, `docs/licences.md`, `docs/data/d10-mars24-source.md` (new).
+- Config: `index.html` (empty inline icon), `package.json`, `package-lock.json` (+ `@fontsource/ibm-plex-sans` 5.3.0, `@fontsource/ibm-plex-mono` 5.3.0).
+- E2E: new `e2e/{helpers.ts,conditions,contours,coverage,fonts,hatch}.spec.ts`; changed `e2e/{a11y,area-sheet,briefing,drill,field,plan-route,resilience}.spec.ts`.
+- Pipeline: new `pipeline/sharpwalk/{rems,run_rems,coverage,run_coverage,contours,run_contours,run_terrain_masks}.py`, `pipeline/tests/{test_rems,test_coverage,test_contours}.py`; changed `pipeline/sharpwalk/{display,run_display}.py`, `pipeline/tests/{test_display,test_area_outputs}.py`.
+- Data: new `public/area/{coverage.geojson,contours.geojson,terrain_steep.png,terrain_excluded.png,terrain_unknown.png}`, `public/conditions/rems.json`; changed `public/area/layers.json`; **deleted `public/area/terrain_overlay.png`**.
+- App: new `src/app/{ConditionsPanel.tsx,conditions.test.ts,fonts.css,rems.ts,rems.test.ts}`, `src/engine/{sun,sun.test}.ts`, `src/geo/{planetographic,planetographic.test}.ts`, `src/map/{coverage,coverage.test,coverageLayer,elevationContours,elevationContours.test,elevationLayer,terrainLayer,terrainPattern,terrainPattern.test,view}.ts`; changed `src/app/{App.tsx,QuantityText.tsx,SourcePanel.tsx,format.ts,format.test.ts,main.tsx,sources.ts,sources.test.ts,styles.css}`, `src/briefing/{model,model.test}.ts`, `src/constants/index.ts`, `src/engine/{assumptions,planner,planner.test}.ts`, `src/geo/{grid,grid.test}.ts`, `src/map/{AreaSheet.tsx,loadArea.ts,readout.ts,snapshot.ts}`.
+- Note: commits 9ec2f70 and 6e8ca00 say "Phase 3.2 Conditions" in their messages; PHASES records that work as part 3.6.
 
-## Tests run at handoff (Sat 14 Nov 17:22-17:24 at c739bf4, exact commands and results; earlier values in brackets)
+## Tests run at handoff (Sat 14 Nov 17:27-17:30 at d9bd3bd, clean install; exact commands and results)
 
 | Command | Result |
 |---|---|
 | `npm ci` | OK, 0 vulnerabilities |
-| `npx vitest run` | **255 passed / 255**, 23 files [249 / 22 at 1d85b36] |
+| `npx vitest run` | **255 passed / 255**, 23 files |
 | `npx tsc --noEmit` | clean |
-| `npm run build` | OK; JS gzipped: main 205.3 KB + worker 40.9 KB = **~246.2 KB** (budget 250; **under 4 KB headroom**) [244.8]; fonts are separate woff2 assets (a Planning load fetches 10 files, 171 KB) |
-| `(cd pipeline && ../.venv/bin/python -m pytest -q)` | **61 passed** [60] (includes area, mask, coverage and contour checksums; gdal_contour plane oracle (skips if the GDAL CLI is absent); licence inventory; REMS) |
-| `PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome npx playwright test --trace off` | **43 passed / 43** at c739bf4 (hatch 4 new) [39 at 1d85b36] (26 at 9608ecb with 3 new Conditions specs; +1 helper pin). Previous handoff: first run after `npm ci`: **2 failed / 21 passed** (area-sheet, a11y Planning). Cause reproduced: a cold Vite dev-server cache re-optimised dependencies and reloaded the page. Fixed in `cb7e24c` (E2E now runs on the production build via `vite preview`). After the fix: **23 passed / 23** on a cold run (cache and dist deleted) and on a warm run |
-| `SHARPWALK_AREA=public/area node --experimental-strip-types bench/route-bench.ts` (14:48) | longest route 316-393 ms (< 500); time field 382-438 ms (< 3 s) |
+| `npm run build` (dist deleted first) | OK; Vite reports main 205.29 kB gzip; worker 40,897 B gzip: **~246.2 KB of the 250 KB JS budget** (B-01, under 4 KB headroom). Fonts are separate woff2 assets (a Planning load fetches 10 files, 171 KB) |
+| `(cd pipeline && ../.venv/bin/python -m pytest)` | **61 passed** (area, mask, coverage, contour, REMS checksums and content; gdal_contour plane oracle, which skips without the GDAL CLI; licence inventory) |
+| `.venv/bin/python scripts/licences.py \| diff -q - docs/licences.md` | no difference (inventory current) |
+| `PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome npx playwright test --trace off` | **43 passed / 43** (cold build via vite preview) |
+| `SHARPWALK_AREA=public/area node --experimental-strip-types bench/route-bench.ts`, two runs | Run A (straight after Playwright, load average ~2.35 on 4 cores): decreasing placeholder longest route 450, 472, **523** ms; time field 586, 517, 514 ms. Run B: **unity (the factors the app uses, K-01) longest route 463, 377, 369 ms**; time field 475, 484, 596 ms; decreasing placeholder longest route 458, 498, 447 ms; time field 462, 464, 553 ms. Target: route < 500 ms, field < 3 s. Routing code unchanged since 091866a |
 
 ## Known failures and limitations
 
-1. No known failing check at handoff. E2E needs `PW_CHROMIUM` in this cloud container (Playwright 1.65.0 with 1.63 browsers, S-03).
-2. Planned and field margins show "unknown" until the plan times are entered (B-1).
-3. Latency measured only on the cloud Xeon; laptop timing pending (G5).
-4. Pipeline outputs built with GDAL 3.10.3, not the pinned 3.12.3 (P-03).
-5. 31 native libraries bundled in the pipeline wheels: licences **not verified** (docs/licences.md).
-6. Contours cached per session (R-08 item 5); bundle headroom 15 KB (B-01).
-7. Deferred review findings: R-02 (7, 8, 10), R-03 (5), R-04 (6, 7), R-05 (5, 6), R-06 (5), R-07 (3), R-08 (5).
+1. No failing test or check. E2E needs `PW_CHROMIUM` in this cloud container (Playwright 1.65.0 with 1.63 browsers, S-03).
+2. **Latency margin:** one of six "decreasing placeholder" route runs took 523 ms (> 500 ms) under load; unity factors (used by the app) stayed under 500 ms (369-463 ms). At 14:48 the same benchmark gave 316-393 ms. The engine is unchanged, so this is machine load; confirm on a mid-range laptop at G5 before calling G2 latency safe.
+3. Planned and field margins show "unknown" until plan times are entered (B-1); sun values show "unknown" until a scenario time is set (B-9).
+4. **Bundle: ~246.2 KB of 250 KB** (B-01). Check size before adding code.
+5. Pipeline: outputs built with rasterio's GDAL 3.10.3 (P-03) and contours with the GDAL 3.8.4 CLI (P-05), not the pinned 3.12.3. `run_display` gained calls to `run_terrain_masks`, `run_coverage` and `run_contours` and **has not been re-run end to end** (each step was run on its own and checked).
+6. 31 native libraries bundled in the pipeline wheels: licences not verified (docs/licences.md).
+7. Hatch: during a button zoom (~250 ms) the terrain canvas is briefly scaled before re-rendering (HATCH-02, accepted).
+8. Deferred review findings still open: R-02 (4 = C-16; 7 waits for P-01), R-03 (5), R-04 (7 = C-16), R-05 (5, 6), R-06 (5), R-07 (3), R-08 (5), R-11 (4, skipped), R-13 (CON-02 timing at G5).
 
 ## Decisions awaiting human approval (DECISIONS.md)
 
 | Who | Items |
 |---|---|
-| Team | **G-06 authorship change** (supersedes the merged G-01; review in the PR); T-01 plan times; contract changes C-01..C-17 (C-12, C-16, C-17 open); H-01 habitat and D-04 interim smoothing (applied from plan defaults, confirm); F-01; P-01, P-02 encodings; K-02 bin edges; L-01, L-02 conventions; S-01..S-05 tooling; P-04 D2 licence wording |
-| Patrick Ezekiel A. Arcilla | Concept-formation account (SI_LOG); Vercel deployment (R-17); portal deadline confirmation |
+| Patrick Ezekiel A. Arcilla | Concept-formation account for SI_LOG/README (B-5; his account to give); Vercel deployment (B-4, R-17); portal deadline confirmation |
+| Team (contracts) | C-01..C-17 (C-12, C-16, C-17 open), **C-18** (REMS snapshot schema), **C-19** (stop name/tasks command, B-12), **C-20** (coverage file), **C-21** (contour file); G-06 wording reaching `main` via PR review |
+| Team (plan values) | **T-01** plan times (B-1), **T-02** scenario time (B-9), K-02 bin edges, H-01 habitat, D-04 interim smoothing, F-01, L-01/L-02 |
+| Design (B-13) | COV-01 coverage outline symbol, COV-02 load view vs crop, CON-03 contour symbol, HATCH-01 hatch look, S-06 Fontsource packages, S-01..S-05 tooling |
+| Data and Science | **P-01** grid encoding (gates the shared elevation decoder, R-02/7), P-02, **P-03/P-05** GDAL versions, CON-01 contour grid, SUN-01..03 (Mars24 frame, table digits, coefficient register), REMS-01/02 (units, outreach terms, B-11), D-05 vertical reference, D-06, 1.1 sign-off, 1.4 trust grid, 20 deg slope-limit source |
 | Local Lead (via the team) | D-01 pre-event wireframes; D-02 GSAP / Cesium Mars |
-| Data and Science work (team) | 1.1 sign-off; D-05 vertical reference; D-06; P-03 GDAL rerun; 1.4 trust grid; 20 deg slope-limit source |
+| Any member with Java | AC-09 third date with the Mars24 app (B-10) |
 
-## External blocker register (Sat 14 Nov 2026, 15:40 Asia/Manila; previous 14:58)
+## External blocker register (Sat 14 Nov 2026, 17:31 Asia/Manila)
 
-Nothing below is marked approved or filled in by SI. "Needed by" times are the latest that still leave time to build
-and check the dependent work before G3 (Sun 01:00).
+Nothing below is marked approved or filled in by SI. "Needed by" times leave time to build and check before G3 (Sun 01:00).
 
 | # | Blocker | Owner | Input required | Impact if missing | Needed by |
 |---|---|---|---|---|---|
-| B-1 | EVA, task, contingency and stop durations (T-01) | Team (decided together; G-05) | T_EVA, t_ops, t_cont, default stop duration (and any per-stop values), each with a one-line rationale; enter in the console or record in DECISIONS | Planned margin and field margins show "unknown"; G3 acceptance "including planned margin" fails | Sat 22:00 |
-| B-2 | **RESOLVED 15:21 for the "Space App" environment** (hosts added in-session; Conditions built). Kept for history: NASA Mars24 and MSL weather access (D10, D7) | John Malubay (environment owner) | Start a session on the "Uptown-Func" environment (allows www.giss.nasa.gov, mars.nasa.gov) or allow the download in this session | Tier 1 Conditions panel (sun elevation, LMST label, dated REMS reading) cannot be built or checked against the Mars24 worked example (AC-09) | Sat 20:00 (about 3 h of build and checks) |
-| B-3 | 3-5 Curiosity images and metadata (D6) | Team | Image IDs or URLs with sol, camera, credit line; which stop or terrain each illustrates ("similar terrain"). Supplied references recorded in DECISIONS B-3-SRC: the NASA MSL raw-images browser (source to pick from) and "Curiosity's Proposed Path up Mount Sharp" (a planning visualization, **not** a rover-camera image; never to be used as one). Nothing selected or bundled by SI. | Tier 1 rover point-of-view feature missing at G3 | Sat 22:00 |
-| B-4 | Vercel deployment access (R-17) | Patrick Ezekiel A. Arcilla (repository owner) | Vercel project linked to the repository, or a deploy done by a member; then the FortiGuard classification request (plan 19.3) | No public deploy: G3 and G5 acceptance fail; judges cannot open the app | Sun 00:00 |
-| B-5 | Concept-formation account (SI_LOG, README) | Patrick Ezekiel A. Arcilla | How and when the concept was formed, pre-event research, confirmation and date | SI disclosure incomplete; submission SI field cannot be prepared truthfully | Sun 17:00 |
-| B-6 | Contract agreement C-12, C-16, C-17 | Team (all members) | Agree or reject: nullable manifest residuals (C-12); Quantity fields for leg length and climb (C-16); nullable field margins (C-17) | No AreaManifest (G1 item 1 stays open); leg length/climb shown without Quantity metadata; stored field margins cannot be "unknown" | Sat 22:00 |
-| B-7 | D5 rover positions | Team, plus John Malubay for network access | Curiosity positions for sols 1456-1467 (Butte M12) and the reference period, from D5, with the host allowed | AC-07 and AC-08 cannot run; sky-obstruction layer stays hidden (SKY-1) | Sun 06:00 (G4) |
-| B-9 | Scenario date and time (T-02, plan 19.11 weakness 27) | Team | A UTC date and time from 2017 on, with a one-line rationale; enter in the console's Conditions panel or record under T-02 | Sun elevation, LMST and L_s show "unknown" in the demo | Sat 22:00 |
-| B-10 | AC-09 third date | Any member with Java | Run the GISS Mars24 app at 4.8719 S (planetographic), 222.61 W for a chosen date; compare its sun elevation with the console's for the same scenario time (pass: within 0.1 deg); record in PHASES 3.6 | AC-09 stays 2 of 3 | Sun 10:00 (G4) |
-| B-13 | Design / team confirmations from 2.6 parts 3-4 | Team (Design, Data and Science) | Confirm the coverage outline symbol (COV-01), the Fontsource font packages (S-06), the contour symbol (CON-03) and 4 m contour grid (CON-01), the GDAL 3.8.4 CLI (P-05), and the coverage/contour file contracts (C-20, C-21); decide whether the load view should fit the crop (COV-02) | Choices stay as display defaults | Sun 10:00 (G4) |
-| B-12 | Stop name/tasks command (C-19) | Team (contract) | Pick option (a) new `edit_stop` CommandType or (b) engine-defined payload fields | Briefing card shows no per-stop tasks (Tier 1 card item) | Sat 22:00 |
-| B-11 | REMS units and outreach terms (REMS-01, REMS-02) | Team (Data and Science) | Confirm degrees C / Pa and whether CAB's "outreach purposes only" terms fit the submission | D7 shown with unconfirmed units / terms | Sun 13:00 (G5) |
-| B-8 | Merge of `claude/wizardly-lovelace-i2i0wa` (contains `trusting-fermi`) | A human (operator instruction: no AI merge this session) | Review including G-06 vs G-01, C-18, SUN-01..04; open a PR when the team wants one (none opened) | Work stays off `main`; G4 "Tier 2 merged" fails | Sun 10:00 |
+| B-1 | EVA, task, contingency and stop durations (T-01) | Team | T_EVA, t_ops, t_cont, default stop duration (and any per-stop values), each with a one-line rationale; enter in the console or record under T-01 | Planned and field margins show "unknown"; G3 "including planned margin" fails | Sat 22:00 |
+| B-3 | 3-5 Curiosity images and metadata (D6) | Team | For each: image ID/URL, sol, camera, credit line, and the stop or terrain it illustrates ("similar terrain"). Pick from the NASA MSL raw-images browser (DECISIONS B-3-SRC). "Curiosity's Proposed Path up Mount Sharp" is a planning visualization, **not** a rover-camera image. Nothing selected by SI | Tier 1 rover point of view missing at G3 | Sat 22:00 |
+| B-4 | Vercel deployment access (R-17) | Patrick Ezekiel A. Arcilla | Vercel project linked to the repository, or a deploy by a member; then the FortiGuard classification request (plan 19.3) | No public deploy: G3 and G5 fail; judges cannot open the app | Sun 00:00 |
+| B-5 | Concept-formation account (SI_LOG, README) | Patrick Ezekiel A. Arcilla | How and when the concept was formed, pre-event research, confirmation and date (not written by SI) | SI disclosure incomplete | Sun 17:00 |
+| B-6 | Contract agreement C-12, C-16, C-17 | Team | Agree or reject each | No AreaManifest; leg length/climb without Quantity metadata; stored field margins cannot be "unknown" | Sat 22:00 |
+| B-7 | D5 rover positions | Team | Curiosity positions for sols 1456-1467 (Butte M12) and the reference period | AC-07 and AC-08 cannot run; sky-obstruction layer stays hidden (SKY-1) | Sun 06:00 (G4) |
+| B-8 | Merge of `claude/wizardly-lovelace-i2i0wa` (contains `trusting-fermi`) | A human (no AI merge or PR without authorization) | Open a PR when authorized; review incl. G-06 vs G-01, C-18..C-21, SUN-01..04, S-06, P-05 | Work stays off `main`; G4 "Tier 2 merged" fails | Sun 10:00 |
+| B-9 | Scenario date and time (T-02) | Team | A UTC date and time from 2017 on, with a one-line rationale | Sun elevation, LMST and L_s show "unknown" | Sat 22:00 |
+| B-10 | AC-09 third date | Any member with Java | Mars24 app at 4.8719 S (planetographic), 222.61 W; compare sun elevation with the console's (pass within 0.1 deg) | AC-09 stays 2 of 3 | Sun 10:00 (G4) |
+| B-11 | REMS units and outreach terms (REMS-01/02) | Team (Data and Science) | Confirm degrees C / Pa and whether CAB's "outreach purposes only" terms fit the submission | D7 shown with unconfirmed units/terms | Sun 13:00 (G5) |
+| B-12 | Stop name/tasks command (C-19) | Team (contract) | Option (a) new `edit_stop` CommandType or (b) engine-defined payload fields | Card shows no per-stop tasks | Sat 22:00 |
+| B-13 | Design / Data and Science confirmations from 2.6 | Team | COV-01, COV-02, CON-01, CON-03, HATCH-01, S-06, P-05, C-20, C-21 | Choices stay as display defaults | Sun 10:00 (G4) |
+
+B-2 (NASA host access) was resolved at 15:21 for the "Space App" environment.
 
 ## Exact next task
 
-1. **Human inputs for G3 (smallest first):** B-9 scenario time and B-1 plan times (each a value + one-line rationale in the console, or recorded under T-02 / T-01 in DECISIONS so a session can pre-set them as logged team choices); B-3 rover images; B-4 Vercel. Do not invent any of them.
-2. **Code-only work while waiting:** 2.6 is code-complete (coverage outlines, fonts, contours, hatch aliasing; last commits b40550c, c739bf4); only Design review remains (B-13). Next code-only items: G5 prep (laptop timing incl. contour load CON-02 and frame pacing HATCH-04); watch the bundle (under 4 KB headroom, B-01) before adding code. R-02 item 7 still waits for P-01; C-19 (stop tasks) still waits for the team (B-12); contour/coverage contracts (C-20, C-21) wait for agreement. None is to be implemented without approval.
-3. **When images arrive (B-3):** rover point of view in the stop panel and the card, labelled "similar terrain".
-4. **When deploy access arrives (B-4):** 3.5 first public deploy, then G5 checks. Re-take the REMS snapshot at build time (command below) so the dated reading is the latest.
-5. Do not build the sky-obstruction layer until D5 positions allow AC-07 (SKY-1). Do not fabricate the Butte M12 position, any benchmark result, the scenario time or the AC-09 third date.
+1. **Human inputs for G3, smallest first:** B-9 scenario time and B-1 plan times (a value + one-line rationale each, in the console or recorded under T-02 / T-01 so a session can pre-set them as logged team choices); B-12 stop-tasks option; B-3 images; B-4 Vercel. Do not invent any of them.
+2. **Next code-only work (no approval needed):** G5 preparation that does not add bundle weight: measure route latency, contour load (CON-02) and frame pacing (HATCH-04) on a mid-range laptop; re-run `run_display` end to end once (needs the USGS bucket and gdal-bin) and confirm the committed outputs reproduce, or record the differences.
+3. **When B-12 is decided:** implement stop name/tasks in the planner, the plan panel and the card (contract change recorded first).
+4. **When B-3 images arrive:** rover point of view in the stop panel and the card, labelled "similar terrain", with sol, camera and credit.
+5. **When B-4 arrives:** 3.5 first public deploy, then G5 checks; re-take the REMS snapshot at build time.
+6. **Do not:** touch the shared elevation decoder before P-01; change contract files before agreement (C-18..C-21); build the sky-obstruction layer before AC-07 (SKY-1); fabricate any position, benchmark, plan time, scenario time, image or AC-09 date.
 
 ## Exact commands for the next session
 
@@ -137,77 +139,83 @@ npm ci && npx vitest run && npx tsc --noEmit && npm run build
 ```
 
 ```bash
-python3.11 -m venv .venv && .venv/bin/pip install -r pipeline/requirements.txt && (cd pipeline && ../.venv/bin/python -m pytest -q)
+python3.11 -m venv .venv && .venv/bin/pip install -r pipeline/requirements.txt && (cd pipeline && ../.venv/bin/python -m pytest)
 ```
 
 ```bash
 PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome npx playwright test --trace off
 ```
 
-(Off this cloud container, run `npx playwright test --trace off` after `npx playwright install chromium`.)
+(Off this cloud container: `npx playwright install chromium`, then `npx playwright test --trace off`.)
 
 ```bash
 SHARPWALK_AREA=public/area node --experimental-strip-types bench/route-bench.ts
 ```
 
 ```bash
-.venv/bin/python scripts/licences.py > docs/licences.md
+.venv/bin/python scripts/licences.py | diff -q - docs/licences.md
 ```
 
-(Only after changing dependencies; the pytest check fails if docs/licences.md is stale.)
+(Regenerate with `.venv/bin/python scripts/licences.py > docs/licences.md` only after changing dependencies.)
 
-Re-take the D7 REMS snapshot (needs `mars.nasa.gov`; in this container also `SSL_CERT_FILE=/root/.ccr/ca-bundle.crt`):
-
-```bash
-cd pipeline && ../.venv/bin/python -m sharpwalk.run_rems ../public/conditions && cd ..
-```
-
-`public/area` is committed. Rebuild only if the pipeline changes (needs the USGS bucket host):
-
-```bash
-cd pipeline && ../.venv/bin/python -m sharpwalk.run_d1 ../public/area && ../.venv/bin/python -m sharpwalk.run_display ../public/area && cd ..
-```
-
-(run_display now also writes the terrain masks, the coverage outlines and the contours, and needs the GDAL CLI first: `apt-get install -y --no-install-recommends gdal-bin` (P-05). Not re-run end to end since. To redo only the terrain masks (local files, about 3 s), the outlines (about 30 s) or the contours (about 35 s):)
+Pipeline reruns (only if the pipeline or data changes). Terrain masks, local files only (about 3 s):
 
 ```bash
 cd pipeline && ../.venv/bin/python -m sharpwalk.run_terrain_masks ../public/area && cd ..
 ```
 
-(and:)
+Coverage outlines (USGS bucket, about 30 s) and contours (USGS bucket + GDAL CLI, about 35 s):
 
 ```bash
 cd pipeline && SSL_CERT_FILE=/root/.ccr/ca-bundle.crt ../.venv/bin/python -m sharpwalk.run_coverage ../public/area && cd ..
 ```
 
 ```bash
+apt-get install -y --no-install-recommends gdal-bin
+```
+
+```bash
 cd pipeline && SSL_CERT_FILE=/root/.ccr/ca-bundle.crt ../.venv/bin/python -m sharpwalk.run_contours ../public/area && cd ..
 ```
 
-Expected at this handoff: vitest 255/255 in 23 files; tsc clean; build OK (~246.2 KB gzipped JS); pytest 61 passed;
-playwright 43/43; route bench not re-run this session (engine routing unchanged; last 316-393 ms). Open DECISIONS.md "Plan defaults applied" and the blocker register before editing.
+D7 REMS snapshot (mars.nasa.gov):
+
+```bash
+cd pipeline && SSL_CERT_FILE=/root/.ccr/ca-bundle.crt ../.venv/bin/python -m sharpwalk.run_rems ../public/conditions && cd ..
+```
+
+Full rebuild (USGS bucket + GDAL CLI; also writes masks, coverage and contours; not yet run end to end):
+
+```bash
+cd pipeline && SSL_CERT_FILE=/root/.ccr/ca-bundle.crt ../.venv/bin/python -m sharpwalk.run_d1 ../public/area && SSL_CERT_FILE=/root/.ccr/ca-bundle.crt ../.venv/bin/python -m sharpwalk.run_display ../public/area && cd ..
+```
+
+Expected at this handoff: vitest 255/255 in 23 files; tsc clean; build OK (~246.2 KB JS gzip); pytest 61 passed;
+licence inventory current; Playwright 43/43; route bench unity factors under 500 ms (machine-dependent, see Known failures 2).
 
 ## Last session report
 
 ```text
-Session / member: operated from parcilla13's account (member not stated); cloud session_01NVSLpGshQsBW5eL1eQzMgw
-Model / tools: Claude Code, Claude Opus 5.5; Superpowers test-driven-development skill; Fable 5.2 not used
-Times (Asia/Manila, container clock): Sat 14 Nov 15:19-15:45 (Conditions, R-02/R-04 follow-ups), 16:27-16:50
-  (R-11 review, 2.6 coverage outlines and fonts, R-12 review) 16:50-17:06 (2.6 contours, R-13 review) and 17:11-17:26 (2.6 hatch aliasing, R-14 review)
+Session / member: operated from parcilla13's account (the account owner, Patrick Ezekiel A. Arcilla; the member at the
+  keyboard was not otherwise stated); cloud session_01NVSLpGshQsBW5eL1eQzMgw
+Model / tools: Claude Code, Claude Opus 5.5 throughout; Superpowers test-driven-development skill; Fable 5.2 not used;
+  one web search (REMS units); gdal-bin 3.8.4 installed in the container; two environment hosts added with approval
+Times (Asia/Manila, container clock): Sat 14 Nov 15:19-17:31, in parts: 15:19-15:45 Conditions (3.6) and R-02/R-04
+  follow-ups; 16:27-16:50 R-11 review, 2.6 coverage outlines and fonts, R-12; 16:50-17:06 2.6 contours, R-13;
+  17:11-17:26 2.6 hatch aliasing, R-14; 17:27-17:31 handoff (clean-install check run)
 Branch: claude/wizardly-lovelace-i2i0wa (fast-forwarded from claude/trusting-fermi-c5pc0s at 091866a; nothing overwritten)
-Starting commit this part: 38965fa (verified equal to origin, clean tree, no new branches, no open PRs at 17:11)
-Ending commit: the log commit after c739bf4 (git log -1)
-Phase parts: 2.6 parts 3-5 VERIFIED for their scope (coverage outlines, fonts, 10 m contours, hatch aliasing); 2.6
-  overall IN PROGRESS (Design review only). R-11 VERIFIED. 3.6 Conditions still IN PROGRESS (AC-09 2/3; T-02 unset).
-Files changed: see PHASES.md completion records (R-11; 2.6 part 3) plus the logs and README
-Checks run: see "Tests run at handoff" (all green at e4cb7f6)
-Failures / limitations: IBM font packages' telemetry postinstall attempted one report (refused by the proxy) before
-  they were replaced (S-06); run_display not re-run end to end after it gained the coverage and contour calls;
-  gdal-bin 3.8.4 installed in this container only (P-05); earlier test-file count corrected (LOG-01)
-Decisions needing people: B-13 (COV-01, S-06, C-20, COV-02), plus B-1, B-3, B-4, B-9..B-12 unchanged
-SI_LOG.md entries added this part: 1 row (17:11-17:26)
-Uncommitted changes left: none (.venv/, node_modules/, dist/, test-results/ are git-ignored)
-Next owner: the team (blocker register), then the next session from "Exact next task"
+Starting commit: 091866a. Ending commit: the handoff commit after d9bd3bd (18 commits this session)
+Phase parts: VERIFIED (for their scope): 2.6 parts 3-5; R-02/8, R-02/10, R-04/6, R-11. IN PROGRESS: 2.6 overall
+  (Design review only), 3.6 Conditions (AC-09 2/3, T-02 unset). No part was marked complete without its checks.
+Files changed: see "Files changed this session" (42 added, 42 modified, 1 deleted)
+Checks run: see "Tests run at handoff" (17:27-17:30, clean install, all passing; bench margin noted)
+Reviews: /code-review R-10..R-14 on every code change; all findings fixed or recorded in DECISIONS
+Failures / limitations: see "Known failures and limitations"; IBM font packages' telemetry postinstall made one
+  attempt (refused by the proxy) before they were replaced (S-06); test-file count once mis-logged, corrected (LOG-01)
+Decisions needing people: see "Decisions awaiting human approval" and the blocker register
+SI_LOG.md: one row per working part, plus the handoff row
+Uncommitted changes left: none
+Next owner: the team for B-1, B-3, B-4, B-9, B-12, B-13; then the next session from "Exact next task"
 ```
 
 ## Outgoing handoff checklist
