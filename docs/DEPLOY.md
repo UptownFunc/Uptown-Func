@@ -10,6 +10,7 @@ Vercel never runs Python. See DECISIONS **DEP-01** for why the pipeline is not d
 | File | Purpose |
 |---|---|
 | `vercel.json` | Single static Vite project: `npm ci`, `npm run build` (runs `tsc --noEmit`, then `vite build`), output `dist/`. Hashed `/assets/*` files are cached for a year. Every response gets `X-Content-Type-Options: nosniff`. No rewrites, no services, no functions. |
+| `package.json` `engines` | Pins Node 22.x for the Vercel build. |
 | `.vercelignore` | Keeps `pipeline/`, `bench/`, `e2e/`, `scripts/`, `docs/` and test output out of the upload. The build needs none of them. |
 
 There are **no environment variables**, secrets or service bindings. The app fetches only its own static files
@@ -44,28 +45,30 @@ reporting the missing file.
    - Build Command: **`npm run build`**
    - Output Directory: **`dist`**
    - Environment Variables: **none**
-4. Under **Settings > Build and Deployment > Node.js Version**, choose **22.x**. This is the version the project is
-   built and tested with (Node 22.23.4). Vite 8 needs Node 20.19+ or 22.12+.
+4. Node.js version: `package.json` pins `"engines": {"node": "22.x"}`, which Vercel uses over the dashboard setting.
+   22.x is what the project is built and tested with (Node 22.23.4). Check that **Settings > Build and Deployment >
+   Node.js Version** shows 22.x; if the first deploy came from `main` before this file was merged, redeploy once.
 5. Click **Deploy**. The first build takes about one minute.
 6. Under **Settings > Deployment Protection**, turn **Vercel Authentication off** for Production. The plan's 3.5
    check is that the deploy **opens without a login**, and judges and a second machine must reach it.
 
 ## Deploy from the command line (alternative)
 
-Run these from the repository root, after logging in to Vercel in a browser.
+Run these from the repository root, after logging in to Vercel in a browser. The Vercel CLI is a deploy tool, not part of the
+app stack; the version is pinned so the steps behave the same for everyone (65.16.0, the registry version on 14 Nov).
 
 ```bash
-npx vercel@latest login
+npx vercel@65.16.0 login
 ```
 
 ```bash
-npx vercel@latest link
+npx vercel@65.16.0 link
 ```
 
 Choose the team and create the project `uptown-func` with the settings in `vercel.json`.
 
 ```bash
-npx vercel@latest --prod
+npx vercel@65.16.0 --prod
 ```
 
 ## Verify the deploy (phase 3.5 / G5 evidence)
