@@ -29,3 +29,22 @@ def test_provenance_covers_every_dataset_used():
     prov = {r["id"] for r in json.loads((AREA / "provenance.json").read_text())}
     layers = json.loads((AREA / "layers.json").read_text())
     assert {L["source"] for L in layers["layers"]} <= prov
+
+
+def test_coverage_outlines_match_their_checksum_and_cover_every_layer():
+    """Plan 7.8: each dataset ships its coverage outline. Every display layer is listed by the feature of its source."""
+    layers = json.loads((AREA / "layers.json").read_text())
+    cov = layers["coverage"]
+    assert _sha(AREA / cov["path"]) == cov["sha256"]
+    fc = json.loads((AREA / cov["path"]).read_text())
+    assert fc["type"] == "FeatureCollection" and fc["frame"] == "F1"
+    by_dataset = {f["properties"]["dataset"]: f for f in fc["features"]}
+    for L in layers["layers"]:
+        f = by_dataset[L["source"]]
+        assert L["id"] in f["properties"]["layerIds"]
+        assert 0.0 <= f["properties"]["validFraction"] <= 1.0
+        lons = [p[0] for poly in f["geometry"]["coordinates"] for ring in poly for p in ring]
+        k = 3.141592653589793 * 3_396_190 / 180
+        x0, _, x1, _ = layers["extentF7"]
+        # The outline lies on this sheet's display window (F7 -> F1 is x / k).
+        assert min(lons) >= x0 / k - 1e-7 and max(lons) <= x1 / k + 1e-7

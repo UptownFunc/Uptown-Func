@@ -211,3 +211,5 @@ body { background: var(--housing); color: var(--text); font-family: var(--sans);
 .conditions .time-inputs { flex-wrap: wrap; }
 .conditions .time-inputs label { flex: 1 1 100%; display: flex; gap: 6px; align-items: center; }
 .conditions .time-inputs .rationale { min-width: 12em; }
+/* Plan 7.8 coverage notes in the layer list: informational, not a warning (no status colour). */
+.legend .coverage-note { color: var(--text-muted); }

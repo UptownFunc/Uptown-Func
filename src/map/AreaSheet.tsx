@@ -23,6 +23,8 @@ import { F7_PROJECTION } from "./f7";
 import { INITIAL_RESOLUTION_F7 } from "./view";
 import { loadArea, type LoadedArea } from "./loadArea";
 import { readoutAt, type Readout } from "./readout";
+import { coverageNote, coveragePolygonsF7, viewCoverage, type PolygonsF7 } from "./coverage";
+import { createCoverageLayer, drawCoverage } from "./coverageLayer";
 import type { Quantity } from "../contracts";
 
 /** Displays a Quantity: unknown stays "unknown" (CLAUDE.md); one decimal for metres. */
@@ -98,12 +100,22 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
   /** AC-31: display layers that failed to load are named; the sheet keeps working without them. */
   const [layerErrors, setLayerErrors] = useState<string[]>([]);
   const failed = useRef<Set<string>>(new Set());
+  /** Plan 7.8: per layer id, the note the layer list shows when the view leaves that layer's dataset coverage. */
+  const [coverageNotes, setCoverageNotes] = useState<Record<string, string>>({});
+  /** Why the coverage outlines are missing, or null when they are drawn. */
+  const [coverageError, setCoverageError] = useState<string | null>(null);
+  const [coverageDatasets, setCoverageDatasets] = useState<string[]>([]);
+  const coverageLayer = useRef<ReturnType<typeof createCoverageLayer> | null>(null);
+  coverageLayer.current ??= createCoverageLayer();
   const datasetsRef = useRef(onDatasets);
   datasetsRef.current = onDatasets;
 
   useEffect(() => {
     let map: OlMap | null = null;
     setLayerErrors([]); // a new area starts with no failed layers
+    setCoverageNotes({});
+    setCoverageError(null);
+    setCoverageDatasets([]);
     failed.current = new Set();
     let cancelled = false;
     loadArea(dataUrl).then((a) => {
@@ -129,7 +141,7 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
       const o = f1ToF7(a.grid.origin);
       map = new OlMap({
         target: target.current,
-        layers: [image("d2", "layer-d2"), image("hillshade", "layer-hillshade"), image("terrain", "layer-terrain"), contourLayer.current!, planLayer.current, markerLayerRef.current!, cursorLayer.current!],
+        layers: [image("d2", "layer-d2"), image("hillshade", "layer-hillshade"), image("terrain", "layer-terrain"), coverageLayer.current!, contourLayer.current!, planLayer.current, markerLayerRef.current!, cursorLayer.current!],
         controls: [new Zoom(), new ScaleLine({ units: "metric" })],
         view: new View({
           projection: F7_PROJECTION, center: [o.x, o.y], resolution: INITIAL_RESOLUTION_F7,
@@ -137,11 +149,29 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
           minResolution: a.display.pixel_m / 2, maxResolution: 16, extent, constrainOnlyCenter: true,
         }),
       });
+      // Plan 7.8 coverage outlines, and the layer-list notes for the current view (recomputed after each move).
+      const outlines: { dataset: string; label: string; layerIds: string[]; polys: PolygonsF7 }[] = a.coverage.ok
+        ? a.coverage.collection.features.map((f) => ({ dataset: f.properties.dataset, label: f.properties.label, layerIds: f.properties.layerIds, polys: coveragePolygonsF7(f) }))
+        : [];
+      if (!a.coverage.ok) setCoverageError(a.coverage.reason);
+      setCoverageDatasets(outlines.filter((o) => o.polys.length > 0).map((o) => o.dataset));
+      target.current.dataset.coverageOutlines = String(drawCoverage(coverageLayer.current!, outlines));
+      const updateCoverageNotes = (m: OlMap) => {
+        if (!a.coverage.ok) return;
+        const ext = m.getView().calculateExtent(m.getSize());
+        const notes: Record<string, string> = {};
+        for (const o of outlines) {
+          const note = coverageNote(viewCoverage(o.polys, ext), o.label);
+          if (note) for (const id of o.layerIds) notes[id] = note;
+        }
+        setCoverageNotes((prev) => (JSON.stringify(prev) === JSON.stringify(notes) ? prev : notes));
+      };
       drawPlan(planLayer.current, planRef.current, a.grid);
       target.current.dataset.contourLines = String(drawContours(contourLayer.current!, contoursRef.current, a.grid));
       profXY.current = profileXY(planRef.current, a.grid);
       const m = map;
       mapRef.current = map;
+      map.on("moveend", () => { if (!cancelled) updateCoverageNotes(m); });
       snapRef.current?.(() => snapshotMap(m, planLayer.current, a.grid.origin.lat,
         () => a.display.layers.filter((l) => !failed.current.has(l.id)).map((l) => l.name)));
       map.on("singleclick", (e) => {
@@ -236,7 +266,11 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
         <div className="legend" aria-label="Layers">
           <ul>{legend.map((l) => layerErrors.includes(l.name)
             ? <li key={l.id} className="failed">{l.name} - not loaded</li>
-            : <li key={l.id}>{l.name} - {l.valueClass.replace("_", " ")}, {l.source}, {fmt(l.resolution)}, built {l.builtOn}</li>)}</ul>
+            : <li key={l.id} data-layer={l.id}>{l.name} - {l.valueClass.replace("_", " ")}, {l.source}, {fmt(l.resolution)}, built {l.builtOn}
+              {coverageNotes[l.id] && <span className="coverage-note"> · {coverageNotes[l.id]}</span>}</li>)}
+            {legend.length > 0 && (coverageError
+              ? <li className="failed" data-testid="coverage-status">Coverage outlines not available: {coverageError}</li>
+              : <li className="muted" data-testid="coverage-status">Dotted outline: edge of the {coverageDatasets.join(" and ")} data on this sheet; blank beyond it</li>)}</ul>
         </div>
       </div>
       <div className="status" data-testid="status-line">

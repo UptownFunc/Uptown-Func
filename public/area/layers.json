@@ -53,5 +53,9 @@
       "builtOn": "2026-11-14",
       "sha256": "d3925d882723f2cbe77362f8688cf9c4f5efd2f8d8799c8e451385078397f45e"
     }
-  ]
+  ],
+  "coverage": {
+    "path": "coverage.geojson",
+    "sha256": "08271050153a1bf444cec31194563eb401b8412af262649e8f95b2a7b6b46d12"
+  }
 }
