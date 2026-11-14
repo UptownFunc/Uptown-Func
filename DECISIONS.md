@@ -45,6 +45,16 @@ Plan 19.9 lists fields but leaves these details open. The drafts below are in `s
 | C-09 | Quantity | `sourceIds` must be non-empty even for `unknown`, which pushes producers to invent a source. | Allow empty `sourceIds` when `valueClass` is `unknown`. | Data and Science | PENDING |
 | C-10 | AreaManifest.grids | A list of names only; the `Grid` metadata (dtype, noData, scale, offset) is not referenced by any contract. | Make `grids` an array of `Grid`. | Data and Science + contracts owner | PENDING |
 | C-11 | MissionExecution.ticks | No checks that a stop exists in the plan, that departure follows arrival, or that elapsed time increases. | Add the in-record checks in the schema; leave the cross-record stop check to the field view. | Design + Route Engine | PENDING |
+## Pipeline encoding and toolchain items from 1.2 (need Data and Science agreement)
+
+| ID | Topic | Current choice in code | Why it needs a decision | Status |
+|---|---|---|---|---|
+| P-01 | Grid quantisation | Elevation uint16, 0.01 m steps, offset = floor(min); slope uint16, 0.01 deg steps; NoData = 65535 | Plan 7.7 says "quantised" without fixing the encoding. Elevation fails loudly if the relief exceeds 655.34 m. | PENDING |
+| P-02 | Terrain class codes | uint8: 0 unknown or low-confidence, 1 slope-screened candidate, 2 known exclusion | Plan 6.3 names the classes but not their codes. "Validated for traversal" has no code, because none exists in the area. | PENDING |
+| P-03 | GDAL version | pip rasterio 1.4.4 wheel with bundled GDAL 3.10.3 | The plan pins GDAL 3.12.3. A conda-forge install was refused by this session's safety check. The outputs must be re-run on a machine with GDAL 3.12.3 and the checksums compared. | OPEN - needs a team machine |
+| C-12 | AreaManifest residual fields | Manifest not written | `controlPoints`, `rmsHorizontal_m`, `maxHorizontal_m` and `verticalBias_m` are required numbers, so a manifest written before 1.5 would need invented values. Options: make them nullable until measured, or write the manifest only after 1.5. | PENDING (contract change: both owners) |
+| C-13 | Provenance.sha256 scope | sha256 of the D1 window actually read (float32 LE) | The contract does not say whether the checksum covers the full source file (3.9 GB; USGS publishes only an md5) or the bytes used. | PENDING |
+
 ## Governance decisions
 
 | ID | Topic | Decision | Decided by | Date/time (Asia/Manila) | Evidence |

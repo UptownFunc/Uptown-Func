@@ -55,7 +55,7 @@ Work on optional features only when it does not endanger this path. The AREA 2D 
 | Part | Task | Owner | Status | Checks / evidence | Commit |
 |---|---|---|---|---|---|
 | 1.1 | Verify source datasets, licences, CRS, latitude type, longitude direction, vertical reference, resolution, date and coverage. Re-check the demo area and case-A hillshade condition. | Data and Science | IN PROGRESS (evidence gathered; owner sign-off pending) | Sat 10:50: D1, D2 and D12 metadata read and matched to plan 5.2 / 7.3. Demo area inside D1, D2 and HiRISE stereo extents; 0% NoData; the 1 m hillshade supports case A. D12 is a sphere (was UNVERIFIED). D1 vertical reference: lead only (about -9 m vs the HiRISE areoid DTMs). Full record: `docs/data/phase-1.1-source-audit.md`. **Open:** plan section 19 (part 2) not read; Data and Science sign-off; QGIS absent; bundled GDAL 3.10.3, not 3.12.3; D5 host not allowed. | see completion record |
-| 1.2 | Build the one-time Python pipeline for approved crops, frame conversions and derived grids. Keep raw-source preparation out of the browser. | Data and Science | UNVERIFIED | Pipeline tests; reproducible outputs; no unapproved source substitutions | - |
+| 1.2 | Build the one-time Python pipeline for approved crops, frame conversions and derived grids. Keep raw-source preparation out of the browser. | Data and Science | IN PROGRESS (built and tested; pinned-GDAL rerun and owner review pending) | `pipeline/sharpwalk`: F1->F5->F6 (`geo`), D1 -> F6 warp by averaging on `+proj=ortho` (`warp`), Horn slope, terrain classes and quantisation (`grids`), typed-array grids with sha256 (`outputs`, `build`). `pytest` 29/29. A real D1 run (3 x 3 km, 2 m, 1,500 x 1,500) reproduced identical checksums on two runs. **Open:** GDAL 3.10.3, not 3.12.3 (P-03); the "filled from CTX/HRSC/MOLA" and seam parts of the unknown class are not implemented (no trust grid yet; 1.4); encoding choices P-01/P-02 need agreement; plan section 19 not read. | see completion record |
 | 1.3 | Emit area manifest, typed grid files, provenance and checksums; validate against shared Zod contracts. | Data and Science + Contracts owner | UNVERIFIED | All required files present; schema validation; checksums reproduced | - |
 | 1.4 | Run DEM quality checks and raster alignment checks. Record the hillshade/roughness check and D1/D2 vertical relationship. | Data and Science | UNVERIFIED | DEM checks and outputs stored with source IDs and assumptions | - |
 | 1.5 | Complete at least eight spread-out control points; record D2 pixel, F1, F5 XYZ, matching Cesium Cartesian pick, per-point east/north/up residuals, RMS, maximum, raster offset and vertical bias/spread. | Data and Science + 3D owner | UNVERIFIED | AC-15 evidence; horizontal RMS and fallback decision recorded | - |
@@ -192,6 +192,29 @@ Known limitations or failures: plan section 19 not read; GDAL 3.10.3 (bundled) n
 Review status: /code-review pending at PR time; Data and Science sign-off pending
 Commit SHA: see the 1.1 evidence commit on claude/kind-ptolemy-1wdqf5
 Next part / blocker owner: Data and Science sign off on 1.1 and D-03 case A; read plan section 19; then 1.2 pipeline
+```
+
+```text
+Part: 1.2 (pipeline core; not VERIFIED)
+Owner: Data and Science (TBA); built in Yujin's session
+Status: IN PROGRESS. Tests pass and outputs reproduce; the pinned-GDAL rerun, owner review and section-19 check are outstanding.
+Scope completed: pipeline/sharpwalk/{geo,grids,warp,outputs,build,run_d1}.py; pipeline/tests (29 tests);
+  pipeline/requirements.txt; pipeline/pytest.ini
+Checks run (exact commands):
+  cd pipeline && python -m pytest                      (Python 3.11.18 venv: rasterio 1.4.4 / GDAL 3.10.3, numpy 2.4.6, pytest 9.2.0)
+  cd pipeline && python -m sharpwalk.run_d1 <scratch>/area   (twice, into two directories)
+  npx vitest run ; npx tsc --noEmit
+Results: pytest 29 passed. Real D1 area: origin F1 (-4.815, 137.39, h -3506.337 m), F5 (-2488131.803, 2288756.065,
+  -284777.53); 1,500 x 1,500 at 2 m; candidate 1,709,324, excluded (over 20 deg) 534,680, unknown 5,996 (= the grid
+  border); elevation -3871.609 to -3234.268 m; 2,423 cells over 60 deg (seam check, 1.4). Grids 11.25 MB in total.
+  sha256: elevation a93aa209...99a3ef, slope aa366e6f...18bdc0, terrain_class c9c06b3e...58ae21, identical on both runs.
+  vitest 44/44; tsc clean.
+Known limitations or failures: GDAL version deviation (P-03); fill/seam unknown classes not implemented; provenance
+  sha256 covers the window read, not the full file (C-13); area manifest not written because control-point residuals
+  do not exist yet (C-12)
+Review status: /code-review pending at PR time; Data and Science review pending
+Commit SHA: see the 1.2 commit on claude/kind-ptolemy-1wdqf5
+Next part / blocker owner: 1.3 manifest + Zod validation (needs C-12); 1.4 seams and fill mask; owner review
 ```
 
 ## Phase-part completion record
