@@ -96,21 +96,33 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
   const [error, setError] = useState<string | null>(null);
   /** AC-31: display layers that failed to load are named; the sheet keeps working without them. */
   const [layerErrors, setLayerErrors] = useState<string[]>([]);
+  const failed = useRef<Set<string>>(new Set());
+  const datasetsRef = useRef(onDatasets);
+  datasetsRef.current = onDatasets;
 
   useEffect(() => {
     let map: OlMap | null = null;
+    setLayerErrors([]); // a new area starts with no failed layers
+    failed.current = new Set();
     let cancelled = false;
     loadArea(dataUrl).then((a) => {
       if (cancelled || !target.current) return;
       area.current = a;
       setLegend(a.display.layers);
-      onDatasets?.([...new Set(a.display.layers.map((l) => l.source))]);
+      // UX-15: the datasets in view are the sources of the layers actually shown (recomputed if one fails to load).
+      const report = () => datasetsRef.current?.([...new Set(a.display.layers.filter((l) => !failed.current.has(l.id)).map((l) => l.source))]);
+      report();
       const extent = a.display.extentF7;
       const image = (id: string, className: string) => {
         const L = a.display.layers.find((l) => l.id === id)!;
         // interpolate: false keeps source pixels crisp past native size (plan 7.8, honest zoom).
         const source = new Static({ url: dataUrl + L.path, imageExtent: extent, projection: F7_PROJECTION, interpolate: false });
-        source.on("imageloaderror", () => { if (!cancelled) setLayerErrors((e) => (e.includes(L.name) ? e : [...e, L.name])); });
+        source.on("imageloaderror", () => {
+          if (cancelled) return;
+          failed.current.add(L.id);
+          setLayerErrors((e) => (e.includes(L.name) ? e : [...e, L.name]));
+          report();
+        });
         return new ImageLayer({ className, source });
       };
       const o = f1ToF7(a.grid.origin);
@@ -129,7 +141,8 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
       profXY.current = profileXY(planRef.current, a.grid);
       const m = map;
       mapRef.current = map;
-      snapRef.current?.(() => snapshotMap(m, planLayer.current, a.grid.origin.lat));
+      snapRef.current?.(() => snapshotMap(m, planLayer.current, a.grid.origin.lat,
+        () => a.display.layers.filter((l) => !failed.current.has(l.id)).map((l) => l.name)));
       map.on("singleclick", (e) => {
         const p = f7ToF1({ frame: "F7", x: e.coordinate[0]!, y: e.coordinate[1]! }, 0);
         pickRef.current?.({ lat: p.lat, lon: p.lon });
@@ -221,7 +234,9 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
           </div>
         )}
         <div className="legend" aria-label="Layers">
-          <ul>{legend.map((l) => <li key={l.id}>{l.name} - {l.valueClass.replace("_", " ")}, {l.source}, {fmt(l.resolution)}, built {l.builtOn}</li>)}</ul>
+          <ul>{legend.map((l) => layerErrors.includes(l.name)
+            ? <li key={l.id} className="failed">{l.name} - not loaded</li>
+            : <li key={l.id}>{l.name} - {l.valueClass.replace("_", " ")}, {l.source}, {fmt(l.resolution)}, built {l.builtOn}</li>)}</ul>
         </div>
       </div>
       <div className="status" data-testid="status-line">

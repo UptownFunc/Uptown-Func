@@ -73,7 +73,7 @@ export function BriefingView({ output, snapshot, hidden = false }: BriefingViewP
             {card.map ? (
               <figure className="card-map">
                 <img src={card.map.dataUrl} alt="Sheet crop with the route, habitat and stops" />
-                <figcaption className="small">North up. About {Math.round(card.map.widthGround_m)} m across (display, not for measuring). Grid path on D2 orthophoto and D1 hillshade.</figcaption>
+                <figcaption className="small">North up. About {Math.round(card.map.widthGround_m)} m across (display, not for measuring). Grid path (D1) on: {card.map.layers.length ? card.map.layers.join("; ") : "no base layers (they failed to load)"}.</figcaption>
               </figure>
             ) : <p className="small">Map unavailable.</p>}
             <table className="card-legs">

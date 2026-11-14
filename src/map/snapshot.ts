@@ -7,10 +7,12 @@ import type VectorLayer from "ol/layer/Vector";
 import type VectorSource from "ol/source/Vector";
 import { f7PointResolution } from "../geo";
 
-export interface MapSnapshot { readonly dataUrl: string; readonly widthGround_m: number }
+/** layers: names of the display layers that were loaded and drawn into the image (failed layers are left out). */
+export interface MapSnapshot { readonly dataUrl: string; readonly widthGround_m: number; readonly layers: readonly string[] }
 
 /** Never hangs: resolves null on any error or after timeout_ms. The planner's view is restored afterwards. */
-export function snapshotMap(map: OlMap, plan: VectorLayer<VectorSource>, latDeg: number, timeout_ms = 10_000): Promise<MapSnapshot | null> {
+export function snapshotMap(map: OlMap, plan: VectorLayer<VectorSource>, latDeg: number, layers: () => readonly string[] = () => [],
+  timeout_ms = 10_000): Promise<MapSnapshot | null> {
   const view = map.getView();
   const saved = { center: view.getCenter(), resolution: view.getResolution() };
   const restore = () => { if (saved.center) view.setCenter(saved.center); if (saved.resolution) view.setResolution(saved.resolution); };
@@ -18,11 +20,11 @@ export function snapshotMap(map: OlMap, plan: VectorLayer<VectorSource>, latDeg:
     let done = false;
     const finish = (v: MapSnapshot | null) => { if (!done) { done = true; clearTimeout(timer); resolve(v); } };
     const timer = setTimeout(() => finish(null), timeout_ms);
-    try { capture(map, plan, latDeg, finish); } catch { finish(null); }
+    try { capture(map, plan, latDeg, (s) => finish(s ? { ...s, layers: layers() } : null)); } catch { finish(null); }
   }).finally(restore);
 }
 
-function capture(map: OlMap, plan: VectorLayer<VectorSource>, latDeg: number, resolve: (v: MapSnapshot | null) => void): void {
+function capture(map: OlMap, plan: VectorLayer<VectorSource>, latDeg: number, resolve: (v: Omit<MapSnapshot, "layers"> | null) => void): void {
   {
     const ext = plan.getSource()!.getExtent();
     if (ext && ext.every(Number.isFinite) && ext[2]! > ext[0]!) map.getView().fit(ext, { padding: [48, 48, 48, 48] });

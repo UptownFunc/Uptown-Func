@@ -19,6 +19,17 @@ test("a display layer that fails to load leaves the sheet usable, with no uncaug
   const box = (await page.getByTestId("area-map").boundingBox())!;
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
   await expect(page.getByTestId("status-line")).toContainText("elev");
+  // The legend, the sources panel and the briefing card do not claim the missing layer.
+  await expect(page.getByLabel("Layers")).toContainText("Orthophoto (D2 colour mosaic, luminance) - not loaded");
+  await expect(page.getByTestId("datasets-in-view")).not.toContainText("D2:");
+  await page.mouse.click(box.x + box.width / 2 + (59274.7 * 0.000728) / 4, box.y + box.height / 2 + (59274.7 * 0.000118) / 4);
+  await expect(page.getByTestId("legs")).toBeVisible({ timeout: 20_000 });
+  await page.getByRole("button", { name: "Briefing" }).click();
+  await page.getByRole("button", { name: "Generate card from current plan" }).click();
+  const caption = page.getByTestId("briefing-card").locator("figcaption");
+  await expect(caption).toBeVisible({ timeout: 20_000 });
+  await expect(caption).not.toContainText("Orthophoto");
+  await expect(caption).toContainText("Hillshade (D1)");
   expect(errors).toEqual([]);
 });
 
