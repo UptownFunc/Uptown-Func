@@ -13,12 +13,14 @@ export interface DrillPanelProps {
   readonly output: PlanOutput | null;
   readonly showContours: boolean;
   readonly onShowContours: (on: boolean) => void;
+  readonly showSky: boolean;
+  readonly onShowSky: (on: boolean) => void;
   readonly drillMin: number | null;
   readonly onDrillMin: (m: number | null) => void;
   readonly busy: boolean;
 }
 
-export function DrillPanel({ output, showContours, onShowContours, drillMin, onDrillMin, busy }: DrillPanelProps) {
+export function DrillPanel({ output, showContours, onShowContours, showSky, onShowSky, drillMin, onDrillMin, busy }: DrillPanelProps) {
   const stops = output?.plan.stops ?? [];
   const ret = output?.geometry.stopReturn_s ?? {};
   const outside = drillMin === null ? [] : stops.filter((s) => !((ret[s.id] ?? Infinity) <= drillMin * 60));
@@ -28,6 +30,10 @@ export function DrillPanel({ output, showContours, onShowContours, drillMin, onD
       <label className="check">
         <input type="checkbox" checked={showContours} onChange={(e) => onShowContours(e.target.checked)} />
         5-minute contour lines (est., slow bound 0.64 m/s, 2 m grid path; unknown and excluded ground not crossed)
+      </label>
+      <label className="check">
+        <input type="checkbox" checked={showSky} onChange={(e) => onShowSky(e.target.checked)} />
+        Sky obstruction layer (geometry, not dose; 20 m grid)
       </label>
       <label className="check">
         <input type="checkbox" checked={drillMin !== null} onChange={(e) => onDrillMin(e.target.checked ? DEFAULT_MIN : null)} data-testid="drill-toggle" />

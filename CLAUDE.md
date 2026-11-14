@@ -57,6 +57,7 @@ These values were **not given by the plan or a cited source**. A session or a te
 | V-11 | AC-08 path rule | a 2 m cell counts if the D5 line enters it (exact traversal); share over known cells | Session (method) | `pipeline/sharpwalk/rover_path.py` | AC-08 record | OPEN |
 | V-12 | AC-07 base observer height h_obs | 1 m (the plan sweeps 0-2 m; RAD's reference height UNVERIFIED, R-13) | Session (method) | `pipeline/sharpwalk/run_sky_benchmark.py` `BASE` | AC-07 record | OPEN |
 | V-13 | AC-07 sampling | D1 to 3 km (plan: to the D1 edge), 1 m steps; D12 beyond, 100 m steps | Session (method) | `pipeline/sharpwalk/run_sky_benchmark.py` | AC-07 record | OPEN |
+| V-14 | Sky layer display ramp | graphite #191B20, alpha 0 to 200 for f_obs 0 to 50 %, 4 m display pixels | Session (display) | `pipeline/sharpwalk/run_sky_grid.py` `RAMP_MAX` | SKY-3 | OPEN (Design: hard to see on dark imagery) |
 
 **Plan values whose source is still unresolved** (the value comes from the plan; the citation or reference is missing):
 - 20 deg slope limit: page or slide UNRESOLVED (`src/constants`; the release check lists it).

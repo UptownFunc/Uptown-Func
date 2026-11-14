@@ -118,6 +118,9 @@ def main(area_dir: str) -> None:
     # The 10 m contours (plan 7.8) are registered in layers.json the same way.
     from .run_contours import main as write_contours
     write_contours(area_dir)
+    # The plan 6.7 sky-obstruction layer (about 5 min: D1/D12 windows and the 20 m grid) is registered the same way.
+    from .run_sky_grid import main as write_sky
+    write_sky(area_dir)
 
 
 if __name__ == "__main__":
