@@ -33,7 +33,7 @@ This file is the live execution record. Update it **after every phase part**, no
 
 The plan freezes at Sun 13:00, leaving 10 h 59 min for validation, video and submission, plus a 2 h 59 min buffer after the internal submit target. Verify the portal in case the event's actual deadline differs.
 
-## Status at handoff (Sat 14 Nov 2026, 13:20 Asia/Manila container clock; previous 12:20)
+## Status at handoff (Sat 14 Nov 2026, 13:26 Asia/Manila container clock; previous 12:20)
 
 | Part | Status | One-line reason |
 |---|---|---|
@@ -55,6 +55,7 @@ The plan freezes at Sun 13:00, leaving 10 h 59 min for validation, video and sub
 | 2.6 | IN PROGRESS | Part 2 done: habitat, stops, route drawn via the worker (88f8b9a, 19b7c68); coverage outlines, contours, fonts open |
 | 2.7 | VERIFIED (Node, cloud Xeon) | k_v = 1: longest route 354-395 ms, field 426-470 ms; worker command 261 ms for 2 legs |
 | 3.1 | IN PROGRESS | Planner (only MissionPlan writer) + Comlink worker + all six commands; C-15 route geometry outside the contract |
+| 3.4 | IN PROGRESS (core done) | Briefing card: version stamp, STALE + print blocked, legs/stops/assumptions/limits/footer, sheet map (05cc50e, 0ff9423); A5 print not checked on paper
 | 3.2 | IN PROGRESS | Console: Assumed plan-time inputs (no defaults, rationale required), end margin est. range + word/shape/colour state; profile, provenance panel open |
 | 3.x-5.x | NOT STARTED | |
 
@@ -109,7 +110,7 @@ Work on optional features only when it does not endanger this path. The AREA 2D 
 | 3.1 | Integrate command flow, engine worker, `MissionPlan`, version hash and shared contracts. | Route Engine + Captain | IN PROGRESS | `src/engine/planner.ts`: only writer of MissionPlan; applies add/move/delete/reorder/recompute Commands, refuses stale versions and off-screen ground, emits Zod-valid plans with a content version hash; set_assumption refused until plan times/k_v are set. `worker.ts`/`client.ts`: Comlink 4.4.2. `loadGrid.ts`: size-checked typed arrays. 12 planner + 3 loader tests. Works in dev and in the production build. **Open:** plan times (T_EVA, t_ops, t_cont, stop durations) unset so margins unknown; route geometry returned beside the plan (C-15); review findings 7/8/10 deferred. | 9e9496c, 88f8b9a, 19b7c68 |
 | 3.2 | Integrate console Planning and Analysis around the AREA sheet, stops, route, profile and provenance. | Design | IN PROGRESS | Console panel beside the AREA sheet: ASSUMED k_v banner (text from src/constants), stops with delete, leg table (length, climb, italic est. time ranges in SI minutes), end margin with OK check / NEAR LIMIT triangle / OVER octagon (word + shape + colour; no SAFE), "estimate under stated assumptions" note, plan-time inputs in minutes. `npx playwright test` 6/6 (margin unknown until all four times are entered; OK then OVER; Set disabled without a rationale; no "SAFE" on the page). Screenshot `test-results/plan-margin.png`. **Open:** elevation/margin profile, provenance panel, stop renaming, responsive check below 800 px. | 88f8b9a, bf0524b, 4420678 |
 | 3.3 | Integrate Field View with manual arrival/departure ticks and separate `MissionExecution` state. | Design | UNVERIFIED | Tick timing, continue/return-now margin, last-tick labels; field view cannot mutate plan | - |
-| 3.4 | Produce the briefing card with route, leg ranges, margin, assumptions, sources, limits and the required NASA non-affiliation footer. | Design | UNVERIFIED | Print/export check; no untraceable number; readable on one card | - |
+| 3.4 | Produce the briefing card with route, leg ranges, margin, assumptions, sources, limits and the required NASA non-affiliation footer. | Design | IN PROGRESS (core implemented and green; print output not yet checked) | **13:20 (this session):** `src/briefing/model.ts` builds the card only from a MissionPlan copy (5 unit tests): per leg heading, length, climb, italic est. time range; per stop assumed duration, tasks ("none entered"), blanks for arrive/depart; every assumption with value, source and rationale; end margin + state or "unknown". `BriefingView`: "Generate card from current plan" stamps the plan version; on any plan change it shows STALE and "Print briefing" is disabled until regenerated (UX-10/11). Card carries the limits text and the NASA footer. Map exported from the same OpenLayers map (`src/map/snapshot.ts`, fit to plan, view restored; resolves null on error/timeout). Print CSS: A5 portrait, 12 mm margins, two columns, white. `npx playwright test` 8/8 x3 runs (2 briefing specs: version, assumptions, footer, STALE within 1 s of returning to Briefing, print disabled; map image has >50 grey levels). One earlier full run failed the map-image spec once (20.8 s; first run after a change; not reproduced). Screenshot `test-results/briefing-card.png`. **Open:** paper/PDF print check; map at a fixed scale (plan 7.8) rather than fit-to-route; halftone print styling; AC-06 measured from view switch, not from the edit (R-04). | 05cc50e, 0ff9423 |
 | 3.5 | Run Tier 1 end-to-end tests and publish the first public deploy. | Captain | UNVERIFIED | E2E green; planned margin included; deploy opens without login | - |
 
 **G3 acceptance:** Tier 1 end-to-end is green, planned margin included, and first public deploy works. If missed, use the plan fallback: move Field View to Tier 3; ship console and card.
@@ -369,6 +370,21 @@ Known limitations or failures: no plan-time values exist (T-01): the e2e test us
 Review status: /code-review high on 89b08a7...bf0524b: 6 findings; 4 fixed (4420678); 2 deferred (DECISIONS R-03)
 Commit SHA: bf0524b, 4420678 (+ log commit)
 Next part / blocker owner: team enters real T-01 values in the console (or tells the next session); then 3.4 briefing card
+```
+
+```text
+Part: 3.4 briefing card (after the operator's second "proceed")
+Owner: no per-module roles (G-04)
+Status: IN PROGRESS (core implemented and green; print output on paper/PDF not checked)
+Files changed: src/briefing/{model,model.test,BriefingView}.ts(x), src/map/{snapshot.ts,AreaSheet.tsx}, src/app/{App.tsx,styles.css},
+  e2e/briefing.spec.ts
+Checks run (exact commands): npx vitest run; npx tsc --noEmit; npm run build;
+  PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome npx playwright test --trace off (x3)
+Results: vitest 182/182 (13 files); tsc clean; build OK (main JS 161.6 KB gz); playwright 8/8 on three consecutive runs;
+  one earlier run had 1 failure (map-image spec, 20.8 s) not reproduced
+Review status: /code-review high on 16fb661...05cc50e: 7 findings; 3 fixed (0ff9423); 4 deferred (DECISIONS R-04)
+Commit SHA: 05cc50e, 0ff9423 (+ log commit)
+Next part / blocker owner: T-01 values (team); D-04 (G2, 19:00); C-14 then 3.5 first deploy
 ```
 
 ## Phase-part completion record
