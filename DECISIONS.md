@@ -17,6 +17,18 @@ Record decisions that affect science, eligibility, architecture, scope or delive
 | D-09 | kJ workload | Off. Do not compute or display workload unless validated cited rates are supplied. | Captain + Route Engine | Before any implementation | DEFAULT LOCKED - off |
 | D-10 | 3D fallback and feature cuts | No-ion default. AREA 2D sheet is never cut. Under no-ion default, cut whole 3D view after PLANET and SITE, before 3D rasters. Draped Cesium overlays only after G1 residuals pass and are the first overlay cut. | Captain + 3D owner | G0/G1 | DEFAULT - verify Local Lead response to D-02 |
 
+## Contract details drafted at G0 (need Data and Science agreement)
+
+Plan 19.9 lists fields but leaves these details open. The drafts below are in `src/contracts` (commit 5e9cbdd). If they are not agreed by G0 (Sat 11:00), the G0 fallback freezes them as drafted.
+
+| ID | Contract | Detail not fixed by 19.9 | Draft in code | Status |
+|---|---|---|---|---|
+| C-01 | Quantity | 19.9 types `value` as number, but "unknown is never given a default" | `value` is `number \| null`; `null` is allowed **only** for `unknown`, which also may not carry a range | PENDING agreement |
+| C-02 | Quantity | How strictly to enforce the display rules | `estimated` requires `low`, `high` and at least one `assumptionId`; every class needs at least one `sourceId`; `low <= value <= high` | PENDING agreement |
+| C-03 | Command | Payload shape per command type | Generic object; the route engine owner defines per-type payloads before G2 | PENDING - Route Engine |
+| C-04 | MissionPlan | `terrainClassSummary` shape | Map of terrain class to share of route length (0..1) | PENDING agreement |
+| C-05 | AreaManifest / Grid / Assumption | Small typing choices | `cellSize_m` any positive number (allows D-08's 4 m fallback); `grids[]` hold `Grid.name`; F1 longitude -180..180 east-positive (D12 domain); `Assumption.value` numeric; `Assumption.source` is `D1`-`D13` or `"team choice"` | PENDING agreement |
+
 ## Fixed technical / presentation constraints
 
 - `MissionPlan` is written only by the engine; `MissionExecution` only by the field view. Console changes the plan by Commands.

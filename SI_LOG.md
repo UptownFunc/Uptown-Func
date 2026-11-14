@@ -18,7 +18,7 @@ Add one row for every meaningful SI-assisted contribution, including code, data 
 
 | Date/time (Asia/Manila) | Human member | Tool / model | Task and inputs | SI contribution | What the team kept / changed / rejected | Human review / verification | Files and commit SHA | Required marker / disclosure |
 |---|---|---|---|---|---|---|---|---|
-| NOT YET RECORDED | TBA | TBA | TBA | TBA | TBA | TBA | TBA | TBA |
+| Sat 14 Nov 2026, 09:50-10:05 | parcilla13 (Captain) | Claude Code (Anthropic); exact model to be filled in by the team | Draft G0 contracts from plan 19.9 and 7.5; inputs: the team's plan PDF and CLAUDE.md | Drafted Zod schemas for the nine 19.9 contracts, their 44 Vitest tests, the package scaffold with exact pins, and the MIT LICENSE text | Kept as drafted, pending Data and Science agreement on C-01..C-05 (DECISIONS.md) | Tests and typecheck run (`npx vitest run` 44/44, `npx tsc --noEmit` clean); human owner review pending | `src/contracts/*`, `package.json`, `tsconfig.json`, `LICENSE`; commit 5e9cbdd | `SI-assisted` file headers in `src/contracts/*`; `SI-assisted:` commit trailer |
 
 ## Local Lead / G0 answers
 

@@ -43,10 +43,10 @@ Work on optional features only when it does not endanger this path. The AREA 2D 
 
 | Part | Task | Owner | Status | Checks / evidence | Commit |
 |---|---|---|---|---|---|
-| 0.1 | Inspect repository, branch state, toolchain, challenge portal deadline, and required Superpowers skill. Record actual start/deadline and repo state. | Captain | UNVERIFIED | `git status`, branch list, recent log, toolchain versions, portal deadline captured in HANDOFF | - |
-| 0.2 | Create/verify root instructions and shared logs: `CLAUDE.md`, `PHASES.md`, `HANDOFF.md`, `DECISIONS.md`, `SI_LOG.md`. | Captain | UNVERIFIED | Files present; no contradictory instructions; unresolved decisions recorded | - |
-| 0.3 | Agree contracts from plan Section 19.9 and module owners. Establish one owner per module and separate working branches. | Captain + Data and Science + Route Engine + Design | UNVERIFIED | Contract list, writer/reader boundaries, owners and branches documented | - |
-| 0.4 | Ask/verify Local Lead decisions on pre-event wireframes and R-04 (GSAP/Cesium Mars); record exact responses in `SI_LOG.md` and `DECISIONS.md`. | Captain | UNVERIFIED | Written response or explicit default retained; no inferred approval | - |
+| 0.1 | Inspect repository, branch state, toolchain, challenge portal deadline, and required Superpowers skill. Record actual start/deadline and repo state. | Captain | VERIFIED (portal deadline not re-checked) | Repo: `main` held only the six log files, no code. Toolchain: Node 22.23.4, npm 10.9.9, Python 3.11 and 3.13.18 present; GDAL/QGIS **not installed** in the cloud container. All pinned npm versions in 10.5 resolve on the registry (`npm view`). Superpowers loaded. Plan baseline deadline Sun 15 Nov 23:59 used; **live portal deadline not verified by this session**. | 5e9cbdd |
+| 0.2 | Create/verify root instructions and shared logs: `CLAUDE.md`, `PHASES.md`, `HANDOFF.md`, `DECISIONS.md`, `SI_LOG.md`. | Captain | VERIFIED | All five files on `main` (393723e) plus `SESSION_PROMPTS.md`; read against plan 19.10, no contradictions found. MIT `LICENSE` added (19.3). | 5e9cbdd |
+| 0.3 | Agree contracts from plan Section 19.9 and module owners. Establish one owner per module and separate working branches. | Captain + Data and Science + Route Engine + Design | IN PROGRESS | Zod schemas for all nine 19.9 contracts in `src/contracts`; `npx vitest run` 44/44 pass; `npx tsc --noEmit` clean. **Pending:** Data and Science agreement on the drafted details (C-01..C-05 in DECISIONS.md) and owner/branch names in HANDOFF.md. If not agreed by 11:00, G0 fallback: freeze as drafted. | 5e9cbdd |
+| 0.4 | Ask/verify Local Lead decisions on pre-event wireframes and R-04 (GSAP/Cesium Mars); record exact responses in `SI_LOG.md` and `DECISIONS.md`. | Captain | BLOCKED (human) | No answer yet (Captain, 14 Nov 10:00). Defaults retained: wireframes not cleared, no GSAP, no Cesium ion. | - |
 
 **G0 acceptance:** repository and instructions exist; contracts and ownership are agreed. The G0 plan default is to freeze contracts as drafted if time is short.
 
@@ -122,6 +122,22 @@ Work on optional features only when it does not endanger this path. The AREA 2D 
 5. Cesium overlay draping is attempted only after G1 residuals pass and is the first overlay cut.
 
 The AREA sheet is never cut. Preserve the working route, planned margin and briefing card. If 3D is in doubt, cut it at G0/G1 rather than waiting until late integration.
+
+## Completion records
+
+```text
+Part: 0.1-0.3 (G0)
+Owner: Captain (parcilla13), contracts drafted for Data and Science review
+Status: 0.1 VERIFIED, 0.2 VERIFIED, 0.3 IN PROGRESS, 0.4 BLOCKED (Local Lead)
+Scope completed: repo audit; package scaffold with exact pins; src/contracts (9 contracts); LICENSE
+Files changed: package.json, package-lock.json, tsconfig.json, .gitignore, LICENSE, src/contracts/*
+Checks run (exact commands): npx vitest run ; npx tsc --noEmit
+Results: 2 test files, 44/44 tests pass; typecheck clean
+Known limitations or failures: GDAL/QGIS absent in cloud container (needed at G1); portal deadline not re-verified
+Review status: /code-review not yet run; Data and Science agreement pending
+Commit SHA: 5e9cbdd
+Next part / blocker owner: agree C-01..C-05 (Data and Science); Local Lead answers (Captain); then 1.1
+```
 
 ## Phase-part completion record
 
