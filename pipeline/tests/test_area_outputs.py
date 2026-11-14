@@ -34,12 +34,14 @@ def test_provenance_covers_every_dataset_used():
 def test_coverage_outlines_match_their_checksum_and_cover_every_layer():
     """Plan 7.8: each dataset ships its coverage outline. Every display layer is listed by the feature of its source."""
     layers = json.loads((AREA / "layers.json").read_text())
+    assert "coverage" in layers, "layers.json lists no coverage outline: run `python -m sharpwalk.run_coverage` after run_display"
     cov = layers["coverage"]
     assert _sha(AREA / cov["path"]) == cov["sha256"]
     fc = json.loads((AREA / cov["path"]).read_text())
     assert fc["type"] == "FeatureCollection" and fc["frame"] == "F1"
     by_dataset = {f["properties"]["dataset"]: f for f in fc["features"]}
     for L in layers["layers"]:
+        assert L["source"] in by_dataset, f"no coverage outline for {L['source']} (layer {L['id']})"
         f = by_dataset[L["source"]]
         assert L["id"] in f["properties"]["layerIds"]
         assert 0.0 <= f["properties"]["validFraction"] <= 1.0

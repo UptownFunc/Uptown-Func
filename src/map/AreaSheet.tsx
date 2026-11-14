@@ -270,7 +270,9 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
               {coverageNotes[l.id] && <span className="coverage-note"> · {coverageNotes[l.id]}</span>}</li>)}
             {legend.length > 0 && (coverageError
               ? <li className="failed" data-testid="coverage-status">Coverage outlines not available: {coverageError}</li>
-              : <li className="muted" data-testid="coverage-status">Dotted outline: edge of the {coverageDatasets.join(" and ")} data on this sheet; blank beyond it</li>)}</ul>
+              : <li className="muted" data-testid="coverage-status">{coverageDatasets.length
+                ? `Dotted outline: edge of the ${coverageDatasets.join(" and ")} data on this sheet; blank beyond it`
+                : "No valid data on this sheet for any dataset: no coverage outline to draw"}</li>)}</ul>
         </div>
       </div>
       <div className="status" data-testid="status-line">

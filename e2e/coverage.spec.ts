@@ -90,3 +90,17 @@ test("an invalid coverage file is refused, not drawn", async ({ page }) => {
   await expect(page.getByTestId("coverage-status")).toHaveText("Coverage outlines not available: coverage.geojson is not a valid coverage file");
   await expect(page.getByTestId("area-map")).toHaveAttribute("data-coverage-outlines", "0");
 });
+
+test("a dataset with no valid data on the sheet: every layer says it is outside its coverage", async ({ page }) => {
+  const empty = (dataset: string, label: string, layerIds: string[]) => ({ type: "Feature", geometry: { type: "MultiPolygon", coordinates: [] },
+    properties: { dataset, label, layerIds, validFraction: 0, method: "e2e fixture" } });
+  await page.route("**/area/coverage.geojson", (r) => r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({
+    type: "FeatureCollection", frame: "F1", features: [empty("D1", "D1 elevation coverage", ["hillshade", "terrain"]), empty("D2", "D2 colour coverage", ["d2"])] }) }));
+  await page.goto("/");
+  const legend = page.getByLabel("Layers");
+  await expect(page.getByTestId("coverage-status")).toHaveText("No valid data on this sheet for any dataset: no coverage outline to draw");
+  await expect(page.getByTestId("area-map")).toHaveAttribute("data-coverage-outlines", "0");
+  await expect(legend.locator('[data-layer="d2"]')).toContainText("outside D2 colour coverage");
+  await expect(legend.locator('[data-layer="d2"]')).not.toContainText("partly");
+  await expect(legend.locator('[data-layer="hillshade"]')).toContainText("outside D1 elevation coverage");
+});
