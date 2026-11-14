@@ -54,7 +54,7 @@ Work on optional features only when it does not endanger this path. The AREA 2D 
 
 | Part | Task | Owner | Status | Checks / evidence | Commit |
 |---|---|---|---|---|---|
-| 1.1 | Verify source datasets, licences, CRS, latitude type, longitude direction, vertical reference, resolution, date and coverage. Re-check the demo area and case-A hillshade condition. | Data and Science | BLOCKED (Sat 10:23) | (1) This session cannot read the plan PDF: it is not in the repo or on the connected Google Drive. The D1-D13 dataset register, product IDs and AOI details cannot be checked against the plan. (2) The egress proxy refused HTTPS connections to hirise-pds.lpl.arizona.edu, trek.nasa.gov, astrogeology.usgs.gov, planetarymaps.usgs.gov and pds-imaging.jpl.nasa.gov. (3) Python 3.11.18 is present. Wheels for rasterio 1.4.4, numpy 2.4.6 and pytest 9.2.0 resolve from PyPI. The rasterio wheel bundles its own GDAL, which is not confirmed to be the pinned 3.12.3. QGIS is unavailable. **Unblock:** run on a team machine with the plan and the GIS tools, or give this session the plan and allowed data hosts. No pipeline results exist. | - |
+| 1.1 | Verify source datasets, licences, CRS, latitude type, longitude direction, vertical reference, resolution, date and coverage. Re-check the demo area and case-A hillshade condition. | Data and Science | IN PROGRESS (evidence gathered; owner sign-off pending) | Sat 10:50: D1, D2 and D12 metadata read and matched to plan 5.2 / 7.3. Demo area inside D1, D2 and HiRISE stereo extents; 0% NoData; the 1 m hillshade supports case A. D12 is a sphere (was UNVERIFIED). D1 vertical reference: lead only (about -9 m vs the HiRISE areoid DTMs). Full record: `docs/data/phase-1.1-source-audit.md`. **Open:** plan section 19 (part 2) not read; Data and Science sign-off; QGIS absent; bundled GDAL 3.10.3, not 3.12.3; D5 host not allowed. | see completion record |
 | 1.2 | Build the one-time Python pipeline for approved crops, frame conversions and derived grids. Keep raw-source preparation out of the browser. | Data and Science | UNVERIFIED | Pipeline tests; reproducible outputs; no unapproved source substitutions | - |
 | 1.3 | Emit area manifest, typed grid files, provenance and checksums; validate against shared Zod contracts. | Data and Science + Contracts owner | UNVERIFIED | All required files present; schema validation; checksums reproduced | - |
 | 1.4 | Run DEM quality checks and raster alignment checks. Record the hillshade/roughness check and D1/D2 vertical relationship. | Data and Science | UNVERIFIED | DEM checks and outputs stored with source IDs and assumptions | - |
@@ -169,6 +169,29 @@ Known limitations or failures: none
 Review status: /code-review done
 Commit SHA: 444728b (PR head); merged to main as bb473b7
 Next part / blocker owner: merge PR #1; G0 branch claude/kind-ptolemy-1wdqf5 then needs a rebase on main
+```
+
+```text
+Part: 1.1 (evidence; not VERIFIED)
+Owner: Data and Science (TBA); evidence gathered in Yujin's session
+Status: IN PROGRESS. The evidence supports case A; owner sign-off and the section-19 check are outstanding.
+Scope completed: D1/D2/D12 headers read remotely; D1 demo-area window fetched; NoData, hillshade, roughness and slope
+  computed; HiRISE stereo extents checked; D1 vs HiRISE areoid DTM height comparison at 36 + 35 points
+Files changed: docs/data/phase-1.1-source-audit.md, pipeline/checks/*.py (7 read-only scripts), .gitignore (work/), PHASES.md,
+  HANDOFF.md, DECISIONS.md, SI_LOG.md
+Checks run (exact commands, Python 3.11.18 venv with rasterio 1.4.4, numpy 2.4.6):
+  python -I pipeline/checks/d1_probe.py ; d1_crop.py ; d1_checks.py ; d2_probe.py ; d12_probe.py ; vref.py ;
+  dtm_cover.py <DTMCUMINDEX.TAB>  (SHARPWALK_WORK set to a scratch directory)
+  npx vitest run ; npx tsc --noEmit
+Results: area NoData 0/8,782,332; elevation -3,865.81 to -3,247.22 m; 26.23% of cells over 20 deg; 19,569 over 60 deg;
+  roughness p50 0.192 m; HiRISE DTM extents cover 100% of the area (019698: 95%, 009149: 93%); D1 - HiRISE mean
+  -8.62 m (std 5.94) and -9.21 m (std 13.43); D2 COG 36,000 x 76,000 at 0.25 m, LAYOUT=COG, area 0% empty; D12 sphere
+  R = 3,396,190 m, -180..180 east-positive; vitest 44/44; tsc clean
+Known limitations or failures: plan section 19 not read; GDAL 3.10.3 (bundled) not 3.12.3; QGIS absent; HiRISE valid-data
+  footprints not checked (extents only); D5 not checked
+Review status: /code-review pending at PR time; Data and Science sign-off pending
+Commit SHA: see the 1.1 evidence commit on claude/kind-ptolemy-1wdqf5
+Next part / blocker owner: Data and Science sign off on 1.1 and D-03 case A; read plan section 19; then 1.2 pipeline
 ```
 
 ## Phase-part completion record

@@ -13,7 +13,7 @@ This file is the handoff between team members and Claude sessions. Keep it factu
 - Last verified commit: **the review follow-up commit after 8986d70 on `claude/kind-ptolemy-1wdqf5`** (tests 44/44, typecheck clean)
 - Current owner / member: **parcilla13 (Captain); this session is operated by Yujin. The project concept and plan belong to the whole team.**
 - Repository state: **`main` = 393723e (logs only). The G0 branches add the package scaffold, `src/contracts`, LICENSE and the log updates.**
-- Active phase part: **0.3 frozen as drafted (unagreed); 0.4 blocked on the Local Lead; 1.1 BLOCKED (plan PDF not available here, data hosts blocked, QGIS absent)**
+- Active phase part: **0.3 frozen as drafted (unagreed); 0.4 blocked on the Local Lead; 1.1 IN PROGRESS: evidence recorded in `docs/data/phase-1.1-source-audit.md`, awaiting Data and Science sign-off and a read of plan section 19 (part 2)**
 
 Do not interpret blank fields as proof that no work exists. Inspect GitHub and the working tree.
 
@@ -37,7 +37,7 @@ Avoid simultaneous edits to the same files. Agree on shared contract changes bef
 - **In progress:** 0.3. Contracts are frozen as drafted under the G0 fallback; C-01..C-11 await owner agreement (DECISIONS.md). Owner names are still TBA.
 - **Blocked:** 0.4 (Local Lead answers for D-01 and D-02; none recorded, defaults kept). 1.1: the plan PDF is not readable by this session, and the egress proxy refused the HiRISE, Mars Trek and USGS hosts. QGIS is absent. rasterio 1.4.4 bundles its own GDAL, which is not confirmed to be the pinned 3.12.3.
 - **Cut:** none.
-- **Next action:** Data and Science run 1.1 on a team machine with the plan PDF, GDAL 3.12.3, rasterio 1.4.4 and QGIS 4.2.3. Alternatively, give a cloud session the plan and allow the data hosts. In parallel, a human reviews and merges the G0 branch.
+- **Next action:** Data and Science review the 1.1 audit and sign off D-03 case A. Someone reads plan section 19 (part 2, not seen by this session) for changes to datasets or the area. Then start 1.2: crop D1, warp to F6 (`+proj=ortho` on the 3,396,190 m sphere, 2 m cells, average resampling) with the pinned GDAL 3.12.3. Note that D1 is `AREA_OR_POINT=Point`.
 
 ## Last session report
 
