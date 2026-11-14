@@ -137,3 +137,12 @@ body { background: var(--housing); color: var(--text); font-family: var(--sans);
 .well > .status { height: 52px; overflow: hidden; align-content: flex-start; }
 .well > .profile { height: 158px; overflow: hidden; }
 @media (max-width: 800px) { .well > .status { height: 92px; } }
+
+/* Quantities are buttons that open their source (AC-05, demo beat 5). */
+.qty { background: none; border: 0; padding: 0; color: inherit; font: inherit; cursor: pointer; text-decoration: underline dotted; text-underline-offset: 3px; }
+.qty.est { font-style: italic; }
+.qty.unknown { font-style: italic; color: var(--text-muted); }
+.qty:focus-visible, .link:focus-visible { outline: 2px solid var(--plan-hi); outline-offset: 2px; }
+.sources { border-top: 1px solid var(--border); margin-top: 10px; }
+.sources ul { padding-left: 16px; margin: 4px 0; overflow-wrap: anywhere; }
+.link { background: none; border: 0; color: var(--plan-hi); cursor: pointer; font: inherit; font-size: 12px; text-decoration: underline; }

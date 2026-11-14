@@ -31,7 +31,7 @@ test("a click adds a stop through the engine worker and the route is drawn and l
   await expect(legs).toContainText("Habitat → A");
   await expect(legs).toContainText("A → Habitat");
   // Walking times are estimated ranges in SI minutes, italic.
-  const time = legs.locator("tbody tr").first().locator("td").nth(3);
+  const time = legs.locator("tbody tr").first().locator("td").nth(3).locator("[data-quantity]");
   await expect(time).toHaveText(/^est\. \d+\.\d to \d+\.\d min$/);
   await expect(time).toHaveCSS("font-style", "italic");
   await expect(page.getByTestId("end-margin")).toContainText("unknown");
@@ -121,4 +121,27 @@ test("profile scrubs both ways with the map, and margin ticks appear when the pl
   await page.mouse.move(box.x + box.width * 0.9, box.y + box.height / 2);
   await expect(readout).toContainText(/planned margin est\. -?\d+\.\d to -?\d+\.\d min/);
   await page.screenshot({ path: "test-results/plan-profile.png" });
+});
+
+test("AC-05: every displayed quantity carries its class and sources, and opens its source (UX-15, beat 5)", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
+  await clickAt(page, STOP);
+  await expect(page.getByTestId("legs")).toBeVisible({ timeout: 20_000 });
+  const qs = page.locator("[data-quantity]");
+  expect(await qs.count()).toBeGreaterThanOrEqual(4); // 2 leg times, 1 stop duration, end margin
+  for (const el of await qs.all()) {
+    await expect(el).toHaveAttribute("data-value-class", /^(directly_measured|published_observation|model_derived|estimated|simulated|assumed|unknown)$/);
+    await expect(el).toHaveAttribute("data-source-ids", /\S/);
+  }
+  await page.getByTestId("legs").locator("[data-quantity]").first().click();
+  const detail = page.getByTestId("source-detail");
+  await expect(detail).toContainText("estimated");
+  await expect(detail).toContainText("NASA/TM-2010-216138");
+  await expect(detail).toContainText("Table 4, p. 13");
+  await expect(detail).toContainText("K-01 placeholder");
+  const datasets = page.getByTestId("datasets-in-view");
+  await expect(datasets).toContainText("MSL_Gale_DEM_Mosaic_1m_v3");
+  await expect(datasets).toContainText("vertical reference unknown");
+  await expect(datasets).toContainText("D2 - No provenance record");
 });

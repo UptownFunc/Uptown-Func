@@ -7,12 +7,16 @@ import { createEngine, type EngineClient } from "../engine/client";
 import type { LatLon, PlanOutput } from "../engine/planner";
 import { PlanPanel } from "./PlanPanel";
 import { RouteProfile } from "./RouteProfile";
+import { SourcePanel } from "./SourcePanel";
+import { Provenance, type Quantity } from "../contracts";
 import { BriefingView } from "../briefing/BriefingView";
 import type { MapSnapshot } from "../map/snapshot";
 
 const AREA_URL = "area/";
 /** H-01 (DECISIONS.md, pending team confirmation): the slope-screened cell nearest the plan 19.2 suggestion
  *  (4.795 S, 137.392 E), which itself lies on ground over the 20 deg limit. Assumed scenario input, not a base site. */
+/** Datasets drawn or used on the AREA view: D2 orthophoto base, D1 heights, hillshade, classes and routing. */
+const DATASETS_IN_VIEW = ["D1", "D2"] as const;
 export const DEFAULT_HABITAT: LatLon = { lat: -4.795211, lon: 137.391845 };
 
 let commandSeq = 0;
@@ -25,6 +29,14 @@ export function App() {
   const [output, setOutput] = useState<PlanOutput | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [hover, setHover] = useState<number | null>(null);
+  const [selected, setSelected] = useState<Quantity | null>(null);
+  const [provenance, setProvenance] = useState<Provenance[]>([]);
+  useEffect(() => {
+    // provenance.json is the pipeline's record (UX-15); it is validated against the shared contract.
+    fetch(new URL(AREA_URL + "provenance.json", document.baseURI)).then((r) => (r.ok ? r.json() : []))
+      .then((j: unknown) => { const p = Provenance.array().safeParse(j); setProvenance(p.success ? p.data : []); })
+      .catch(() => setProvenance([]));
+  }, []);
   const [view, setView] = useState<"planning" | "briefing">("planning");
   const [snapshot, setSnapshot] = useState<(() => Promise<MapSnapshot | null>) | null>(null);
   const outputRef = useRef(output);
@@ -83,7 +95,11 @@ export function App() {
         {/* Kept mounted so a built card keeps its version stamp and shows STALE after a plan change. */}
         <BriefingView output={output} snapshot={snapshot} hidden={view !== "briefing"} />
         <PlanPanel output={output} message={message} onDeleteStop={(id) => send("delete_stop", { stopId: id })}
-          onSetTime={(id, value_s, rationale, stopId) => send("set_assumption", { id, value_s, rationale, ...(stopId ? { stopId } : {}) })} />
+          onSetTime={(id, value_s, rationale, stopId) => send("set_assumption", { id, value_s, rationale, ...(stopId ? { stopId } : {}) })}
+          onOpenSource={setSelected}>
+          <SourcePanel selected={selected} provenance={provenance} assumptions={output?.plan.assumptions ?? []}
+            datasetsInView={DATASETS_IN_VIEW} onClose={() => setSelected(null)} />
+        </PlanPanel>
       </main>
       <footer className="footer">Independent student project; not affiliated with or endorsed by NASA.</footer>
     </div>
