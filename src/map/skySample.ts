@@ -23,12 +23,15 @@ export function decodeSkyGrid(buf: ArrayBuffer, m: SkyGridMeta, origin: F1Point)
   return { def: { origin, rows: m.rows, cols: m.cols, cell_m: m.cell_m }, values };
 }
 
-/** f_obs at the nearest 20 m observer, in % to 0.1 percentage points; h_obs is the session's assumed 1 m (V-12).
+/** The per-stop reader handed to the console (plan 6.7). */
+export type SkySampler = (p: { lat: number; lon: number }) => Quantity;
+
+/** f_obs at the nearest 20 m observer, in % (shown to 0.1 percentage points by format.ts); h_obs is the session's assumed 1 m (V-12).
  *  Unknown outside the grid, on no-data cells, or when the grid did not load (g null). */
 export function skySampleAt(p: { lat: number; lon: number }, g: SkyGrid | null): Quantity {
   const cell = g && f1ToCell(f1(p.lat, p.lon, 0), g.def);
   const v = cell ? g.values[cell.r * g.def.cols + cell.c]! : Number.NaN;
   const known = Number.isFinite(v);
-  return { value: known ? Math.round(v * 1000) / 10 : null, unit: "%", valueClass: known ? "model_derived" : "unknown",
+  return { value: known ? v * 100 : null, unit: "%", valueClass: known ? "model_derived" : "unknown",
     methodId: "pipeline:sky-grid-6.7", assumptionIds: ["V-12"], sourceIds: ["D1", "D12"] };
 }

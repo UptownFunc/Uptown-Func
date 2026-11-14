@@ -2,7 +2,8 @@
 // Tier 1 shell: the AREA sheet is the largest, brightest surface (plan 9). Every view carries the footer.
 // The engine worker is the only writer of MissionPlan; the console sends it Commands and shows the copies it returns.
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AreaSheet, type SkySampler } from "../map/AreaSheet";
+import { AreaSheet } from "../map/AreaSheet";
+import type { SkySampler } from "../map/skySample";
 import { createEngine, type EngineClient } from "../engine/client";
 import type { LatLon, PlanOutput } from "../engine/planner";
 import { PlanPanel } from "./PlanPanel";

@@ -62,3 +62,16 @@ test("a stop reads the nearest 20 m sky value only while the layer is shown (pla
   await toggle.uncheck();
   await expect(page.getByTestId("stop-sky")).toHaveCount(0);
 });
+
+test("a sky grid that fails to load is named in the legend and stops read unknown, never zero", async ({ page }) => {
+  await page.route("**/area/sky_obstruction.uint16.bin", (r) => r.fulfill({ status: 404, body: "" }));
+  await page.goto("/?preset=none");
+  await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
+  await clickAt(page, STOP);
+  await expect(page.locator(".stops li")).toHaveCount(1, { timeout: 20_000 });
+  await page.getByLabel(/Sky obstruction layer/).check();
+  await expect(page.getByLabel("Layers").locator('[data-layer="sky"]')).toContainText("stop values unknown");
+  const q = page.getByTestId("stop-sky").locator("[data-quantity]");
+  await expect(q).toHaveText("unknown");
+  await expect(q).toHaveAttribute("data-value-class", "unknown");
+});

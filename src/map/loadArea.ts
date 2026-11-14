@@ -25,8 +25,8 @@ export type Optional<T> = { ok: true; collection: T } | { ok: false; reason: str
 export type AreaCoverage = Optional<CoverageCollection>;
 /** Plan 7.8 / 9 elevation contours; missing or invalid is a labelled state, like the coverage outlines. */
 export type AreaContours = Optional<ContourCollection>;
-/** skyGrid: plan 6.7 per-stop "20 m sample"; null when absent or not loadable (stops then read unknown). */
-export interface LoadedArea { grid: AreaGrid; display: AreaDisplay; coverage: AreaCoverage; contours: AreaContours; skyGrid: SkyGrid | null }
+/** skyGrid: plan 6.7 per-stop "20 m sample"; when missing or invalid the reason is shown and stops read unknown. */
+export interface LoadedArea { grid: AreaGrid; display: AreaDisplay; coverage: AreaCoverage; contours: AreaContours; skyGrid: Optional<SkyGrid> }
 
 interface GridMeta { name: string; path: string; dtype: string; noData: number; scale: number; offset: number }
 
@@ -55,11 +55,18 @@ export async function loadArea(base: string): Promise<LoadedArea> {
   for (let i = 0; i < q.length; i++) elevation[i] = q[i] === eg.noData ? Number.NaN : q[i]! * eg.scale + eg.offset;
   const o = report.origin.f1;
   const origin = f1(o.lat, o.lon, o.h);
-  let skyGrid: SkyGrid | null = null;
-  if (s) try { skyGrid = decodeSkyGrid(await (await get(s.grid.path)).arrayBuffer(), s.grid, origin); } catch { /* stops read unknown */ }
-  const [coverage, contours] = await Promise.all([
+  const loadSky = async (): Promise<Optional<SkyGrid>> => {
+    if (!s) return { ok: false, reason: "no sky grid listed in layers.json" };
+    try {
+      return { ok: true, collection: decodeSkyGrid(await (await get(s.grid.path)).arrayBuffer(), s.grid, origin) };
+    } catch (e) {
+      return { ok: false, reason: e instanceof Error ? e.message : `${s.grid.path} could not be loaded` };
+    }
+  };
+  const [coverage, contours, skyGrid] = await Promise.all([
     loadOptional(base, raw.coverage?.path, CoverageCollection, "coverage"),
     loadOptional(base, raw.contours?.path, ContourCollection, "contours"),
+    loadSky(),
   ]);
   return {
     grid: { origin, rows: report.rows, cols: report.cols, cell_m: report.cellSize_m, elevation,

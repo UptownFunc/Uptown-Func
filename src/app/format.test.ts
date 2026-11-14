@@ -38,6 +38,10 @@ describe("conditions formatting (plan 6.10: Mars solar time is a clock label, ne
     expect(formatQuantity(q(-61.93960, "deg")).text).toBe("-61.9°");
     expect(formatQuantity(q(327.32416, "deg")).text).toBe("327.3°");
   });
+  it("shows percentages to 0.1 percentage points (sky-obstruction samples)", () => {
+    expect(formatQuantity(q(12, "%")).text).toBe("12.0 %");
+    expect(formatQuantity(q(11.64, "%")).text).toBe("11.6 %");
+  });
   it("shows local mean solar time as an HH:MM clock label marked LMST", () => {
     expect(formatQuantity(q(0.8519, "Mars h (clock label)")).text).toBe("00:51 LMST");
     expect(formatQuantity(q(23.99425, "Mars h (clock label)")).text).toBe("23:59 LMST");

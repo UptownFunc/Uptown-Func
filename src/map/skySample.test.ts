@@ -20,7 +20,7 @@ describe("per-stop sky sample (plan 6.7)", () => {
     const p = cellCentreF1({ r: 2, c: 1 }, g.def);
     const q = skySampleAt(p, g);
     expect(Quantity.parse(q)).toEqual(q);
-    expect(q.value).toBe(9); // (2 * 4 + 1) / 100 as a fraction -> 9.0 %
+    expect(q.value).toBeCloseTo(9, 5); // (2 * 4 + 1) / 100 as a fraction -> 9 %
     expect(q.unit).toBe("%");
     expect(q.valueClass).toBe("model_derived");
     expect(q.methodId).toBe("pipeline:sky-grid-6.7");
@@ -28,9 +28,9 @@ describe("per-stop sky sample (plan 6.7)", () => {
     expect(q.assumptionIds).toEqual(["V-12"]);
   });
 
-  it("rounds to 0.1 percentage points", () => {
+  it("keeps the grid value unrounded (display rounds)", () => {
     const g = sky(() => 0.23456);
-    expect(skySampleAt(cellCentreF1({ r: 0, c: 0 }, g.def), g).value).toBe(23.5);
+    expect(skySampleAt(cellCentreF1({ r: 0, c: 0 }, g.def), g).value).toBeCloseTo(23.456, 4);
   });
 
   it("keeps a no-data cell unknown, never zero", () => {

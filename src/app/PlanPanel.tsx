@@ -10,7 +10,7 @@ const RANGE = CONSTANTS.walkSpeedRange;
 import { MarginState } from "./MarginState";
 import { PlanTimes, TimeRow } from "./PlanTimes";
 import { QuantityText } from "./QuantityText";
-import type { SkySampler } from "../map/AreaSheet";
+import type { SkySampler } from "../map/skySample";
 import type { Quantity, Stop } from "../contracts";
 import { STOP_LIMITS } from "../engine/assumptions";
 import { parseTasks } from "./stopTasks";
