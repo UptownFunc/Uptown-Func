@@ -112,7 +112,7 @@ Deadline still Sun 15 Nov 23:59 local (portal confirmation by a person still pen
 | 1.4 | IN PROGRESS | Seam candidates listed; alignment inconclusive; trust-grid method undecided |
 | 1.5 | NOT STARTED | 8+ control points with Cesium picks (human) |
 | 1.6 | CUT | 3D view cut at G1 under the plan rule (D-10); AREA 2D sheet kept |
-| 2.1 | IN PROGRESS | 20 deg slope-limit source UNRESOLVED (plan names only "NASA presentation") |
+| 2.1 | IN PROGRESS | 20 deg slope-limit source **resolved on the REG-01 branch** (EVA-EXP-0042 Rev B, 4.2.1.3, p. 38; SLOPE-01); skyObstructionM12 page still UNRESOLVED |
 | 2.2 | VERIFIED (human review pending) | K-01: k_v = 1 placeholder with ASSUMED banner |
 | 2.3 | VERIFIED (human review pending) | L-01/L-02 conventions to confirm |
 | 2.4 | VERIFIED (G3-01 demo values; team to confirm) | Planned margin shown on default load from the G3-01 preset (est. 32.3 to 67.2 min, OK, for the e2e stop); values chosen by SI at the operator's direction |
@@ -131,7 +131,7 @@ Deadline still Sun 15 Nov 23:59 local (portal confirmation by a person still pen
 | 4.4 | VERIFIED (automated) | axe, keyboard and width checks pass: Playwright 50/50 on the local build and 50/50 against the live deploy (Sat 22:30-22:45); manual checks at G5 |
 | 4.5 | VERIFIED (integrated build on main 38839d0) | PRs #2-#9 merged after checks and /code-review (R-15..R-19); deploy done since (3.5, PRs #13-#16) |
 | 5.1 | PENDING | Freeze Sun 13:00; two-machine check moved to 5.5 (G5-DEFER); Cesium-blocked criterion trivially true (3D cut) |
-| 5.2 | PENDING | Register V-01..V-14 left to another session (REG-DEFER), all OPEN; G-08 target Sun 13:00 |
+| 5.2 | IN PROGRESS (register cleared, REG-01, 29830fd; other members' confirmation and the post-freeze regression pending) | **Sat 23:59:** V-01..V-14 each FIXED or KEPT; T_EVA 360, t_ops 60, t_cont 60, stop 45 min cited; 20 deg citation resolved; on branch claude/amazing-hypatia-f808mz, **not merged, so the live site still shows the old values** |
 | 5.3 | NOT STARTED | Video (Design, Sun 17:00) or the 7-slide fallback |
 | 5.5 | PENDING (last phase) | Includes the deferred two-machine check and FortiGuard request (G5-DEFER); internal submit Sun 21:00 |
 | 5.4 | IN PROGRESS | README SI use and references current (D5, D6, D12, papers); concept-origin account (B-5) and native-library licences open; D12 licence terms not read |
@@ -210,7 +210,7 @@ Work on optional features only when it does not endanger this path. The AREA 2D 
 | Part | Task | Owner | Status | Checks / evidence | Commit |
 |---|---|---|---|---|---|
 | 5.1 | Freeze features. Run the demo from public deploy on two machines and verify the AREA 2D map with Cesium blocked. | Captain + all owners | PENDING (freeze Sun 13:00; two-machine check deferred to 5.5) | **G5-DEFER (Sat 22:48, operator):** the two-machine check of https://uptown-func.vercel.app moves to 5.5. Cesium-blocked criterion trivially true (3D cut, 1.6). Single-machine evidence so far: Playwright 50/50 against the live URL (3.5). | - |
-| 5.2 | After freeze, allow bug fixes only. Re-run core tests and validate all displayed quantities, citations, assumptions and warnings. **Clear the CLAUDE.md placeholder register (V-01..V-10): each row FIXED or KEPT by the team (G-08).** | Module owners | UNVERIFIED (register deferred to another session, REG-DEFER) | Regression suite; provenance review; no new feature scope | - |
+| 5.2 | After freeze, allow bug fixes only. Re-run core tests and validate all displayed quantities, citations, assumptions and warnings. **Clear the CLAUDE.md placeholder register (V-01..V-10): each row FIXED or KEPT by the team (G-08).** | Module owners | IN PROGRESS (register cleared by REG-01 on its branch; the other members' confirmation and the post-freeze regression pending) | Regression suite; provenance review; no new feature scope. **REG-01 (Sat 23:59):** see the completion record "5.2 register" | 29830fd |
 | 5.3 | Lock the <=30-second subtitled video with every on-screen claim sourced and limitation caption present. If not ready by the video gate, switch to the 7-slide format. | Design | UNVERIFIED | Final asset reviewed; SI watermark if applicable; sources captured | - |
 | 5.4 | Complete README `SI use`, dependency/dataset/image licences, submission references and SI form data from `SI_LOG.md`. | Captain | IN PROGRESS (draft written; team review and concept-origin text pending) | **14:39:** README.md: summary and limits, dataset-to-number table (19.3), run/check commands, "SI use" reconciled with SI_LOG.md, references with exact versions and licences for every bundled, dev and pipeline package (read from installed metadata), datasets with credit, cited publications, images. **Pending:** the team's concept-origin account in SI_LOG.md, then the submission SI field from the same facts; human review of the disclosure. **14:47:** authorship per G-06 (concept and plan: Patrick Ezekiel A. Arcilla; team credited only for recorded contributions); "SI use" audited against SI_LOG; `docs/licences.md` generated by `scripts/licences.py` (130 lockfile entries: 31 production, 99 development-only including @axe-core/playwright MPL-2.0; 16 pipeline distributions; 31 bundled native libraries marked NOT VERIFIED), cross-checked with `npm ls --omit=dev` (31) and kept current by `pipeline/tests/test_licences.py`. | bdb889e, f38f824 |
 | 5.5 | Verify every submission field; public app and repository links open without login; submit the frozen version by the internal target. **Deferred here (G5-DEFER):** (a) open https://uptown-func.vercel.app on two machines (private window; map, footer, a stop with route and margin, Briefing, Field View; DevTools Network all 200); (b) request the FortiGuard web-filter classification for the URL (plan 19.3) and record the result. | Captain | UNVERIFIED | Link checks; two-machine evidence; FortiGuard request and result; submission receipt or confirmation captured | - |
@@ -955,6 +955,34 @@ Review status: /code-review high R-20 of 8285658..2a65db1: 6 findings, all fixed
 Commit SHA: 2a65db1, 7cf23b2
 Merge: PR #11 merged as 99eabc7 (Sat 14 Nov 20:57, by the SI session at the operator's instruction "proceed. review and merge"; merge tree identical to 9ebd66e)
 Next part / blocker owner: B-4 deploy (repository owner)
+```
+
+```text
+Part: 5.2 register (REG-01): clear CLAUDE.md placeholder register V-01..V-14; 2.1 slope-limit citation
+Owner: session operator (member not named); SI session on claude/amazing-hypatia-f808mz (Claude Fable 5.2; Superpowers not installed, not used)
+Status: IN PROGRESS (register cleared and checked on the branch; not merged; other members' confirmation pending)
+Scope completed: V-01 T_EVA 240 -> 360 min, V-02 t_ops 30 -> 60 min, V-03 t_cont 30 -> 60 min (EVA-EXP-0042 Rev B,
+  pp. 29-30); V-04 stop 45 min cited (NASA/TM-2010-216138, Tables 2-3, p. 12); V-05..V-07, V-09..V-14 KEPT with
+  reasons; V-08 terms recorded; 20 deg citation resolved (EVA-EXP-0042 Rev B, 4.2.1.3, p. 38); banner "ASSUMED.";
+  findings W-01 (2 km/h planning pace) and IMG-01 (wording) left open
+Files changed: src/app/{demoPreset.ts,demoPreset.test.ts,App.tsx,PlanPanel.tsx,sources.test.ts},
+  src/engine/{assumptions.ts,planner.ts,planner.test.ts}, src/constants/{index.ts,constants.test.ts},
+  src/briefing/model.test.ts, e2e/{g3-preset,plan-route}.spec.ts, docs/data/reg-01-register-sources.md,
+  CLAUDE.md, DECISIONS.md, README.md
+Checks run (exact commands), Sat 14 Nov ~23:25-23:55 Asia/Manila (container clock UTC + 8 h):
+  npx vitest run (tests written first)             -> 8 failed / 278 passed before the change; 286 passed / 286, 28 files after
+  npx tsc --noEmit                                 -> clean
+  rm -rf dist && npm run build                     -> OK; main 208.32 kB gzip + worker 41,515 B (gzip -9): ~249.8 of 250 KB
+  PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome npx playwright test --trace off -> 50 passed / 50
+  (cd pipeline && ../.venv/bin/python -m pytest -rs -q) -> 82 passed, 2 skipped (gdal_contour not installed)
+  .venv/bin/python scripts/licences.py | diff -q - docs/licences.md -> no difference
+Results: demo end margin for the e2e stop est. 92.3 to 127.2 min, OK (was est. 32.3 to 67.2 min)
+Known limitations or failures: values picked from the documents by SI, not yet reviewed by the other members;
+  k_v = 1 unsupported for 10-20 deg; RAD height (R-13) and M12 pages unresolved; route bench not re-run;
+  live deploy not updated (branch not merged)
+Review status: /code-review low of main...29830fd: 0 findings
+Commit SHA: 29830fd
+Next part / blocker owner: team confirms REG-01, then a PR to main (not opened: no instruction to); W-01 Data and Science
 ```
 
 ## Phase-part completion record
