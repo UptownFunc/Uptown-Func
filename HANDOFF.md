@@ -2,7 +2,91 @@
 
 This file is the handoff between team members and Claude sessions. Keep it factual and current. A new session must read this file before touching code.
 
-## Latest session (Sun 15 Nov 2026, 00:02-00:35 Asia/Manila): REG-02, every value and citation checked
+## Handoff: Yujin's session (Sun 15 Nov 2026, 00:02-01:55 Asia/Manila)
+
+**Read this section first.** It replaces the two short "latest session" notes below it, which keep the detail.
+
+### 1. State right now
+
+| Item | State |
+|---|---|
+| `main` | `1ad41f6` (PR #20). **Nothing from this session is on `main` yet.** The live site is unchanged. |
+| **PR #21** `yujin/reg-02-verification`, head `13506af` plus this handoff commit | Open. GitHub reports it mergeable, state clean. **Not merged:** the SI session's merge command was refused by its own permission check, so a person must press merge. Changes no value. |
+| **PR #22** `yujin/w-01-slow-bound` | Open, stacked on PR #21. **Do not merge until the other members confirm it:** it changes a plan value (section 3). |
+| Session | Directed by Yujin on his own Windows computer. Claude Code with Claude Fable 5.2. Superpowers not installed, not used. |
+| Deadlines | G5 freeze Sun 15 Nov 13:00. Submission Sun 15 Nov 23:59 local. **A person must still confirm the deadline on the portal.** |
+
+### 2. What this session did
+
+Scope set by Yujin: "1. Verify them 2. Citation 3. Check if they are correct and appropriate"; "ALL DATA MUST HAVE BEEN VERIFIED". Full record: `docs/data/reg-02-verification.md` (12 sections).
+
+| Work | Result |
+|---|---|
+| Register V-01..V-14, the nine science constants, README references | Every source downloaded again and read. The four REG-01 documents have the recorded sha256; every quotation is on its stated page. **No value changed.** |
+| Citations corrected in `src/constants` (tests written first) | `walkSpeedRange` (a treadmill speed window, pages 2, 5, 10, 70); `drillWarningDefault` (arXiv:2502.02469; NASA/TM-20205000837, p. 49); `skyObstructionM12` (resolved). `unresolvedCitations()` is now empty. |
+| Wrong statements in REG-01 corrected | The egress/ingress hour is from rover-based sustained missions, not a habitat hatch. The TBR tag is on the rover walk-back sentence. The station timeline on p. 8 of NASA/TM-2010-216138 is Figure 4, not Table 1. The README lacked the TM's fourth author. |
+| 0.37 pi at Butte M12 | **Yujin opened Ehresmann et al. 2021 and supplied its text.** Sections 2.2 and 4 give 0.37 pi (about 19 %), average blocking angle 11 deg, up to about 30 deg. The paper states no height for RAD. |
+| AC-09 third date | **Yujin ran NASA GISS Mars24 8.3.1:** 43.5 deg at 09:28 LMST for 2026-11-15 12:00 UT, the same as SharpWalk. **AC-09 passes on 3 of 3 dates; B-10 closed.** Screenshot: `docs/data/ac-09-mars24-third-date.png`. |
+| Other checks | REMS temperature in degrees C confirmed from NASA's own script for the feed. RAD height sourced to the 1.1 m rover deck. D1 agrees with the rover's `elev_geoid` at 116 waypoints (mean -0.003 m, sd 0.050 m). D1, D2, D12 headers, the D5 file and the rover image checksums match their records. Sun angles agree with JPL Horizons within 0.1 deg at the four scenario times (0.13 and 0.19 deg at two other dates). |
+| Decisions, on PR #22 only | Yujin delegated them ("choose what is best"); **SI chose.** Slow walking bound 0.64 -> 0.56 m/s (EVA-EXP-0042 Rev B, p. 40). Slope factors k_v kept at 1 (no source gives a value). Demo stop end margin est. 77.6 to 127.2 min, OK (was 92.3 to 127.2). |
+
+Checks on PR #21's head: vitest 289/289; `tsc --noEmit` clean; build about 249.9 of 250 KB; Playwright 50/50 with `--workers=1`; `/code-review` low on the final diff, 0 findings. On PR #22: vitest 290/290; tsc clean; build about 249.95 of 250 KB (about 50 bytes left); Playwright 50/50 with `--workers=1`; `/code-review` low, 0 findings.
+
+### 3. What to do next, in order
+
+1. **Merge PR #21** (any member; the button on GitHub, or `gh pr merge 21 --merge`). It changes only citation text in the app.
+2. **Check the live site after the merge.** `curl -sS https://uptown-func.vercel.app/ | grep -o 'assets/index-[^"]*\.js'` should print `assets/index-D6_LSyTq.js`, the bundle built from this branch. Then record the merge SHA in `PHASES.md` and here (CLAUDE.md step 6).
+3. **Decide PR #22 as a team.** It lowers the slow walking bound, which plan 19.5 and CLAUDE.md fix at 0.64 m/s. If the team agrees: record the agreement in `DECISIONS.md` (W-01), run `gh pr edit 22 --base main`, merge, and check the live site again. If not: close it. PR #21 does not depend on it.
+4. **G5 freeze at 13:00:** bug fixes only from then. Laptop route-latency measurement (BENCH) is still owed.
+5. **5.3 video** (Design, 17:00) and **5.4 README / SI use**: the team's own account of how the concept was formed (B-5). SI must not write it.
+6. **5.5, before 21:00:** two-machine check of the public site; FortiGuard request; every submission field; submit. Resubmitting is allowed and the last saved version is judged, so submit early and again after fixes.
+
+### 4. Hackathon rules: where the project stands
+
+Rules as the team plan records them (section 19.3: the Project Submission Guide and the Judging and Awards Guide, both dated 12 Nov 2026, and the Participant Terms updated 7 Aug 2026). **This session did not read the guides themselves; a person should check each row against the portal before submitting.**
+
+| Rule (plan 19.3) | Status after this session | Still to do, and who |
+|---|---|---|
+| SI "should not be used to" come up with the idea of how to solve the challenge | Not affected. This session verified and cited values; it did not touch the concept. | **Team:** write the concept account in `SI_LOG.md` and the README (B-5). Authorship wording G-07 is still unsettled. |
+| SI code and data acknowledged "in descriptive text and metadata" | Done for this session: `SI_LOG.md` rows for each step, the README "SI use" paragraph, `SI-assisted` file headers, and an `SI-assisted:` trailer on every commit. Commits are authored by Yujin, who directed the work. | **Team:** fill the submission's SI field from `SI_LOG.md`. |
+| SI images and video need a visible watermark | None generated. The one new image is a screenshot of NASA's Mars24 app, taken by Yujin, in `docs/` only (not shipped). | **Design:** keep this true for the video (5.3). |
+| No NASA logos, flags or mission identifiers | Unchanged: none in the app; the non-affiliation footer is on every view. NASA's media page was re-read: "References like 'according to NASA' or similar are prohibited in SI products" (IMG-01). Documents are cited by number. | **Team:** confirm the IMG-01 reading with the Local Lead. Keep "according to NASA" out of the video and the project page. |
+| At least one NASA data or resource (Global Award eligibility) | Met and re-checked: D1, D2, D12 (USGS files, headers re-read), D5 and D6 (NASA/JPL), D7 (REMS feed), D10 (GISS Mars24). | None. |
+| Relevance: NASA data as "a core component ... rather than a superficial addition" | README section "How each NASA dataset drives a number on screen" stands; every cited value behind it is now verified. | **Team:** say the same on the project page. |
+| References field: list all data, resources and tools, "including any code, text, and images" | README References updated with every document read here, including the ones used only to verify (section "Verification sources"). | **Captain:** copy the README References into the submission field. Licences of the 31 native libraries in the pipeline wheels and the D12 terms are still unverified. |
+| Own code open source (MIT); third-party code OSI-licensed and identified | Unchanged: MIT `LICENSE`; `docs/licences.md`. No dependency added. Mars24 and a Java runtime were used as tools on one computer and are **not** in the repository. | **Any member with the cloud container:** re-run `scripts/licences.py` (it could not run on Windows). |
+| No export-controlled information | The NASA documents used are public NTRS releases; EVA-EXP-0042 Rev B carries "This document does not contain export control information" on each page. | None. |
+| No image, video, audio or likeness of anyone under 18 | Nothing added that shows a person. | **Design:** keep this true for the video. |
+| Submit before Sun 15 Nov 23:59 local; late saves are not eligible | Not started. | **Captain:** confirm the deadline on the portal; submit. |
+| Team of 1-6, same Local Event, on the Members tab | Not checked by this session. | **Captain.** |
+| Website access: FortiGuard classification request recommended | Deferred to 5.5 (G5-DEFER). | **Captain.** |
+
+### 5. Still open after this session
+
+- **PR #21 merge** and its merge record; **PR #22** team decision.
+- NASA/TP-2010-216115 (the IST-1 report) is not online. The 2.3-3.5 km/h window is confirmed only as quoted in NASA/TM-2010-216138, Table 4, p. 13.
+- D1 vertical reference: strong lead (areoid), not an independent survey; the app's label is unchanged. Plan part 1.5 (control points) is not done.
+- k_v = 1 on 10-20 deg is an unsupported choice, kept because no source exists.
+- The sun model is good to about 0.2 deg against JPL Horizons; the app shows 0.1 deg.
+- Bundle budget: about 94 bytes left on PR #21, about 50 on PR #22. Any new app code needs savings first.
+- Not run here: `scripts/licences.py`; the AC-07 and AC-08 pipeline jobs; the route bench.
+
+### 6. Notes for whoever works on a Windows computer
+
+- Node 24.16.0 was used; the repo pins 22.x. The build still reproduced the live bundle byte for byte before any change.
+- Run Playwright with `--workers=1`. Parallel runs on a 4-core machine fail one or two specs at random.
+- pytest needs `PYTHONUTF8=1`. Three tests then fail for reasons that are not data: git adds one carriage return to `coverage.geojson` and `contours.geojson` at checkout (their copies in git match the recorded sha256), and the licence check looks for a Linux `.venv`.
+- Tools fetched for the checks live outside the repository and are not needed to build or run the app.
+
+### 7. Do not
+
+- Merge PR #22 without the other members' recorded agreement.
+- Write "according to NASA" or "official NASA value" anywhere.
+- Present any cited value as measured or Mars-validated: every one is a lunar planning figure applied to Mars, and stays Assumed.
+- Add an invented value without a row in the CLAUDE.md register.
+- Change attribution without the team's written decision on G-07.
+
+## Detail of the first part of that session (Sun 15 Nov 2026, 00:02-00:35 Asia/Manila): REG-02, every value and citation checked
 
 **Read this first; the two older sections below are otherwise still valid.**
 
