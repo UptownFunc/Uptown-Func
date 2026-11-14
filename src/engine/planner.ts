@@ -69,9 +69,8 @@ export class Planner {
   private nextStop = 1;
   private cached: PlanOutput | null = null;
   private planTimes: Partial<Record<PlanTimeId, Assumption>> = {};
-  /** Time to the habitat at 1 m/s level speed; divide by a speed to get that bound's field (time scales as 1/v). */
-  private unitField: Float64Array | null = null;
-  private fieldScratch: Float64Array | null = null;
+  /** Slow-bound time-to-habitat field, keyed by the inputs it depends on (habitat, k_v, slope limit, speed). */
+  private slowField: { key: string; field: Float64Array } | null = null;
 
   constructor(grid: PlannerGrid, habitat: LatLon) {
     if (grid.elevation.length !== grid.rows * grid.cols || grid.classes.length !== grid.rows * grid.cols)
@@ -215,20 +214,19 @@ export class Planner {
     const times = { tEva_s: t.T_EVA.value, tOps_s: t.t_ops.value, tCont_s: t.t_cont.value };
     const stopDur = this.stops.map(() => t.stop_duration!.value);
     const g = this.routeGrid, sp = this.speeds;
-    if (!this.unitField) {
+    const key = JSON.stringify([this.habitat, sp.kBins, sp.slopeLimit_deg, sp.low_mps]);
+    if (this.slowField?.key !== key) {
       const h = { r: Math.floor(this.habitat / g.cols), c: this.habitat % g.cols };
-      this.unitField = timeField(g, h, { vLevel_mps: 1, kBins: sp.kBins, slopeLimit_deg: sp.slopeLimit_deg });
-      this.fieldScratch = new Float64Array(this.unitField.length);
+      this.slowField = { key, field: timeField(g, h, { vLevel_mps: sp.low_mps, kBins: sp.kBins, slopeLimit_deg: sp.slopeLimit_deg }) };
     }
-    const unit = this.unitField, scratch = this.fieldScratch!;
-    const at = (v: number) => {
-      for (let i = 0; i < unit.length; i++) scratch[i] = unit[i]! / v;
-      const s: SpeedRange = { ...sp, low_mps: v, nominal_mps: v, high_mps: v };
-      return plannedMarginProfile(g, legCells, stopDur, times, s, scratch);
-    };
-    const slow = at(sp.low_mps);
-    const endOf = (p: ReturnType<typeof at>) => p[p.length - 1]!.margin_s;
-    const low = endOf(slow), nominal = endOf(at(sp.nominal_mps)), high = endOf(at(sp.high_mps));
+    const slow = plannedMarginProfile(g, legCells, stopDur, times, sp, this.slowField.field);
+    // Walking and the walk back both scale as 1/v along the same grid path, so the end margin at another speed bound
+    // follows from the slow-bound end: m(v) = fixed - travel_slow * v_low / v, with fixed = T_EVA - stops - t_ops - t_cont.
+    const low = slow[slow.length - 1]!.margin_s;
+    const fixed = times.tEva_s - stopDur.reduce((a, b) => a + b, 0) - times.tOps_s - times.tCont_s;
+    const travelSlow = fixed - low;
+    const at = (v: number) => fixed - (travelSlow * sp.low_mps) / v;
+    const nominal = at(sp.nominal_mps), high = at(sp.high_mps);
     return {
       profile: slow.map((m) => ({ s_m: m.s_m, margin_min: m.margin_s / 60, state: m.state })),
       end: { value: nominal, low, high, unit: "s", valueClass: "estimated", methodId: "engine:margin-6.6-grid-metric",

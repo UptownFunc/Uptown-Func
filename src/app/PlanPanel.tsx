@@ -2,7 +2,10 @@
 // Planning panel (Tier 1 subset): K-01 placeholder banner, stops, leg estimates and the planned margin state.
 // It never edits the plan: deleting a stop sends a Command to the engine through onCommand.
 import type { PlanOutput } from "../engine/planner";
+import { CONSTANTS } from "../constants";
 import { formatDuration, formatLength } from "./format";
+
+const RANGE = CONSTANTS.walkSpeedRange;
 import { MarginState } from "./MarginState";
 import { PlanTimes } from "./PlanTimes";
 
@@ -31,8 +34,8 @@ export function PlanPanel({ output, message, onDeleteStop, onSetTime }: PlanPane
       {output.kvPlaceholder && (
         <div className="banner" role="note" data-testid="assumed-banner">
           <strong>ASSUMED placeholder.</strong> Slope factors k<sub>v</sub> = 1 in every bin (K-01, team choice): slope
-          changes walking time only through 3D path length. Times are estimates from the 0.64-0.97 m/s suited range
-          (lunar-gravity tests, NASA/TM-2010-216138, Table 4, p. 13), not Mars-validated.
+          changes walking time only through 3D path length. Times are estimates from the {RANGE.low}-{RANGE.high} m/s suited
+          range (lunar-gravity tests, {RANGE.citation.source.split(",")[0]}, {RANGE.citation.location}), not Mars-validated.
         </div>
       )}
       <h2>Route <span className="muted">slope-screened, not rock-free</span></h2>
@@ -80,7 +83,7 @@ export function PlanPanel({ output, message, onDeleteStop, onSetTime }: PlanPane
       </p>
       {last && (
         <p className="muted small">
-          Estimate under stated assumptions, not a guarantee. Range = slow (0.64 m/s) to fast (0.97 m/s) bound; the state
+          Estimate under stated assumptions, not a guarantee. Range = slow ({RANGE.low} m/s) to fast ({RANGE.high} m/s) bound; the state
           uses the slow bound. On the grid path the margin never rises and is lowest at the end (AC-19).
         </p>
       )}

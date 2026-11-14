@@ -31,8 +31,8 @@ function Row({ id, label, current, onSet }: { id: string; label: string; current
       </div>
       {current && <div className="muted small">Rationale: {current.rationale}</div>}
       <div className="time-inputs">
-        <label>min <input aria-label={`${label}, minutes`} inputMode="decimal" value={minutes} onChange={(e) => setMinutes(e.target.value)} /></label>
-        <input aria-label={`${label}, rationale`} placeholder="one-line rationale" value={why} onChange={(e) => setWhy(e.target.value)} />
+        <label>min <input className="minutes" aria-label={`${label}, minutes`} inputMode="decimal" value={minutes} onChange={(e) => setMinutes(e.target.value)} /></label>
+        <input className="rationale" aria-label={`${label}, rationale`} placeholder="one-line rationale" value={why} onChange={(e) => setWhy(e.target.value)} />
         <button type="submit" disabled={!valid}>Set</button>
       </div>
     </form>
