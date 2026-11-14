@@ -498,6 +498,7 @@ describe("R-16: add_stop name follows the edit_stop rules", () => {
     expect(p.apply(cmd("add_stop", { ...at(g, 2, 10), name: "x".repeat(61) }, v())).ok).toBe(false);
     expect(p.apply(cmd("add_stop", { ...at(g, 2, 10), name: "  Ridge  " }, v())).ok).toBe(true);
     expect(p.apply(cmd("add_stop", { ...at(g, 4, 10) }, v())).ok).toBe(true);
-    expect(p.current().plan.stops.map((s) => s.name)).toEqual(["Ridge", "Stop S2"]);
+    expect(p.apply(cmd("add_stop", { ...at(g, 6, 10), name: null }, v())).ok).toBe(true);
+    expect(p.current().plan.stops.map((s) => s.name)).toEqual(["Ridge", "Stop S2", "Stop S3"]);
   });
 });

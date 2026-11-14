@@ -170,7 +170,7 @@ export class Planner {
         if (taken) return { ok: false, reason: taken };
         if (this.stops.length >= LETTERS.length) return { ok: false, reason: "too many stops" };
         const given = typeof p.name === "string" ? p.name.trim() : undefined;
-        if (p.name !== undefined && (!given || given.length > MAX_NAME)) return { ok: false, reason: `a stop name must be 1-${MAX_NAME} characters` };
+        if (p.name !== undefined && p.name !== null && (!given || given.length > MAX_NAME)) return { ok: false, reason: `a stop name must be 1-${MAX_NAME} characters` };
         const id = `S${this.nextStop++}`;
         this.stops.push({ id, name: given ?? `Stop ${id}`, cell, tasks: [] });
         break;

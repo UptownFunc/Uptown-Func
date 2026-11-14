@@ -1,7 +1,7 @@
 // SI-assisted: drafted with Claude Code (Claude Opus 5.5); human Design review pending.
 // Planning panel (Tier 1 subset): K-01 placeholder banner, stops, leg estimates and the planned margin state.
 // It never edits the plan: deleting a stop sends a Command to the engine through onCommand.
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { PlanOutput } from "../engine/planner";
 import { CONSTANTS } from "../constants";
 import { formatDuration, formatLength } from "./format";
@@ -119,6 +119,9 @@ export function PlanPanel({ output, message, onDeleteStop, onEditStop, onSetTime
 function StopEdit({ stop, onSave }: { stop: Stop; onSave: (stopId: string, name: string, tasks: string[]) => void }) {
   const [name, setName] = useState(stop.name);
   const [tasks, setTasks] = useState(stop.tasks.join("\n"));
+  // Show what the engine stored (trimmed, or changed elsewhere) while the editor stays open.
+  const stored = stop.tasks.join("\n");
+  useEffect(() => { setName(stop.name); setTasks(stored); }, [stop.name, stored]);
   const { tasks: list, problem } = parseTasks(tasks);
   return (
     <details className="stop-edit">
