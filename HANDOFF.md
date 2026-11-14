@@ -11,7 +11,7 @@ This file is the handoff between team members and Claude sessions. Keep it factu
 - Current gate: **G0 (due Sat 11:00). Contracts freeze as drafted and unagreed under the G0 fallback.**
 - Active branches: **`claude/kind-ptolemy-1wdqf5`** (this session; fast-forwarded onto `claude/lucid-ptolemy-nz6qpw` at 8986d70, then adds the review follow-up commit). `claude/lucid-ptolemy-nz6qpw` is unchanged at 8986d70. A human merges to `main`.
 - Last verified commit: **the review follow-up commit after 8986d70 on `claude/kind-ptolemy-1wdqf5`** (tests 44/44, typecheck clean)
-- Current owner / member: **parcilla13 (Captain, project owner); this session is operated by Yujin**
+- Current owner / member: **parcilla13 (Captain); this session is operated by Yujin. The project concept and plan belong to the whole team.**
 - Repository state: **`main` = 393723e (logs only). The G0 branches add the package scaffold, `src/contracts`, LICENSE and the log updates.**
 - Active phase part: **0.3 frozen as drafted (unagreed); 0.4 blocked on the Local Lead; 1.1 BLOCKED (plan PDF not available here, data hosts blocked, QGIS absent)**
 
