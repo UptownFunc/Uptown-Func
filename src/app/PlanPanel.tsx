@@ -11,6 +11,8 @@ import { MarginState } from "./MarginState";
 import { PlanTimes, TimeRow } from "./PlanTimes";
 import { QuantityText } from "./QuantityText";
 import type { Quantity, Stop } from "../contracts";
+import { STOP_LIMITS } from "../engine/assumptions";
+import { parseTasks } from "./stopTasks";
 
 export interface PlanPanelProps {
   readonly output: PlanOutput | null;
@@ -62,7 +64,7 @@ export function PlanPanel({ output, message, onDeleteStop, onEditStop, onSetTime
               <TimeRow id="stop_duration" stopId={s.id} label={`Stop ${s.letter} duration`} onSet={onSetTime}
                 current={plan.assumptions.find((a) => a.id === `A-stop_duration-${s.id}`)}
                 inherited={plan.assumptions.some((a) => a.id === "A-stop_duration") ? "uses the default" : "not set"} />
-              {onEditStop && <StopEdit key={`${s.id}:${s.name}:${s.tasks.join("\n")}`} stop={s} onSave={onEditStop} />}
+              {onEditStop && <StopEdit key={s.id} stop={s} onSave={onEditStop} />}
             </li>
           ))}
         </ol>
@@ -117,14 +119,15 @@ export function PlanPanel({ output, message, onDeleteStop, onEditStop, onSetTime
 function StopEdit({ stop, onSave }: { stop: Stop; onSave: (stopId: string, name: string, tasks: string[]) => void }) {
   const [name, setName] = useState(stop.name);
   const [tasks, setTasks] = useState(stop.tasks.join("\n"));
-  const list = tasks.split("\n").map((t) => t.trim()).filter(Boolean);
+  const { tasks: list, problem } = parseTasks(tasks);
   return (
     <details className="stop-edit">
       <summary>Name and tasks{stop.tasks.length ? ` (${stop.tasks.length})` : ""}</summary>
-      <form onSubmit={(e) => { e.preventDefault(); if (name.trim()) onSave(stop.id, name.trim(), list); }}>
-        <input aria-label={`Stop ${stop.letter} name`} value={name} maxLength={60} onChange={(e) => setName(e.target.value)} />
+      <form onSubmit={(e) => { e.preventDefault(); if (name.trim() && !problem) onSave(stop.id, name.trim(), list); }}>
+        <input aria-label={`Stop ${stop.letter} name`} value={name} maxLength={STOP_LIMITS.nameChars} onChange={(e) => setName(e.target.value)} />
         <textarea aria-label={`Stop ${stop.letter} tasks, one per line`} rows={3} value={tasks} onChange={(e) => setTasks(e.target.value)} />
-        <button type="submit" disabled={!name.trim()}>Save</button>
+        {problem && <span className="problem small" role="status">Tasks: {problem}.</span>}
+        <button type="submit" disabled={!name.trim() || problem !== null}>Save</button>
       </form>
     </details>
   );

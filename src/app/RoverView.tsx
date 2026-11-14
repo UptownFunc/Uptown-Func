@@ -11,7 +11,7 @@ export function RoverView({ data, compact = false }: { data: RoverImages | "fail
       <div className="rover-strip">
         {data.images.map((i) => (
           <figure key={i.file}>
-            <img src={`rover/${i.file}`} alt={`Curiosity Navcam view of boxwork terrain, sol ${i.sol}`} loading="lazy" />
+            <img src={`rover/${i.file}`} alt={`Curiosity Navcam view of boxwork terrain, sol ${i.sol}`} loading={compact ? "eager" : "lazy"} />
             <figcaption className="small">{roverCaption(i)}</figcaption>
           </figure>
         ))}

@@ -10,7 +10,7 @@ import { f1 } from "../geo";
 import { f1ToPlanetographic, type PlanetographicPoint } from "../geo/planetographic";
 import { marsSun, ttMinusUtc_s } from "./sun";
 import { cellCentreF1, f1ToCell, type GridDef } from "../geo/grid";
-import { KV_PLACEHOLDER, MARS_CLOCK_UNIT, SCENARIO_ID, SCENARIO_UNIT, SLOPE_LIMIT_ASSUMPTION } from "./assumptions";
+import { KV_PLACEHOLDER, MARS_CLOCK_UNIT, SCENARIO_ID, SCENARIO_UNIT, SLOPE_LIMIT_ASSUMPTION, STOP_LIMITS } from "./assumptions";
 import { legMetrics, type SpeedRange } from "./leg";
 import { plannedMarginProfile } from "./margin";
 import { CLASS, edgeCost, routeAStar, timeField, type RouteGrid } from "./route";
@@ -61,7 +61,7 @@ export type ApplyResult = { ok: true; versionHash: string } | { ok: false; reaso
 
 interface StopState { id: string; name: string; cell: number; tasks: string[] }
 
-const MAX_NAME = 60, MAX_TASK = 120, MAX_TASKS = 10;
+const { nameChars: MAX_NAME, taskChars: MAX_TASK, tasks: MAX_TASKS } = STOP_LIMITS;
 
 /** The Assumed plan times (plan 6.6). Payload of set_assumption: { id, value_s, rationale } (C-03, engine-defined). */
 export const PLAN_TIME_IDS = {
@@ -169,8 +169,10 @@ export class Planner {
         const taken = this.cellTaken(cell);
         if (taken) return { ok: false, reason: taken };
         if (this.stops.length >= LETTERS.length) return { ok: false, reason: "too many stops" };
+        const given = typeof p.name === "string" ? p.name.trim() : undefined;
+        if (p.name !== undefined && (!given || given.length > MAX_NAME)) return { ok: false, reason: `a stop name must be 1-${MAX_NAME} characters` };
         const id = `S${this.nextStop++}`;
-        this.stops.push({ id, name: str(p.name) ? p.name : `Stop ${id}`, cell, tasks: [] });
+        this.stops.push({ id, name: given ?? `Stop ${id}`, cell, tasks: [] });
         break;
       }
       case "move_stop": {

@@ -34,3 +34,6 @@ export const SLOPE_LIMIT_ASSUMPTION: Assumption = {
   rationale: "xEVA 20 deg slope requirement, a lunar source applied to Mars (plan 6.4); Assumed",
   source: "team choice",
 };
+
+/** Limits on a stop's name and tasks (C-19 edit_stop, add_stop), shared by the engine and the Plan panel editor. */
+export const STOP_LIMITS = { nameChars: 60, tasks: 10, taskChars: 120 } as const;

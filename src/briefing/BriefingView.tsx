@@ -10,7 +10,7 @@ import { RoverView } from "../app/RoverView";
 import type { RoverImages } from "../app/rover";
 import { briefingModel, isStale, type BriefingModel } from "./model";
 
-interface Card { model: BriefingModel; map: MapSnapshot | null; builtAt: string }
+interface Card { model: BriefingModel; map: MapSnapshot | null; builtAt: string; rover: RoverImages | "failed" | null }
 
 export interface BriefingViewProps {
   readonly output: PlanOutput | null;
@@ -46,7 +46,8 @@ export function BriefingView({ output, snapshot, hidden = false, rover = null }:
       // The map must show the same plan version as the stamp; if the plan moved on meanwhile, do not mix them.
       if (currentRef.current !== model.versionHash) { setNote("The plan changed while the card was built; generate again."); return; }
       setNote(map ? null : "Map export failed; the card has no map.");
-      setCard({ model, map, builtAt: new Date().toISOString().slice(0, 16).replace("T", " ") + " UTC" });
+      // The rover views are captured with the card, so the card does not change after it is built (R-16 finding 7).
+      setCard({ model, map, builtAt: new Date().toISOString().slice(0, 16).replace("T", " ") + " UTC", rover });
     } finally {
       setBusy(false);
     }
@@ -112,7 +113,7 @@ export function BriefingView({ output, snapshot, hidden = false, rover = null }:
               Estimates under stated assumptions, not guarantees. Slope-screened, not validated terrain; no rock detection.
               Walking speeds from lunar-gravity tests. Suit life support not modelled. No dose and no safe zones.
             </p>
-            <RoverView data={rover} compact />
+            <RoverView data={card.rover} compact />
             <footer className="small">Independent student project; not affiliated with or endorsed by NASA.</footer>
           </div>
         </article>

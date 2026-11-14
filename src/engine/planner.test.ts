@@ -489,3 +489,15 @@ describe("edit_stop: stop name and tasks for the briefing card (C-19 option a)",
     expect(p.current().plan.stops[0]).toMatchObject({ name: "A", tasks: [] });
   });
 });
+
+describe("R-16: add_stop name follows the edit_stop rules", () => {
+  it("trims a given name and refuses a blank or overlong one; no name gets the default", () => {
+    const { g, p } = plannerWithHabitat();
+    const v = () => p.current().plan.versionHash;
+    expect(p.apply(cmd("add_stop", { ...at(g, 2, 10), name: "   " }, v())).ok).toBe(false);
+    expect(p.apply(cmd("add_stop", { ...at(g, 2, 10), name: "x".repeat(61) }, v())).ok).toBe(false);
+    expect(p.apply(cmd("add_stop", { ...at(g, 2, 10), name: "  Ridge  " }, v())).ok).toBe(true);
+    expect(p.apply(cmd("add_stop", { ...at(g, 4, 10) }, v())).ok).toBe(true);
+    expect(p.current().plan.stops.map((s) => s.name)).toEqual(["Ridge", "Stop S2"]);
+  });
+});

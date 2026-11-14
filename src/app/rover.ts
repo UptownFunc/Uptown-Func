@@ -24,6 +24,6 @@ export const roverCaption = (i: RoverImage): string => `Sol ${i.sol} (${i.dateTa
 
 export function roverSource(m: RoverImages): { id: "D6"; kind: "dataset"; title: string; detail: string } {
   const each = m.images.map((i) => `${i.imageId} (sol ${i.sol}, ${i.credit}; ${i.rawImagePage}; boxwork per "${i.terrainEvidence.title}", ${i.terrainEvidence.url})`);
-  return { id: "D6", kind: "dataset", title: "D6: Curiosity raw images (NASA MSL raw image archive)",
+  return { id: "D6", kind: "dataset", title: "D6: Curiosity rover raw images (NASA raw image archive)",
     detail: `${m.label}. ${m.selectedBy}. ${m.processing}. Images: ${each.join("; ")}.` };
 }

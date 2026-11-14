@@ -801,7 +801,10 @@ Results: all green. First run of the rover change failed 3 e2e specs (card capti
 G3 status: Tier 1 e2e green including planned margin. **First public deploy not done (B-4, Vercel access).**
 Known limitations or failures: bundle headroom ~2.3 KB; values and image picks need team confirmation; image-use terms
   to confirm (C-22); AC-09 2 of 3 dates (B-10)
-Review status: see the PR for this work (/code-review before merge)
+Review status: /code-review medium of PR #3 (R-16): 10 findings; 6 fixed, 2 resolved by the operator (G3-02), 2 recorded
+R-16 fix checks (Sat 14 Nov ~19:18-19:22): npx vitest run 274/274 (28 files); npx tsc --noEmit clean; npm run build OK
+  (main 206.69 kB gzip + worker 41,242 B, ~247.9 of 250 KB); pytest 62 passed; Playwright 46/46. Tests written first and
+  seen failing: add_stop name rule (accepted a blank name), parseTasks (module missing)
 Commit SHA: 34ccda0 (G3-01 preset), fdc64e7 (C-19), and the D6 commit that adds this record
 Next part / blocker owner: B-4 deploy (human); then G4 items (B-7 rover positions for AC-07/AC-08)
 ```
