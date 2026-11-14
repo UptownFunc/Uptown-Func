@@ -62,6 +62,14 @@ Ten findings. Eight were fixed, test-first where code was involved. One was fixe
 - **Partly fixed:** the two UNRESOLVED citations (walkSpeedRange, slopeLimit) remain, because their pages are in plan section 19, which this session has not read. A test now pins the exact list, so any new uncited constant fails the suite.
 - **Fixed:** the vertical-reference check now uses CRS transforms, the D1 NoData value and edge guards (results unchanged: -8.62 m / -9.21 m); quantise refuses an all-unknown grid; the build validates before writing anything; odd grid sizes are refused; the report is written once with its source metadata; 0.83 m/s is classed `assumed`; the check scripts import the shared radius and URL; the alignment check refuses windows that contain D1 NoData.
 
+## Route engine inputs (2.2)
+
+| ID | Topic | Status |
+|---|---|---|
+| K-01 | Slope factors k_v for the bins 0-5, 5-10, 10-15 and 15-20 deg | **Values missing.** Plan 6.5 says they are Assumed and editable but does not list them in part 1; they are probably in section 19. The engine takes them as a required input and refuses anything other than four positive factors. Route Engine to supply the values with their source. |
+| K-02 | Bin-edge convention | The code uses lower-inclusive bins: [0,5), [5,10), [10,15), [15, limit]. Edges exactly at the limit are allowed. Route Engine to confirm. |
+| D-03 note | Connectivity of the demo area at 2 m | The main routable region covers 58.1% of the area; the area centre is not in it. Habitat and stops must be placed in the main region. Recorded for the D-03 sign-off. |
+
 ## Governance decisions
 
 | ID | Topic | Decision | Decided by | Date/time (Asia/Manila) | Evidence |

@@ -68,12 +68,12 @@ Work on optional features only when it does not endanger this path. The AREA 2D 
 | Part | Task | Owner | Status | Checks / evidence | Commit |
 |---|---|---|---|---|---|
 | 2.1 | Implement and test the approved `src/geo` frame conversions and typed scientific constants with citations/pages. | Data and Science | IN PROGRESS (code and tests done; 2 citations UNRESOLVED) | `src/geo`: frame-tagged F1/F5/F6 points, F1 range checks, F1<->F5 and F5<->F6 on the F1 sphere. `src/constants`: register with citation and location per constant. `npx vitest run` 62/62 after the review fixes; `npx tsc --noEmit` clean. The TS F1->F5 reproduces the Python pipeline origin to 1 mm. **Open:** page for the 0.64-0.97 m/s range (plan 19.5, not read) and the source slide for the 20 deg limit; owner review. | see 2.1 record |
-| 2.2 | Implement admissible grid costs and route search. Exclude unknown terrain; apply slope screening; forbid diagonal corner cutting when either orthogonal neighbour is blocked. | Route Engine | UNVERIFIED | Synthetic and property tests; slope oracle; AC-01 family; unknown-cell tests | - |
+| 2.2 | Implement admissible grid costs and route search. Exclude unknown terrain; apply slope screening; forbid diagonal corner cutting when either orthogonal neighbour is blocked. | Route Engine | IN PROGRESS (built and tested; speed-factor values missing) | `src/engine/route.ts`: A* on 8-connected slope-screened cells; edge time = 3D edge length / (v_level x k_v(bin)); edges over the 20 deg Assumed limit refused; no corner cutting; unknown/excluded never entered; octile heuristic over the fastest bin; Dijkstra oracle; `timeField` for the habitat field. `npx vitest run` 77/77 (15 new), including A* = Dijkstra on 40 random grids and h <= true remaining time on 10 grids. **Open:** k_v values for the four bins are not in plan part 1 (K-01); owner review; Web Worker wiring (3.1). | see 2.2 record |
 | 2.3 | Implement leg distance/time ranges and habitat time field. Keep seconds in the engine and display SI minutes. | Route Engine | UNVERIFIED | Known-grid oracle tests; range and unit tests; benchmark under 500 ms | - |
 | 2.4 | Implement planned margin and the manual-entry field-margin calculations without conflating `MissionPlan` and `MissionExecution`. | Route Engine + Design | UNVERIFIED | Margin boundary tests; stop arrival/departure tests; AC-19 on the grid metric | - |
 | 2.5 | Resolve route smoothing at G2 with Route Engine owner and Data and Science agreement. Record the selected option in `DECISIONS.md`, plan log and O-22. | Route Engine | UNVERIFIED | Written option and matching tests; until decided, calculations use grid paths only | - |
 | 2.6 | Build the OpenLayers **AREA-level 2D sheet** by G2. It is the permanent fallback and is never cut. | Design + Data and Science | UNVERIFIED | Loads local grid; displays route/stops/unknown/slope states; works without Cesium | - |
-| 2.7 | Run the complete G2 engine test and latency gate; record all speed inputs as cited or Assumed. | Route Engine | UNVERIFIED | Synthetic, property, admissibility and slope-oracle tests; route <500 ms; workload remains off | - |
+| 2.7 | Run the complete G2 engine test and latency gate; record all speed inputs as cited or Assumed. | Route Engine | IN PROGRESS (latency measured; not yet on the target hardware) | `bench/route-bench.ts` on the real 1,500 x 1,500 grid, Node 22.23.4, Xeon 2.1 GHz, main thread, placeholder factors: longest route in the main region 370-399 ms (target < 500); habitat time field over 1,307,532 cells 443-495 ms (target < 3 s). The A* route time equals the Dijkstra field time. **Not yet:** a mid-range laptop, in a Web Worker, with the real k_v values. | see 2.2 record |
 
 **G2 acceptance:** all listed engine tests pass and route is under 500 ms. If missed, move to a 4 m grid and show a visible Assumed-input banner. Do not turn on kJ workload without cited rates.
 
@@ -242,6 +242,22 @@ Known limitations: walkSpeedRange and slopeLimit citation locations UNRESOLVED; 
   plan step 1 while D1 is probably areoid-relative (D-05)
 Commit SHA: see the 2.1 commit on claude/kind-ptolemy-1wdqf5
 Next: fill the citations from plan section 19.5; Route Engine starts 2.2 against src/geo and the 1.2 grids
+```
+
+```text
+Part: 2.2 and 2.7 (not VERIFIED)
+Owner: Route Engine (TBA); written in Yujin's session
+Files changed: src/engine/route.ts, src/engine/route.test.ts, bench/route-bench.ts
+Checks run: npx vitest run ; npx tsc --noEmit ; SHARPWALK_AREA=<area> node --experimental-strip-types bench/route-bench.ts
+Results: vitest 77/77; tsc clean; latency as in the 2.7 row
+Connectivity finding (real grid, engine edge rules, placeholder factors): 5,441 separate routable regions. The largest
+  holds 1,307,532 cells (76.5% of candidates, 58.1% of the area); 4,336 regions hold 1-9 cells. The exact area centre
+  (row 750, col 750) is NOT in the largest region, so a habitat or stop placed there reaches only a small pocket.
+  Stops must sit in the main region; the engine returns null for unreachable goals.
+Known limitations: k_v values missing (K-01); one test expectation was corrected during TDD (with (1,1) unknown,
+  the corner rule makes the hand solution 4, not 2*sqrt(2)); latency not yet on target hardware
+Commit SHA: see the 2.2 commit on claude/kind-ptolemy-1wdqf5
+Next: Route Engine supplies the k_v bin values with their source (plan 6.5 / 19), then 2.3 leg ranges
 ```
 
 ## Phase-part completion record
