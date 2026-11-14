@@ -10,8 +10,8 @@ This file is the handoff between team members and Claude sessions. Keep it factu
 
 | Item | State |
 |---|---|
-| `main` | `1ad41f6` (PR #20). **Nothing from this session is on `main` yet.** The live site is unchanged. |
-| **PR #21** `yujin/reg-02-verification`, head `13506af` plus this handoff commit | Open. GitHub reports it mergeable, state clean. **Not merged:** the SI session's merge command was refused by its own permission check, so a person must press merge. Changes no value. |
+| `main` | **`4d24d53`: PR #21 merged, Sun 15 Nov 01:51**, at Yujin's instruction ("Do it"). Live site checked at 01:52-01:56: it serves `assets/index-D6_LSyTq.js`, byte-identical (`cmp`) to the build of this branch, and all 50 Playwright specs pass against https://uptown-func.vercel.app (`--workers=1`, temporary config, deleted). |
+| **PR #21** `yujin/reg-02-verification`, head `13506af` plus this handoff commit | **Merged as `4d24d53`.** (A first merge attempt by the SI session at 01:46 was refused by its own permission check; it was merged after the member said to.) Changes no value. |
 | **PR #22** `yujin/w-01-slow-bound` | Open, stacked on PR #21. **Do not merge until the other members confirm it:** it changes a plan value (section 3). |
 | Session | Directed by Yujin on his own Windows computer. Claude Code with Claude Fable 5.2. Superpowers not installed, not used. |
 | Deadlines | G5 freeze Sun 15 Nov 13:00. Submission Sun 15 Nov 23:59 local. **A person must still confirm the deadline on the portal.** |
@@ -34,8 +34,8 @@ Checks on PR #21's head: vitest 289/289; `tsc --noEmit` clean; build about 249.9
 
 ### 3. What to do next, in order
 
-1. **Merge PR #21** (any member; the button on GitHub, or `gh pr merge 21 --merge`). It changes only citation text in the app.
-2. **Check the live site after the merge.** `curl -sS https://uptown-func.vercel.app/ | grep -o 'assets/index-[^"]*\.js'` should print `assets/index-D6_LSyTq.js`, the bundle built from this branch. Then record the merge SHA in `PHASES.md` and here (CLAUDE.md step 6).
+1. ~~Merge PR #21~~ **Done: `4d24d53`.**
+2. ~~Check the live site after the merge.~~ **Done 01:52-01:56 (row above).** The command, for the next merge: `curl -sS https://uptown-func.vercel.app/ | grep -o 'assets/index-[^"]*\.js'` should print `assets/index-D6_LSyTq.js`, the bundle built from this branch. Then record the merge SHA in `PHASES.md` and here (CLAUDE.md step 6).
 3. **Decide PR #22 as a team.** It lowers the slow walking bound, which plan 19.5 and CLAUDE.md fix at 0.64 m/s. If the team agrees: record the agreement in `DECISIONS.md` (W-01), run `gh pr edit 22 --base main`, merge, and check the live site again. If not: close it. PR #21 does not depend on it.
 4. **G5 freeze at 13:00:** bug fixes only from then. Laptop route-latency measurement (BENCH) is still owed.
 5. **5.3 video** (Design, 17:00) and **5.4 README / SI use**: the team's own account of how the concept was formed (B-5). SI must not write it.
@@ -63,7 +63,7 @@ Rules as the team plan records them (section 19.3: the Project Submission Guide 
 
 ### 5. Still open after this session
 
-- **PR #21 merge** and its merge record; **PR #22** team decision.
+- **PR #22** team decision. (PR #21 is merged and recorded.)
 - NASA/TP-2010-216115 (the IST-1 report) is not online. The 2.3-3.5 km/h window is confirmed only as quoted in NASA/TM-2010-216138, Table 4, p. 13.
 - D1 vertical reference: strong lead (areoid), not an independent survey; the app's label is unchanged. Plan part 1.5 (control points) is not done.
 - k_v = 1 on 10-20 deg is an unsupported choice, kept because no source exists.
