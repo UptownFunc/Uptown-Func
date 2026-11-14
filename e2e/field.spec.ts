@@ -12,7 +12,7 @@ async function setTime(page: Page, label: string, minutes: string) {
 }
 
 test("field view: manual ticks drive est. field margins; the plan is never changed", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/?preset=none");
   await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
   await clickAt(page, STOP);
   await expect(page.getByTestId("legs")).toBeVisible({ timeout: 20_000 });

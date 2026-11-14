@@ -56,7 +56,7 @@ async function expectScreenLattice(page: Page, what: string) {
 
 test("the hatch stays on its screen-pixel lattice at every zoom and after a drag", async ({ page }) => {
   const problems = watch(page);
-  await page.goto("/");
+  await page.goto("/?preset=none");
   const map = page.getByTestId("area-map");
   await expect(map.locator("canvas").first()).toBeVisible();
   await expectScreenLattice(page, "at the 4 m/px load view");
@@ -81,7 +81,7 @@ test("with reduced motion the hatch is the same static image, and nothing on the
   const snap = async (reducedMotion: "reduce" | "no-preference") => {
     const ctx = await browser.newContext({ reducedMotion, viewport: { width: 1280, height: 800 } });
     const page = await ctx.newPage();
-    await page.goto("/");
+    await page.goto("/?preset=none");
     await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
     await expectScreenLattice(page, `(${reducedMotion})`);
     const pixels = await page.locator(".layer-terrain canvas").first().evaluate((c: HTMLCanvasElement) => {
@@ -100,7 +100,7 @@ test("with reduced motion the hatch is the same static image, and nothing on the
 
 test("the hatch does not get in the way: a stop is still placed and the route drawn", async ({ page }) => {
   const problems = watch(page);
-  await page.goto("/");
+  await page.goto("/?preset=none");
   await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
   await expectScreenLattice(page, "before placing a stop");
   await clickAt(page, STOP);
@@ -113,7 +113,7 @@ test("a terrain mask that fails to load is labelled, draws no partial hatch, and
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.route("**/area/terrain_steep.png", (r) => r.fulfill({ status: 404, body: "" }));
-  await page.goto("/");
+  await page.goto("/?preset=none");
   const map = page.getByTestId("area-map");
   await expect(map.locator("canvas").first()).toBeVisible();
   await expect(page.getByTestId("layer-errors")).toContainText("Terrain classes (slope-screened only, no rock detection) could not be loaded");

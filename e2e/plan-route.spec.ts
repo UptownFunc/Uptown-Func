@@ -7,7 +7,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { EXCLUDED, STOP, clickAt, pixelAt } from "./helpers";
 
 test("a click adds a stop through the engine worker and the route is drawn and listed", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/?preset=none");
   await expect(page.getByTestId("assumed-banner")).toContainText("ASSUMED placeholder");
   await expect(page.getByLabel("Plan", { exact: true })).toContainText("No stops yet.");
   await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
@@ -31,7 +31,7 @@ test("a click adds a stop through the engine worker and the route is drawn and l
 });
 
 test("a click on excluded ground is refused and the plan is unchanged", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/?preset=none");
   await expect(page.getByLabel("Plan", { exact: true })).toContainText("No stops yet.");
   await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
   await clickAt(page, EXCLUDED);
@@ -46,7 +46,7 @@ async function setTime(page: Page, label: string, minutes: string) {
 }
 
 test("planned margin stays unknown until every Assumed time is entered, then shows an est. range and a state", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/?preset=none");
   await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
   await expect(page.getByTestId("current-T_EVA")).toHaveText("not set");
   await clickAt(page, STOP);
@@ -69,14 +69,14 @@ test("planned margin stays unknown until every Assumed time is entered, then sho
 });
 
 test("a time without a rationale cannot be submitted", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/?preset=none");
   await expect(page.getByTestId("current-T_EVA")).toHaveText("not set");
   await page.getByLabel("Planned EVA duration (T_EVA), minutes").fill("240");
   await expect(page.getByRole("button", { name: "Set" }).first()).toBeDisabled();
 });
 
 test("profile scrubs both ways with the map, and margin ticks appear when the plan runs over", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/?preset=none");
   await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
   await clickAt(page, STOP);
   const profile = page.getByTestId("profile");
@@ -112,7 +112,7 @@ test("profile scrubs both ways with the map, and margin ticks appear when the pl
 });
 
 test("AC-05: every displayed quantity carries its class and sources, and opens its source (UX-15, beat 5)", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/?preset=none");
   await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
   await clickAt(page, STOP);
   await expect(page.getByTestId("legs")).toBeVisible({ timeout: 20_000 });

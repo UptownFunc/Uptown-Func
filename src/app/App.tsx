@@ -16,6 +16,7 @@ import { Provenance, type Quantity } from "../contracts";
 import { BriefingView } from "../briefing/BriefingView";
 import { FieldView } from "../field/FieldView";
 import type { MapSnapshot } from "../map/snapshot";
+import { G3_PRESET, presetEnabled } from "./demoPreset";
 
 const AREA_URL = "area/";
 /** H-01 (DECISIONS.md, pending team confirmation): the slope-screened cell nearest the plan 19.2 suggestion
@@ -78,6 +79,7 @@ export function App() {
   const [snapshot, setSnapshot] = useState<(() => Promise<MapSnapshot | null>) | null>(null);
   const outputRef = useRef(output);
   outputRef.current = output;
+  const sendRef = useRef<((type: string, payload: Record<string, unknown>) => void) | null>(null);
 
   useEffect(() => {
     const e = createEngine();
@@ -85,7 +87,13 @@ export function App() {
     let live = true;
     // Resolve against the page, not the worker script (whose URL differs in dev and build).
     e.api.init(new URL(AREA_URL, document.baseURI).href, DEFAULT_HABITAT)
-      .then((o) => { if (live) setOutput(o); })
+      .then((o) => {
+        if (!live) return;
+        outputRef.current = o;
+        setOutput(o);
+        // G3-01: the demonstration plan times and scenario time, as logged Commands (skipped with ?preset=none).
+        if (presetEnabled(window.location.search)) for (const a of G3_PRESET) sendRef.current?.("set_assumption", { ...a });
+      })
       .catch((err: unknown) => { if (live) setMessage(`Engine could not start: ${err instanceof Error ? err.message : String(err)}`); });
     return () => { live = false; e.terminate(); engine.current = null; };
   }, []);
@@ -113,6 +121,7 @@ export function App() {
       }
     });
   }, []);
+  sendRef.current = send;
 
   return (
     <div className="housing">

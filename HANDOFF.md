@@ -11,7 +11,7 @@ This file is the handoff between team members and Claude sessions. Keep it factu
 - History: `claude/trusting-fermi-c5pc0s` at 091866a (previous handoff) fast-forwarded, nothing overwritten, **plus 18 commits** from this session (17 before this handoff commit). `main` is **bb473b7**, unchanged. **No open PRs; nothing merged** (operator instruction: no merge, no PR without authorization).
 - Session: operated from **parcilla13's account**; Claude Code with **Claude Opus 5.5** throughout; Fable 5.2 not used; the Superpowers skill was installed and its test-driven-development workflow used.
 - Environment ("Space App", personal): allows `www.giss.nasa.gov` and `mars.nasa.gov` (added with the user's approval at 15:21); the USGS bucket and package registries were reachable. **`gdal-bin` 3.8.4 was installed in this container only** (P-05); a new container needs it again for contour rebuilds.
-- **Authorship:** the concept and project plan are credited to the **whole four-member team** (G-01, restored by G-07 at ~19:00 on the session operator's instruction; G-06's sole-authorship wording is superseded). The team, including Patrick, should confirm G-07. SI assistance is recorded separately in SI_LOG.md and never as the origin of the concept or plan.
+- **Authorship:** the concept and project plan are credited to the **whole four-member team** (G-01, restored by G-07 at 18:52 on the session operator's instruction; G-06's sole-authorship wording is superseded). The team, including Patrick, should confirm G-07. SI assistance is recorded separately in SI_LOG.md and never as the origin of the concept or plan.
 
 Do not interpret blank fields as proof that no work exists. Inspect GitHub and the working tree.
 
@@ -22,9 +22,9 @@ Do not interpret blank fields as proof that no work exists. Inspect GitHub and t
 - Baseline re-run on a fresh container at 82babb6: vitest 255/255 (23 files), tsc clean, build OK, pytest 59 passed + 2 skipped (before gdal-bin), licence inventory current, Playwright 43/43.
 - **RUN-01 (1.2):** full rebuild from the USGS sources reproduces all 13 committed area outputs (PHASES completion record). P-03 is still open.
 - No code, data, contract or decision changed. No PR opened, nothing merged. Open PRs: none (PR #1 merged earlier).
-- **Resolved ~19:00:** G-07 restores team credit (G-01). Contracts accepted as drafted for the merge (C-AGREE). The operator authorised the merge of the branch work into `main` and delegated the G3 input choices to the session.
+- **Resolved 18:52:** G-07 restores team credit (G-01). Contracts accepted as drafted for the merge (C-AGREE). The operator authorised the merge of the branch work into `main` and delegated the G3 input choices to the session.
 
-## Session update 19:35 (merge, PR #2)
+## Session update 19:00 (merge, PR #2)
 
 - PR parcilla13/Uptown-Func#2 (ccr-dbbcdd02-kqy23v -> main) carries all branch work plus G-07, C-AGREE and the R-15 review fixes. Checks at the merge head: vitest 262/262, tsc clean, build OK (~246.4 KB), pytest 61, Playwright 43/43. Merge commit: see PHASES and the PR once merged.
 

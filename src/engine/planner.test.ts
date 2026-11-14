@@ -437,3 +437,17 @@ describe("review R-15 follow-ups", () => {
     expect(geometry.marginTicks).toEqual([]);
   });
 });
+
+describe("G3-01 preset applied through set_assumption commands", () => {
+  it("is accepted by the engine and gives a computed end margin and sun values", async () => {
+    const { G3_PRESET } = await import("../app/demoPreset");
+    const { g, p } = plannerWithHabitat();
+    p.apply(cmd("add_stop", { ...at(g, 2, 38), name: "Far" }, p.current().plan.versionHash));
+    for (const a of G3_PRESET) expect(p.apply(cmd("set_assumption", { ...a }, p.current().plan.versionHash)).ok).toBe(true);
+    const { plan, conditions } = p.current();
+    expect(MissionPlan.safeParse(plan).success).toBe(true);
+    expect(plan.endMargin.valueClass).toBe("estimated");
+    expect(conditions.sunElevation.valueClass).toBe("model_derived");
+    expect(plan.assumptions.find((x) => x.id === "A-T_EVA")!.rationale).toMatch(/G3-01/);
+  });
+});

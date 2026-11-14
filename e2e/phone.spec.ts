@@ -5,7 +5,7 @@ import { devices, expect, test } from "@playwright/test";
 test.use({ viewport: devices["iPhone 13"].viewport, deviceScaleFactor: devices["iPhone 13"].deviceScaleFactor, isMobile: true, hasTouch: true });
 
 test("phone width: no sideways scroll, all views reachable, field view readable", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/?preset=none");
   await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
   const overflow = () => page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   expect(await overflow()).toBeLessThanOrEqual(0);

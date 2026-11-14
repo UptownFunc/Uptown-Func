@@ -766,7 +766,7 @@ Files changed (R-15): src/engine/{margin.ts,margin.test.ts,planner.ts,planner.te
   src/map/{snapshot.ts,AreaSheet.tsx}
 Tests written first and seen failing: 4 engine tests (one-cell leg, stop on habitat/same cell, scenario beyond the date
   range, no tick when OVER from the start), stopProfilePositions (module missing), fieldMarginAssumptionIds (not a function)
-Checks run (exact commands), Sat 14 Nov 2026 ~19:20-19:35 Asia/Manila, at the R-15 fix commits:
+Checks run (exact commands), Sat 14 Nov 2026 ~18:53-18:59 Asia/Manila, at the R-15 fix commits (times corrected 19:06 from commit times):
   npx vitest run                                   -> 262 passed / 262, 24 files
   npx tsc --noEmit                                 -> clean
   rm -rf dist && npm run build                     -> OK; main 205.39 kB gzip + worker 40,991 B (~246.4 of 250 KB, B-01)

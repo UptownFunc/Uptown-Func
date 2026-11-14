@@ -5,7 +5,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { STOP, clickAt } from "./helpers";
 
 test("contour lines and the simulated drill", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/?preset=none");
   const map = page.getByTestId("area-map");
   await expect(map.locator("canvas").first()).toBeVisible();
   await expect(page.getByLabel("Plan", { exact: true })).toContainText("No stops yet."); // engine ready
