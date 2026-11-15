@@ -2,7 +2,7 @@
 // The full-page steps of the guided flow: Welcome (the real terrain on a powered-up monitor), Setup (scenario and
 // conditions) and Planner (the time budget). Nothing here edits the plan: every change is a Command sent through
 // onSet / onApplyPreset to the engine.
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ArrowRight, FilePlus2, FlaskConical } from "lucide-react";
 import type { Quantity } from "../contracts";
 import type { PlanOutput } from "../engine/planner";
@@ -20,9 +20,11 @@ const WALK_PART = "Left for walking and margin";
 type OnSet = (id: string, value_s: number, rationale: string, stopId?: string) => void;
 
 /** ready: true when the engine is up, null when it could not start, false while loading. */
-export function Welcome({ onBegin, onSkip, ready }: { onBegin: () => void; onSkip: () => void; ready: boolean | null }) {
+/** FLOW-01: two choices, then the map: orientation or go, then the NASA-sourced preset or custom times. */
+export function Welcome({ onStart, ready }: { onStart: (tour: boolean, custom: boolean) => void; ready: boolean | null }) {
   const cover = useRef<HTMLDivElement>(null);
   const copy = useRef<HTMLDivElement>(null);
+  const [tour, setTour] = useState<boolean | null>(null);
   useEffect(() => {
     if (cover.current && copy.current) crtPowerOn(cover.current, [...copy.current.children] as HTMLElement[]);
   }, []);
@@ -35,13 +37,19 @@ export function Welcome({ onBegin, onSkip, ready }: { onBegin: () => void; onSki
             <p className="crt-kicker">SharpWalk · Mars walk planner · Gale crater</p>
             <h1 id="w-title" className="display">Plan the walk.{" "}<br />Know the margin.</h1>
             <p className="crt-lede">Route one crewed walk from the habitat to the Mount Sharp boxwork on real orbital terrain, and see how much time it leaves.</p>
-            <div className="crt-actions">
-              <button type="button" className="key big primary" onClick={onBegin}>Begin orientation<ArrowRight {...ICON} aria-hidden="true" /></button>
-              <button type="button" className="key big" onClick={onSkip}>Skip to mission setup</button>
+            <div className="crt-actions" role="group" aria-label={tour === null ? "Start" : "Plan times"}>
+              {tour === null ? <>
+                <button type="button" className="key big primary" onClick={() => setTour(true)}>Begin orientation<ArrowRight {...ICON} aria-hidden="true" /></button>
+                <button type="button" className="key big" onClick={() => setTour(false)}>Go</button>
+              </> : <>
+                <button type="button" className="key big primary" onClick={() => onStart(tour, false)}>NASA-sourced preset<ArrowRight {...ICON} aria-hidden="true" /></button>
+                <button type="button" className="key big" onClick={() => onStart(tour, true)}>Custom times</button>
+              </>}
             </div>
+            {tour !== null && <p className="crt-lede">Preset: times cited from NASA EVA documents, all Assumed. Custom: your own.</p>}
             <p className="ticker" role="status" data-ready={String(ready)}>
               <span className="lamp" aria-hidden="true" />
-              {ready ? `Terrain and route engine ready · orientation ${TOUR.length} cards, about 2 minutes`
+              {ready ? `Terrain and route engine ready · orientation ${TOUR.length} cards`
                 : ready === null ? "The route engine could not start · the map still opens" : "Loading terrain and route engine…"}
             </p>
           </div>

@@ -311,7 +311,7 @@ export function App() {
         </div>
         <span className="progress" aria-hidden="true" />
       </header>
-      {step === "welcome" && <Welcome onBegin={() => { go("setup"); setTour(true); }} onSkip={() => go("setup")} ready={output ? true : engineFailed ? null : false} />}
+      {step === "welcome" && <Welcome onStart={(t, custom) => { if (!custom && !presetEnabled(location.search)) applyPreset(); go(custom ? "planner" : "map"); setTour(t); }} ready={output ? true : engineFailed ? null : false} />}
       <main className="work" inert={step === "welcome"}>
         <div className="plate" inert={!onMap} aria-hidden={!onMap || undefined} data-tour="map"
           onPointerDown={(e) => { down.current = e.button === 0 && step === "map" && (e.target as HTMLElement).closest(".map") ? { x: e.clientX, y: e.clientY } : null; }}
@@ -359,7 +359,7 @@ export function App() {
             onSetTime={setTime} skyAt={showSky && skyState === "ok" ? skyAt : null} picked={picked} onPick={(id) => setPicked(id)}
             onMoveToCursor={cursor ? (stopId) => send("move_stop", { stopId, lat: cursor.lat, lon: cursor.lon }) : undefined} /></Appear>}
           {step === "assess" && <Appear key="assess" className="panel-host" enter={panelIn}><AssessPanel output={output} onOpenSource={openSource} drillMin={drillMin} onDrillMin={setDrillMin} busy={contourBusy}
-            next={next("brief", "Continue to the briefing")} toMap={toMap} /></Appear>}
+            next={next("hud", "Continue to the field HUD")} fix={next("map", "Back to the map: change the route")} toMap={toMap} /></Appear>}
           {step === "setup" && <Appear key="setup" className="screen-host" enter={panelIn}><SetupScreen output={output} rems={rems} rover={rover} onSet={setTime} onOpenSource={openSource}
             preset={presetEnabled(location.search)} onApplyPreset={applyPreset} next={next("planner", "Continue to the time budget")} /></Appear>}
           {step === "planner" && <Appear key="planner" className="screen-host" enter={panelIn}><PlannerScreen output={output} onSet={setTime} next={next("map", "Continue to the map")} /></Appear>}
@@ -367,7 +367,7 @@ export function App() {
         <BriefingView output={output} snapshot={snapshot} hidden={step !== "brief"} rover={rover}
           confirmed={confirmed} onConfirm={setConfirmed} next={next("hud", "Open the field HUD")} />
         {/* Kept mounted: the field view alone holds MissionExecution, so ticks survive step changes. */}
-        <FieldView output={output} hidden={step !== "hud"} briefed={!!version && confirmed === version} toMap={toMap} onExec={setFieldExec} />
+        <FieldView output={output} hidden={step !== "hud"} toMap={toMap} onExec={setFieldExec} />
         <AnimatePresence>
           {message && <Appear as="p" key={message.n} className="toast" data-kind={message.text.startsWith("Plan updated") ? "ok" : "hold"} data-testid="engine-message"
             enter={{ opacity: [0, 1], transform: ["translateY(-10px) scale(0.97)", "translateY(0px) scale(1)"] }} exit={{ opacity: [1, 0] }}><span aria-hidden="true">{message.text}</span>

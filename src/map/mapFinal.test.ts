@@ -92,7 +92,8 @@ describe("MAP-03 plan features in F1 (renderer-free)", () => {
 
 describe("TOUR-01 the tour opens on the screen the user is on", () => {
   it("names the first card of each step, and none for the welcome screen", () => {
-    expect(firstCardOf("setup")).toBe(0);
+    expect(firstCardOf("planner")).toBe(0);
+    expect(firstCardOf("setup")).toBe(-1); // FLOW-01: off the main flow, no card
     expect(TOUR[firstCardOf("map")]!.title).toBe("Point and click to place stops");
     expect(TOUR[firstCardOf("assess")]!.target).toBe("gauge");
     expect(firstCardOf("welcome")).toBe(-1);

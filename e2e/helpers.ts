@@ -66,7 +66,10 @@ export async function settle(page: Page): Promise<void> {
 
 /** Moves to a step with a real click on the masthead's step index, as a user does. */
 export async function goStep(page: Page, name: "Setup" | "Planner" | "Map" | "Assess" | "Brief" | "HUD"): Promise<void> {
-  await page.getByRole("navigation", { name: "Mission steps" }).getByRole("button", { name, exact: true }).click();
+  // FLOW-01: Setup, Planner and Brief are off the step index; a user reaches them by their link, so the spec does too
+  // (a hash change in the same page, so the plan and the ticks are kept).
+  if (name === "Setup" || name === "Planner" || name === "Brief") await page.evaluate((h) => { location.hash = h; }, `#${name.toLowerCase()}`);
+  else await page.getByRole("navigation", { name: "Mission steps" }).getByRole("button", { name, exact: true }).click();
   await settle(page);
 }
 

@@ -455,8 +455,9 @@ details[open] > summary::before { transform: rotate(90deg); }
 
 /* ---------- Field HUD (UX-12): arm's length ---------- */
 .field { font-size: var(--t-md); }
-.hud-brief { display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px; border-radius: 6px; font: 700 14px var(--ui); letter-spacing: 0.04em; background: var(--cream-2); color: var(--ink-2); }
-.hud-brief.ok { background: #d9efcf; color: var(--ok-ink); }
+/* FLOW-01: the plan is not feasible: said first, in the OVER word, shape and colour. */
+.infeasible { margin: 0 0 var(--s4); padding: 10px 12px; border: 2px solid var(--over-ink); border-radius: 8px; background: #ffe3dc; color: var(--over-ink); font: 600 var(--t-sm)/1.4 var(--ui); }
+.infeasible strong { text-transform: uppercase; letter-spacing: 0.04em; }
 .field-label { display: block; margin-bottom: 6px; font: 700 14px/1 var(--ui); letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); }
 .hud-next { margin: 16px 0; font: 800 32px/1.08 var(--display); font-variation-settings: "SOFT" 100, "WONK" 1; color: var(--ink); }
 .hud-leg, .hud-box { padding: 14px 16px; border-radius: 12px; background: var(--crt); color: var(--amber); border: 6px solid #1a0f09; }
@@ -785,7 +786,7 @@ details[open] > summary::before { transform: rotate(90deg); }
 /* ---------- B2 fit fixes ---------- */
 .legs caption.section-title { display: table-caption; caption-side: top; text-align: left; }
 .legs caption.section-title::after { display: none; }
-.hud-brief { margin-bottom: 14px; }
+
 .card-head .meta { max-width: 62%; }
 /* The readout leaves the bottom-right corner to the scale bar and the zoom keys. */
 .status { max-width: calc(100% - 236px); }
