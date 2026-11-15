@@ -9,22 +9,18 @@ Independent student project; not affiliated with or endorsed by NASA.
 
 ## Authorship and credits
 
-SharpWalk's concept, challenge framing, solution direction, requirements and project plan belong to the **whole
-four-member team** (DECISIONS G-01, restored by G-07). How the concept was formed is the team's account to give; it is
-pending in `SI_LOG.md`.
+**SharpWalk is an equally created team project by all four members.**
 
-Team: Patrick Ezekiel A. Arcilla, Christian Jesus Alcazar, Eugene Ibañez Jr. ("Yujin"), John Malubay. Recorded
-contributions (from git history and the project logs; roles not yet recorded are marked as such):
+Christian Jesus Alcazar, Patrick Ezekiel A. Arcilla, Eugene Ibañez Jr. ("Yujin") and John Malubay are equal co-creators and co-authors of the SharpWalk concept, challenge framing, solution direction,
+requirements, project plan and application (DECISIONS G-11). No member is the sole originator or the lead author. The
+names are in alphabetical order by surname; the order means nothing else.
 
-| Member | Recorded contributions |
-|---|---|
-| Patrick Ezekiel A. Arcilla | Committed the team's project plan (`docs/plan`, on branch `claude/lucid-ptolemy-nz6qpw`); repository owner; starter instructions and shared logs; G0 scaffold and shared contracts (commits as `parcilla13`) |
-| Eugene Ibañez Jr. (Yujin) | Directed and reviewed the Claude Code sessions of Sat 14 Nov 10:21-12:20 Asia/Manila (G0 review; data pipeline, geo, constants, route engine, leg and margin functions, AREA sheet part 1); merged PR parcilla13/Uptown-Func#1; governance decisions G-01 and G-02; directed the REG-02 verification of every register value, constant and citation (Sun 15 Nov, from 00:02) |
-| John Malubay | Directed the Claude Code session from Sat 14 Nov 12:57 Asia/Manila (engine worker, route and briefing, planned margin, field view, accessibility, tier-2 contours and drill, resilience, README); decisions G-05, K-01, G-06 (since superseded by G-07) and the instruction to apply the plan's defaults |
-| Christian Jesus Alcazar | Directed the Claude Code session from Sat 14 Nov 18:29 Asia/Manila (pipeline reproducibility check RUN-01, merge of the branch work into `main`, G3 inputs); decisions G-07 and C-AGREE (session account; to be confirmed by the team) |
+The implementation, science, engineering, design, testing and delivery are the team's shared work. The project logs
+(`SI_LOG.md`, `DECISIONS.md`, `PHASES.md`) record which member directed or reviewed each working session; those are
+working records, not a ranking of credit. The repository is hosted under the GitHub account `parcilla13` for the team.
 
-Code in this repository was drafted with SI assistance under these members' direction; see **SI use** below. SI is not
-credited with the concept, the plan or any team decision.
+SI assistance is disclosed separately under **SI use** below and in `SI_LOG.md`. Code and documents were drafted with
+SI assistance at the members' direction. SI is not credited with the concept, the plan or any team decision.
 
 ## What it does
 
@@ -141,8 +137,8 @@ it.
   Playwright, typecheck, build) and after review findings were fixed or recorded in `DECISIONS.md`; human review of
   the code is still pending (no module owner has signed it off).
 - **What people decided, not SI:** the concept and plan (the whole team); governance and scientific choices
-  such as G-01/G-02 (Yujin), G-05, K-01 (k_v = 1 in every bin), G-06 and applying the plan's defaults (John
-  Malubay), G-07 and the contract agreement C-AGREE (Christian Jesus Alcazar). Local Lead approvals were not chosen by SI.
+  such as G-01/G-02, G-05, K-01 (k_v = 1 in every bin), applying the plan's defaults, G-07, the contract agreement
+  C-AGREE and the equal-credit decision G-11 (the session operators are named per entry in `DECISIONS.md` and `SI_LOG.md`). Local Lead approvals were not chosen by SI.
 - **Values picked by SI at a team member's direction (G3-01, then REG-01):** on Sat 14 Nov 2026 a team member asked
   the SI session to choose the G3 inputs the plan leaves open ("for g3 needed you choose"); SI chose unsourced
   demonstration values. Later that day a team member asked for every placeholder to be replaced by a sourced value

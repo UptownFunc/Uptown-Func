@@ -12,8 +12,8 @@ The plan is the project authority. **Section 19 overrides earlier sections where
 
 ## Authorship and attribution
 
-- The SharpWalk team (all four members) originated and owns the project concept, challenge framing, solution direction, requirements and project plan. Attribute these to the team only (DECISIONS G-01, restored by G-07).
-- Credit the team members (Patrick Ezekiel A. Arcilla, Christian Jesus Alcazar, Eugene Ibañez Jr. "Yujin", John Malubay) for their actual implementation, data, design, review and delivery contributions as recorded in git and the logs; never invent a contribution. How the concept was formed is the team's account to give; do not write it for them.
+- **SharpWalk is an equally created team project by all four members.** Christian Jesus Alcazar, Patrick Ezekiel A. Arcilla, Eugene Ibañez Jr. ("Yujin") and John Malubay are equal co-creators and co-authors of the concept, challenge framing, solution direction, requirements, project plan and application (DECISIONS G-11, which confirms G-01 and G-07). Never present one member as the sole originator or the lead author, in any file or submission text. List the names alphabetically by surname.
+- Credit implementation, science, engineering, design, testing and delivery as the team's shared work. Records of who directed or reviewed a session (`SI_LOG.md`, `DECISIONS.md`, git) are working records, not a ranking of credit; never invent a name, a role or an individual contribution. How the concept was formed is the team's account to give; do not write it for them.
 - Do not credit Claude or another SI tool with originating the concept, framing, solution approach, or user/team decisions. Do not present SI as the source of the project idea.
 - Record actual SI assistance transparently where required by the challenge, using `SI_LOG.md` and the submission disclosure. This operational disclosure does not transfer authorship or ownership of the project concept to an SI tool. Never invent, omit, or misstate what a tool contributed.
 

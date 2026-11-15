@@ -2,6 +2,19 @@
 
 This file is the handoff between team members and Claude sessions. Keep it factual and current. A new session must read this file before touching code.
 
+## Credits branch (Sun 15 Nov 2026, about 13:45 Asia/Manila, container clock): for team review, NOT merged
+
+- **Branch `credits/equal-team-authorship`**, from `main` 943d30e. Documents only: `README.md`, `CLAUDE.md`, `LICENSE`,
+  `SI_LOG.md`, `DECISIONS.md` (G-11), `PHASES.md`, `HANDOFF.md`. No code, test, value or dataset changed.
+- **What it says:** SharpWalk is an equally created team project by all four members; no sole originator, no lead
+  author; work credited as shared; SI disclosed separately. It settles the authorship question left open in the
+  sections below (G-04, G-06 to G-10); read those as history.
+- **For the team to check before merging:** the four names and their spelling; the `LICENSE` copyright line; that
+  replacing the README's per-member table with the shared-work statement is what everyone wants; and the "Concept
+  origin" section of `SI_LOG.md`, which only the team can write.
+- **To merge after review:** open a pull request from the branch into `main`; docs only, so `npx vitest run` and
+  `npx tsc --noEmit` are the checks.
+
 ## MERGED INTO MAIN (Sun 15 Nov 2026, 13:27 Asia/Manila, container clock): start here
 
 - **`main` = merge commit `b0896ad`** (parents `ca2504a` = previous `main`, `52965ae` = `design/sharpwalk-ui-ux`), plus
@@ -32,7 +45,7 @@ This file is the handoff between team members and Claude sessions. Keep it factu
 - **If the live site is wrong:** in Vercel, promote the previous production deployment (instant), then on a branch
   `git revert -m 1 b0896ad` and open a pull request. Do not force-push `main`.
 - **Still open for people:** the other members' written review of the redesign (UI-01 to UI-16, MOT-04); BUILD-01
-  (worker build layout); authorship wording (G-08 to G-10, unchanged: whole team); EL-01; pull request #22 (W-01); the
+  (worker build layout); authorship wording (settled by G-11 on branch `credits/equal-team-authorship`, awaiting team review); EL-01; pull request #22 (W-01); the
   team's confirmation of REG-01; G5 two-machine demo on the new interface; the card on paper; the video and the
   submission.
 

@@ -190,6 +190,10 @@ Playwright 67/67, pytest 82 passed + 2 skipped, licences current):
 | Blocked on people | Merge of the design branch (team approval); BUILD-01 (Route Engine owners); G-08 / G-09 (authorship wording); PR #22 (W-01); the team's confirmation of REG-01 |
 | Pending, not started | EL-01 (elevation grid requested twice); card printed on paper; phone in daylight; browsers other than Chromium; on `main`: the plan's freeze, video and submission steps (older sections of this file) |
 
+**Credits (Sun 15 Nov, about 13:45 Asia/Manila; G-11): on branch `credits/equal-team-authorship`, NOT merged.** Documents only
+(README credits, CLAUDE.md authorship rules, LICENSE copyright line, SI_LOG concept-origin line, records). Guard checks on
+the branch: `npx vitest run` 302/302, `npx tsc --noEmit` exit 0. Waiting for the team's review.
+
 **MERGED (Sun 15 Nov, 13:27 Asia/Manila; MERGE-02): `main` = merge commit `b0896ad`** (parents ca2504a, 52965ae), pushed without
 force; remote head verified with `git ls-remote`. Checks at 52965ae on a fresh `npm ci`: vitest 302/302, tsc exit 0, build
 OK, bundle 238,771 B of 250,000 B, Playwright 67/67, pytest 82 passed + 2 skipped, licences current; the merge tree is
