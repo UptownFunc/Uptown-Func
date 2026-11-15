@@ -1406,3 +1406,16 @@ Checks run: npx tsc --noEmit; npx vitest run (docs-only change; run for complete
 Results: tsc clean; vitest 331/331; review 0 findings; no code changed
 Next part / blocker owner: the other three members confirm their roles (G-12)
 ```
+
+```text
+Part: SUB-01 - README top links (live app, SI pointer, References) for the submission
+Owner: this cloud session's operator (a team member: "do the readme needed for now"); SI-assisted (Claude Code,
+  Claude Opus 5.5)
+Status: VERIFIED (docs only)
+Scope completed: README.md, three lines under the introduction; DECISIONS SUB-01
+Checks run: npm ci; npx tsc --noEmit; npx vitest run (docs-only change; run for completeness); anchors #si-use and
+  #references match the headings; curl of https://uptown-func.vercel.app/ -> 200; /code-review low
+Results: tsc clean; vitest 331/331 (34 files); live site 200; /code-review low: 1 finding (SI_LOG wording), fixed
+Next part / blocker owner: Captain - choose the portal Project link (recommended: the GitHub repository) and check
+  both links in a private window; FortiGuard request optional (HANDOFF section 3, task 4)
+```

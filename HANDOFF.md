@@ -2,6 +2,12 @@
 
 This file is the handoff between team members and Claude sessions. Keep it factual and current. A new session must read this file before touching code.
 
+## Submission links (Sun 15 Nov 2026, about 19:00 Asia/Manila): SUB-01. Start here
+
+- The 2026 Project Submission Guide (dated 13 Nov 2026) allows a website **or** a code repository as the Project link. Judges see SI indicators only inside the project, and the live app shows none, so the recommended Project link is **https://github.com/UptownFunc/Uptown-Func**. The README now opens with the live app URL, an SI pointer and a References pointer (DECISIONS SUB-01).
+- From the guide: demo of 30 seconds or less, or at most 7 slides including title and intro (over the limit = not eligible for Global Judging); English (subtitles if spoken in another language); nobody under 18; all members confirmed at the same Local Event; click **Submit for Judging** before 23:59 local; resubmitting is allowed and the last saved version is judged. FortiGuard classification of a new website is recommended, not required.
+- **For people:** check both links in a private window; write the concept-origin account in `SI_LOG.md`; make the demo; fill the fields; submit.
+
 ## README team credits (Sun 15 Nov 2026, about 18:45 Asia/Manila): G-12. Start here, then the MERGE-06 section below
 
 - The README's "Authorship and credits" section is now "Team": whole-team credit and one role per member, as a member set them (DECISIONS G-12). **The other three members should confirm their roles.**
