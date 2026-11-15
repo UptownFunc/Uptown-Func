@@ -79,7 +79,8 @@ export function AssessPanel({ output, onOpenSource, drillMin, onDrillMin, busy, 
           <h1>Return margin</h1>
           <p>What the walk leaves of the EVA, with the route as planned.</p>
         </header>
-        {bad && <p className="infeasible" role="alert" data-testid="assess-infeasible"><strong>Plan not feasible</strong> ({bad}). Estimate under stated assumptions.</p>}
+        {bad && <div className="infeasible big" role="alert" data-testid="assess-infeasible"><strong>Plan not feasible</strong> ({bad}). You can either change the time values or redraw the plan.
+          Estimate under stated assumptions.<div className="fix">{fix}</div></div>}
         <div className="verdict-block" data-testid="assess-margin" data-tour="gauge">
           <Meter angle={needleAngle(low, tEva)} live={low !== null && tEva !== null} />
           <span className="k"><Term k="margin">Planned return margin</Term></span>
@@ -110,7 +111,7 @@ export function AssessPanel({ output, onOpenSource, drillMin, onDrillMin, busy, 
         <p className="section-title"><Term k="toHab" /></p>
         <DrillPanel output={output} drillMin={drillMin} onDrillMin={onDrillMin} busy={busy} />
       </div>
-      <div className="side-foot">{bad ? fix : next}</div>
+      {!bad && <div className="side-foot">{next}</div>}
     </aside>
   );
 }

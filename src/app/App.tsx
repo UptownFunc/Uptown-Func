@@ -22,6 +22,7 @@ import { Provenance, type MissionExecution, type Quantity } from "../contracts";
 import { BriefingView } from "../briefing/BriefingView";
 import { FieldView } from "../field/FieldView";
 import { progressOf } from "../field/progress";
+import { infeasible } from "./feasible";
 import type { MapSnapshot } from "../map/snapshot";
 import { DEMO_PRESET, presetEnabled } from "./demoPreset";
 import { STEPS, stepFromHash, type StepId } from "./steps";
@@ -297,7 +298,7 @@ export function App() {
           <ol>
             {STEPS.map((s, i) => (
               <li key={s.id}>
-                <button type="button" className="step-key" aria-current={step === s.id ? "step" : undefined} data-done={visited.has(s.id) && s.id !== step} onClick={() => go(s.id)}>
+                <button type="button" className="step-key" disabled={s.id === "hud" && !!output && !!infeasible(output)} aria-current={step === s.id ? "step" : undefined} data-done={visited.has(s.id) && s.id !== step} onClick={() => go(s.id)}>
                   <span className="lamp" aria-hidden="true" /><span className="no" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span><span>{s.label}</span>
                 </button>
               </li>
@@ -358,7 +359,7 @@ export function App() {
             onSetTime={setTime} skyAt={showSky && skyState === "ok" ? skyAt : null} picked={picked} onPick={(id) => setPicked(id)}
             onMoveToCursor={cursor ? (stopId) => send("move_stop", { stopId, lat: cursor.lat, lon: cursor.lon }) : undefined} /></Appear>}
           {step === "assess" && <Appear key="assess" className="panel-host" enter={panelIn}><AssessPanel output={output} onOpenSource={openSource} drillMin={drillMin} onDrillMin={setDrillMin} busy={contourBusy}
-            next={next("hud", "Continue to the field HUD")} fix={next("planner", "Change the times or the route")} toMap={toMap} /></Appear>}
+            next={next("hud", "Continue to the field HUD")} fix={<>{next("planner", "Change the time values")}{next("map", "Redraw the plan")}</>} toMap={toMap} /></Appear>}
           {step === "setup" && <Appear key="setup" className="screen-host" enter={panelIn}><SetupScreen output={output} rems={rems} rover={rover} onSet={setTime} onOpenSource={openSource}
             preset={presetEnabled(location.search)} onApplyPreset={applyPreset} next={next("planner", "Continue to the time budget")} /></Appear>}
           {step === "planner" && <Appear key="planner" className="screen-host" enter={panelIn}><PlannerScreen output={output} onSet={setTime} next={next("map", "Continue to the map")} /></Appear>}

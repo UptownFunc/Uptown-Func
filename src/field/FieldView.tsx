@@ -91,7 +91,7 @@ export function FieldView({ output, hidden = false, next, toMap, onExec }: { out
           <label className="hud-elapsed"><span className="field-label">Elapsed EVA time, min</span>
             <input inputMode="decimal" value={minutes} onChange={(ev) => setMinutes(ev.target.value)} aria-label="Elapsed EVA time, minutes" /></label>
           {/* While ticks from an older plan exist, ticking is blocked until the crew explicitly starts over. */}
-          <button type="submit" className="go big" disabled={!next0 || stale}>
+          <button type="submit" className="go big" disabled={!next0 || stale || !!bad}>
             {next0 ? `Tick: ${next0.kind} ${stopOf(next0.stopId)?.letter}` : "All ticked"}
           </button>
           {error && <div className="field-error" role="alert">{error}</div>}
