@@ -2,7 +2,67 @@
 
 This file is the handoff between team members and Claude sessions. Keep it factual and current. A new session must read this file before touching code.
 
-## Latest (Sun 15 Nov 2026, 14:14-15:00 Asia/Manila): orientation timing and interaction polish on `yujin/ux-polish`, NOT merged
+## HANDOFF (Sun 15 Nov 2026, 15:10 Asia/Manila): start here
+
+Written at Yujin's request ("Merge to main now, and prepare a handoff. Push."). It replaces the two sections below it as
+the starting point; they keep the detail.
+
+### 1. State right now
+
+| Item | State |
+|---|---|
+| `main` | **`598cafe`** = merge of PR #26 (UX-17..UX-21), Sun 15 Nov 15:03, at Yujin's instruction (DECISIONS MERGE-03), plus this handoff's logs merge. |
+| Live site | **Checked 15:04-15:09:** https://uptown-func.vercel.app serves `assets/index-5xmFCMnS.js` and `engine-worker.js`, both byte-identical (`cmp`) to a local build of `598cafe`; the full Playwright suite against the live URL: **74/74** (`--workers=1`). This also closes the open check from MERGE-02: the Bureau redesign is live and working. |
+| Checks on `main` | vitest 311/311; `tsc --noEmit` clean; build OK; JavaScript 238,947 B gzip of 250,000 (AC-12). |
+| Open pull requests | **#22** (W-01, slow walking bound 0.56 m/s): **conflicts with `main`**; waits for the team. Branch `credits/equal-team-authorship` (G-11) has no pull request. |
+| Freeze | G5 was 13:00 (bug fixes only). Two merges came after it, both recorded as exceptions on a member's instruction: MERGE-02 (Bureau, 13:27, parcilla13's account) and MERGE-03 (UX polish, 15:03, Yujin). |
+| Deadline | Submission Sun 15 Nov 23:59 local. **A person must confirm it on the portal.** Resubmitting is allowed; the last saved version is judged. |
+
+### 2. What is on `main` now (since the REG-02 handoff further down)
+
+1. **Bureau redesign (MERGE-02):** guided flow (Welcome, Setup, Planner, Map, HUD, Assess, Brief), the 1970s office look, orientation tour, point and click with a stop card, return-margin meter. Fonts Fraunces, Barlow Semi Condensed and VT323; `motion` 14.11.1 and `lucide-react` 1.73.0.
+2. **UX polish (MERGE-03, DECISIONS UX-17..UX-21):** the tour's words, spotlight and card move together (on target at 220-345 ms, was 630-1,055 ms); short copy with a "try it" line that turns to Done when the plan shows it; card placement beside, below or above its control; one key for Next and Finish; each card announced; an old refusal cleared on the next click; the cursor tag's text kept inside the tag.
+3. **Science values:** unchanged since REG-02 (every value checked against its source; no constant unresolved; AC-09 3 of 3).
+
+### 3. What the team must do before 23:59, in order
+
+| # | Task | Owner | Note |
+|---|---|---|---|
+| 1 | Confirm the deadline on the portal | Captain | Late saves are not eligible |
+| 2 | Concept-origin account in `SI_LOG.md` (section "Concept origin and SI boundary") and README | **The team, not SI** | The 2026 rule: SI must not be used to come up with the idea. G-07..G-10 and G-11 (authorship) are open: settle them in writing first |
+| 3 | Video (5.3) | Design | No SI-generated image without a visible watermark; no NASA logo; nobody under 18 |
+| 4 | Two-machine check of the public site and the FortiGuard request (5.5, G5-DEFER) | Captain + one member | Steps in `docs/DEPLOY.md` |
+| 5 | Submission fields | Captain | References field: copy the README References (every dataset, document, package and font). SI field: from `SI_LOG.md` |
+| 6 | Decide PR #22 (W-01) | Data and Science | If accepted: rebase it on `main` (it conflicts), run the checks, merge, check the live site. If not: close it |
+| 7 | Submit, then resubmit after any fix | Captain | |
+
+### 4. Rules check (plan 19.3) for what changed today
+
+The full rule-by-rule table is in "Handoff: Yujin's session", section 4, further down. Changes since then:
+
+- **New dependencies** (`motion` MIT, `lucide-react` ISC, three SIL OFL fonts) are listed in README References. `docs/licences.md` was updated by the design branch; `scripts/licences.py` could not be re-run on Windows (it needs the Linux `.venv`): **re-run it in the cloud container before submitting.**
+- **SI images:** the design sessions generated 25 Higgsfield exploration images; none is shipped or used as data (SI_LOG). The one image added since, `docs/data/ac-09-mars24-third-date.png`, is a screenshot of NASA's Mars24 app taken by a member.
+- **SI disclosure:** every session today has an `SI_LOG.md` row and every commit an `SI-assisted:` trailer.
+
+### 5. Known issues (not blockers)
+
+- `scripts/bundle-size.mjs` fails on Windows (it builds the path as `D:\D:\...`); measure there with a gzip-9 sum of `dist/**/*.js`.
+- Playwright on a 4-core Windows computer: run with `--workers=1` (parallel runs fail specs at random).
+- EL-01: the elevation grid is still downloaded twice. BUILD-01: the worker build layout awaits the Route Engine owners.
+- `HANDOFF.md` repeats one heading ("Latest session (Sat 14 Nov 2026, 23:07-23:59 ...)") above Yujin's session section: a merge leftover, harmless.
+
+### 6. Commands
+
+```bash
+git fetch origin && git checkout main && git pull --ff-only
+npm ci && npx vitest run && npx tsc --noEmit && rm -rf dist && npm run build
+npx playwright test --trace off --workers=1
+curl -sS https://uptown-func.vercel.app/ | grep -o 'assets/index-[^"]*\.js'      # expect assets/index-5xmFCMnS.js
+```
+
+If the live site is ever wrong: promote the previous production deployment in Vercel (instant), then on a branch `git revert -m 1 <merge commit>` and open a pull request. Never force-push `main`.
+
+## Earlier (Sun 15 Nov 2026, 14:14-15:00 Asia/Manila): orientation timing and interaction polish on `yujin/ux-polish` (merged at 15:03 as `598cafe`, MERGE-03)
 
 - **Branch:** `yujin/ux-polish` from `main` `943d30e`; commit `6fb67ca` plus logs. **Not merged:** it comes after the G5 freeze, so the team decides.
 - **What changed (DECISIONS UX-17..UX-21):** the tour's words, spotlight and card now move together (words in the frame of the press, spotlight on target at 220-345 ms, was 630-1,055 ms); shorter copy with a "try it" line that turns to Done when the plan shows it; the card is placed beside, below or above its control; keyboard focus stays on one key; each card is announced; a refusal no longer outlives the next click; the cursor tag's words fit.
