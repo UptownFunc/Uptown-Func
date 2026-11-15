@@ -2,7 +2,15 @@
 
 This file is the handoff between team members and Claude sessions. Keep it factual and current. A new session must read this file before touching code.
 
-## BRANCH (Sun 15 Nov 2026, about 17:55 Asia/Manila): HUD after the briefing, margin logic cross-checked. Not merged
+## MERGED (Sun 15 Nov 2026, about 18:00 Asia/Manila): PR #31 (MERGE-05). Start here
+
+- **`main` = `be056b7`** (PR #31): HUD last in the flow (UI-17), planned vs field margin cross-check (LOGIC-01), slow walking bound **0.56 m/s** (W-01, re-checked in W-02, `docs/data/w-02-walking-speed.md`). PR #22 closed as superseded.
+- **Live site:** serves `assets/index-BahgxpwT.js` and `engine-worker.js`, byte-identical to a local build of `be056b7`; Playwright against the live URL 75/76 on the first run, the one failure (map slow to load) passed 3/3 on rerun.
+- **Open PR #30** (Midori-404, map and tour): not merged, incomplete by its own description; it must merge `main` (UI-17 touches the same tour and step files) and rerun its checks.
+- **For the team:** the other two members confirm W-01/W-02 and UI-17 in `DECISIONS.md`; decide the elapsed-time label (LOGIC-01). Everything in the 15:10 handoff section 3 still stands.
+- Checks on `main`: tsc clean; vitest 320/320; Playwright 76/76 locally; JS 242,912 B of 250,000.
+
+## BRANCH (Sun 15 Nov 2026, about 17:55 Asia/Manila): HUD after the briefing, margin logic cross-checked (merged at 18:00 as part of PR #31)
 
 - **Branch `claude/eager-hypatia-3w23ko`** (from `main` `c60d37e`). Step order is now Setup -> Planner -> Map -> Assess -> Brief -> HUD (DECISIONS UI-17), because the HUD is used during the walk. New test `src/field/consistency.test.ts` shows the HUD reproduces the planned margins when the crew is on plan (LOGIC-01).
 - **Checks:** tsc clean; vitest 318/318; Playwright 76/76; JS 242,650 B of 250,000; /code-review low: 0 findings.
