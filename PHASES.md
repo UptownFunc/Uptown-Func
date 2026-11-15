@@ -1311,6 +1311,39 @@ Live site: assets/index-YVIcYmuh.js and engine-worker.js byte-identical (cmp) to
 Next part / blocker owner: 3D upgrade (separate phase) from d97ff38; Design review of MAP-01..MAP-08 and TOUR-01
 ```
 
+```text
+Part: 3D-VIEW - 3D view of the AREA sheet on the 2D baseline (3D-01..3D-08, B-02, E2E-06)
+Owner: session operator (cloud session from the claude.ai web app; member not named); SI-assisted (Claude Code, Claude Opus 5.5)
+Status: VERIFIED on the branch claude/practical-johnson-hbw41e; NOT merged (team approval required, MERGE-07)
+Scope completed: CesiumJS 1.147.0 on demand (no ion); terrain from the engine's D1 grid through src/geo, no exaggeration;
+  D2 in its published colour (new pipeline step) with the D1 hillshade; terrain classes and strength; route, habitat and
+  stops from the shared plan features; camera keys; readout; 2D/3D switch keeping all state; failure returns to 2D;
+  grade along the route in the profile. 2D sheet unchanged as the fallback (one crossOrigin attribute added).
+Files changed: src/map3d/{vendor,heights,scene,TerrainView}.ts(x) and tests (new), src/engine/worker.ts (read-only
+  heights and sample), src/app/{App.tsx,RouteProfile.tsx,styles.css}, src/map/AreaSheet.tsx, vite.config.ts,
+  scripts/{bundle-size.mjs,licences.py}, package.json, package-lock.json, docs/licences.md, playwright.config.ts,
+  e2e/map-3d.spec.ts (new), pipeline/sharpwalk/run_colour.py (new), pipeline/tests/test_area_outputs.py,
+  public/area/d2_colour.{jpg,json} (new); logs
+Checks run (exact commands), cloud container, Node 22.23.4:
+  npx vitest run ; npx tsc --noEmit ; rm -rf dist && npm run build && node scripts/bundle-size.mjs ;
+  PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome npx playwright test --trace off ;
+  (cd pipeline && ../.venv/bin/python -m pytest) ; .venv/bin/python scripts/licences.py --check
+Results: vitest 336/336 (36 files); tsc clean; AC-12 application JavaScript 248,118 B of 250,000 (without 3D);
+  3D view chunk 6,756 B of 10,000; CesiumJS vendor 2,112,862 B of 2,120,000, unmodified; Playwright 95/95 (9 new 3D);
+  pytest 83 passed, 2 skipped; licences current.
+Measurements (local vite preview, software WebGL, 1440 x 900): first load JavaScript unchanged (248,118 B gzip);
+  entering 3D fetches the 3D chunk (6,756 B gzip), Cesium.js (6,095,011 B raw, 1,774,242 B gzip; served compressed in
+  production), approximateTerrainHeights.json (299,471 B), one IAU2006 table (65,310 B), d2_colour.jpg (2,500,701 B)
+  and the hillshade again (1,692,188 B; a 304 revalidation in production); 3D ready 2.8-2.9 s, first terrain complete
+  5.5-5.8 s, a close-up refined in 7-8 s; JS heap unchanged at 44.7 MB (textures live on the GPU).
+Known limitations: 3D-08 (coverage is the sheet only; D1 vertical reference unverified; AC-15 control points not
+  recorded; D2 colour as published, not calibrated); grazing-angle texel stretch near the horizon with the mouse tilt;
+  only Chromium with software WebGL tested here; no real GPU, no other browser.
+Review status: /code-review to follow on the PR diff (R-31). Playwright note: 95/95 = app project 86/86 (full run) + 3D project 9/9 (rerun after a 1 % tolerance fix to the reset test)
+Commit SHA: 0112e90 (D2 colour), d8241c0 (vendor and budget), 9de97b6 (3D view), plus the logs commit
+Next part / blocker owner: the team approves (or not) the 3D pull request (MERGE-07); Data and Science: 3D-03, 3D-04
+```
+
 ## Phase-part completion record
 
 Copy this block for every phase part and update its table row above:

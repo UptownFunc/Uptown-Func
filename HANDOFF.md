@@ -2,6 +2,14 @@
 
 This file is the handoff between team members and Claude sessions. Keep it factual and current. A new session must read this file before touching code.
 
+## 3D view (Sun 15 Nov 2026, from about 18:15 Asia/Manila): branch `claude/practical-johnson-hbw41e`, NOT merged yet. Start here
+
+- **What:** a 3D view of the AREA sheet, opened with the 2D/3D switch on the plate (DECISIONS 3D-01..3D-08, B-02). Terrain is D1 from the engine's grid, at true scale. The image is D2 in its published colour, with the D1 hillshade. The view shows the route, the habitat and the stops, uses the same layer switches, keys and readout, and shares the profile scrub with 2D. The 2D sheet is unchanged underneath and is where the app goes back to if 3D fails.
+- **Budget (operator's decisions B-02, B-02 amended):** AC-12 (250,000 B) checks everything loaded without opening 3D: **248,118 B**. The 3D view's chunk is checked at **6,756 B of 10,000**, and Cesium's unmodified files at **2,112,862 B of 2,120,000**. `npm run build && node scripts/bundle-size.mjs` checks all three.
+- **Checks:** vitest 336/336; tsc clean; Playwright 95/95 (the 3D spec runs as a second project after the rest); pytest 83 + 2 skipped; licences current.
+- **For people:** team approval to merge (MERGE-07); Data and Science to confirm 3D-03 (the F1 sphere as the globe, D-05 still open) and 3D-04 (the D2 colour step); Design to review the look.
+- **Not done / limits:** nothing beyond the 3 x 3 km sheet; contours, time lines and the sky layer stay 2D-only; only headless Chromium with software WebGL tested here.
+
 ## MERGED (Sun 15 Nov 2026, about 18:30 Asia/Manila): final 2D map baseline (MERGE-06). Start here
 
 - **`main` = `d97ff38`** (PR #30), plus the MERGE-05 and MERGE-06 records (PRs #32, #33). Its tree is identical to the approved branch. The live site serves `assets/index-YVIcYmuh.js` and `engine-worker.js`, byte-identical to a local build of `d97ff38`. Playwright passed **86/86 against the live URL**.
