@@ -2,13 +2,18 @@
 
 This file is the handoff between team members and Claude sessions. Keep it factual and current. A new session must read this file before touching code.
 
-## Final 2D map baseline (Sun 15 Nov 2026, from 17:09 Asia/Manila): branch `claude/practical-johnson-hbw41e`, PR #30, NOT merged yet
+## Final 2D map baseline (Sun 15 Nov 2026, from 17:09 Asia/Manila): branch `claude/practical-johnson-hbw41e`, PR #30, approved and being merged (MERGE-06)
 
 - **What:** the final 2D map that the 3D upgrade will branch from (DECISIONS MAP-01..MAP-08, TOUR-01, UX-24, UX-25, R-30). The load view now shows the whole sheet, with the habitat (before, the habitat was off screen). The sheet has its own keys (zoom, fit the route, whole sheet). The Layers panel has switches, a strength slider and a key. The sheet shows its own loading and error states, with Try again. The tour opens on the current step and follows the user's navigation. Empty HUD and Assess lead to the Map. **No 3D code**; no engine, contract, constant, dataset or value change.
 - **For the 3D upgrade:** use `src/map/planGeometry.ts` (the plan as F1 features; project to F5 with `f1ToF5`) and `src/map/layers.ts` (`MapLayers`, the console's layer state). The 2D sheet does not depend on either 3D or Cesium. Its view is published on `data-view-f7`, and the e2e helpers `pixelAt`, `mapView` and `zoomTo` read it.
 - **Checks at `ab0ff2b`:** vitest 327/327; tsc clean; JS 245,635 B of 250,000 (**about 4.4 kB left**); Playwright 86/86; pytest 82 + 2 skipped; licences current. /code-review high R-30: 7 findings, all fixed.
-- **Blocker:** the brief requires **team approval before merging**, and this comes after the G5 freeze (MERGE-05). To merge once approved: merge PR #30 with a merge commit (no squash, no force push), then check the live site as in MERGE-04 (`curl -sS https://uptown-func.vercel.app/ | grep -o 'assets/index-[^"]*\.js'` against a local build of the merge commit).
+- **Approval and merge:** the operator confirmed the team's approval (MERGE-06). `main` had moved to `be056b7` (PR #31: HUD last, slow bound 0.56 m/s); it was merged into the branch and every check rerun: tsc clean, vitest 331/331, JS 245,896 B, Playwright 86/86. Then PR #30 was merged with a merge commit; the SHA and the live-site check are in the follow-up record. Live-site check: `curl -sS https://uptown-func.vercel.app/ | grep -o 'assets/index-[^"]*\.js'` against a local build of the merge commit (this container's network may refuse the site; a person may need to run it).
 - **Open for people:** a Design review of the map and tour changes; everything in the 15:10 handoff, section 3, below.
+## BRANCH (Sun 15 Nov 2026, about 17:55 Asia/Manila): HUD after the briefing, margin logic cross-checked. Not merged
+
+- **Branch `claude/eager-hypatia-3w23ko`** (from `main` `c60d37e`). Step order is now Setup -> Planner -> Map -> Assess -> Brief -> HUD (DECISIONS UI-17), because the HUD is used during the walk. New test `src/field/consistency.test.ts` shows the HUD reproduces the planned margins when the crew is on plan (LOGIC-01).
+- **Checks:** tsc clean; vitest 318/318; Playwright 76/76; JS 242,650 B of 250,000; /code-review low: 0 findings.
+- **For the team:** approve UI-17 and merge (after the freeze); decide the elapsed-time label (LOGIC-01: from leaving the habitat, or from egress?).
 
 ## MERGED (Sun 15 Nov 2026, 15:57 Asia/Manila): every variable explained (MERGE-04). Start here, then read the 15:10 handoff below
 
@@ -427,6 +432,14 @@ Rules as the team plan records them (section 19.3: the Project Submission Guide 
 - Present any cited value as measured or Mars-validated: every one is a lunar planning figure applied to Mars, and stays Assumed.
 - Add an invented value without a row in the CLAUDE.md register.
 - Change attribution without the team's written decision on G-07.
+
+## Detail of the decisions branch (Sun 15 Nov 2026, 01:04-01:20 Asia/Manila): W-01 decided on a separate branch
+
+- **Branch:** `yujin/w-01-slow-bound`, on top of `yujin/reg-02-verification` (PR #21). Commit `4be709c` plus a log commit. **Not merged.**
+- **What it does:** the slow walking bound goes from 0.64 to 0.56 m/s (DECISIONS W-01). The slope factors stay 1 (K-01 reaffirmed). Yujin delegated both choices to the SI session ("choose what is best").
+- **Why it is separate:** PR #21 changes no value. This one changes a value the plan fixes (plan 19.5), so **the other members must confirm it before it is merged.** If they reject it, close this PR; PR #21 does not depend on it.
+- **Effect:** demo stop end margin est. 77.6 to 127.2 min, OK (was est. 92.3 to 127.2 min). Time-to-habitat contours move in.
+- **Checks:** vitest 290/290; tsc clean; build ~249.95 of 250 KB (about 50 bytes left); Playwright: 50/50 with `--workers=1`.
 
 ## Detail of the first part of that session (Sun 15 Nov 2026, 00:02-00:35 Asia/Manila): REG-02, every value and citation checked
 

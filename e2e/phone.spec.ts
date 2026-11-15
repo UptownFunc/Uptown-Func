@@ -11,7 +11,7 @@ test("phone width: no sideways scroll, all steps reachable, field HUD readable",
   const overflow = () => page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   expect(await overflow()).toBeLessThanOrEqual(0);
   const steps = page.getByRole("navigation", { name: "Mission steps" });
-  for (const name of ["Setup", "Planner", "Map", "HUD", "Assess", "Brief"]) await expect(steps.getByRole("button", { name, exact: true })).toBeInViewport();
+  for (const name of ["Setup", "Planner", "Map", "Assess", "Brief", "HUD"]) await expect(steps.getByRole("button", { name, exact: true })).toBeInViewport();
   await expect(page.getByLabel("Plan", { exact: true })).toBeAttached();
   await goStep(page, "HUD");
   const field = page.getByTestId("field-view");

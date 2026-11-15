@@ -250,8 +250,8 @@ test("the tour answers navigation: it opens on the current step, jumps from its 
   const mapCard = page.getByRole("dialog", { name: "Point and click to place stops" });
   await expect(mapCard.getByLabel("Card 4 of 8")).toBeVisible();
   await expect(page.locator(".tour-ring")).toHaveCount(1);
-  // A pointer user jumps straight to card 7 from the progress bar; the step comes with it.
-  await page.getByRole("button", { name: "Card 7: Judge the return margin" }).click();
+  // A pointer user jumps straight to card 6 from the progress bar; the step comes with it.
+  await page.getByRole("button", { name: "Card 6: Judge the return margin" }).click();
   await expect(page).toHaveURL(/#assess$/);
   const gauge = page.getByRole("dialog", { name: "Judge the return margin" });
   await expect(gauge).toBeVisible();
