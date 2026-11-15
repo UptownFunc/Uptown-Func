@@ -3,6 +3,13 @@
 This file is the handoff between team members and Claude sessions. Keep it factual and current. A new session must read this file before touching code.
 
 
+
+## MERGED (Sun 15 Nov 2026, 22:44 Asia/Manila): streamlined flow, Undo and the 24 h limit (MERGE-11). Start here
+
+- **`main` = `bcca613`** (PR #43, which carried PR #39), plus this record. The live site serves `assets/index-DA16-8us.js` and `engine-worker.js`, byte-identical to a local build of `bcca613`.
+- **Checks:** tsc clean; vitest 356/356; AC-12 249,963 B of 250,000 (**37 B left**: nothing more fits without savings); Playwright app 93/95 (two tour frame-timing misses on this Windows machine, TIME-01), 3D 10/10.
+- **For people:** submit for judging (resubmitting is allowed); Design reviews the new start and the banners; the team confirms FLOW-02 (not feasible = OVER or an unreachable stop) and V-15 (24 h).
+
 ## Streamlined flow (Sun 15 Nov 2026, from 22:02 Asia/Manila): branch `yujin/streamlined-flow` (MERGE-11, carries PR #39). Start here
 
 - **What (DECISIONS FLOW-01..03):** Welcome asks "Begin orientation" or "Go", then "NASA-sourced preset" or "Custom times"; then Map -> Assess -> HUD (the step index holds those three). Setup, Planner and Brief are kept, off the index (link, the custom choice, or the Assess key). Assess and the HUD say "OVER · Plan not feasible (reason)" at once; the HUD adds "Turn back now"; Assess's only key opens the times.

@@ -1595,3 +1595,12 @@ Results: tsc clean; vitest 356/356; AC-12 249,963 B of 250,000 (37 B left); Play
 Next part / blocker owner: Design reviews the new start and the banners; the team confirms what "not feasible" means
   (FLOW-02)
 ```
+
+```text
+Part: MERGE-11 - PR #43 (FLOW-01 with PR #39) merged as bcca613 at 22:44 on Yujin's instruction
+Owner: Yujin (team member); SI-assisted (Claude Code, Claude Opus 5.5)
+Status: VERIFIED (live site byte-identical to a local build of bcca613: index-DA16-8us.js and engine-worker.js)
+Checks run: gh pr view 43 (clean, Vercel passed); local build of bcca613 in a separate worktree; curl + cmp of the live files
+Results: identical; branch-head Playwright app 93/95 (TIME-01), 3D 10/10
+Next part / blocker owner: the team - submission
+```
