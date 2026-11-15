@@ -1492,3 +1492,16 @@ Results: tsc clean; vitest 340/340 (37 files); AC-12 249,567 B of 250,000 (433 B
 Next part / blocker owner: Design confirms ASSESS-01 (the one deliberate loop) and the HUD-01 look; the team decides
   HUD-02 (minutes in the label)
 ```
+
+```text
+Part: ORIGIN-01 - the team's concept-origin account in SI_LOG.md and the README
+Owner: this cloud session's operator (a team member wrote the account); SI-assisted (Claude Code, Claude Opus 5.5;
+  wording only)
+Status: VERIFIED (docs only)
+Scope completed: SI_LOG.md concept-origin section filled from the account; README SI use opens with the account;
+  DECISIONS ORIGIN-01 keeps the original text verbatim
+Checks run: npx tsc --noEmit; npx vitest run (docs-only change; run for completeness); /code-review low
+Results: tsc clean; vitest 340/340 (37 files); /code-review low: 1 finding (this placeholder), fixed; no code changed
+Next part / blocker owner: the other three members confirm the account; the team states whether SI was used while
+  forming the concept or writing the plan, and the brainstorm date if known
+```
