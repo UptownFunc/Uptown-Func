@@ -36,7 +36,9 @@ credited with the concept, the plan or any team decision.
 - **3D view (optional):** the same sheet in 3D, from D1 heights at true scale under the D2 orthophoto in its published
   colour, with the same route, stops, layer switches and profile. CesiumJS loads only when 3D is opened, and the
   app returns to the 2D sheet if it cannot start. Nothing beyond the 3 x 3 km sheet is shown, and D1's vertical
-  reference is still unverified.
+  reference is still unverified. A "Relief lighting" key (off by default) lights the terrain from the
+  north-west at 45 deg, the hillshade's light; it replaces the hillshade image in 3D so relief is shown once, only
+  darkens (the colour keeps its hue) and is not the sun: no shadows.
 - **Route engine (Web Worker):** time-optimal A* routes on a 2 m grid of slope-screened cells (slope limit 20 deg,
   Assumed, from the lunar xEVA concept of operations); leg lengths, climb and walking times as estimated ranges.
 - **Planned margin:** time left in the planned EVA at every route point after walking, stops, tasks, the walk back and
@@ -148,7 +150,9 @@ it.
   error states, renderer-free plan features for the later 3D view, and the tour's answers to navigation (MAP-01 to
   MAP-08, TOUR-01, UX-24, UX-25; merged as pull request #30). From about 18:15 the same session drafted the 3D view
   (3D-01 to 3D-08): terrain from D1 through the engine worker, D2 in its published colour (a new pipeline step),
-  CesiumJS 1.147.0 loaded on demand, and the split bundle check the operator chose (B-02). Details per task: `SI_LOG.md`.
+  CesiumJS 1.147.0 loaded on demand, and the split bundle check the operator chose (B-02). From about 20:26 a
+  **Claude Opus 5.5** cloud session (Superpowers not installed) drafted the 3D relief lighting on
+  `ccr-59efed41-jlwyn8` (3D-09, 3D-10; not merged). Details per task: `SI_LOG.md`.
 - **What SI contributed:** drafted the data pipeline and its tests; the frame conversions and constants register;
   the route engine, margins and field-margin functions; the engine worker; the AREA sheet, console, profile, sources
   panel, briefing card and field view; accessibility and resilience tests; tier-2 contours and drill; this README and
