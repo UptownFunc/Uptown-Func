@@ -909,6 +909,9 @@ p.sheet-msg { grid-auto-flow: column; align-content: center; }
 .scene3d-loading { pointer-events: none; background: rgba(20, 11, 5, 0.55); inset: auto 0 0 0; height: auto; padding: 12px; border-radius: 0; }
 .scene3d .layer-errors { top: 58px; }
 .scene3d .map-keys button:nth-child(3), .scene3d .map-keys button:nth-child(7) { margin-top: 6px; }
+/* 3D-09: a key that stays down while on (relief lighting), in the interaction colour. */
+.scene3d .map-keys button[aria-pressed="true"] { color: #fff6e6; border-color: #7a2e10; transform: translateY(2px);
+  background: linear-gradient(180deg, var(--orange-hi) 0%, var(--orange-deep) 100%); box-shadow: 0 1px 0 rgba(255, 220, 190, 0.5) inset, 0 2px 0 #6e2a0e, 0 3px 6px rgba(0, 0, 0, 0.35); }
 .app[data-view="3d"] :is(.sheet .map-keys, .cursor-tag, .status:not(.status-3d)) { display: none; }
 /* Under the 3D view the 2D sheet stays mounted and laid out (its view, layers and the briefing snapshot are kept) but
    draws nothing on screen: its multiply-blended hillshade could otherwise show through the WebGL canvas. */
@@ -917,6 +920,7 @@ p.sheet-msg { grid-auto-flow: column; align-content: center; }
 @media screen and (max-width: 800px) {
   .view-switch { top: 58px; right: 12px; }
   .scene3d-attrib { top: 100px; max-width: calc(100% - 70px); }
+  .scene3d .map-keys button:nth-child(3), .scene3d .map-keys button:nth-child(7) { margin-top: 4px; }   /* as the 2D keys: room for the 8th */
 }
 /* 3D-06: grade along the route, a band under the profile (light = gentle, dark = steep), the same in 2D and 3D. */
 .profile-grade[data-bin="0"], .grade-key i[data-bin="0"] { fill: #ead8b4; background: #ead8b4; }
