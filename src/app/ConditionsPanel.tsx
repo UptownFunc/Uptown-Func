@@ -9,6 +9,7 @@ import type { PlanOutput } from "../engine/planner";
 import { SCENARIO_ID } from "../engine/assumptions";
 import { QuantityText } from "./QuantityText";
 import { formatUtc } from "./format";
+import { Hint } from "./Term";
 import { remsQuantities, type RemsSnapshot } from "./rems";
 
 export interface ConditionsPanelProps {
@@ -54,12 +55,12 @@ export function ConditionsPanel({ output, onSet, onOpenSource, rems }: Condition
       {c && (
         <dl className="conditions-values">
           <dt>Local mean solar time</dt>
-          <dd data-testid="cond-lmst"><QuantityText q={c.lmst} onOpen={onOpenSource} label="Local mean solar time" /> <span className="why">clock label; durations are SI minutes</span></dd>
+          <dd data-testid="cond-lmst"><QuantityText q={c.lmst} onOpen={onOpenSource} label="Local mean solar time" /> <Hint k="lmst" /></dd>
           <dt>Sun elevation</dt>
           <dd data-testid="cond-sun"><QuantityText q={c.sunElevation} onOpen={onOpenSource} label="Sun elevation" />
-            {elev != null && elev < 0 && <span> below the horizon</span>}</dd>
+            {elev != null && elev < 0 && <span> below the horizon</span>} <Hint k="sun" /></dd>
           <dt>Solar longitude L<sub>s</sub></dt>
-          <dd data-testid="cond-ls"><QuantityText q={c.ls} onOpen={onOpenSource} label="Solar longitude" /></dd>
+          <dd data-testid="cond-ls"><QuantityText q={c.ls} onOpen={onOpenSource} label="Solar longitude" /> <Hint k="ls" /></dd>
         </dl>
       )}
       <p className="note">Sun values are model-derived with the Mars24 algorithm (NASA GISS) at one point, the area centre. Terrain shadowing is not modelled: nearby slopes can hide the sun.</p>

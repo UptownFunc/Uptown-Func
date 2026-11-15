@@ -573,7 +573,7 @@ details[open] > summary::before { transform: rotate(90deg); }
 /* The spotlight: one box whose huge shadow dims everything else. Motion moves it (fx.ts); it never takes a click. */
 .tour-hole { position: absolute; border-radius: 18px; box-shadow: 0 0 0 200vmax rgba(18, 10, 5, 0.62); }
 .tour-ring { outline: 3px dashed var(--amber); outline-offset: -1px; }
-.tour-card { position: absolute; pointer-events: auto; padding: 18px 20px 18px 40px; border-radius: 6px 16px 16px 6px; color: var(--ink); background-color: var(--paper);
+.tour-card { position: absolute; pointer-events: auto; max-height: calc(100vh - 24px); overflow-y: auto; padding: 18px 20px 18px 40px; border-radius: 6px 16px 16px 6px; color: var(--ink); background-color: var(--paper);
   box-shadow: 0 26px 50px rgba(0, 0, 0, 0.6);
   background-image: radial-gradient(circle at 16px 20px, var(--wn-800) 5px, transparent 6px), linear-gradient(90deg, transparent 30px, #e7b9a0 30px 31px, transparent 31px);
   background-size: 32px 40px, auto; background-repeat: repeat-y, no-repeat; }
@@ -591,6 +591,31 @@ details[open] > summary::before { transform: rotate(90deg); }
 /* Done: the line turns to the OK green (word + shape + colour) with one small settle, then rests. */
 .tour-card p.tour-act[data-done] { border-left-color: var(--ok); background: rgba(90, 150, 70, 0.14); animation: pop-in 260ms var(--ease-out); }
 .tour-act[data-done] svg { color: var(--ok-ink); }
+/* UX-22: the terms on this screen, a few words each. */
+.tour-terms { margin-top: 10px; font-size: var(--t-sm); }
+.tour-terms summary { display: inline-flex; align-items: center; gap: 6px; font: 700 11px/1 var(--ui); letter-spacing: 0.12em; text-transform: uppercase; color: var(--orange-deep); cursor: pointer; }
+.tour-terms summary::before { content: none; }
+.tour-terms dl { display: grid; gap: 4px; margin: 8px 0 0; }
+.tour-terms dl > div { display: grid; grid-template-columns: minmax(0, 14ch) 1fr; gap: 10px; align-items: baseline; }
+.tour-terms dt { font: 700 var(--t-sm)/1.3 var(--ui); color: var(--ink); }
+.tour-terms dd { margin: 0; font: 400 var(--t-sm)/1.3 var(--ui); color: var(--ink-2); }
+
+/* ---------- Plain meanings (UX-22) ---------- */
+/* A variable's name opens its meaning in place: a quiet key with a dotted underline, never a floating tip. */
+.term { display: inline; padding: 0; margin: 0; border: 0; background: none; font: inherit; color: inherit; letter-spacing: inherit; text-transform: inherit;
+  text-decoration: underline dotted; text-decoration-thickness: 1px; text-underline-offset: 3px; cursor: help; }
+.term[aria-expanded="true"] { text-decoration-style: solid; }
+.term-def { display: block; margin: 6px 0 2px; padding: 6px 10px; border-left: 3px solid var(--orange); border-radius: 4px;
+  background: rgba(217, 98, 43, 0.1); font: 500 var(--t-sm)/1.4 var(--ui); letter-spacing: normal; text-transform: none; color: inherit;
+  animation: pop-in 200ms var(--ease-out); }
+/* The Sources drawer's glossary: every term, looked up at any step. */
+.glossary { margin-top: var(--s5); padding-top: 14px; border-top: 2px solid var(--ink); }
+.glossary summary { font: 800 var(--t-lg)/1.2 var(--display); font-variation-settings: "SOFT" 100, "WONK" 1; cursor: pointer; }
+.glossary dl { display: grid; gap: 10px; margin: 12px 0 0; }
+.glossary dt { font: 700 var(--t-sm)/1.3 var(--ui); color: var(--ink); }
+.glossary dd { margin: 2px 0 0; font: 400 var(--t-sm)/1.45 var(--ui); color: var(--ink-2); }
+/* Under a form field: the variable's meaning, always shown. */
+.hint { display: block; margin-top: 2px; font: 400 var(--t-sm)/1.4 var(--ui); opacity: 0.85; }
 .tour-progress { display: flex; gap: 5px; margin: 14px 0; }
 .tour-progress span { flex: 1; height: 8px; border-radius: 4px; background: #e2cfaa; transition: background-color 200ms ease; }
 .tour-progress span[data-on="true"] { background: linear-gradient(90deg, var(--orange), var(--mustard)); }

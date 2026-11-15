@@ -89,7 +89,7 @@ export function SetupScreen({ output, rems, rover, onSet, onOpenSource, preset, 
               <button type="button" className="tile" aria-pressed={demo} disabled={!output} onClick={demo ? undefined : onApplyPreset}>
                 <span className="tile-icon" aria-hidden="true"><FlaskConical {...ICON} /></span>
                 <strong>Demonstration scenario</strong>
-                <span>Plan times and scenario time picked from cited planning documents (REG-01). Lunar figures applied to Mars: all Assumed, all editable.</span>
+                <span>Plan times picked from cited planning documents (lunar figures applied to Mars) and a daylight date for the walk, which no document can give. All Assumed, all editable.</span>
                 {demo && <span className="tile-stamp" aria-hidden="true">In use</span>}
               </button>
               {demo ? (
@@ -139,8 +139,8 @@ export function PlannerScreen({ output, onSet, next }: { output: PlanOutput | nu
     <section className="screen planner" aria-labelledby="h-planner">
       <div className="screen-inner">
         <Head id="h-planner" no="02 · Mission planner" title="Set the time budget">
-          The planned margin is what walking leaves of the EVA once tasks, contingency and stops are taken out (plan 6.6).
-          It stays unknown until every time is set.
+          The EVA is your whole time outside. Tasks, contingency and stops come out of it first; walking uses the rest, and
+          what is left after the walk is the margin. It stays unknown until every time below is set.
         </Head>
         <div className="sheet-paper">
           <figure className="budget" aria-label="Time budget" data-tour="budget">

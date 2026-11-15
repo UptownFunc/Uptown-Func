@@ -2,6 +2,9 @@
 // The orientation tour's geometry: where the spotlight goes around a control and where the card sits beside it.
 import { describe, expect, it } from "vitest";
 import { NARROW, TOUR, placeCard, spotFor } from "./Tutorial";
+import { GLOSSARY } from "./glossary";
+import { CONSTANTS } from "../constants";
+import { NEAR_LIMIT_SHARE, marginState } from "../engine/margin";
 
 const rect = (left: number, top: number, width: number, height: number) => ({ left, top, right: left + width, bottom: top + height, width });
 
@@ -54,5 +57,42 @@ describe("tour copy", () => {
     expect(all).toMatch(/Assumed/);
     expect(all).toMatch(/estimate/i);
     expect(all).not.toMatch(/\bsafe\b/i);
+  });
+});
+
+describe("glossary (UX-22)", () => {
+  it("explains every term a tour card lists, and every card lists at least one", () => {
+    for (const c of TOUR) {
+      expect(c.terms.length, c.title).toBeGreaterThan(0);
+      for (const k of c.terms) expect(GLOSSARY[k], `${c.title}: ${k}`).toBeDefined();
+    }
+  });
+  it("keeps the card's words short and the app's meaning to a sentence or two", () => {
+    for (const [k, e] of Object.entries(GLOSSARY)) {
+      expect(e.short.length, k).toBeLessThanOrEqual(16);
+      expect(e.brief.split(/\s+/).length, k).toBeLessThanOrEqual(10);
+      expect(e.plain.split(/\s+/).length, k).toBeLessThanOrEqual(36);
+    }
+  });
+  it("follows the plan's honesty rules: nothing is called safe or guaranteed, Assumed values stay Assumed", () => {
+    const all = Object.values(GLOSSARY).map((e) => `${e.brief} ${e.plain}`).join(" ");
+    expect(all).not.toMatch(/safe|guaranteed|according to NASA/i);
+    expect(GLOSSARY.kv.plain).toMatch(/Assumed/);
+    expect(GLOSSARY.slope.plain).toMatch(/not rock-free/);
+    expect(GLOSSARY.drill.plain).toMatch(/simulation/i);
+  });
+});
+
+describe("glossary numbers come from the code", () => {
+  it("quotes the slope limit the engine screens with", () => {
+    expect(GLOSSARY.slope.plain).toContain(`${CONSTANTS.slopeLimit.value}°`);
+  });
+  it("quotes the NEAR LIMIT band the margin state uses", () => {
+    const pct = `${Math.round(NEAR_LIMIT_SHARE * 100)}%`;
+    expect(GLOSSARY.states.plain).toContain(`at least ${pct}`);
+    // The engine's own boundaries: exactly the band is OK, just under it NEAR LIMIT, below zero OVER.
+    expect(marginState(NEAR_LIMIT_SHARE * 3600, 3600)).toBe("OK");
+    expect(marginState(NEAR_LIMIT_SHARE * 3600 - 1, 3600)).toBe("NEAR_LIMIT");
+    expect(marginState(-1, 3600)).toBe("OVER");
   });
 });

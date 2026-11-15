@@ -8,6 +8,8 @@ import { formatDuration, formatLength } from "./format";
 import { MarginState } from "./MarginState";
 import { TimeRow } from "./PlanTimes";
 import { QuantityText } from "./QuantityText";
+import { Term } from "./Term";
+import { GLOSSARY } from "./glossary";
 import type { SkySampler } from "../map/skySample";
 import type { Quantity, Stop } from "../contracts";
 import { STOP_LIMITS } from "../engine/assumptions";
@@ -40,6 +42,7 @@ export function AssumedNote({ output }: { output: PlanOutput }) {
   return (
     <details className="note-assumed" data-testid="assumed-banner">
       <summary><span className="tag">Assumed</span><span>Slope factors k<sub>v</sub> = 1</span></summary>
+      <p className="plain">{GLOSSARY.kv.plain}</p>
       <p><strong>ASSUMED.</strong> Slope factors k<sub>v</sub> = 1 in every bin (K-01, team choice; no sourced
         speed-versus-slope value exists): slope changes walking time only through 3D path length. Times are estimates from the {RANGE.low}-{RANGE.high} m/s suited
         range (lunar-gravity tests, {RANGE.citation.source.split(",")[0]}, {RANGE.citation.location}), not Mars-validated.</p>
@@ -115,19 +118,21 @@ export function PlanPanel({ output, onDeleteStop, onEditStop, onSetTime, onOpenS
           </tbody>
         </table>
       )}
-      {plan.legs.length > 0 && <p className="legs-note">Length and climb are model-derived from D1 heights on the 2 m grid path. Walking times are
-        estimates from the {RANGE.low}-{RANGE.high} m/s suited range with k<sub>v</sub> = 1 assumed.</p>}
+      {plan.legs.length > 0 && <p className="legs-note"><strong>Leg:</strong> one stretch of the walk between two points.{" "}
+        <strong>Climb:</strong> height gained along it. Length and climb are model-derived from D1 heights on the 2 m grid path.{" "}
+        <strong>Walking time:</strong> an estimate, from the fastest ({RANGE.high} m/s) to the slowest ({RANGE.low} m/s) suited walking speed in
+        lunar-gravity tests (not Mars-validated), with k<sub>v</sub> = 1 assumed.</p>}
       {geometry.unreachable.length > 0 && (
         <p className="problem" role="status">No slope-screened path: {geometry.unreachable.map((u) => `${name(u.fromId)} → ${name(u.toId)}`).join(", ")}.</p>
       )}
       </div>
       <div className="side-foot">
         <p className="margin-line" data-testid="end-margin">
-          <span className="k">End margin</span>
+          <span className="k"><Term k="margin">End margin</Term></span>
           <span key={plan.versionHash} className="flash v"><QuantityText q={plan.endMargin} onOpen={onOpenSource} label="End margin" /></span>
           {last && <MarginState state={last.state} />}
           {end.unknown && <span className="why">Unknown: {why}</span>}
-          {last && <span className="why">Estimate under stated assumptions, not a guarantee. The state uses the slow ({RANGE.low} m/s) bound.</span>}
+          {last && <span className="why">Estimate under stated assumptions, not a guarantee. The state uses the <Term k="slow">slow bound</Term> ({RANGE.low} m/s).</span>}
         </p>
         {next}
       </div>

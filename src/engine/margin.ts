@@ -19,11 +19,14 @@ export interface MarginSample {
   readonly state: MarginState;
 }
 
+/** The NEAR LIMIT band as a share of T_EVA (Assumed). Named so the plain-language glossary quotes this number. */
+export const NEAR_LIMIT_SHARE = 0.1;
+
 /** OK at or above 10% of T_EVA; NEAR_LIMIT from 0 to under 10%; OVER below 0 (the 10% band is Assumed). */
 export function marginState(margin_s: number, tEva_s: number): MarginState {
   if (!Number.isFinite(margin_s) || !(tEva_s > 0)) throw new RangeError("margin state needs a finite margin and a positive T_EVA");
   if (margin_s < 0) return "OVER";
-  return margin_s >= 0.1 * tEva_s ? "OK" : "NEAR_LIMIT";
+  return margin_s >= NEAR_LIMIT_SHARE * tEva_s ? "OK" : "NEAR_LIMIT";
 }
 
 export function plannedMarginProfile(g: RouteGrid, legs: readonly (readonly number[])[], stopDurations_s: readonly number[],
