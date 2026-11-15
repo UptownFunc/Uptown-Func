@@ -289,5 +289,12 @@ test.describe("phone", () => {
     const panel = (await page.locator("#layers-panel").boundingBox())!;
     expect(panel.x >= box.x - 1 && panel.x + panel.width <= box.x + box.width + 1).toBe(true);
     expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0);
+    // The engine's answer to a stop is on screen (review R-30: the map-step message rules once pushed it off a phone).
+    await page.getByRole("button", { name: "Close panel" }).tap();
+    await clickAt(page, STOP);
+    const msg = page.getByTestId("engine-message");
+    await expect(msg).toContainText("Plan updated", { timeout: 20_000 });
+    const m = (await msg.boundingBox())!, vp = page.viewportSize()!;
+    expect(m.x >= 0 && m.x + m.width <= vp.width && m.y >= 0 && m.y + m.height <= vp.height, "message inside the phone screen").toBe(true);
   });
 });

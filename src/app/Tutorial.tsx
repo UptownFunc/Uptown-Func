@@ -146,9 +146,10 @@ export function Tutorial({ open, onClose, go, step, done }: { open: boolean; onC
   const [, setViewport] = useState(0);
   useEffect(() => {
     if (!open) return;
-    const onResize = () => setViewport((n) => n + 1);
+    let frame = 0; // at most one re-render per frame while a window edge is dragged
+    const onResize = () => { frame ||= requestAnimationFrame(() => { frame = 0; setViewport((n) => n + 1); }); };
     addEventListener("resize", onResize);
-    return () => removeEventListener("resize", onResize);
+    return () => { cancelAnimationFrame(frame); removeEventListener("resize", onResize); };
   }, [open]);
 
   // Measure before paint. While the requested step has not arrived yet, hold the spotlight where it is.

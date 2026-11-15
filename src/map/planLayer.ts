@@ -44,10 +44,9 @@ const habitatStyle = [
   new Style({ text: new Text({ text: "HABITAT", offsetY: 20, font: "700 10px 'Barlow Semi Condensed', sans-serif", fill: new Fill({ color: PAPER }),
     stroke: new Stroke({ color: INK, width: 3 }) }) }),
 ];
-/** A stop marker; `scale` below 1 only while it lands (MAP-05). */
-export const stopStyle = (letter: string, scale = 1) => new Style({
-  image: new CircleStyle({ radius: 12 * scale, fill: new Fill({ color: PLAN }), stroke: new Stroke({ color: PAPER, width: 2.5 }) }),
-  text: scale > 0.6 ? new Text({ text: letter, font: "700 12px 'Barlow Semi Condensed', sans-serif", fill: new Fill({ color: PAPER }) }) : undefined,
+const stopStyle = (letter: string) => new Style({
+  image: new CircleStyle({ radius: 12, fill: new Fill({ color: PLAN }), stroke: new Stroke({ color: PAPER, width: 2.5 }) }),
+  text: new Text({ text: letter, font: "700 12px 'Barlow Semi Condensed', sans-serif", fill: new Fill({ color: PAPER }) }),
 });
 
 /** UI-11: the stop picked on the map carries a wider amber ring, so the pinned card's anchor is unmistakable. */
@@ -97,20 +96,6 @@ export function drawPlan(layer: VectorLayer<VectorSource>, out: PlanOutput | nul
     features.push(f);
   }
   src.addFeatures(features);
-}
-
-/** MAP-05: a new stop lands (its marker grows from a point with one small overshoot) once the engine has placed it.
- *  Skipped under reduced motion. Returns a function that stops it and leaves the final marker. */
-export function landStop(f: Feature, letter: string, ms = 320): () => void {
-  let raf = 0;
-  const t0 = performance.now();
-  const tick = (now: number) => {
-    const t = Math.min(1, (now - t0) / ms), c = 1.9; // ease-out-back
-    f.setStyle(stopStyle(letter, Math.max(0.05, 1 + (c + 1) * (t - 1) ** 3 + c * (t - 1) ** 2)));
-    raf = t < 1 ? requestAnimationFrame(tick) : 0;
-  };
-  raf = requestAnimationFrame(tick);
-  return () => { if (raf) cancelAnimationFrame(raf); raf = 0; f.setStyle(stopStyle(letter)); };
 }
 
 /** Separate small layer for the scrub marker, so hovering never redraws the plan. */

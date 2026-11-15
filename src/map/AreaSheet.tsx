@@ -21,7 +21,7 @@ import { Stroke, Style } from "ol/style";
 import RegularShape from "ol/style/RegularShape";
 import { cellCentreF1, type GridDef } from "../geo/grid";
 import type { LatLon, PlanOutput } from "../engine/planner";
-import { createContourLayer, createMarkerLayer, createPlanLayer, drawContours, drawMarker, drawPlan, landStop, type ContourDisplay } from "./planLayer";
+import { createContourLayer, createMarkerLayer, createPlanLayer, drawContours, drawMarker, drawPlan, type ContourDisplay } from "./planLayer";
 import { snapshotMap, type MapSnapshot } from "./snapshot";
 import { F7_PROJECTION } from "./f7";
 import { FIT_PADDING, MAX_RESOLUTION_F7, fitResolution, formatView } from "./view";
@@ -40,16 +40,17 @@ import { Layers, LoaderCircle, MousePointerClick, Minus, Plus, RotateCcw, Route,
 import Overlay from "ol/Overlay";
 import { terrainHint } from "./terrainHint";
 
-/** Motion on the map (zoom, fit, a stop landing) follows the user's reduced-motion setting: then it jumps. */
+/** The view glides on the map keys (zoom, fit) follow the user's reduced-motion setting: then they jump. */
 const reducedMotion = () => typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 const EASE = (t: number) => 1 - (1 - t) ** 3;
 
-/** A terrain symbol's tile as a CSS background, for the key (the same ink the layer draws). */
-function swatch(kind: SymbolKind): string {
+/** A terrain symbol's tile as a CSS background, for the key (the same ink the layer draws). Built once. */
+function swatchOf(kind: SymbolKind): string {
   const p = SYMBOLS[kind].period;
   const rects = tileInk(kind).map(([x, y]) => `<rect x='${x}' y='${y}' width='1' height='1'/>`).join("");
   return `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='${p}' height='${p}' fill='${SYMBOLS[kind].colour}' shape-rendering='crispEdges'>${rects}</svg>`)}")`;
 }
+const SWATCH: Record<SymbolKind, string> = { steep: swatchOf("steep"), excluded: swatchOf("excluded"), unknown: swatchOf("unknown") };
 
 /** Displays a Quantity: unknown stays "unknown" (CLAUDE.md); one decimal for metres. */
 function fmt(q: Quantity): string {
@@ -128,9 +129,6 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
   layersRef.current = layers;
   /** The OpenLayers layers the MapLayers switches act on, once built. */
   const switched = useRef<{ relief?: BaseLayer; terrain?: BaseLayer }>({});
-  /** Stops already on the sheet: only a stop new to this list lands (MAP-05); null until the first draw. */
-  const knownStops = useRef<Set<string> | null>(null);
-  const landing = useRef<(() => void)[]>([]);
   const classesRef = useRef(terrainClasses);
   classesRef.current = terrainClasses;
   const selectRef = useRef(onSelectStop);
@@ -216,7 +214,6 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
     let map: OlMap | null = null;
     setError(null);
     setReady(false);
-    knownStops.current = null;
     setLayerErrors([]); // a new area starts with no failed layers
     setCoverageNotes({});
     setCoverageError(null);
@@ -373,20 +370,9 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
 
   useEffect(() => {
     if (!area.current) return;
-    for (const stop of landing.current) stop();
-    landing.current = [];
     drawPlan(planLayer.current, plan, area.current.grid, selectedStop);
     profXY.current = profileXY(plan, area.current.grid);
     lastHover.current = null; // indices refer to the previous profile
-    // MAP-05: a stop the engine has just placed lands, so the click's effect is seen where it happened.
-    const ids = new Set(plan?.plan.stops.map((s) => s.id) ?? []);
-    if (knownStops.current && !reducedMotion()) {
-      for (const f of planLayer.current.getSource()!.getFeatures()) {
-        const id = f.get("stopId") as string | undefined;
-        if (f.get("kind") === "stop" && id && !knownStops.current.has(id) && id !== selectedStop) landing.current.push(landStop(f, f.get("letter") as string));
-      }
-    }
-    knownStops.current = ids;
   }, [plan, selectedStop, ready]);
 
   useEffect(() => {
@@ -492,7 +478,7 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
           // Near the right or bottom edge the tag flips to the other side of the pointer, so it is never cut off.
           const w = target.current?.clientWidth ?? 0, hgt = target.current?.clientHeight ?? 0;
           // MAP-07: on a narrow sheet neither side has room for the whole tag, so it is also kept 8 px inside both edges.
-          const x = pointer.x > w - 380 ? `max(8px, calc(${pointer.x - 18}px - 100%))` : `min(${pointer.x + 18}px, calc(${w - 8}px - 100%))`;
+          const x = pointer.x > w - 380 ? `max(8px, calc(${pointer.x - 18}px - 100%))` : `max(8px, min(${pointer.x + 18}px, calc(${w - 8}px - 100%)))`;
           const y = pointer.y > hgt - 60 ? `calc(${pointer.y - 18}px - 100%)` : `${pointer.y + 18}px`;
           return <div className="cursor-tag" data-kind={h.kind} data-testid="cursor-tag" aria-hidden="true" style={{ transform: `translate(${x}, ${y})` }}>
             <span className="lamp" aria-hidden="true" />{h.text}</div>;
@@ -548,9 +534,9 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
             <div><dt><span className="k-habitat">H</span></dt><dd>Habitat (an Assumed scenario input)</dd></div>
             <div><dt><span className="k-stop">A</span></dt><dd>Stop; click one to edit it</dd></div>
             <div><dt><span className="k-tick" /></dt><dd>Margin marks: 10 % of the EVA left (amber), none left (red)</dd></div>
-            <div><dt><span className="k-sym" style={{ backgroundImage: swatch("steep") }} /></dt><dd>Steep but under the Assumed limit</dd></div>
-            <div><dt><span className="k-sym" style={{ backgroundImage: swatch("excluded") }} /></dt><dd>Excluded: steeper than the Assumed limit</dd></div>
-            <div><dt><span className="k-sym" style={{ backgroundImage: swatch("unknown") }} /></dt><dd>Unknown ground: no slope value</dd></div>
+            <div><dt><span className="k-sym" style={{ backgroundImage: SWATCH.steep }} /></dt><dd>Steep but under the Assumed limit</dd></div>
+            <div><dt><span className="k-sym" style={{ backgroundImage: SWATCH.excluded }} /></dt><dd>Excluded: steeper than the Assumed limit</dd></div>
+            <div><dt><span className="k-sym" style={{ backgroundImage: SWATCH.unknown }} /></dt><dd>Unknown ground: no slope value</dd></div>
           </dl>
         </div>
       </div>
