@@ -17,6 +17,3 @@ export function stepFromHash(hash: string): StepId {
   const h = hash.replace(/^#/, "");
   return STEPS.some((s) => s.id === h) ? (h as StepId) : "welcome";
 }
-
-/** Position in the flow (welcome is -1), so a move reads as forward or back. */
-export const stepIndex = (s: StepId): number => STEPS.findIndex((x) => x.id === s);

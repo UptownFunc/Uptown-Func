@@ -2,6 +2,28 @@
 
 This file is the handoff between team members and Claude sessions. Keep it factual and current. A new session must read this file before touching code.
 
+## Merge preparation (Sun 15 Nov 2026, 12:55 Asia/Manila, container clock): READY, NOT MERGED; read this first
+
+- **Asked:** merge `design/sharpwalk-ui-ux` into `main` (request from parcilla13's account, about 12:47).
+- **Done:** whole-branch `/code-review` (R-26; 3 findings fixed in this commit, 3 kept and recorded); every check rerun
+  and green: vitest 302/302, tsc exit 0, build OK, bundle 238,771 B of 250,000 B, Playwright 67/67, pytest 82 passed +
+  2 skipped, licences current. The merge is conflict-free (`main` ca2504a is already inside the branch). AUD-13 closed.
+- **Not done: the merge itself.** Three points need a person's yes (DECISIONS MERGE-01): the team approval the records
+  require for the redesign; merging a whole new interface at the G5 freeze (13:00, bug fixes only) into the branch
+  Vercel deploys; and the authorship wording (G-10), which does not match the records.
+- **To merge once confirmed** (no force push; keep the history):
+
+  ```bash
+  git fetch origin && git checkout main && git pull --ff-only
+  git merge --no-ff origin/design/sharpwalk-ui-ux
+  npx vitest run && npx tsc --noEmit && npm run build && node scripts/bundle-size.mjs
+  git push origin main
+  curl -sS https://uptown-func.vercel.app/ | grep -o 'assets/index-[^"]*\.js'   # compare with dist/index.html
+  ```
+
+  In the same merge, rewrite the "pending team approval / not merged" wording in CLAUDE.md (visual and motion lines),
+  HANDOFF and PHASES, and record the merge commit SHA.
+
 ## Addendum (Sun 15 Nov 2026, 12:55 Asia/Manila, container clock): second session's independent check of 08f20f7
 
 A separate cloud session (the one that did REG-01 on Sat night) was asked to resume the audit and then to hand off. It

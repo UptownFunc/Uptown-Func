@@ -127,6 +127,7 @@ export function PlanPanel({ output, onDeleteStop, onEditStop, onSetTime, onOpenS
           <span key={plan.versionHash} className="flash v"><QuantityText q={plan.endMargin} onOpen={onOpenSource} label="End margin" /></span>
           {last && <MarginState state={last.state} />}
           {end.unknown && <span className="why">Unknown: {why}</span>}
+          {last && <span className="why">Estimate under stated assumptions, not a guarantee. The state uses the slow ({RANGE.low} m/s) bound.</span>}
         </p>
         {next}
       </div>

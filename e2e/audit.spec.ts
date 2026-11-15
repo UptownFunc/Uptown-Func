@@ -267,6 +267,8 @@ test("keyboard and focus: a step change moves focus to the new step's heading, a
 
 test("Assess meter and the Briefed stamp never sit on a word or a number they do not mean", async ({ page }) => {
   await demoPlan(page);
+  // The margin is never shown as a bare verdict: the Map panel says what it is, as main's panel did.
+  await expect(page.getByTestId("end-margin")).toContainText("Estimate under stated assumptions, not a guarantee.");
   await goStep(page, "Assess");
   const needle = page.locator(".meter .needle");
   await expect.poll(() => needle.evaluate((n) => n.getAnimations().length), { timeout: 5_000 }).toBe(0);

@@ -18,7 +18,7 @@ export function FieldView({ output, hidden = false, briefed = false, next }: { o
   const [exec, setExec] = useState<MissionExecution | null>(null);
   const [minutes, setMinutes] = useState("");
   const [error, setError] = useState<string | null>(null);
-  if (!output) return <section className="side field" aria-label="Field view" hidden={hidden}><div className="side-scroll"><p>Loading the route engine…</p></div></section>;
+  if (!output) return <section className="side field" aria-label="Field view" hidden={hidden}><div className="side-scroll"><h1 className="hud-next">Field HUD</h1><p>Loading the route engine…</p></div></section>;
   const { plan, geometry } = output;
   const e = exec && exec.planVersion === plan.versionHash ? exec : null;
   const stale = exec !== null && exec.planVersion !== plan.versionHash;
@@ -56,7 +56,7 @@ export function FieldView({ output, hidden = false, briefed = false, next }: { o
           <button type="button" className="textbtn" onClick={() => setExec(null)}>Start ticks for the current plan</button>
         </p>
       )}
-      {plan.stops.length === 0 ? <p className="hud-next">No stops in the plan yet.</p> : <>
+      {plan.stops.length === 0 ? <h1 className="hud-next">No stops in the plan yet.</h1> : <>
         <div data-testid="field-next"><span className="field-label">Next</span><h1 className="hud-next">
           {next0 ? <>{next0.kind === "arrive" ? "Arrive at" : "Depart from"} <strong>{stopOf(next0.stopId)?.letter}</strong> {stopOf(next0.stopId)?.name}</> : "All stops ticked: walk back to the habitat"}
         </h1></div>
