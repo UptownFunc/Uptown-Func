@@ -88,7 +88,7 @@ export function SetupScreen({ output, rems, rover, onSet, onOpenSource, preset, 
     <section className="screen setup" aria-labelledby="h-setup">
       <div className="screen-inner">
         <Head id="h-setup" no="01 · Mission setup" title="Choose the scenario">
-          The scenario fixes the inputs you do not choose on the map: the plan times and the date and time of the walk.
+          The inputs not chosen on the map: plan times and the walk's date and time.
         </Head>
         <div className="setup-grid">
           <div className="sheet-paper" data-tour="scenario">
@@ -97,22 +97,22 @@ export function SetupScreen({ output, rems, rover, onSet, onOpenSource, preset, 
               <button type="button" className="tile" aria-pressed={demo} disabled={!output} onClick={demo ? undefined : onApplyPreset}>
                 <span className="tile-icon" aria-hidden="true"><FlaskConical {...ICON} /></span>
                 <strong>Demonstration scenario</strong>
-                <span>Plan times picked from cited planning documents (lunar figures applied to Mars) and a daylight date for the walk, which no document can give. All Assumed, all editable.</span>
+                <span>Cited plan times (lunar figures applied to Mars) and a daylight date. All Assumed, editable.</span>
                 {demo && <span className="tile-stamp" aria-hidden="true">In use</span>}
               </button>
               {demo ? (
                 // Switching to blank needs a fresh engine (an Assumed time cannot be unset), so it reloads, after a confirm.
                 <a className="tile" href="?preset=none#setup"
-                  onClick={(e) => { if (!confirm("Start a blank scenario? The planner reloads and the current plan is cleared.")) e.preventDefault(); }}>
+                  onClick={(e) => { if (!confirm("Start blank? The current plan is cleared.")) e.preventDefault(); }}>
                   <span className="tile-icon" aria-hidden="true"><FilePlus2 {...ICON} /></span>
                   <strong>Blank scenario</strong>
-                  <span>Every time starts not set until you enter it with a rationale. Opens a fresh planner.</span>
+                  <span>Every time starts not set. Opens a fresh planner.</span>
                 </a>
               ) : (
                 <div className="tile" aria-current="true">
                   <span className="tile-icon" aria-hidden="true"><FilePlus2 {...ICON} /></span>
                   <strong>Blank scenario</strong>
-                  <span>In use: every time starts not set until you enter it with a rationale.</span>
+                  <span>Every time starts not set.</span>
                   <span className="tile-stamp" aria-hidden="true">In use</span>
                 </div>
               )}

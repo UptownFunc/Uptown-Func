@@ -47,15 +47,27 @@ test("an infeasible plan is announced at once on Assess (no way on) and on the H
   await expect(bad).toContainText("Plan not feasible (the walk overruns the EVA at the slow speed)", { timeout: 20_000 });
   await expect(page.getByRole("button", { name: "Continue to the field HUD" })).toHaveCount(0);
   await page.screenshot({ path: "test-results/flow-01-assess-infeasible.png" });
-  await expect(page.getByRole("button", { name: "Change the times or the route" })).toBeVisible();
-  await goStep(page, "HUD"); // the step index still opens it: the HUD says the same, and what to do
+  // FLOW-04: it cannot proceed. The prompt offers the two ways out; the step index's HUD key is closed.
+  await expect(bad).toContainText("You can either change the time values or redraw the plan.");
+  await expect(bad.getByRole("button", { name: "Change the time values" })).toBeVisible();
+  await expect(bad.getByRole("button", { name: "Redraw the plan" })).toBeVisible();
+  const hudKey = page.getByRole("navigation", { name: "Mission steps" }).getByRole("button", { name: "HUD", exact: true });
+  await expect(hudKey).toBeDisabled();
+  // Even reached by its link, the HUD says why and allows no tick forward.
+  await page.evaluate(() => { location.hash = "#hud"; });
   await expect(page.getByTestId("hud-infeasible")).toContainText("Plan not feasible (the walk overruns the EVA at the slow speed). Turn back now.");
+  await expect(page.getByRole("button", { name: "Tick: arrive A" })).toBeDisabled();
   await page.screenshot({ path: "test-results/flow-01-hud-infeasible.png" });
-  // R-37: the way out of an infeasible plan reaches the times (and from there the map), not only the route.
+  // The two ways out: the times (the Planner) and the route (the Map).
   await goStep(page, "Assess");
-  await page.getByRole("button", { name: "Change the times or the route" }).click();
+  await page.getByRole("button", { name: "Redraw the plan" }).click();
+  await expect(page).toHaveURL(/#map$/);
+  await goStep(page, "Assess");
+  await page.getByRole("button", { name: "Change the time values" }).click();
   await expect(page).toHaveURL(/#planner$/);
-  await expect(page.getByRole("button", { name: /Continue to the map/ })).toBeVisible();
+  // Fixed times: the plan is feasible again and the HUD key opens.
+  await setTime(page, "Planned EVA duration (T_EVA)", "360");
+  await expect(hudKey).toBeEnabled({ timeout: 20_000 });
 });
 
 test("on the HUD, a tick that leaves no margin to carry on says turn back now", async ({ page }) => {
@@ -69,4 +81,6 @@ test("on the HUD, a tick that leaves no margin to carry on says turn back now", 
   await page.getByLabel("Elapsed EVA time, minutes").fill("355"); // arrived at A five minutes before the 6 h EVA ends
   await page.getByRole("button", { name: "Tick: arrive A" }).click();
   await expect(page.getByTestId("hud-infeasible")).toContainText("Plan not feasible (carrying on overruns the EVA at the slow speed). Turn back now.");
+  // FLOW-04: no tick forward after an elapsed time that leaves no margin to carry on.
+  await expect(page.getByRole("button", { name: "Tick: depart A" })).toBeDisabled();
 });
