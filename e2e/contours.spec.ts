@@ -3,7 +3,7 @@
 // and labelled; derived layers name source and cell size. Driven through the UI; positions checked with the readout.
 import { readFileSync } from "node:fs";
 import { expect, test, type Page } from "@playwright/test";
-import { STOP, clickAt, pixelAt, openStep, goStep } from "./helpers";
+import { STOP, clickAt, pixelAt, openStep, goStep, zoomTo } from "./helpers";
 
 /** Two vertices of the -3450 m index line in public/area/contours.geojson, chosen (14 Nov) as the gentlest index
  *  vertices in the load view with the line running east-west (3.9 deg) and north-south (84 deg), so a misplaced layer
@@ -52,6 +52,7 @@ test("contours are drawn, named in the layer list, and sit where D1 has that hei
   await expect(entry).toContainText("partly outside D1 elevation coverage"); // contours come from D1 (plan 9)
 
   const status = page.getByTestId("status-line");
+  await zoomTo(page, 4); // the placement check below is stated for 4 m pixels (the whole-sheet load view is coarser)
   for (const fx of FIXTURES) {
     const { level, a, b } = neighbours(fx);
     const p = await pixelAt(page, fx), pa = await pixelAt(page, a), pb = await pixelAt(page, b);

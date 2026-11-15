@@ -4,7 +4,7 @@
 // card, the four Motion timelines end in the right state, and the orientation tour keeps out of the way of the map
 // and of form fields and gives focus back when it closes.
 import { expect, test, type Page } from "@playwright/test";
-import { STOP, clickAt, goStep, openStep, pixelAt, setTime } from "./helpers";
+import { STOP, STOP2, clickAt, goStep, openStep, pixelAt, setTime } from "./helpers";
 
 function trackErrors(page: Page): string[] {
   const errors: string[] = [];
@@ -20,8 +20,7 @@ async function demoPlan(page: Page): Promise<void> {
   await clickAt(page, STOP);
   await expect(page.locator(".stops > .stop")).toHaveCount(1, { timeout: 20_000 });
   await page.waitForTimeout(350); // two clicks within 250 ms would be a double-click (E2E-03)
-  const first = await pixelAt(page, STOP);
-  await page.mouse.click(first.x - 50, first.y + 100);
+  await clickAt(page, STOP2);
   await expect(page.locator(".stops > .stop")).toHaveCount(2, { timeout: 20_000 });
 }
 

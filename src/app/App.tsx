@@ -30,6 +30,7 @@ import { AnimatePresence, Appear, PANEL_FADE, PANEL_IN } from "./motion";
 import { Tutorial, orientationDone } from "./Tutorial";
 import { StopPopover } from "./StopPopover";
 import { GlossaryList } from "./Term";
+import { DEFAULT_LAYERS, type MapLayers } from "../map/layers";
 
 const AREA_URL = "area/";
 /** H-01 (DECISIONS.md, pending team confirmation): the slope-screened cell nearest the plan 19.2 suggestion
@@ -76,6 +77,8 @@ export function App() {
   // Tier 2: contour lines from the engine worker (computed once per habitat), shown as lines only.
   const [showContours, setShowContours] = useState(false);
   const [showSky, setShowSky] = useState(false);
+  /** MAP-02: the display layers shown on the sheet (console state; a later 3D view reads the same object). */
+  const [mapLayers, setMapLayers] = useState<MapLayers>(DEFAULT_LAYERS);
   const [skyState, setSkyState] = useState<"none" | "ok" | "failed">("none");
   const [skyAt, setSkyAt] = useState<SkySampler | null>(null);
   const [drillMin, setDrillMin] = useState<number | null>(null);
@@ -289,7 +292,7 @@ export function App() {
             popover={step === "map" && pickedStop && !moving ? <StopPopover stop={pickedStop} output={output!} onOpenSource={openSource} onClose={() => setPicked(null)}
               onMove={() => { setMoving(pickedStop.id); setPicked(null); }} onDelete={() => { send("delete_stop", { stopId: pickedStop.id }); setPicked(null); }}
               onEdit={(name, tasks) => send("edit_stop", { stopId: pickedStop.id, name, tasks })} /> : null}
-            terrainClasses={classesReady ? terrainClasses.current : null}
+            terrainClasses={classesReady ? terrainClasses.current : null} layers={mapLayers} onLayers={setMapLayers}
             cursorHint={step === "map" ? (movingStop ? `Click to move stop ${movingStop.letter} here · Esc to cancel` : true) : false}
             onSnapshotReady={(fn) => setSnapshot(() => fn)} hoverIndex={hover} onHoverIndex={setHover} onDatasets={setLayerDatasets} onCursor={setCursor}
             contours={contourDisplay} showSky={showSky} onSky={(st, f) => { setSkyState(st); if (f) setSkyAt(() => f); }}
