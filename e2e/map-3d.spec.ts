@@ -72,7 +72,8 @@ test("the home view holds the whole sheet; the keys zoom, rotate, tilt and reset
   await page.getByRole("button", { name: "Tilt towards the horizon", exact: true }).click();
   await expect.poll(() => num(page, "data-pitch")).toBeGreaterThan(pitch0 + 5);
   await page.getByRole("button", { name: "Reset the view", exact: true }).click();
-  await expect.poll(() => num(page, "data-range"), { timeout: 5_000 }).toBeCloseTo(range0, -1);
+  // The glide ends within 1 % of the home range (Cesium's flight lands a few metres from the exact placement).
+  await expect.poll(async () => Math.abs(await num(page, "data-range") - range0) / range0, { timeout: 5_000 }).toBeLessThan(0.01);
   await expect.poll(() => num(page, "data-pitch")).toBeCloseTo(pitch0, 0);
 });
 

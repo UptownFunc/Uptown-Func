@@ -925,3 +925,5 @@ p.sheet-msg { grid-auto-flow: column; align-content: center; }
 .profile-grade[data-bin="3"] { fill: #a8401a; }
 .profile-grade[data-bin="4"], .grade-key i[data-bin="4"] { fill: #5a1e06; background: #5a1e06; }
 .grade-key i { display: inline-block; width: 12px; height: 6px; margin: 0 3px 0 6px; vertical-align: middle; border-radius: 1px; }
+/* The stop and margin labels sit over the plot: the pointer passes through them, so scrubbing never stops at a label. */
+.profile-label { pointer-events: none; }
