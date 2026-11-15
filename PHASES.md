@@ -1360,6 +1360,41 @@ Live site: assets/index-DIhEGVs4.js, engine-worker.js, the 3D chunk, cesium-1.14
 Next part / blocker owner: Data and Science confirm 3D-03 and 3D-04; Design reviews the 3D look; the team's submission
 ```
 
+```text
+Part: 3D-09 - relief lighting in the 3D view (3D-09, 3D-10, PERF-3D-09, E2E-08, R-35)
+Owner: session operator (cloud session from the claude.ai web app; member not named); SI-assisted (Claude Code, Claude Opus 5.5)
+Status: VERIFIED on the branch ccr-59efed41-jlwyn8 (from main bdd041b); NOT merged (after the G5 freeze: team approval needed)
+Scope completed: one Fabric globe material (facet normal from screen-space derivatives; Lambert with the D1 hillshade's
+  light, 315 deg / 45 deg, built in F6 through src/geo; black output with alpha, so one factor for R, G and B); tile-skirt
+  guard; one relief at a time (the hillshade image is off while lit; pickBase); "Relief lighting" key, off by default,
+  kept across 2D/3D; status line wording; phone key spacing. Nothing outside the lazy 3D chunk except 3D-scoped CSS.
+Files changed: src/map3d/relief.ts (new), src/map3d/relief.test.ts (new), src/map3d/TerrainView.tsx,
+  src/app/styles.css (3D keys only), e2e/map-3d.spec.ts; logs (DECISIONS, PHASES, HANDOFF, SI_LOG, CLAUDE.md V-16, README)
+Checks run (exact commands), cloud container, Node v22.23.4, Chromium /opt/pw-browsers/chromium (software WebGL):
+  npx tsc --noEmit ; npx vitest run ; npm run build && node scripts/bundle-size.mjs ;
+  PW_CHROMIUM=/opt/pw-browsers/chromium npx playwright test --reporter=line ;
+  PW_CHROMIUM=/opt/pw-browsers/chromium npx playwright test --project=3d --no-deps ;
+  PW_CHROMIUM=/opt/pw-browsers/chromium npx playwright test --project=3d --no-deps -g "relief lighting" --repeat-each=3 ;
+  PW_CHROMIUM=/opt/pw-browsers/chromium npx playwright test e2e/tour-timing.spec.ts --project=app --repeat-each=3 (branch, and main bdd041b in a worktree)
+Results (after the R-35 fixes): tsc clean; vitest 349/349 (37 files; 13 new); AC-12 app JavaScript 248,265 B of 250,000
+  (baseline 248,267); 3D chunk 7,569 B of 10,000 (baseline 6,738); CesiumJS vendor 2,112,862 B of 2,120,000, unmodified;
+  Playwright 3D project 10/10 (1 new); the new test 3/3 repeated; app project 85/86 on the full run (before R-32, which
+  touches only the lazy 3D chunk), the one failure the tour timing flake (FLAKE-01: 23/27 alone on this branch, 25/27 on main).
+Not run: pytest (no pipeline or data change; this container has no pipeline venv, rasterio missing); scripts/licences.py
+  (no dependency change).
+Render checks (scratch Playwright harness, not committed; frames read from the WebGL canvas): five cameras (home, two and
+  five zoom steps, low oblique turned 90 deg, overhead): lit with the Hillshade switch on = lit alone, max difference 0 at
+  all five; shade factor never above 1; chroma residual p99 1.2-1.3 levels; tile seam lines found, fixed by the skirt
+  guard and checked again; strength 0.5 / 0.4 / 0.3 compared, 0.4 chosen; terrain classes legible when lit; phone layout.
+Performance: PERF-3D-09 (+14 to 17 % per frame on software WebGL; idle costs nothing).
+Known limitations: 3D-10. Found, not fixed: 3D-BUG-01 (overlays missing after the tilt-to-overhead keys, pre-existing).
+Review status: /code-review medium (R-35; R-32 in the commit message): 8 findings; 5 code findings fixed (660a0c4), 2 log findings done here, 1 not
+  valid (reason recorded).
+Commit SHA: 4b88b1c (lighting), 660a0c4 (review fixes), plus the logs commit
+Next part / blocker owner: the team decides whether to merge after the freeze (it is opt-in and off by default); Design
+  reviews the look; Data and Science confirm the light and strength (V-16); 3D view owner: 3D-BUG-01; nobody has tested a GPU
+```
+
 ## Phase-part completion record
 
 Copy this block for every phase part and update its table row above:

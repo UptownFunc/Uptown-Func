@@ -140,6 +140,131 @@ test("layers in 3D: the terrain-class symbols switch and take the strength slide
   await expect(scene(page)).toHaveAttribute("data-layers", "plain", { timeout: 20_000 });
 });
 
+// 3D-09: the 3D view's own pixels, read from its WebGL canvas (the drawing buffer is kept), so the page's chrome never
+// enters a comparison. `grab` waits for the loaded tiles and a canvas unchanged over two reads, then keeps the frame.
+async function grab(page: Page, name: string): Promise<void> {
+  await expect(page.getByTestId("scene-3d")).toHaveAttribute("data-tiles", "true", { timeout: 90_000 });
+  const read = () => page.evaluate((n) => {
+    const c = document.querySelector(".scene3d-canvas canvas") as HTMLCanvasElement, x = document.createElement("canvas");
+    x.width = c.width; x.height = c.height; const g = x.getContext("2d")!; g.drawImage(c, 0, 0);
+    const d = g.getImageData(0, 0, x.width, x.height), w = window as unknown as { frames3d?: Record<string, ImageData> };
+    (w.frames3d ??= {})[n] = d;
+    let h = 0; for (let k = 0; k < d.data.length; k += 61) h = (h * 31 + d.data[k]!) >>> 0;
+    return h;
+  }, name);
+  let last = await read(), same = 0;
+  for (let i = 0; i < 80 && same < 2; i++) { await page.waitForTimeout(350); const h = await read(); same = h === last ? same + 1 : 0; last = h; }
+  expect(same, `${name}: the 3D view settles`).toBe(2);
+}
+/** Per pixel (each channel of `base` at least 12): the shade factor f = sum(b) / sum(base), how far b strays from
+ *  f * base in any channel (0 when the change is the same factor for R, G and B), the share of pixels where any channel
+ *  got brighter, the largest per-channel difference, and the correlation of f with the factor of a third frame, over the
+ *  pixels that frame changes (the hillshade image covers the sheet only, not the flat floor around it). */
+function compare(page: Page, base: string, b: string, other?: string) {
+  return page.evaluate(([base, b, other]) => {
+    const F = (window as unknown as { frames3d: Record<string, ImageData> }).frames3d, A = F[base!]!.data, B = F[b!]!.data, O = other ? F[other]!.data : null;
+    const f: number[] = [], fo: number[] = [], fc: number[] = [], resid: number[] = [];
+    let brighter = 0, maxDiff = 0, n = 0;
+    for (let k = 0; k < A.length; k += 4) {
+      for (let c = 0; c < 3; c++) maxDiff = Math.max(maxDiff, Math.abs(A[k + c]! - B[k + c]!));
+      if (Math.min(A[k]!, A[k + 1]!, A[k + 2]!) < 12) continue;
+      n++;
+      const r = (B[k]! + B[k + 1]! + B[k + 2]!) / (A[k]! + A[k + 1]! + A[k + 2]!);
+      f.push(r); resid.push(Math.max(...[0, 1, 2].map((c) => Math.abs(B[k + c]! - r * A[k + c]!))));
+      if ([0, 1, 2].some((c) => B[k + c]! > A[k + c]! + 2)) brighter++;
+      if (O && [0, 1, 2].some((c) => O[k + c] !== A[k + c])) { fo.push((O[k]! + O[k + 1]! + O[k + 2]!) / (A[k]! + A[k + 1]! + A[k + 2]!)); fc.push(r); }
+    }
+    const q = (a: number[], p: number) => [...a].sort((x, y) => x - y)[Math.floor(p * (a.length - 1))]!;
+    let corr = NaN;
+    if (O) {
+      const m = (a: number[]) => a.reduce((s, v) => s + v, 0) / a.length, mf = m(fc), mo = m(fo);
+      let sxy = 0, sx = 0, sy = 0;
+      fc.forEach((v, i) => { sxy += (v - mf) * (fo[i]! - mo); sx += (v - mf) ** 2; sy += (fo[i]! - mo) ** 2; });
+      corr = sxy / Math.sqrt(sx * sy);
+    }
+    return { n, maxDiff, brighter: brighter / n, f001: q(f, 0.001), f01: q(f, 0.01), f50: q(f, 0.5), resid99: q(resid, 0.99), corr };
+  }, [base, b, other] as const);
+}
+
+test("relief lighting (3D-09): shades the terrain once, keeps the D2 colour, and leaves the plan, the picks and the hillshade as they were", async ({ page }) => {
+  await withStop(page);
+  await open3d(page);
+  const lighting = page.getByRole("button", { name: "Relief lighting", exact: true });
+  await expect(lighting).toHaveAttribute("aria-pressed", "false"); // off by default: the 3D view opens as before
+  // Close enough that the terrain mesh carries the relief (at the home view it is coarser than the 1 m hillshade).
+  await page.getByRole("button", { name: "Zoom in", exact: true }).click();
+  await page.getByRole("button", { name: "Zoom in", exact: true }).click();
+  const layer = async (name: RegExp, on: boolean) => {
+    await page.getByRole("button", { name: "Layers", exact: true }).click();
+    const box = page.locator("#layers-panel").getByRole("checkbox", { name });
+    await (on ? box.check() : box.uncheck());
+    await page.getByRole("button", { name: "Close panel" }).click();
+    await page.mouse.move(2, 2); // the pointer off the view: no readout pick, no scrub marker
+  };
+  await layer(/^Terrain classes/, false); // the D2 image alone under the relief
+  await expect(scene(page)).toHaveAttribute("data-layers", "relief");
+  await grab(page, "hillshade");
+  const marks0 = await scene(page).getAttribute("data-marks");
+  await layer(/^Hillshade/, false);
+  await expect(scene(page)).toHaveAttribute("data-layers", "plain", { timeout: 20_000 });
+  await grab(page, "plain");
+
+  await lighting.click();
+  await page.mouse.move(2, 2);
+  await expect(lighting).toHaveAttribute("aria-pressed", "true");
+  await expect(scene(page)).toHaveAttribute("data-layers", "plain lit");
+  await expect(page.getByTestId("status-line-3d")).toContainText("Lit from the north-west, 45° up, as the hillshade (its image is off while lit); not the sun.");
+  await grab(page, "lit");
+  const lit = await compare(page, "plain", "lit", "hillshade");
+  expect(lit.n).toBeGreaterThan(50_000);
+  expect(lit.brighter, "the lighting only darkens").toBeLessThan(0.001);
+  expect(lit.resid99, "one factor for R, G and B: no tint").toBeLessThanOrEqual(2.5);
+  expect(lit.f50, "level ground keeps most of its brightness").toBeGreaterThan(0.82);
+  expect(lit.f50).toBeLessThan(0.97);
+  expect(lit.f01, "ridges and valleys are shaded").toBeLessThan(0.8);
+  expect(lit.f001, "never darker than the strength allows (0.6)").toBeGreaterThan(0.55);
+  expect(lit.corr, "the same light as the D1 hillshade: the two shade the same ground").toBeGreaterThan(0.5);
+  // Geometry, imagery placement and overlays are untouched: same marker and corner pixels, same marker colour.
+  expect(await scene(page).getAttribute("data-marks")).toBe(marks0);
+  const at = Object.entries(JSON.parse(marks0!) as Record<string, [number, number] | null>).find(([k]) => k.startsWith("S"))![1]!;
+  const px = (name: string) => page.evaluate(([n, x, y]) => {
+    const d = (window as unknown as { frames3d: Record<string, ImageData> }).frames3d[n as string]!;
+    return Array.from(d.data.slice(((y as number) * d.width + (x as number)) * 4, ((y as number) * d.width + (x as number)) * 4 + 3));
+  }, [name, at[0], at[1]] as const);
+  expect(await px("lit")).toEqual(await px("plain"));
+
+  // The Hillshade switch on under the lighting adds nothing: the relief is never counted twice.
+  await layer(/^Hillshade/, true);
+  await expect(scene(page)).toHaveAttribute("data-layers", "plain lit");
+  await grab(page, "lit+hillshade");
+  expect((await compare(page, "lit", "lit+hillshade")).maxDiff).toBeLessThanOrEqual(1);
+  // A pick through the lit view names the stop's own ground (the lighting changes no depth).
+  const box = (await scene(page).boundingBox())!;
+  await page.mouse.move(box.x + at[0], box.y + at[1]);
+  await expect.poll(async () => {
+    const t = (await page.getByTestId("status-line-3d").textContent()) ?? "";
+    const lat = /lat (-?\d+\.\d+)/.exec(t), lon = /lon (-?\d+\.\d+)/.exec(t);
+    return lat && lon ? Math.max(Math.abs(Number(lat[1]) - STOP.lat), Math.abs(Number(lon[1]) - STOP.lon)) : Infinity;
+  }, { timeout: 10_000 }).toBeLessThan(2e-4);
+  await page.mouse.move(2, 2);
+
+  // Lighting off: the hillshade image returns exactly as it was.
+  await lighting.click();
+  await page.mouse.move(2, 2);
+  await expect(lighting).toHaveAttribute("aria-pressed", "false");
+  await expect(scene(page)).toHaveAttribute("data-layers", "relief");
+  await grab(page, "hillshade again");
+  expect((await compare(page, "hillshade", "hillshade again")).maxDiff).toBeLessThanOrEqual(1);
+
+  // A switch to 2D and back keeps the lighting as the user left it (like the shared layer switches).
+  await lighting.click();
+  await page.getByRole("button", { name: "2D", exact: true }).click();
+  await expect(page.getByTestId("scene-3d")).toHaveCount(0);
+  await open3d(page);
+  await expect(page.getByRole("button", { name: "Relief lighting", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(scene(page)).toHaveAttribute("data-layers", "plain lit");
+});
+
 test("missing 3D library: the app says why and stays on the 2D sheet, which keeps working", async ({ page }) => {
   await page.route("**/cesium-1.147.0/Cesium.js", (r) => r.fulfill({ status: 404, body: "" }));
   await withStop(page);
@@ -179,7 +304,7 @@ test.describe("phone", () => {
     await ready(page);
     await open3d(page);
     const plate = (await scene(page).boundingBox())!;
-    for (const name of ["Zoom in", "Reset the view"]) {
+    for (const name of ["Zoom in", "Reset the view", "Relief lighting"]) {
       const b = (await page.getByRole("button", { name, exact: true }).boundingBox())!;
       expect(b.x >= plate.x && b.x + b.width <= plate.x + plate.width && b.y >= plate.y && b.y + b.height <= plate.y + plate.height, `${name} inside`).toBe(true);
     }

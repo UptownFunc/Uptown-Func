@@ -1,11 +1,13 @@
-// SI-assisted: drafted with Claude Code (Claude Opus 5.5) (3D-01..3D-07); human Design and Data and Science review pending.
+// SI-assisted: drafted with Claude Code (Claude Opus 5.5) (3D-01..3D-07, 3D-09); human Design and Data and Science review pending.
 // The 3D view of the AREA sheet, loaded only when the user opens it (App lazy-imports this module; CesiumJS is a vendor
 // script loaded on demand). It reads the same plan, layer switches, hover index and selected stop as the 2D sheet and
 // writes nothing but Commands' inputs (a pick) and the shared hover/selection, so switching views loses nothing.
 // Cesium objects live in a ref; camera movement never re-renders React. Any failure hands back to the 2D sheet.
+// 3D-09: a key lights the rendered D1 terrain with the hillshade's light (relief.ts); while it is on, the hillshade
+// image is not drawn, so the relief is shown once.
 import { useEffect, useRef, useState } from "react";
 import type * as CesiumNS from "cesium";
-import { ChevronDown, ChevronUp, LoaderCircle, Minus, Plus, RotateCcw, RotateCw, Scan } from "lucide-react";
+import { ChevronDown, ChevronUp, LoaderCircle, Minus, Mountain, Plus, RotateCcw, RotateCw, Scan } from "lucide-react";
 import { f1 } from "../geo";
 import { cellCentreF1, type GridDef } from "../geo/grid";
 import type { LatLon, PlanOutput } from "../engine/planner";
@@ -15,6 +17,7 @@ import type { SymbolKind } from "../map/terrainPattern";
 import { terrainHint } from "../map/terrainHint";
 import { loadCesium, type Cesium } from "./vendor";
 import { baseTexture, canvasLayer, classTexture, drawPlan3d, fromF5, rectOf, sphereOf, terrain, toF5, type Drawn, type Sampler } from "./scene";
+import { pickBase, reliefLight, reliefMaterial, reliefSource } from "./relief";
 
 export interface TerrainViewProps {
   readonly areaUrl: string;
@@ -32,7 +35,7 @@ export interface TerrainViewProps {
 
 interface Scene3d {
   C: Cesium; w: CesiumNS.CesiumWidget; sphere: CesiumNS.Ellipsoid; grid: GridDef; rect: CesiumNS.Rectangle;
-  base: { relief?: CesiumNS.ImageryLayer; plain?: CesiumNS.ImageryLayer }; classes?: CesiumNS.ImageryLayer;
+  base: { relief?: CesiumNS.ImageryLayer; plain?: CesiumNS.ImageryLayer }; classes?: CesiumNS.ImageryLayer; lighting?: CesiumNS.Material;
   lines: CesiumNS.PolylineCollection; marks: CesiumNS.BillboardCollection; hover: CesiumNS.PointPrimitiveCollection;
   home: CesiumNS.BoundingSphere; corners: CesiumNS.Cartesian3[]; drawn: Drawn; urls: { d2: string; colour: boolean; hs: string; masks: Record<SymbolKind, string> };
 }
@@ -44,12 +47,15 @@ const put = (t: Scene3d, l: CesiumNS.ImageryLayer, bottom?: number) => { t.w.ima
 const credit = (t: Scene3d) => `Image: D2 MSL Gale HiRISE-LRGB orthomosaic, ${t.urls.colour ? "published colour" : "luminance"} (USGS Astrogeology; T. J. Parker, F. J. Calef III)`;
 const urlsColour = (t: Scene3d | null) => (t && !t.urls.colour ? "luminance" : "published colour");
 const fmtQ = (q: Quantity) => (q.value === null ? "unknown" : `${q.value.toFixed(1)} ${q.unit}`);
+/** 3D-09: the relief lighting as the user left it, kept while the page lives, so a switch to 2D and back keeps it
+ *  (the other layer settings are the console's MapLayers). A failed 3D view forgets it: the next attempt starts unlit. */
+let litKept = false;
 
 export default function TerrainView(props: TerrainViewProps) {
   const host = useRef<HTMLDivElement>(null), credits = useRef<HTMLDivElement>(null);
   const s = useRef<Scene3d | null>(null);
   const p = useRef(props); p.current = props;
-  const [ready, setReady] = useState(false), [tiles, setTiles] = useState(false);
+  const [ready, setReady] = useState(false), [tiles, setTiles] = useState(false), [lit, setLit] = useState(litKept), [canLight, setCanLight] = useState(true), [litShown, setLitShown] = useState(false);
   const [notes, setNotes] = useState<string[]>([]);
   /** Bumped when a plan has been drawn, so the scrub marker is placed on the drawn profile, not the previous one. */
   const [drawnN, setDrawnN] = useState(0);
@@ -70,10 +76,14 @@ export default function TerrainView(props: TerrainViewProps) {
 
   useEffect(() => {
     let dead = false, widget: CesiumNS.CesiumWidget | null = null;
-    const fail = (e: unknown) => { if (!dead) p.current.onFail(e instanceof Error ? e.message : String(e)); };
+    const fail = (e: unknown) => { if (!dead) { litKept = false; p.current.onFail(e instanceof Error ? e.message : String(e)); } };
     (async () => {
       const probe = document.createElement("canvas");
-      if (!(probe.getContext("webgl2") ?? probe.getContext("webgl"))) throw new Error("this browser has no WebGL");
+      const gl = probe.getContext("webgl2") ?? probe.getContext("webgl");
+      if (!gl) throw new Error("this browser has no WebGL");
+      // 3D-09: the relief material needs fragment derivatives (WebGL 2 has them; WebGL 1 through an extension).
+      if (!("texStorage2D" in gl || gl.getExtension("OES_standard_derivatives"))) { litKept = false; setCanLight(false); setLit(false); }
+      gl.getExtension("WEBGL_lose_context")?.loseContext(); // the probe's context is not needed any more
       const base = new URL(p.current.areaUrl, document.baseURI).href;
       const get = (f: string) => fetch(base + f).then((r) => (r.ok ? r.json() : Promise.reject(new Error(`${f} could not be loaded (${r.status})`))));
       const [C, meta, report, colour] = await Promise.all([loadCesium(), get("layers.json"), get("build_report.json"), get("d2_colour.json").catch(() => null)]);
@@ -99,6 +109,8 @@ export default function TerrainView(props: TerrainViewProps) {
       g.baseColor = C.Color.fromCssColorString("#2a1a10"); sc.backgroundColor = C.Color.fromCssColorString("#140b05");
       g.showGroundAtmosphere = false; g.enableLighting = false; g.depthTestAgainstTerrain = true; sc.fog.enabled = false;
       g.maximumScreenSpaceError = 1.5; g.tileCacheSize = 300;
+      // 3D-09: the scene's one light is the hillshade's, fixed to the sheet (read only by the relief material).
+      sc.light = reliefLight(C, grid.origin);
       const cc = sc.screenSpaceCameraController;
       cc.minimumZoomDistance = 60; cc.maximumZoomDistance = 60_000;
       const lines = sc.primitives.add(new C.PolylineCollection()) as CesiumNS.PolylineCollection;
@@ -171,7 +183,7 @@ export default function TerrainView(props: TerrainViewProps) {
       }, C.ScreenSpaceEventType.LEFT_CLICK);
       setReady(true);
     })().catch(fail);
-    return () => { dead = true; s.current = null; widget?.destroy(); };
+    return () => { dead = true; const l = s.current?.lighting; s.current = null; widget?.destroy(); l?.destroy(); };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   /** Back to the starting view: the whole sheet. */
@@ -205,11 +217,12 @@ export default function TerrainView(props: TerrainViewProps) {
   };
 
   // Layers (MAP-02, shared with 2D): the base image with or without relief, the terrain-class symbols and their strength.
+  // 3D-09: with the lighting on, the base image is the D2 without the hillshade, whatever the Hillshade switch says.
   useEffect(() => {
     const t = s.current;
     if (!ready || !t) return;
     let live = true;
-    const want = props.layers.relief ? "relief" : "plain";
+    const want = reliefSource(props.layers.relief, lit) === "hillshade" ? "relief" : "plain";
     const ensureBase = async () => {
       if (!t.base[want]) {
         try {
@@ -218,13 +231,17 @@ export default function TerrainView(props: TerrainViewProps) {
           t.base[want] = put(t, canvasLayer(t.C, t.sphere, c, t.rect, credit(t) + (want === "relief" ? "; D1 hillshade (USGS)" : "")), 1);
         } catch (e) {
           // No imagery is drawn rather than any stand-in: the terrain stays, in its plain base colour.
-          note(`${e instanceof Error ? e.message : String(e)}: the terrain is shown without ${want === "relief" ? "relief shading" : "imagery"}`);
+          note(`${e instanceof Error ? e.message : String(e)}: the terrain is shown without ${want === "relief" ? "relief shading" : lit && t.base.relief ? "relief lighting" : "imagery"}`);
           if (want === "relief") { try { const c = await baseTexture(t.urls.d2, null); if (live && !t.base.plain) t.base.plain = put(t, canvasLayer(t.C, t.sphere, c, t.rect, credit(t)), 1); } catch { /* noted above */ } }
         }
       }
       if (!live) return; // a newer switch setting decides what shows
-      const shown = t.base[want] ?? t.base.plain;
+      // With the lighting on but no plain image, the hillshade image shows instead, unlit: the relief is never drawn twice.
+      const { shown, light } = pickBase(t.base, want, lit);
       for (const l of [t.base.relief, t.base.plain]) if (l) l.show = l === shown;
+      // Set with the base image, in the same frame, so the two reliefs are never drawn together.
+      t.w.scene.globe.material = light ? (t.lighting ??= reliefMaterial(t.C, t.grid.origin)) : undefined;
+      setLitShown(light);
       render();
     };
     const ensureClasses = async () => {
@@ -233,13 +250,13 @@ export default function TerrainView(props: TerrainViewProps) {
         catch (e) { note(`Terrain classes could not be loaded (${e instanceof Error ? e.message : String(e)})`); }
       }
       if (t.classes) { t.classes.show = props.layers.terrain; t.classes.alpha = clampOverlay(props.layers.overlay); }
-      host.current!.dataset.layers = [t.base.relief?.show && "relief", t.base.plain?.show && "plain", t.classes?.show && "terrain"].filter(Boolean).join(" ");
+      host.current!.dataset.layers = [t.base.relief?.show && "relief", t.base.plain?.show && "plain", t.classes?.show && "terrain", t.w.scene.globe.material && "lit"].filter(Boolean).join(" ");
       host.current!.dataset.overlay = String(t.classes?.alpha ?? "");
       render();
     };
     void ensureBase().then(ensureClasses);
     return () => { live = false; };
-  }, [ready, props.layers.relief, props.layers.terrain, props.layers.overlay]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [ready, lit, props.layers.relief, props.layers.terrain, props.layers.overlay]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // The plan (route, habitat, stops) and the selected stop.
   useEffect(() => {
@@ -282,13 +299,16 @@ export default function TerrainView(props: TerrainViewProps) {
         {k("Tilt towards the horizon", "up", <ChevronUp size={18} strokeWidth={2} aria-hidden="true" />)}
         {k("Tilt towards overhead", "down", <ChevronDown size={18} strokeWidth={2} aria-hidden="true" />)}
         <button type="button" title="Reset the view" aria-label="Reset the view" disabled={!ready} onClick={() => goHome()}><Scan size={18} strokeWidth={1.75} aria-hidden="true" /></button>
+        <button type="button" title="Relief lighting: light the terrain from the north-west, 45° up, as the hillshade (it replaces the hillshade image in 3D)"
+          aria-label="Relief lighting" aria-pressed={lit} disabled={!ready || !canLight} onClick={() => { litKept = !lit; setLit(litKept); }}><Mountain size={18} strokeWidth={1.75} aria-hidden="true" /></button>
       </div>
       <div className="status status-3d" data-testid="status-line-3d">
         {readout ? <>
           <span><span className="label">lat </span>{readout.lat}</span><span><span className="label">lon </span>{readout.lon} E</span>
           <span><span className="label">elev </span>{fmtQ(readout.elev)}</span>
           <span className="label">D1 between 2 m cells; vertical reference unverified{ground ? ` · ${ground.text.split(" · ")[0]}` : ""}</span>
-        </> : <span className="label">3D: D1 heights at true scale (no exaggeration) under the D2 orthophoto. Point at the ground for coordinates.</span>}
+        </> : <span className="label">3D: D1 heights at true scale (no exaggeration) under the D2 orthophoto.{litShown
+          ? " Lit from the north-west, 45° up, as the hillshade (its image is off while lit); not the sun." : ""} Point at the ground for coordinates.</span>}
       </div>
     </div>
   );
