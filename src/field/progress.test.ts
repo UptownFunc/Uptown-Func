@@ -57,5 +57,8 @@ describe("progressOf (HUD-01)", () => {
     expect(progressText({ kind: "at", letter: "A", toLetter: null, elapsed_min: 12, cells: [14] })).toBe("Crew at A (arrival ticked at 12 min)");
     const leg = progressText({ kind: "leg", letter: "B", toLetter: null, elapsed_min: 40, cells: [30, 20, 10] });
     expect(leg).toBe("Crew on the leg B to habitat (left B at 40 min; position on the leg not tracked)");
+    // No path for the leg: the map draws nothing, and the words say so instead of pointing at a mark.
+    expect(progressText({ kind: "leg", letter: "A", toLetter: "B", elapsed_min: 20, cells: [] }))
+      .toBe("Crew on the leg A to B (left A at 20 min); no mark on the map: the engine has no path for this leg");
   });
 });

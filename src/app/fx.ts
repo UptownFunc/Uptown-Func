@@ -6,7 +6,9 @@
 // press states. One owner per element. Every timeline collapses to its end state under prefers-reduced-motion.
 import { animate } from "motion/mini";
 
-export const reduced = (): boolean => typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+/** The one definition of the reduced-motion preference (the ladder trace also listens to it changing). */
+export const REDUCE = "(prefers-reduced-motion: reduce)";
+export const reduced = (): boolean => typeof matchMedia === "function" && matchMedia(REDUCE).matches;
 
 /**
  * True when nothing should be animated on this element: the user asked for reduced motion, or the element is not

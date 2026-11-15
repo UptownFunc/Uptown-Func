@@ -4,7 +4,7 @@
 // the word set is OK / NEAR LIMIT / OVER with shape and colour, and there is no SAFE state.
 import { useEffect, useRef, type ReactNode } from "react";
 import { ZONES, arc, needleAngle } from "./gauge";
-import { swingNeedle, traceLadder } from "./fx";
+import { REDUCE, swingNeedle, traceLadder } from "./fx";
 import { Term } from "./Term";
 import type { Quantity } from "../contracts";
 import type { PlanOutput } from "../engine/planner";
@@ -39,17 +39,21 @@ function Meter({ angle, live }: { angle: number; live: boolean }) {
 }
 
 /** ASSESS-01: the ladder's looping trace. It lives only while the Assess step is open (the panel unmounts on any other
- *  step), pauses while the ladder is scrolled out of view, and stops for good if the user turns on reduced motion. */
+ *  step), pauses while the ladder is scrolled out of view, and stops for good if the user turns on reduced motion
+ *  (until the step is opened again). data-on marks it running, which is what shows its note (stylesheet). */
 function Trace() {
   const ref = useRef<HTMLLIElement>(null);
   useEffect(() => {
-    const a = ref.current && traceLadder(ref.current);
-    if (!a) return;
+    const el = ref.current, a = el && traceLadder(el);
+    if (!el || !a) return;
+    el.dataset.on = "";
     const io = new IntersectionObserver(([en]) => (en?.isIntersecting ? a.play() : a.pause()));
-    io.observe(ref.current!.parentElement!); // the ladder, not the trace: the trace has no height at the start of a pass
-    const mq = matchMedia("(prefers-reduced-motion: reduce)"), off = () => { if (mq.matches) a.cancel(); };
+    io.observe(el.parentElement!); // the ladder, not the trace: the trace has no height at the start of a pass
+    const mq = matchMedia(REDUCE);
+    const stop = () => { io.disconnect(); mq.removeEventListener("change", off); a.cancel(); delete el.dataset.on; };
+    const off = () => { if (mq.matches) stop(); }; // stop() disconnects the observer too, so a scroll cannot restart it
     mq.addEventListener("change", off);
-    return () => { io.disconnect(); mq.removeEventListener("change", off); a.cancel(); };
+    return stop;
   }, []);
   return <li ref={ref} className="ladder-trace" aria-hidden="true" data-testid="ladder-trace" />;
 }

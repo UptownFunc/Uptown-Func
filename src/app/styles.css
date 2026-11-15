@@ -438,8 +438,8 @@ details[open] > summary::before { transform: rotate(90deg); }
    first, so the node dots stay on top of it. */
 .ladder > .ladder-trace { position: absolute; left: 8px; top: 12px; bottom: 12px; width: 5px; border-radius: 3px; opacity: 0; transform-origin: 50% 0;
   pointer-events: none; background: linear-gradient(180deg, rgba(42, 26, 16, 0.2), var(--ink) 78%, var(--amber) 96%); box-shadow: 0 0 7px rgba(255, 179, 71, 0.7); }
-.trace-note { margin: -4px 0 10px; font-size: 12px; color: var(--ink-3); }
-@media (prefers-reduced-motion: reduce) { .trace-note { display: none; } }
+.trace-note { display: none; margin: -4px 0 10px; font-size: 12px; color: var(--ink-3); }
+.assess:has(.ladder-trace[data-on]) .trace-note { display: block; }
 .ladder .leg { display: flex; justify-content: space-between; gap: 12px; font-size: var(--t-sm); color: var(--ink-2); padding: 2px 0; }
 .switch { position: relative; display: inline-flex; align-items: center; gap: 12px; cursor: pointer; font: 700 var(--t-sm) var(--ui); }
 .switch input { position: absolute; inset: 0; width: 100%; height: 100%; min-height: 0; margin: 0; opacity: 0; cursor: pointer; z-index: 1; }

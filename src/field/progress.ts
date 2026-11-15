@@ -31,6 +31,8 @@ export function progressOf(out: PlanOutput | null, e: MissionExecution | null): 
 
 /** The same words on the map label, the map key's live line and the HUD, so the three never disagree. */
 export function progressText(p: Progress): string {
-  return p.kind === "at" ? `Crew at ${p.letter} (arrival ticked at ${p.elapsed_min} min)`
-    : `Crew on the leg ${p.letter} to ${p.toLetter ?? "habitat"} (left ${p.letter} at ${p.elapsed_min} min; position on the leg not tracked)`;
+  if (p.kind === "at") return `Crew at ${p.letter} (arrival ticked at ${p.elapsed_min} min)`;
+  const leg = `Crew on the leg ${p.letter} to ${p.toLetter ?? "habitat"} (left ${p.letter} at ${p.elapsed_min} min`;
+  // The map draws a leg only when it has a path of two cells or more (drawProgress); otherwise it says so.
+  return p.cells.length < 2 ? `${leg}); no mark on the map: the engine has no path for this leg` : `${leg}; position on the leg not tracked)`;
 }

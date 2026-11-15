@@ -42,13 +42,13 @@ test("HUD-01: the map's crew mark follows each HUD tick, stays put across zoom, 
   await goStep(page, "HUD");
   const map = page.getByTestId("area-map");
   await expect(page.getByText("View only · amber = crew from HUD ticks, not GPS")).toBeVisible();
-  await expect(page.getByTestId("field-map-progress")).toHaveText("On the map, the amber mark: it appears with the first tick.");
+  await expect(page.getByTestId("field-map-progress")).toHaveText("On the map: the amber crew mark appears with the first tick.");
   await expect(map).toHaveAttribute("data-progress", "");
 
   // Arrival at A: a ring centred on stop A.
   await tickAt(page, "45", "Tick: arrive A");
   await expect(map).toHaveAttribute("data-progress", "at A 1");
-  await expect(page.getByTestId("field-map-progress")).toHaveText("On the map, the amber mark: Crew at A (arrival ticked at 45 min).");
+  await expect(page.getByTestId("field-map-progress")).toHaveText("On the map: Crew at A (arrival ticked at 45 min).");
   const ringCentred = async () => {
     const a = await pixelAt(page, STOP), m = await amberAround(page, a, 30);
     return m.count > 150 ? Math.hypot(m.x - a.x, m.y - a.y) : Infinity;
@@ -94,7 +94,7 @@ test("HUD-01: the map's crew mark follows each HUD tick, stays put across zoom, 
   await goStep(page, "HUD");
   await expect(page.getByTestId("field-view").getByRole("alert")).toContainText("belong to plan");
   await expect(map).toHaveAttribute("data-progress", "");
-  await expect(page.getByTestId("field-map-progress")).toContainText("it appears with the first tick");
+  await expect(page.getByTestId("field-map-progress")).toContainText("the amber crew mark appears with the first tick");
   expect(errors).toEqual([]);
 });
 
@@ -142,6 +142,17 @@ test("ASSESS-01: the ladder trace draws and loops on the Assess step, stops on o
   await page.emulateMedia({ reducedMotion: "reduce" });
   await expect.poll(async () => (await traceAnimations(page))?.length).toBe(0);
   await expect(page.getByTestId("ladder-trace")).toHaveCSS("opacity", "0");
+  await expect(page.getByText("An illustration, not a live run.")).toBeHidden();
+  // R-32 finding 1: scrolling the ladder out of view and back must not restart it.
+  await page.setViewportSize({ width: 1280, height: 520 });
+  await scroller.evaluate((el) => { el.scrollTop = 0; });
+  await page.waitForTimeout(200);
+  await ladder.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(300);
+  expect(await traceAnimations(page)).toEqual([]);
+  // Turning reduced motion off again does not bring back a note for a line that is not moving.
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await expect(page.getByText("An illustration, not a live run.")).toBeHidden();
 });
 
 test("ASSESS-01: under reduced motion the ladder trace never runs and its note is hidden", async ({ page }) => {
