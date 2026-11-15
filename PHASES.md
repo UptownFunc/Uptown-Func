@@ -1395,6 +1395,23 @@ Next part / blocker owner: the team decides whether to merge after the freeze (i
   reviews the look; Data and Science confirm the light and strength (V-16); 3D view owner: 3D-BUG-01; nobody has tested a GPU
 ```
 
+```text
+Part: MERGE-10 - PR #41 (3D-09 relief lighting) merged into main
+Owner: session operator ("merge it to main"); SI-assisted (Claude Code, Claude Opus 5.5)
+Status: VERIFIED (live site not checked: the container's proxy refuses it, 403)
+Merge: main had moved to 49d852d (PRs #38, #40); merged into the branch as dd844a1 (log conflicts: both sides kept;
+  E2E-07/R-32 taken by main, V-15/R-33/MERGE-09 by open PR #39, so this work uses E2E-08, R-35, R-36, V-16, MERGE-10).
+  /code-review medium on the final diff (R-36): 5 fixed in ce720a8, 3 recorded with reasons. PR #41 merged as 6f06b62
+  (parents 49d852d, ce720a8); origin/main^{tree} == ce720a8^{tree}.
+Checks on the merged tree (commands as in the 3D-09 record): npx tsc --noEmit clean; npx vitest run 353/353 (38 files);
+  node scripts/bundle-size.mjs: app 249,570 B of 250,000 (430 B left), 3D chunk 7,609 B of 10,000, Cesium 2,112,862 B
+  of 2,120,000 (unmodified); Playwright full 99/99 (app 89 incl. tour timing, 3D 10) at dd844a1; after the R-36 fixes
+  (lazy 3D chunk only; entry and worker byte-identical apart from file names) --project=3d --no-deps 10/10.
+GitHub: Vercel preview deployment success; Vercel Preview Comments success; no conflicts.
+Next part / blocker owner: a person checks https://uptown-func.vercel.app serves the new build and opens 3D with the
+  Relief lighting key; Design reviews the look; Data and Science confirm V-16; 3D view owner: 3D-BUG-01
+```
+
 ## Phase-part completion record
 
 Copy this block for every phase part and update its table row above:
