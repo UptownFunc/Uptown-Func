@@ -185,7 +185,10 @@ describe("Assumed plan times via set_assumption (plan 6.6, UX-03; T-01: no value
     // V-15: above 24 h is a typing mistake (1,000,000 min), refused with the reason; 24 h itself is accepted.
     const big = p.apply(cmd("set_assumption", { id: "T_EVA", value_s: 1_000_000 * 60, rationale: "x" }, v()));
     expect(big.ok).toBe(false);
-    expect(big.ok ? "" : big.reason).toMatch(/at most 1440 min/);
+    expect(big.ok ? "" : big.reason).toBe("T_EVA must be at most 1440 min (24 h)");
+    // A negative time keeps its own reason; the 24 h rule is named only when it is the rule broken.
+    const neg = p.apply(cmd("set_assumption", { id: "t_ops", value_s: -60, rationale: "x" }, v()));
+    expect(neg.ok ? "" : neg.reason).toBe("t_ops must be a finite non-negative number of seconds");
     expect(p.apply(cmd("set_assumption", { id: "stop_duration", value_s: 1441 * 60, rationale: "x" }, v())).ok).toBe(false);
     expect(p.current().plan.assumptions.some((a) => a.id.startsWith("A-T"))).toBe(false);
   });

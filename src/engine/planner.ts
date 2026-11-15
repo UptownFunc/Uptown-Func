@@ -237,8 +237,9 @@ export class Planner {
         if (typeof p.id !== "string" || !Object.hasOwn(PLAN_TIME_IDS, id))
           return { ok: false, reason: `unknown assumption ${String(p.id)}; settable: ${[...Object.keys(PLAN_TIME_IDS), SCENARIO_ID].join(", ")}` };
         const v = p.value_s;
-        if (!num(v) || v < 0 || v > TIME_LIMIT_MIN * 60 || (PLAN_TIME_IDS[id].min === "positive" && v === 0))
-          return { ok: false, reason: `${id} must be a finite ${PLAN_TIME_IDS[id].min === "positive" ? "positive" : "non-negative"} number of seconds, at most ${TIME_LIMIT_MIN} min` };
+        if (!num(v) || v < 0 || (PLAN_TIME_IDS[id].min === "positive" && v === 0))
+          return { ok: false, reason: `${id} must be a finite ${PLAN_TIME_IDS[id].min === "positive" ? "positive" : "non-negative"} number of seconds` };
+        if (v > TIME_LIMIT_MIN * 60) return { ok: false, reason: `${id} must be at most ${TIME_LIMIT_MIN} min (24 h)` }; // V-15
         if (!str(p.rationale) || !p.rationale.trim()) return { ok: false, reason: "every Assumed value needs a one-line rationale" };
         if (p.stopId !== undefined) {
           if (id !== "stop_duration") return { ok: false, reason: "only stop_duration can be set per stop" };

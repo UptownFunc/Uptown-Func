@@ -13,11 +13,19 @@ test("UNDO-01: an accidental stop is taken back with the message's Undo key; the
   await expect(page.locator(".stops > .stop")).toHaveCount(1, { timeout: 20_000 });
   const undo = page.getByRole("button", { name: "Undo stop A" });
   await expect(undo).toBeVisible();
-  await expect(page.getByTestId("engine-announce")).toContainText("Undo stop A is in the message");
+  await expect(page.getByTestId("engine-announce")).toContainText("Undo stop A: Ctrl+Z, or the key in the message.");
   await page.screenshot({ path: "test-results/undo-stop.png" });
-  await undo.click(); // a real click: the message passes pointer input to its key
+  await undo.dblclick(); // a real double click: the message passes pointer input to its key; the second click is ignored
   await expect(plan).toContainText("No stops yet.", { timeout: 20_000 });
   await expect(page.getByRole("button", { name: /^Undo stop/ })).toHaveCount(0);
+  await expect(page.getByTestId("engine-message")).not.toContainText("Not changed");
+
+  // Keyboard: Ctrl+Z takes back the stop just added (outside a text field).
+  await page.waitForTimeout(350);
+  await clickAt(page, STOP);
+  await expect(page.getByRole("button", { name: "Undo stop A" })).toBeVisible({ timeout: 20_000 });
+  await page.keyboard.press("Control+z");
+  await expect(plan).toContainText("No stops yet.", { timeout: 20_000 });
 
   // Placed on purpose: the key is offered for a few seconds, then the message clears itself.
   await page.waitForTimeout(350); // two clicks within 250 ms would be a double-click (E2E-03)
@@ -48,6 +56,6 @@ test("V-15: a time over 24 h is refused with its reason, in the Planner and in t
   await goStep(page, "HUD");
   await page.getByLabel("Elapsed EVA time, minutes").fill("1000000");
   await page.getByRole("button", { name: "Tick: arrive A" }).click();
-  await expect(page.getByTestId("field-view").getByRole("alert")).toContainText("at most 1440");
+  await expect(page.getByTestId("field-view").getByRole("alert")).toContainText("at most 2880");
   await expect(page.getByTestId("field-continue")).toContainText("no tick yet");
 });

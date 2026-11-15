@@ -38,7 +38,7 @@ export function TimeRow({ id, label, current, onSet, stopId, inherited, hint }: 
         {current && <span className="why" title={current.rationale}>{current.rationale}</span>}
       </div>
       <label className="time-min"><span>min</span>
-        <input aria-label={`${label}, minutes`} aria-describedby={hint ? hintId : undefined} inputMode="decimal" value={minutes} placeholder={current ? (current.value / 60).toFixed(0) : "—"} onChange={(e) => setMinutes(e.target.value)} />
+        <input aria-label={`${label}, minutes`} aria-describedby={hint ? hintId : undefined} inputMode="decimal" aria-invalid={over || undefined} value={minutes} placeholder={current ? (current.value / 60).toFixed(0) : "—"} onChange={(e) => setMinutes(e.target.value)} />
       </label>
       <input className="time-why" aria-label={`${label}, rationale`} placeholder="One-line rationale (required)" value={why} onChange={(e) => setWhy(e.target.value)} />
       <button type="submit" className="set" disabled={!valid}>Set</button>

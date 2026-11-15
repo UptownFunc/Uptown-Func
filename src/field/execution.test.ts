@@ -42,10 +42,12 @@ describe("MissionExecution (written only by the field view; never edits the plan
     let e = addTick(plan, newExecution(plan), { elapsed_min: 12, enteredAt: at });
     expect(() => addTick(plan, e, { elapsed_min: 11, enteredAt: at })).toThrow(/earlier/);
     expect(() => addTick(plan, e, { elapsed_min: Number.NaN, enteredAt: at })).toThrow(/finite/);
-    // V-15: a typing mistake such as 1,000,000 min is refused; 24 h itself is accepted.
-    expect(() => addTick(plan, e, { elapsed_min: 1_000_000, enteredAt: at })).toThrow(/at most 1440/);
-    expect(() => addTick(plan, e, { elapsed_min: 1441, enteredAt: at })).toThrow(/at most 1440/);
-    expect(addTick(plan, e, { elapsed_min: 1440, enteredAt: at }).ticks).toHaveLength(2);
+    // V-15: a typing mistake such as 1,000,000 min is refused; 48 h (twice the longest plan time, so an overrun of the
+    // longest T_EVA can still be recorded) is accepted.
+    expect(() => addTick(plan, e, { elapsed_min: 1_000_000, enteredAt: at })).toThrow(/at most 2880/);
+    expect(() => addTick(plan, e, { elapsed_min: 2881, enteredAt: at })).toThrow(/at most 2880/);
+    expect(addTick(plan, e, { elapsed_min: 1450, enteredAt: at }).ticks).toHaveLength(2);
+    expect(addTick(plan, e, { elapsed_min: 2880, enteredAt: at }).ticks).toHaveLength(2);
     for (const m of [16, 20, 22]) e = addTick(plan, e, { elapsed_min: m, enteredAt: at });
     expect(nextEvent(plan, e)).toBeNull();
     expect(() => addTick(plan, e, { elapsed_min: 30, enteredAt: at })).toThrow(/no further/);

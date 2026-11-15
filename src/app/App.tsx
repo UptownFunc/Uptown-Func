@@ -62,7 +62,7 @@ export function App() {
   /** The latest engine message for assistive technology: one live region that stays mounted (a toast that remounts
    *  for every message is not announced reliably). */
   const [announce, setAnnounce] = useState("");
-  const say = (text: string, undo?: { id: string; letter: string }) => { setMessage((m) => ({ text, n: (m?.n ?? 0) + 1, undo })); setAnnounce(undo ? `${text} Undo stop ${undo.letter} is in the message.` : text); };
+  const say = (text: string, undo?: { id: string; letter: string }) => { setMessage((m) => ({ text, n: (m?.n ?? 0) + 1, undo })); setAnnounce(undo ? `${text} Undo stop ${undo.letter}: Ctrl+Z, or the key in the message.` : text); };
   /** A message answers one action. The next action (or step) clears it, except a failed engine start, which concerns
    *  every action; `refusalsOnly` clears only a refusal (the map's click, before the engine has the pick). */
   const clearActionMessage = useCallback((refusalsOnly = false) => setMessage((m) => {
@@ -72,9 +72,18 @@ export function App() {
   // A success clears itself; a refusal or an error explains why nothing changed, so it stays until the next message.
   useEffect(() => {
     if (!message?.text.startsWith("Plan updated")) return;
-    const timer = setTimeout(() => setMessage((m) => (m?.n === message.n ? null : m)), message.undo ? 6000 : 4000);
-    return () => clearTimeout(timer);
-  }, [message]);
+    // UNDO-01: while the pointer or keyboard focus is on the message (its Undo key), it waits; Ctrl+Z (Cmd+Z) outside a
+    // text field takes back the stop just added, so the key is not pointer-only.
+    let timer = 0;
+    const wait = () => { timer = window.setTimeout(() => (document.querySelector(".toast:is(:hover, :focus-within)") ? wait()
+      : setMessage((m) => (m?.n === message.n ? null : m))), message.undo ? 6000 : 4000); };
+    wait();
+    const key = (e: KeyboardEvent) => {
+      if (message.undo && (e.ctrlKey || e.metaKey) && e.key === "z" && !(e.target as Element).closest("input, textarea")) { e.preventDefault(); send("delete_stop", { stopId: message.undo.id }); }
+    };
+    addEventListener("keydown", key);
+    return () => { clearTimeout(timer); removeEventListener("keydown", key); };
+  }, [message]); // eslint-disable-line react-hooks/exhaustive-deps -- send is stable
   const [pending, setPending] = useState(0);
   const [engineFailed, setEngineFailed] = useState(false);
   const [hover, setHover] = useState<number | null>(null);
@@ -240,7 +249,7 @@ export function App() {
         outputRef.current = next;
         setOutput(next);
         say(result.ok ? `Plan updated in ${Math.round(elapsed_ms)} ms.` : `Not changed: ${result.reason}.`,
-          type === "add_stop" && result.ok ? next.plan.stops.find((s) => !cur.plan.stops.some((o) => o.id === s.id)) : undefined);
+          type === "add_stop" && result.ok ? (({ id, letter }) => ({ id, letter }))(next.plan.stops.at(-1)!) : undefined); // add_stop appends
       } catch (err: unknown) {
         say(`Engine error: ${errText(err)}`);
       } finally { setPending((n) => n - 1); }
@@ -362,7 +371,7 @@ export function App() {
         <AnimatePresence>
           {message && <Appear as="p" key={message.n} className="toast" data-kind={message.text.startsWith("Plan updated") ? "ok" : "hold"} data-testid="engine-message"
             enter={{ opacity: [0, 1], transform: ["translateY(-10px) scale(0.97)", "translateY(0px) scale(1)"] }} exit={{ opacity: [1, 0] }}><span aria-hidden="true">{message.text}</span>
-            {message.undo && <button type="button" className="textbtn" onClick={() => send("delete_stop", { stopId: message.undo!.id })}>Undo stop {message.undo.letter}</button>}</Appear>}
+            {message.undo && <button type="button" className="textbtn" onClick={(e) => { e.currentTarget.disabled = true; send("delete_stop", { stopId: message.undo!.id }); }}>Undo stop {message.undo.letter}</button>}</Appear>}
         </AnimatePresence>
         <p className="sr-only" role="status" data-testid="engine-announce">{announce}</p>
         {/* Always mounted (inert and hidden while closed) so the datasets-in-view list stays current. */}
