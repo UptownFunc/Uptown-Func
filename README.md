@@ -19,10 +19,10 @@ credited to the team as a whole.
 
 | Member | Role |
 |---|---|
-| Christian Jesus Bolilan Alcazar | Team Leader, Planning, Programming |
+| Christian Jesus Bolilan Alcazar | Team Leader, Planning, Programming, Finalization |
 | Patrick Ezekiel A. Arcilla | UI/UX, Planning, Programming |
-| Eugene Ibañez Jr. ("Yujin") | Data Verification, Programming |
-| John Lyod R. Malubay | Data, Programming and Accessibility |
+| Eugene Ibañez Jr. ("Yujin") | Data Verification, Programming, Finalization |
+| John Lyod R. Malubay | Programming and Accessibility |
 
 Code in this repository was drafted with SI assistance under the team's direction; see **SI use** below. SI is not
 credited with the concept, the plan or any team decision.

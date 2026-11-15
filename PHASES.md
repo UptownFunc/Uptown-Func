@@ -1604,3 +1604,12 @@ Checks run: gh pr view 43 (clean, Vercel passed); local build of bcca613 in a se
 Results: identical; branch-head Playwright app 93/95 (TIME-01), 3D 10/10
 Next part / blocker owner: the team - submission
 ```
+
+```text
+Part: G-13 - README team roles amended at a member's instruction
+Owner: this cloud session's operator (a team member); SI-assisted (Claude Code, Claude Opus 5.5)
+Status: VERIFIED (docs only)
+Checks run: npx tsc --noEmit; npx vitest run; /code-review low
+Results: tsc clean; vitest 356/356; /code-review low: 1 finding (this placeholder), fixed; docs only
+Next part / blocker owner: the named members confirm their roles
+```
