@@ -2,10 +2,11 @@
 // Conditions panel (Tier 1, plan 6.10): sun values stay unknown until a person sets the Assumed scenario time with a
 // rationale; then the engine returns model-derived LMST, sun elevation and L_s at the area centre, each opening its
 // source (D10 Mars24) in the sources panel. The test instant is a test input, not a team choice.
+import { openStep } from "./helpers";
 import { expect, test } from "@playwright/test";
 
 test("scenario time drives the Mars24 sun values, each traceable to D10", async ({ page }) => {
-  await page.goto("/?preset=none");
+  await openStep(page, "setup");
   const panel = page.getByRole("region", { name: "Conditions" });
   await expect(panel).toBeVisible();
   await expect(page.getByTestId("current-scenario")).toHaveText("not set");
@@ -33,7 +34,7 @@ test("scenario time drives the Mars24 sun values, each traceable to D10", async 
 });
 
 test("D7: the dated Curiosity reading is shown for context and opens its source with the provider's disclaimer", async ({ page }) => {
-  await page.goto("/?preset=none");
+  await openStep(page, "setup");
   const rems = page.getByTestId("rems");
   await expect(rems).toContainText(/Conditions at Curiosity on \d{4}-\d{2}-\d{2} \(sol \d+\), for context/);
   await expect(rems).toContainText("not at the boxwork");
@@ -49,6 +50,6 @@ test("D7: the dated Curiosity reading is shown for context and opens its source 
 
 test("D7: a missing snapshot is labelled unavailable, not filled in", async ({ page }) => {
   await page.route("**/conditions/rems.json", (r) => r.fulfill({ status: 404, body: "" }));
-  await page.goto("/?preset=none");
+  await openStep(page, "setup");
   await expect(page.getByTestId("rems")).toHaveText("Curiosity weather snapshot (D7) unavailable.");
 });

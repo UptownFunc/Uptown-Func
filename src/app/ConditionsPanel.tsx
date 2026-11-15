@@ -35,25 +35,26 @@ export function ConditionsPanel({ output, onSet, onOpenSource, rems }: Condition
   const elev = c?.sunElevation.value;
   return (
     <section aria-label="Conditions" className="conditions">
-      <h2>Conditions <span className="muted">sun model-derived at the area centre; weather measured at the rover</span></h2>
-      <form className="time-row" onSubmit={(e) => { e.preventDefault(); if (valid && s !== null) onSet(SCENARIO_ID, s, why.trim()); }}>
-        <div className="time-head">
-          <span>Scenario date and time</span>
-          <span data-testid="current-scenario" className={c?.scenario ? "assumed" : "unknown"}>
-            {c?.scenario ? `${formatUtc(c.scenario.value)} · assumed` : "not set"}
-          </span>
-        </div>
-        {c?.scenario && <div className="muted small">Rationale: {c.scenario.rationale}</div>}
-        <div className="time-inputs">
-          <label>UTC <input type="datetime-local" aria-label="Scenario date and time, UTC" value={when} onChange={(e) => setWhen(e.target.value)} /></label>
-          <input className="rationale" aria-label="Scenario date and time, rationale" placeholder="one-line rationale" value={why} onChange={(e) => setWhy(e.target.value)} />
-          <button type="submit" disabled={!valid || !output}>Set</button>
-        </div>
-      </form>
+      <p className="section-title">Conditions</p>
+      <div className="readout-row">
+        <span className="k">Scenario date and time</span>
+        <span data-testid="current-scenario" key={c?.scenario?.value} className={c?.scenario ? "assumed flash" : "unknown"}>
+          {c?.scenario ? `${formatUtc(c.scenario.value)} · assumed` : "not set"}
+        </span>
+        {c?.scenario && <span className="why">{c.scenario.rationale}</span>}
+      </div>
+      <details className="change" open={!c?.scenario || undefined}>
+        <summary>Change the scenario time</summary>
+        <form className="time-row" onSubmit={(e) => { e.preventDefault(); if (valid && s !== null) onSet(SCENARIO_ID, s, why.trim()); }}>
+          <label className="time-min"><span>UTC</span><input type="datetime-local" aria-label="Scenario date and time, UTC" value={when} onChange={(e) => setWhen(e.target.value)} /></label>
+          <input className="time-why" aria-label="Scenario date and time, rationale" placeholder="One-line rationale (required)" value={why} onChange={(e) => setWhy(e.target.value)} />
+          <button type="submit" className="set" disabled={!valid || !output}>Set</button>
+        </form>
+      </details>
       {c && (
         <dl className="conditions-values">
           <dt>Local mean solar time</dt>
-          <dd data-testid="cond-lmst"><QuantityText q={c.lmst} onOpen={onOpenSource} label="Local mean solar time" /> <span className="muted small">clock label; durations are SI minutes</span></dd>
+          <dd data-testid="cond-lmst"><QuantityText q={c.lmst} onOpen={onOpenSource} label="Local mean solar time" /> <span className="why">clock label; durations are SI minutes</span></dd>
           <dt>Sun elevation</dt>
           <dd data-testid="cond-sun"><QuantityText q={c.sunElevation} onOpen={onOpenSource} label="Sun elevation" />
             {elev != null && elev < 0 && <span> below the horizon</span>}</dd>
@@ -61,7 +62,7 @@ export function ConditionsPanel({ output, onSet, onOpenSource, rems }: Condition
           <dd data-testid="cond-ls"><QuantityText q={c.ls} onOpen={onOpenSource} label="Solar longitude" /></dd>
         </dl>
       )}
-      <p className="muted small">Mars24 algorithm (NASA GISS) at one point, the area centre. Terrain shadowing is not modelled: nearby slopes can hide the sun.</p>
+      <p className="note">Sun values are model-derived with the Mars24 algorithm (NASA GISS) at one point, the area centre. Terrain shadowing is not modelled: nearby slopes can hide the sun.</p>
       <Rems rems={rems} onOpenSource={onOpenSource} />
     </section>
   );
@@ -70,18 +71,18 @@ export function ConditionsPanel({ output, onSet, onOpenSource, rems }: Condition
 /** D7: "conditions at Curiosity on [date], for context" (plan 19.11 weakness 27): a real recent sol at the rover. */
 function Rems({ rems, onOpenSource }: { rems: ConditionsPanelProps["rems"]; onOpenSource: (q: Quantity) => void }) {
   if (rems === null) return null;
-  if (rems === "failed") return <p className="unknown small" data-testid="rems">Curiosity weather snapshot (D7) unavailable.</p>;
+  if (rems === "failed") return <p className="unknown" data-testid="rems">Curiosity weather snapshot (D7) unavailable.</p>;
   const q = remsQuantities(rems), r = rems.reading;
   return (
     <div data-testid="rems">
-      <h3 className="small">Conditions at Curiosity on {r.terrestrialDate} (sol {r.sol}), for context</h3>
+      <h3>Conditions at Curiosity on {r.terrestrialDate} (sol {r.sol}), for context</h3>
       <dl className="conditions-values">
         <dt>Air temperature</dt>
         <dd><QuantityText q={q.airTempMin} onOpen={onOpenSource} label="Air temperature, minimum" /> to <QuantityText q={q.airTempMax} onOpen={onOpenSource} label="Air temperature, maximum" /></dd>
         <dt>Pressure</dt>
         <dd><QuantityText q={q.pressure} onOpen={onOpenSource} label="Air pressure" /></dd>
       </dl>
-      <p className="muted small">REMS daily summary at the rover, not at the boxwork, and not a forecast for the scenario date. Outreach data from CAB.</p>
+      <p className="note">REMS daily summary at the rover, not at the boxwork, and not a forecast for the scenario date. Outreach data from CAB.</p>
     </div>
   );
 }

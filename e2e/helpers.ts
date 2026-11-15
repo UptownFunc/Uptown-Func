@@ -27,3 +27,38 @@ export async function clickAt(page: Page, p: { lat: number; lon: number }): Prom
   const { x, y } = await pixelAt(page, p);
   await page.mouse.click(x, y);
 }
+
+/** Guided flow (UI-01): the step lives in the URL hash, so a spec can open a step directly, like a shared link. */
+export async function openStep(page: Page, step: string, query = "?preset=none"): Promise<void> {
+  await page.goto(`/${query}#${step}`);
+}
+
+/** Waits until a step change's view transition has finished (pointer input during it reaches the snapshot layer). */
+export async function settle(page: Page): Promise<void> {
+  await page.waitForFunction(() => { try { return !document.documentElement.matches(":active-view-transition"); } catch { return true; } });
+}
+
+/** Moves to a step with a real click on the masthead's step index, as a user does. */
+export async function goStep(page: Page, name: "Setup" | "Planner" | "Map" | "HUD" | "Assess" | "Brief"): Promise<void> {
+  await page.getByRole("navigation", { name: "Mission steps" }).getByRole("button", { name, exact: true }).click();
+  await settle(page);
+}
+
+/** Opens the source drawer from the masthead (a click on a Quantity opens it too). */
+export async function openSources(page: Page): Promise<void> {
+  const b = page.getByRole("button", { name: "Sources", exact: true });
+  if ((await b.getAttribute("aria-expanded")) !== "true") await b.click();
+}
+
+/** Opens the map's Layers panel (layer list and the Tier 2 layer switches). */
+export async function openLayers(page: Page): Promise<void> {
+  const b = page.getByRole("button", { name: "Layers", exact: true });
+  if ((await b.getAttribute("aria-expanded")) !== "true") await b.click();
+}
+
+/** Sets one Assumed plan time on the Planner step (the caller is on that step). */
+export async function setTime(page: Page, label: string, minutes: string): Promise<void> {
+  await page.getByLabel(`${label}, minutes`).fill(minutes);
+  await page.getByLabel(`${label}, rationale`).fill("e2e test fixture, not a plan value");
+  await page.getByLabel(`${label}, minutes`).press("Enter");
+}

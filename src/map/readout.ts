@@ -13,6 +13,8 @@ export interface AreaGrid {
   readonly cell_m: number;
   readonly elevation: Float64Array;
   readonly elevationSource: string;
+  /** Pipeline terrain classes (0 unknown, 1 slope-screened, 2 excluded), for the point-and-click hint; optional. */
+  readonly classes?: Uint8Array;
 }
 
 export interface Readout {
@@ -24,6 +26,8 @@ export interface Readout {
   readonly north: Quantity;
   readonly elevation: Quantity;
   readonly elevationSource: string;
+  /** Terrain class of the cell under the point, or null outside the grid / without the class grid (UI-11). */
+  readonly terrainClass: number | null;
 }
 
 const POSITION = { methodId: "geo:F7-F1-F5-F6", assumptionIds: [] as string[], sourceIds: ["plan-7.3"] };
@@ -43,5 +47,6 @@ export function readoutAt(coordF7: readonly number[], grid: AreaGrid): Readout {
   return {
     lat: p.lat.toFixed(5), lon: p.lon.toFixed(5), latQ: q(p.lat, "deg"), lonQ: q(p.lon, "deg"),
     east: q(enu.e, "m"), north: q(enu.n, "m"), elevation, elevationSource: grid.elevationSource,
+    terrainClass: cell && grid.classes ? grid.classes[cell.r * grid.cols + cell.c]! : null,
   };
 }

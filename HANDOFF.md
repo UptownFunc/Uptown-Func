@@ -2,6 +2,225 @@
 
 This file is the handoff between team members and Claude sessions. Keep it factual and current. A new session must read this file before touching code.
 
+## Merge preparation, audit session (Sun 15 Nov 2026, 12:55 Asia/Manila, container clock): READY, NOT MERGED; read this first
+
+Two sessions received the merge request at the same time and both stopped before the merge, for the same reasons.
+This section is the audit session's; the next section is the second session's (MERGE-01).
+
+- **Asked:** merge `design/sharpwalk-ui-ux` into `main` (request from parcilla13's account, about 12:47).
+- **Done:** whole-branch `/code-review` (R-27; 3 findings fixed in 79c9c56, 3 kept and recorded); every check rerun
+  and green: vitest 302/302, tsc exit 0, build OK, bundle 238,771 B of 250,000 B, Playwright 67/67, pytest 82 passed +
+  2 skipped, licences current. The merge is conflict-free (`main` ca2504a is already inside the branch). AUD-13 closed.
+- **Not done: the merge itself.** Three points need a person's yes (DECISIONS MERGE-01 and its note): the team approval the records
+  require for the redesign; merging a whole new interface at the G5 freeze (13:00, bug fixes only) into the branch
+  Vercel deploys; and the authorship wording (G-10), which does not match the records.
+- **To merge once confirmed** (no force push; keep the history):
+
+  ```bash
+  git fetch origin && git checkout main && git pull --ff-only
+  git merge --no-ff origin/design/sharpwalk-ui-ux
+  npx vitest run && npx tsc --noEmit && npm run build && node scripts/bundle-size.mjs
+  git push origin main
+  curl -sS https://uptown-func.vercel.app/ | grep -o 'assets/index-[^"]*\.js'   # compare with dist/index.html
+  ```
+
+  In the same merge, rewrite the "pending team approval / not merged" wording in CLAUDE.md (visual and motion lines),
+  HANDOFF and PHASES, and record the merge commit SHA.
+## Merge request (Sun 15 Nov 2026, about 12:55 Asia/Manila, container clock): prepared, NOT merged (MERGE-01)
+
+- **Asked:** merge `design/sharpwalk-ui-ux` into `main`. **Done:** audit of the diff against `main` (87 files; no
+  `src/contracts`, `src/constants`, `pipeline/` or `public/` change; engine change limited to the worker build and
+  `terrainClasses()`), `/code-review` low (R-26, 0 findings, partial pass as stated there), checks (see the addendum
+  below: all passed at 08f20f7; only log files changed since), SI headers present on every new source file, licences
+  current, a pull request opened.
+- **Not merged, two decisions needed from the team, in writing:**
+  1. **Authorship:** sole credit to Patrick Ezekiel A. Arcilla (this request, and G-06) or the whole team (G-07, now in
+     `CLAUDE.md` and `README.md`). No file was changed.
+  2. **The redesign itself:** the branch's own records say no merge until the team approves the interface (UI-01 to
+     UI-16). Merging replaces the live site's interface; after 13:00 `main` takes bug fixes only (G5).
+- **To merge once both are settled:** update the attribution text if the team chooses to, rerun
+  `npm ci && npx vitest run && npx tsc --noEmit && npm run build && node scripts/bundle-size.mjs && npx playwright test --trace off`,
+  merge the pull request with a merge commit, then check https://uptown-func.vercel.app (`/engine-worker.js` must answer 200).
+- **Also open:** AUD-13 (were the "13 defects" the UX-16 and A11Y-02 fixes?), BUILD-01 (worker build layout), PR #22 (W-01).
+
+## Addendum (Sun 15 Nov 2026, 12:55 Asia/Manila, container clock): second session's independent check of 08f20f7
+
+A separate cloud session (the one that did REG-01 on Sat night) was asked to resume the audit and then to hand off. It
+changed **no code**. Read the 12:50 handoff below for the branch state; this adds four facts.
+
+- **Independent re-run at 08f20f7, fresh `npm ci`, all passed:** `npx vitest run` 303/303 (31 files); `npx tsc --noEmit`
+  clean; `rm -rf dist && npm run build` OK; `node scripts/bundle-size.mjs` 238,750 B of 250,000 B (index 195,579 +
+  shared 34,631 + engine-worker 8,540); `PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome npx
+  playwright test --trace off` 67 passed / 67; pipeline pytest 82 passed + 2 skipped (`gdal_contour` not installed);
+  `scripts/licences.py` against `docs/licences.md`: no difference. The A5 print check was not run separately; it is
+  inside `e2e/audit.spec.ts`. Not re-run after the logs-only commit 0800f59.
+- **"13 failing regression tests" are not in the repository.** The resume brief said the previous session stopped
+  after writing failing tests for 13 further UX and accessibility defects. At 0800f59 there is no failing, skipped,
+  `fixme` or `fail` test: `e2e/audit.spec.ts` holds 10 tests and all pass. Either the 13 were fixed inside 9107c42
+  (UX-16, A11Y-02 list in DECISIONS) or that work was never pushed. **The member who ran that session should say
+  which.** This session wrote no tests and fixed no defect, so as not to duplicate or overwrite that work.
+- **Two sessions wrote to this branch within minutes of each other** (9107c42 and 08f20f7 at 12:37, 0800f59 at 12:44,
+  this commit after). Always `git fetch origin && git status -sb` before committing here.
+- **Tools installed in this session's container only (TOOL-01):** Claude Code plugins Superpowers 7.0.2
+  (`obra/superpowers`) and caveman 4.1.0 (`juliusbrussee/caveman`), user scope. Other containers do not have them.
+  Caveman shortens chat replies only; code, documents, commits and these logs stay in full prose.
+- **Authorship:** this handoff request again asked to preserve "the user's sole authorship of the concept and plan".
+  The records credit the whole team (G-07). Nothing was changed (G-07 note 3; same question as G-08 below).
+- **Outside git:** a shareable document, "SharpWalk register corrections (REG-01)", was written for the team:
+  https://claude.ai/artifact/YTD4Mj1cQyoUwmNWRuFr1H. It predates REG-02; where they differ, `docs/data/reg-02-verification.md` is newer.
+
+## HANDOFF (Sun 15 Nov 2026, 12:50 Asia/Manila, container clock): design branch audit finished; start here
+
+**Deadline:** Sun 15 Nov 2026 23:59 Asia/Manila (about 11 h left at this handoff). The G5 freeze (13:00) concerns
+`main`; this session did not touch `main`.
+
+- **Current phase part:** design branch audit A1-A6 (PHASES "Design branch, audit of the Bureau redesign"): **VERIFIED,
+  complete, not merged.** Nothing is in progress and nothing is uncommitted.
+- **Exact next task:** a human decision, not code. The team reviews `design/sharpwalk-ui-ux` and decides whether it
+  replaces the interface on `main` before submission. If yes: merge current `main` into the branch, rerun the checks
+  below, run `/code-review`, then open a pull request. If no: `main` (ca2504a) stays as it is and the branch is kept
+  as a record. The plan's own next steps on `main` (freeze, video, submission) are in the older sections below.
+- **Branch:** `design/sharpwalk-ui-ux` = `origin/design/sharpwalk-ui-ux`. Code and tests: **9107c42**; logs: 08f20f7,
+  then this handoff commit (see `git log`). Working tree clean. `main` = ca2504a, untouched; the branch already
+  contains it (0 commits behind).
+- **Pull requests:** #22 (`yujin/w-01-slow-bound`, W-01, needs the team's confirmation) is the only open one. #24, opened
+  for this branch from the Claude Code app during the session, was **closed unmerged** at 12:40. This session opened
+  and merged none. GitHub now reports the repository as `UptownFunc/Uptown-Func`; the old
+  `parcilla13/Uptown-Func` address still works for fetch and push.
+- **Files changed by the audit (9107c42):** `src/app/{App,AssessPanel,PlanPanel,Screens,Tutorial,fx,motion,styles}.*`,
+  `src/briefing/BriefingView.tsx`, `src/engine/{client,worker}.ts`, `src/map/{AreaSheet,loadArea}.*`, `src/raw.d.ts`,
+  `vite.config.ts`, `vercel.json`, `package.json`, `package-lock.json`, `e2e/audit.spec.ts` (new),
+  `scripts/bundle-size.mjs` (new), `docs/licences.md`, `docs/design/visual-system.md`, `docs/design/screenshots/*`,
+  and the six records. `src/contracts`, `src/constants`, the engine's calculations, `pipeline/` and `public/` are unchanged.
+- **Checks run again at 08f20f7 for this handoff (12:42-12:48), all passed:**
+
+  | Command | Result |
+  |---|---|
+  | `npx vitest run` | 31 files, 303/303 passed |
+  | `npx tsc --noEmit` | exit 0 |
+  | `rm -rf dist && npm run build` | built |
+  | `node scripts/bundle-size.mjs` | 238,750 B of 250,000 B: within budget (AC-12) |
+  | `PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome npx playwright test --trace off` | 67/67 passed |
+  | `(cd pipeline && ../.venv/bin/python -m pytest)` | 82 passed, 2 skipped (`gdal_contour` not installed) |
+  | `.venv/bin/python scripts/licences.py \| diff -q - docs/licences.md` | no difference |
+
+- **Known failures:** none in the checks above. **Not verified:** the card printed on paper; the phone layout in
+  daylight; the deployed site (this branch is not deployed); browsers other than Chromium.
+- **Blockers and decisions awaiting people:**
+  1. Team approval of the redesign (UI-11 to UI-16, MOT-04) before any merge.
+  2. BUILD-01: Route Engine owners confirm the worker build (`engine-worker.js` as a second build entry).
+  3. EL-01: the elevation grid is requested by both the page and the worker (same on `main`); owners decide.
+  4. G-08 / G-09: authorship wording. Two session briefs asked for one member's sole authorship of the concept and
+     plan; the records in force credit the whole team (G-07). Nothing was changed. **The team must settle this before
+     the submission text is written.**
+  5. Still open from earlier sessions: PR #22 (W-01), the team's confirmation of REG-01, and the items in the older
+     sections below.
+- **Commands for the next session:**
+
+  ```bash
+  git fetch origin && git checkout design/sharpwalk-ui-ux && git pull --ff-only
+  npm ci
+  npx vitest run && npx tsc --noEmit
+  npm run build && node scripts/bundle-size.mjs
+  PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome npx playwright test --trace off
+  python3.11 -m venv .venv && .venv/bin/pip install -r pipeline/requirements.txt && (cd pipeline && ../.venv/bin/python -m pytest)
+  npx vite preview   # then open / or /#map
+  ```
+
+  `PW_CHROMIUM` is only needed in the cloud container. Do not import the `motion`/`m` components again (about 30 kB);
+  use `Appear` in `src/app/motion.tsx` and `src/app/fx.ts`.
+
+## Session detail (Sun 15 Nov 2026, 11:34 to about 12:50 Asia/Manila): audit of the "Bureau" redesign, design branch, NOT merged
+
+**Read this first if you work on the interface.** `main` is untouched.
+
+- **Branch:** `design/sharpwalk-ui-ux`, commit 9107c42 on top of 62fa3bd (plus a logs commit). Pushed to that branch only. Not merged. A pull request
+  (#24) was opened from the Claude Code app during the session and closed unmerged at 12:40; this session opened none.
+- **Model:** Claude Fable 5.2 (configured and serving). Superpowers loaded; tests first; /code-review high (R-25).
+- **What changed:**
+  - **Bundle (B-01): AC-12 met.** 310,521 B -> 238,750 B (`gzip -9`, every `.js` in `dist/`). Check it with
+    `npm run build && node scripts/bundle-size.mjs`.
+  - **Anime.js removed (MOT-04).** Motion alone animates: `src/app/fx.ts` (four timelines) and `src/app/motion.tsx`
+    (`Appear`, enter and exit). Do not import `m`/`motion` components again: they add about 30 kB.
+  - **Worker build (BUILD-01).** The engine worker is the `engine-worker` entry in `vite.config.ts` and shares
+    `assets/shared-<hash>.js` with the page. `src/engine/client.ts` addresses `/engine-worker.js` (dev: the module).
+  - **Terrain (TER-01).** Only the worker downloads `terrain_class.uint8.bin`; `engineApi.terrainClasses()` gives the
+    sheet a copy for the cursor tag.
+  - **Print (PRINT-02).** The demonstration card is one A5 page, 6 pt minimum.
+  - **Design, UX, accessibility (UX-16, A11Y-02):** see DECISIONS for the list.
+- **Checks:** vitest 303/303; tsc clean; build OK; bundle 238,750 B of 250,000 B; Playwright 67/67 (new
+  `e2e/audit.spec.ts`, 10 tests); pytest 82 passed + 2 skipped; licences regenerated.
+- **Open for the team:**
+  1. Approve or change the branch (UI-11 to UI-16, MOT-04) before any merge.
+  2. BUILD-01: Route Engine owners confirm the worker build layout.
+  3. EL-01: the elevation grid is still requested twice (page and worker), as on `main`.
+  4. G-08: the brief asked to credit one member with the concept and plan; the records credit the whole team (G-07).
+     Nothing was changed. The team decides.
+  5. Print the card on paper once; try the phone layout in daylight.
+- **To look at it:** `git fetch origin design/sharpwalk-ui-ux && git checkout design/sharpwalk-ui-ux && npm ci && npm run build && npx vite preview`.
+- **Pipeline tests here need Python 3.11:** `python3.11 -m venv .venv && .venv/bin/pip install -r pipeline/requirements.txt`.
+
+## Earlier session (Sun 15 Nov 2026, until about 11:30 Asia/Manila): "Bureau" redesign, design branch, NOT merged
+
+**Read this first if you work on the interface.** `main` is untouched.
+
+- **Branch:** `design/sharpwalk-ui-ux`, one commit on top of 6380209. Pushed to that branch only; no PR, as the operator asked.
+- **What changed:** "Bureau" (UI-13) replaces Frosted terrain on this branch: walnut, cream index cards and forms, keys
+  with travel, lamps, the real terrain on a CRT, Fraunces / Barlow Semi Condensed / VT323. New: point and click on the
+  map (UI-11: cursor tag, stop card with Rename/Move/Delete, move mode), an 8-card orientation tour (UI-12), a
+  return-margin meter (UI-14). Motion 14.11.1 and Anime.js 4.5.0 installed at the operator's request (MOT-03).
+  Records: `docs/design/visual-system.md`, `docs/design/screenshots/` (now also `desktop-8-orientation`,
+  `desktop-9-stop-card`), DECISIONS UI-11..UI-14, MOT-03, R-24, E2E-03, B-01.
+- **Checks:** vitest 303/303; tsc clean; build OK; Playwright 57/57 (new `e2e/bureau.spec.ts`); pytest 82 + 2 skipped; licences regenerated.
+- **Blockers before any PR:** B-01 (about 313.6 kB vs 250 KB; Motion + Anime.js added about 55 kB); MOT-03 (Anime.js vs
+  the CLAUDE.md rule); team approval of UI-11..UI-14; PRINT-02.
+- **Next:** team review of the look; if kept, cut bundle size (drop Anime.js or lazy-load both libraries; Zod into the worker).
+
+## Earlier session (Sun 15 Nov 2026, 01:58-02:40 Asia/Manila): "Frosted terrain" redesign, design branch, NOT merged
+
+**Read this first if you work on the interface.** `main` is untouched.
+
+- **Branch:** `design/sharpwalk-ui-ux`. `main` ca2504a was merged in (46218f4), then the redesign (0a00683) and the review fixes and logs. Pushed to that branch only; no PR, as the operator asked.
+- **What changed:**
+  - The real terrain is the stage on all seven steps, with frosted glass panels over it and an oxide accent.
+  - Geist and Geist Mono, Lucide icons, design tokens.
+  - CSS-only motion per emil-design-eng, with view transitions removed.
+  - A decision-first briefing card with expandable details.
+  - Records: `docs/design/visual-system.md`, `docs/design/screenshots/`. Decisions: UI-07..UI-10, MOT-02, PRINT-02, R-23, B-01 in `DECISIONS.md`.
+- **Checks:** vitest 296/296; tsc clean; build OK; Playwright 55/55; pytest 82 + 2 skipped; licences current.
+- **Blockers before any PR:**
+  1. **B-01:** about 258.5 kB of app JavaScript against 250 KB.
+  2. **MOT-01:** the CLAUDE.md Motion rule.
+  3. The team approves UI-07..UI-10.
+  4. **PRINT-02:** the demo-preset card prints on two pages.
+- **To look at it:** `git checkout design/sharpwalk-ui-ux && npm ci && npm run build && npx vite preview`; open `/` (Welcome) or `/#map`.
+
+## Latest session (Sun 15 Nov 2026, 00:58-01:55 Asia/Manila): UI/UX redesign on an isolated branch, NOT merged
+
+**Read this first if you work on the interface.** `main` is untouched by this session.
+
+- **Branch:** `design/sharpwalk-ui-ux`, from `main` 1ad41f6. Commits 2b5f515 (redesign), dbfdd6d (review fixes and records), plus a logs commit. Pushed to that branch only.
+  - The operator said: no merge and no PR until the team approves.
+  - `main`, `claude/ecstatic-keller-k9idte` and every other branch were not touched.
+- **Session:** run from parcilla13's account (member identity not otherwise stated).
+  - Model: Claude Opus 5.5. Superpowers loaded; the frontend-design skill used; Higgsfield used for 18 exploration images (none shipped).
+  - The cloud environment "Space App" gained the allowed host `d8j0ntlcm91z4.cloudfront.net` (Higgsfield's image host), with the operator's approval in the prompt.
+- **What changed:**
+  - A guided flow (Welcome -> Setup -> Planner -> Map -> HUD -> Assess -> Brief) with the step in the URL hash.
+  - The "Geologic Folio" visual system (paper, ink, cobalt interaction, the map as a framed plate).
+  - Newsreader, Instrument Sans and DM Mono replace IBM Plex.
+  - CSS and view-transition motion; a briefing confirmation.
+  - Design record: `docs/design/visual-system.md`. Decisions: UI-01..UI-06, MOT-01, R-22, E2E-02 in `DECISIONS.md`.
+- **Checks:**
+  - vitest 290/290; tsc clean; build OK; Playwright 56/56; pytest 82 + 2 skipped; licences current.
+  - /code-review high: 10 findings, 8 fixed.
+- **Blockers before any PR:**
+  1. **B-01:** app JavaScript about 254.1 kB against the 250 KB AC-12 budget (about 4.1 kB over); options are in DECISIONS B-01.
+  2. **MOT-01:** the CLAUDE.md "Motion owns all motion" rule versus CSS-only motion (Motion was never installed).
+  3. The team must approve UI-01..UI-06; the visual revision came from one member's authorisation.
+- **To look at it:** `git fetch origin design/sharpwalk-ui-ux && git checkout design/sharpwalk-ui-ux && npm ci && npm run build && npx vite preview`; open `/` (welcome) or `/#map`.
+
+## Latest session (Sat 14 Nov 2026, 23:07-23:59 Asia/Manila): register cleared, REG-01
 ## Handoff: Yujin's session (Sun 15 Nov 2026, 00:02-01:55 Asia/Manila)
 
 **Read this section first.** It replaces the two short "latest session" notes below it, which keep the detail.

@@ -63,6 +63,8 @@ export async function loadArea(base: string): Promise<LoadedArea> {
       return { ok: false, reason: e instanceof Error ? e.message : `${s.grid.path} could not be loaded` };
     }
   };
+  // The terrain-class grid is not fetched here: the engine worker loads it once and the console passes a copy to the
+  // sheet for the cursor tag (AreaSheet `terrainClasses`).
   const [coverage, contours, skyGrid] = await Promise.all([
     loadOptional(base, raw.coverage?.path, CoverageCollection, "coverage"),
     loadOptional(base, raw.contours?.path, ContourCollection, "contours"),

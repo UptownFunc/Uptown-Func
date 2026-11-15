@@ -4,10 +4,10 @@ import { roverCaption, type RoverImages } from "./rover";
 
 export function RoverView({ data, compact = false }: { data: RoverImages | "failed" | null; compact?: boolean }) {
   if (data === null) return null;
-  if (data === "failed") return <p className="muted small" data-testid="rover-view">Rover views (D6) unavailable.</p>;
+  if (data === "failed") return <p className="unknown" data-testid="rover-view">Rover views (D6) unavailable.</p>;
   return (
     <section className={compact ? "rover rover-compact" : "rover"} aria-label="Rover point of view" data-testid="rover-view">
-      {!compact && <h2>Rover point of view <span className="muted">similar terrain, not the demo stops</span></h2>}
+      {!compact && <h2>Rover point of view <span className="sub">Similar terrain, not the demo stops</span></h2>}
       <div className="rover-strip">
         {data.images.map((i) => (
           <figure key={i.file}>
@@ -16,7 +16,7 @@ export function RoverView({ data, compact = false }: { data: RoverImages | "fail
           </figure>
         ))}
       </div>
-      <p className={compact ? "small" : "small muted"}>D6: {data.label}. Raw images, downscaled.</p>
+      <p className={compact ? "small" : "note"}>D6: {data.label}. Raw images, downscaled.</p>
     </section>
   );
 }

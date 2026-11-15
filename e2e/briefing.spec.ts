@@ -2,16 +2,16 @@
 // Phase 3.4: the briefing card is built from the current plan (UX-10), stamped with its version, carries the
 // assumption list, limits and footer, and is marked STALE within 1 s of a plan change with printing blocked (UX-11, AC-06).
 import { expect, test, type Page } from "@playwright/test";
-import { STOP, clickAt } from "./helpers";
+import { STOP, clickAt, openStep, goStep } from "./helpers";
 
 test("briefing card: built from the current plan, then STALE and unprintable after a change", async ({ page }) => {
-  await page.goto("/?preset=none");
+  await openStep(page, "map");
   await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
   await clickAt(page, STOP);
   await expect(page.getByTestId("legs")).toBeVisible({ timeout: 20_000 });
   const version = (await page.getByText(/^Plan [0-9a-f]{16} ·/).textContent())!.match(/Plan ([0-9a-f]{16})/)![1]!;
 
-  await page.getByRole("button", { name: "Briefing" }).click();
+  await goStep(page, "Brief");
   const print = page.getByRole("button", { name: "Print briefing" });
   await expect(print).toBeDisabled();
   await page.getByRole("button", { name: "Generate card from current plan" }).click();
@@ -34,11 +34,11 @@ test("briefing card: built from the current plan, then STALE and unprintable aft
 
   // Change the plan, return: the card is STALE within 1 s and cannot be printed.
   // AC-06: measured from the plan edit (the Delete click) to the STALE mark, including the switch back to Briefing.
-  await page.getByRole("button", { name: "Planning" }).click();
+  await goStep(page, "Map");
   const t0 = Date.now();
   await page.getByRole("button", { name: "Delete stop A" }).click();
   await expect(page.getByLabel("Plan", { exact: true })).toContainText("No stops yet.");
-  await page.getByRole("button", { name: "Briefing" }).click();
+  await goStep(page, "Brief");
   await expect(page.getByTestId("stale")).toBeVisible({ timeout: 1000 });
   expect(Date.now() - t0).toBeLessThanOrEqual(1000);
   await expect(print).toBeDisabled();
@@ -48,11 +48,11 @@ test("briefing card: built from the current plan, then STALE and unprintable aft
 });
 
 test("the briefing map is the real sheet, not a blank image", async ({ page }) => {
-  await page.goto("/?preset=none");
+  await openStep(page, "map");
   await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
   await clickAt(page, STOP);
   await expect(page.getByTestId("legs")).toBeVisible({ timeout: 20_000 });
-  await page.getByRole("button", { name: "Briefing" }).click();
+  await goStep(page, "Brief");
   await page.getByRole("button", { name: "Generate card from current plan" }).click();
   const img = page.getByTestId("briefing-card").locator(".card-map img");
   await expect(img).toBeVisible({ timeout: 20_000 });
@@ -68,20 +68,24 @@ test("the briefing map is the real sheet, not a blank image", async ({ page }) =
 });
 
 test("the printed card is one A5 page; printing from Planning is not blank", async ({ page }) => {
-  await page.goto("/?preset=none");
+  await openStep(page, "map");
   await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
   await clickAt(page, STOP);
   await expect(page.getByTestId("legs")).toBeVisible({ timeout: 20_000 });
-  await page.getByRole("button", { name: "Briefing" }).click();
+  await goStep(page, "Brief");
   await page.getByRole("button", { name: "Generate card from current plan" }).click();
   await expect(page.getByTestId("briefing-card").locator(".card-map img")).toBeVisible({ timeout: 20_000 });
   // The Print briefing button sets the card-only print state while print() runs.
   await page.evaluate(() => { (window as unknown as { __printed: boolean[] }).__printed = [];
     window.print = () => { (window as unknown as { __printed: boolean[] }).__printed.push(document.body.classList.contains("print-card")); }; });
+  const closedDetails = () => page.getByTestId("briefing-card").evaluate((c) => c.querySelectorAll("details:not([open])").length);
+  expect(await closedDetails()).toBeGreaterThan(0); // on screen the detail sections start closed
   await page.getByRole("button", { name: "Print briefing" }).click();
   expect(await page.evaluate(() => (window as unknown as { __printed: boolean[] }).__printed)).toEqual([true]);
+  expect(await closedDetails()).toBe(0); // the printed card carries every section (legs, stops with time blanks, assumptions)
   await page.evaluate(() => window.dispatchEvent(new Event("afterprint")));
   expect(await page.evaluate(() => document.body.classList.contains("print-card"))).toBe(false);
+  expect(await closedDetails()).toBeGreaterThan(0); // and closes them again afterwards
   await page.emulateMedia({ media: "print" });
   const pages = (pdf: Buffer) => (pdf.toString("latin1").match(/\/Type\s*\/Page[^s]/g) ?? []).length;
   const plain = await page.pdf({ preferCSSPageSize: true });

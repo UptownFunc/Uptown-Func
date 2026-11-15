@@ -84,3 +84,16 @@ describe("readout values are Quantities (CLAUDE.md)", () => {
     expect(u.valueClass).toBe("unknown"); expect(u.value).toBeNull();
   });
 });
+
+describe("readout terrain class (UI-11 point-and-click hint)", () => {
+  it("reports the class of the cell under the point, and null without a class grid", async () => {
+    const { readoutAt } = await import("./readout");
+    const { f1, f1ToF7 } = await import("../geo");
+    const origin = f1(-4.815, 137.39, 0);
+    const base = { origin, rows: 3, cols: 3, cell_m: 2, elevation: new Float64Array(9).fill(-3500), elevationSource: "test" };
+    const c = f1ToF7(origin);
+    expect(readoutAt([c.x, c.y], base).terrainClass).toBeNull();
+    const classes = new Uint8Array([0, 0, 0, 0, 2, 0, 0, 0, 0]);
+    expect(readoutAt([c.x, c.y], { ...base, classes }).terrainClass).toBe(2);
+  });
+});

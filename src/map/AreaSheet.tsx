@@ -1,7 +1,8 @@
-// SI-assisted: drafted with Claude Code (Claude Opus 5.5); human Design review pending.
+// SI-assisted: drafted with Claude Code (Claude Opus 5.5); Folio plate and HUD on design/sharpwalk-ui-ux; human Design review pending.
 // Plan 7.8 AREA level of the 2D sheet: D2 base, D1 hillshade multiplied, terrain classes, scale bar, cursor readout.
 // F7 is display only; the readout's east/north and elevation come from the F6 grid through src/geo.
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import OlMap from "ol/Map";
 import View from "ol/View";
 import ImageLayer from "ol/layer/Image";
@@ -30,10 +31,19 @@ import { createElevationLayer, drawElevationContours } from "./elevationLayer";
 import { createTerrainLayer } from "./terrainLayer";
 import { skySampleAt, type SkySampler } from "./skySample";
 import type { Quantity } from "../contracts";
+import { Layers, MousePointerClick } from "lucide-react";
+import Overlay from "ol/Overlay";
+import { terrainHint } from "./terrainHint";
 
 /** Displays a Quantity: unknown stays "unknown" (CLAUDE.md); one decimal for metres. */
 function fmt(q: Quantity): string {
   return q.value === null ? "unknown" : `${q.value.toFixed(1)} ${q.unit}`;
+}
+
+/** The loaded area with the engine's terrain classes on its grid, when they fit it (a wrong-sized grid is ignored). */
+function withClasses(a: LoadedArea, classes: Uint8Array | null): LoadedArea {
+  const { classes: _old, ...grid } = a.grid;
+  return { ...a, grid: classes && classes.length === grid.rows * grid.cols ? { ...grid, classes } : grid };
 }
 
 function profileXY(plan: PlanOutput | null, grid: GridDef): Float64Array {
@@ -51,7 +61,7 @@ export interface AreaSheetProps {
   /** The engine's latest plan (a copy); the sheet only draws it. */
   readonly plan?: PlanOutput | null;
   /** Called with the F1 position of a click; the console turns it into a Command for the engine. */
-  readonly onPick?: (p: LatLon) => void;
+  readonly onPick?: ((p: LatLon) => void) | undefined;
   /** Receives a function that exports the current sheet with the plan for the briefing card (plan 7.8). */
   readonly onSnapshotReady?: (snapshot: () => Promise<MapSnapshot | null>) => void;
   /** Index into plan.geometry.profile under the pointer (shared with the profile chart, UX-06). */
@@ -67,11 +77,38 @@ export interface AreaSheetProps {
   readonly showSky?: boolean;
   /** Whether this area has a sky layer, and whether its image failed to load; with the per-stop 20 m sampler (plan 6.7). */
   readonly onSky?: (state: "none" | "ok" | "failed", sample?: SkySampler) => void;
+  /** Layer switches shown at the top of the Layers panel (the console owns their state). */
+  readonly tools?: ReactNode;
+  /** One line telling the user what a click on the sheet does in the current step. */
+  readonly hint?: string;
+  /** UI-11 point and click: a click on a stop marker selects it instead of adding a stop. */
+  readonly onSelectStop?: ((stopId: string) => void) | undefined;
+  readonly selectedStop?: string | null;
+  /** A card pinned to the selected stop (an OpenLayers overlay keeps it on the stop while the map moves). */
+  readonly popover?: ReactNode;
+  /** Cursor tag: true shows the terrain-class hint under the pointer; a string replaces it (e.g. move mode). */
+  readonly cursorHint?: boolean | string;
+  /** The engine's terrain-class grid (a copy), for the cursor tag. Null until the engine has loaded it, or when the
+   *  engine could not start: the tag then says the ground cannot be checked. The sheet never downloads it itself. */
+  readonly terrainClasses?: Uint8Array | null;
 }
 
 const cursorStyle = new Style({ image: new RegularShape({ points: 4, radius: 11, radius2: 0, angle: 0, stroke: new Stroke({ color: "#f3eee4", width: 2 }) }) });
 
-export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hoverIndex = null, onHoverIndex, onDatasets, onCursor, contours = null, showSky = false, onSky }: AreaSheetProps) {
+export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hoverIndex = null, onHoverIndex, onDatasets, onCursor, contours = null, showSky = false, onSky, tools, hint, onSelectStop, selectedStop = null, popover = null, cursorHint = false, terrainClasses = null }: AreaSheetProps) {
+  const [layersOpen, setLayersOpen] = useState(false);
+  const classesRef = useRef(terrainClasses);
+  classesRef.current = terrainClasses;
+  const selectRef = useRef(onSelectStop);
+  selectRef.current = onSelectStop;
+  // The overlay element belongs to OpenLayers (it moves it into its own container); React renders into it by portal.
+  const popEl = useRef<HTMLDivElement | null>(null);
+  popEl.current ??= Object.assign(document.createElement("div"), { className: "pop-anchor" });
+  const overlay = useRef<Overlay | null>(null);
+  /** Pointer position over the map (CSS px within the sheet) for the cursor tag; null when the pointer is off it. */
+  const [pointer, setPointer] = useState<{ x: number; y: number } | null>(null);
+  /** The stop under the pointer: a click there edits it, so the cursor tag must not offer to add a stop. */
+  const [overStop, setOverStop] = useState<string | null>(null);
   const target = useRef<HTMLDivElement>(null);
   const area = useRef<LoadedArea | null>(null);
   const planLayerRef = useRef<ReturnType<typeof createPlanLayer> | null>(null);
@@ -144,7 +181,7 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
     let raf = 0; // pending pointermove frame, cancelled on unmount (R-15 finding 10)
     loadArea(dataUrl).then((a) => {
       if (cancelled || !target.current) return;
-      area.current = a;
+      area.current = withClasses(a, classesRef.current);
       setLegend(a.display.layers);
       setSky(a.display.sky);
       // UX-15: the datasets in view are the sources of the layers actually shown (recomputed if one fails to load).
@@ -224,10 +261,17 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
       snapRef.current?.(() => snapshotMap(m, planLayer.current, a.grid.origin.lat,
         () => [...a.display.layers.filter((l) => !failed.current.has(l.id)).map((l) => l.name),
           ...(a.contours.ok ? [contourLegend(a.contours.collection.properties)] : [])]));
+      overlay.current = new Overlay({ element: popEl.current!, positioning: "bottom-center", offset: [0, -24], stopEvent: true });
+      map.addOverlay(overlay.current);
       map.on("singleclick", (e) => {
+        // A click on a stop marker selects that stop (UI-11); anywhere else it is a pick for a new stop.
+        const hit = selectRef.current ? m.forEachFeatureAtPixel(e.pixel, (f) => (f.get("kind") === "stop" ? (f.get("stopId") as string) : undefined),
+          { hitTolerance: 6, layerFilter: (l) => l === planLayer.current }) : undefined;
+        if (hit) { selectRef.current?.(hit); return; }
         const p = f7ToF1({ frame: "F7", x: e.coordinate[0]!, y: e.coordinate[1]! }, 0);
         pickRef.current?.({ lat: p.lat, lon: p.lon });
       });
+      m.getViewport()?.addEventListener("pointerleave", () => setPointer(null));
       // Readouts are throttled to one per animation frame; the grid frame is cached in src/geo/grid.
       let pending: number[] | null = null;
       map.on("pointermove", (e) => {
@@ -237,6 +281,11 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
           raf = 0;
           if (!pending || !area.current) return;
           setReadout(readoutAt(pending, area.current.grid));
+          const px = m.getPixelFromCoordinate(pending);
+          if (px) setPointer({ x: px[0]!, y: px[1]! });
+          const stopHit = px && selectRef.current ? m.forEachFeatureAtPixel(px, (f) => (f.get("kind") === "stop" ? (f.get("stopId") as string) : undefined),
+            { hitTolerance: 6, layerFilter: (l) => l === planLayer.current }) ?? null : null;
+          setOverStop((s) => (s === stopHit ? s : stopHit));
           // Nearest profile sample within 10 screen pixels drives the shared scrub marker (UX-06).
           const xy = profXY.current, tol = 10 * (m.getView().getResolution() ?? 1);
           let best = -1, bestD = tol * tol;
@@ -252,12 +301,24 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
     return () => { cancelled = true; if (raf) cancelAnimationFrame(raf); map?.setTarget(undefined); };
   }, [dataUrl]);
 
+  // The engine's terrain classes arrive after the sheet has loaded (or before: see the load above).
+  useEffect(() => { if (area.current) area.current = withClasses(area.current, terrainClasses); }, [terrainClasses]);
+
+  // The pinned stop card follows the selected stop (and drops when the stop is gone).
+  useEffect(() => {
+    const a = area.current, o = overlay.current, cell = selectedStop ? plan?.geometry.stopCells[selectedStop] : undefined;
+    if (!a || !o) return;
+    if (cell === undefined || !popover) { o.setPosition(undefined); return; }
+    const p = f1ToF7(cellCentreF1({ r: Math.floor(cell / a.grid.cols), c: cell % a.grid.cols }, a.grid));
+    o.setPosition([p.x, p.y]);
+  }, [selectedStop, plan, !!popover]); // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     if (!area.current) return;
-    drawPlan(planLayer.current, plan, area.current.grid);
+    drawPlan(planLayer.current, plan, area.current.grid, selectedStop);
     profXY.current = profileXY(plan, area.current.grid);
     lastHover.current = null; // indices refer to the previous profile
-  }, [plan]);
+  }, [plan, selectedStop]);
 
   useEffect(() => {
     if (area.current && target.current) target.current.dataset.contourLines = String(drawContours(contourLayer.current!, contours, area.current.grid));
@@ -288,7 +349,10 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
       if (xy.x < ext[0]! || xy.x > ext[2]! || xy.y < ext[1]! || xy.y > ext[3]!) m.getView().setCenter([xy.x, xy.y]);
       const r = readoutAt([xy.x, xy.y], a.grid);
       setReadout(r);
-      setAnnounce(`Cursor at latitude ${r.lat}, longitude ${r.lon} east, elevation ${fmt(r.elevation)}. Enter adds a stop here.`);
+      // The same verdict the pointer's tag gives, in words: keyboard and screen-reader users hear it before Enter.
+      const ground = terrainHint(r.terrainClass);
+      setAnnounce(`Cursor at latitude ${r.lat}, longitude ${r.lon} east, elevation ${fmt(r.elevation)}. ${
+        ground.kind === "ok" ? "Slope-screened ground. Enter adds a stop here." : `${ground.text.replace(" · ", ": ")}.`}`);
       cursorRef.current?.({ lat: next.lat, lon: next.lon });
     } else if (e.key === "Enter" && cursor.current) {
       e.preventDefault();
@@ -303,6 +367,18 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
         <div className="map" ref={target} data-testid="area-map" tabIndex={0} onKeyDownCapture={onKeyDown} role="application"
           aria-label="Traverse sheet. Arrow keys move a cursor 10 m, Shift plus arrow 100 m; Enter adds a stop at the cursor." />
         <div className="sr-only" aria-live="polite" data-testid="cursor-announce">{announce}</div>
+        {createPortal(popover, popEl.current)}
+        {cursorHint && pointer && readout && (() => {
+          const stop = overStop ? plan?.plan.stops.find((s) => s.id === overStop) : undefined;
+          const h = typeof cursorHint === "string" ? { kind: "move" as const, text: cursorHint }
+            : stop ? { kind: "stop" as const, text: `Stop ${stop.letter} · click to edit it` } : terrainHint(readout.terrainClass);
+          // Near the right or bottom edge the tag flips to the other side of the pointer, so it is never cut off.
+          const w = target.current?.clientWidth ?? 0, hgt = target.current?.clientHeight ?? 0;
+          const x = pointer.x > w - 380 ? `calc(${pointer.x - 18}px - 100%)` : `${pointer.x + 18}px`;
+          const y = pointer.y > hgt - 60 ? `calc(${pointer.y - 18}px - 100%)` : `${pointer.y + 18}px`;
+          return <div className="cursor-tag" data-kind={h.kind} data-testid="cursor-tag" aria-hidden="true" style={{ transform: `translate(${x}, ${y})` }}>
+            <span className="lamp" aria-hidden="true" />{h.text}</div>;
+        })()}
         {contours?.drill_s != null && (
           <div className="sim-banner" role="note" data-testid="simulation-banner">
             SIMULATION · SIMULATED DRILL · ASSUMED {Math.round(contours.drill_s / 60)} MIN WARNING · not a live alert, not a measurement
@@ -313,7 +389,10 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
             {layerErrors.map((n) => `${n} could not be loaded`).join("; ")}. The sheet, the route and the readout work without it.
           </div>
         )}
-        <div className="legend" aria-label="Layers">
+        {hint && <p className="map-hint"><MousePointerClick size={16} strokeWidth={1.5} aria-hidden="true" />{hint}</p>}
+        <button type="button" className="layers-btn" aria-expanded={layersOpen} aria-controls="layers-panel" onClick={() => setLayersOpen((o) => !o)}><Layers size={18} strokeWidth={1.5} aria-hidden="true" />Layers</button>
+        <div className="legend" id="layers-panel" aria-label="Layers" data-open={layersOpen}>
+          {tools}
           <ul>{legend.map((l) => layerErrors.includes(l.name)
             ? <li key={l.id} className="failed">{l.name} - not loaded</li>
             : <li key={l.id} data-layer={l.id}>{l.name} - {l.valueClass.replace("_", " ")}, {l.source}, {fmt(l.resolution)}, built {l.builtOn}
@@ -337,13 +416,13 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
           <>
             <span><span className="label">lat </span>{readout.lat}</span>
             <span><span className="label">lon </span>{readout.lon} E</span>
-            <span className="label">(display precision)</span>
+            <span className="label">display precision</span>
             <span><span className="label">E </span>{fmt(readout.east)}</span>
             <span><span className="label">N </span>{fmt(readout.north)}</span>
             <span><span className="label">elev </span>{fmt(readout.elevation)}</span>
             <span className="label">{readout.elevationSource}; vertical reference unverified</span>
           </>
-        ) : <span className="label">Move the pointer over the sheet for coordinates.</span>}
+        ) : <span className="label">Point at the plate, or tap it, for coordinates.</span>}
       </div>
     </>
   );

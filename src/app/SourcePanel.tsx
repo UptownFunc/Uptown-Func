@@ -19,19 +19,19 @@ export function SourcePanel({ selected, provenance, assumptions, datasetsInView,
   const e = selected ? explainQuantity(selected, provenance, assumptions, extraSources) : null;
   return (
     <section className="sources" aria-label="Sources" data-testid="source-panel">
-      <h2>Sources {selected && <button type="button" className="link" onClick={onClose}>close</button>}</h2>
+      <header className="drawer-head"><h2>Sources</h2><button type="button" className="textbtn" onClick={onClose}>Close</button></header>
       {selected && e && (
         <div data-testid="source-detail">
-          <p><strong>{formatQuantity(selected).text}</strong> · {e.valueClass.replace("_", " ")} · method {e.method}</p>
-          <ul className="small">{e.sources.map((s) => <li key={s.id}><strong>{s.title}</strong>{s.detail && ` - ${s.detail}`}</li>)}</ul>
+          <p className="src-value"><strong>{formatQuantity(selected).text}</strong> · {e.valueClass.replace("_", " ")} · method {e.method}</p>
+          <ul>{e.sources.map((s) => <li key={s.id}><strong>{s.title}</strong>{s.detail && ` - ${s.detail}`}</li>)}</ul>
           {e.assumptions.length > 0 && <>
-            <p className="small"><strong>Assumptions</strong></p>
-            <ul className="small">{e.assumptions.map((a) => <li key={a.id}>{a.text}</li>)}</ul>
+            <h3>Assumptions</h3>
+            <ul>{e.assumptions.map((a) => <li key={a.id}>{a.text}</li>)}</ul>
           </>}
         </div>
       )}
-      <p className="small"><strong>Datasets in this view</strong></p>
-      <ul className="small" data-testid="datasets-in-view">
+      <h3>Datasets in this view</h3>
+      <ul data-testid="datasets-in-view">
         {datasetsInView.map((id) => { const d = describeSource(id, provenance, extraSources); return <li key={id}><strong>{d.title}</strong> - {d.detail}</li>; })}
       </ul>
     </section>

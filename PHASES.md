@@ -136,6 +136,156 @@ Deadline still Sun 15 Nov 23:59 local (portal confirmation by a person still pen
 | 5.5 | PENDING (last phase) | Includes the deferred two-machine check and FortiGuard request (G5-DEFER); internal submit Sun 21:00 |
 | 5.4 | IN PROGRESS | README SI use and references current (D5, D6, D12, papers); concept-origin account (B-5) and native-library licences open; D12 licence terms not read |
 
+## Design branch, audit of the "Bureau" redesign (Sun 15 Nov 2026, 11:34 to about 12:50 Asia/Manila; NOT merged)
+
+```text
+Part: Design branch audit A1-A6 (MOT-04, B-01, BUILD-01, TER-01, PRINT-02, UX-16, A11Y-02, R-25, E2E-04)
+Owner: session from parcilla13's account (member not otherwise stated); model Claude Fable 5.2; Design and Route Engine review pending
+Status: VERIFIED on design/sharpwalk-ui-ux only; not merged (team approval of the branch pending)
+Scope completed:
+  A1 bundle: contributors measured from source maps; Anime.js removed; Motion reduced to motion/mini + AnimatePresence;
+     worker built as a second entry sharing one chunk with the page (Zod no longer shipped twice)
+  A2 animation: CRT power-on, tour spotlight, meter needle and stamp on Motion (src/app/fx.ts); enter/exit in
+     src/app/motion.tsx; a crash found and fixed (Motion committing styles on a hidden toast)
+  A3 terrain: terrain_class.uint8.bin requested once (engine worker), handed to the sheet
+  A4 print: demonstration card on one A5 page, 6 pt minimum, status word dark on white
+  A5 design, UX and accessibility sweep at 1440 x 900 and iPhone 13 (UX-16, A11Y-02)
+  A6 /code-review high (R-25: 8 findings, 8 fixed), records, screenshots
+Files changed: src/app/{App,AssessPanel,PlanPanel,Screens,Tutorial,fx,motion,styles}.*, src/briefing/BriefingView.tsx,
+  src/engine/{client,worker}.ts, src/map/{AreaSheet,loadArea}.*, src/raw.d.ts, vite.config.ts, vercel.json,
+  package.json, package-lock.json, e2e/audit.spec.ts (new), scripts/bundle-size.mjs (new), docs/licences.md,
+  docs/design/visual-system.md, docs/design/screenshots/*, CLAUDE.md (motion line), README.md, DECISIONS.md,
+  HANDOFF.md, SI_LOG.md, PHASES.md
+Engine calculations, contracts (src/contracts), constants, pipeline and data: unchanged
+Tests first: scripts/bundle-size.mjs failed at 310,521 B; e2e/audit.spec.ts failed on the terrain count (2 requests),
+  the card's italic estimate and page count, and all five UX/accessibility tests, before the fixes
+Checks run (exact commands, final tree):
+  npx vitest run                                   -> 31 files, 303/303 passed
+  npx tsc --noEmit                                 -> clean
+  rm -rf dist && npm run build                     -> OK; index 198.08 kB, shared 34.98 kB, engine-worker 8.56 kB (Vite gzip)
+  node scripts/bundle-size.mjs                     -> 238,750 B of 250,000 B (gzip -9, every .js in dist): within budget
+  PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome npx playwright test --trace off  -> 67/67 passed
+     (includes e2e/a11y.spec.ts with axe: no serious or critical violation; e2e/audit.spec.ts 10/10)
+  (cd pipeline && ../.venv/bin/python -m pytest)   -> 82 passed, 2 skipped (Python 3.11.18; gdal_contour not installed)
+  .venv/bin/python scripts/licences.py > docs/licences.md   -> regenerated (animejs gone); the licence test passes
+  vite dev server                                  -> engine ready (the development worker path works)
+  print check: demonstration card, two stops -> 1 A5 page (420 x 595 pt), card 642 px of 703 px, smallest text 6 pt
+Bundle before / after: 310,521 B -> 238,750 B (gzip -9); 313.6 kB -> 241.6 kB (Vite gzip); AC-12 MET
+Terrain download: terrain_class.uint8.bin 2 requests (up to 2 x 2.25 MB) -> 1 request
+Known limitations: EL-01 (elevation grid still requested twice, as on main); card not printed on paper; phone not
+  checked in daylight; BUILD-01 needs the Route Engine owners' confirmation; G-08 (attribution wording) for the team
+Review status: /code-review high, R-25 in DECISIONS.md; human Design review pending
+Commit SHA: 9107c42 (audit fixes, tests and records), then a logs commit recording this SHA
+Next part / blocker owner: team (Design, Route Engine, Local Lead) reviews the branch; PR #24 (opened from the app
+  during the session) was closed unmerged at 12:40
+```
+
+Handoff state (12:50 Asia/Manila, checks rerun at 08f20f7: vitest 303/303, tsc exit 0, build OK, bundle 238,750 B,
+Playwright 67/67, pytest 82 passed + 2 skipped, licences current):
+
+| State | Work |
+|---|---|
+| Completed and verified | Audit A1-A6 on `design/sharpwalk-ui-ux` (9107c42): MOT-04, B-01 (AC-12 met), BUILD-01, TER-01, PRINT-02, UX-16, A11Y-02, R-25, E2E-04 |
+| In progress | None. Working tree clean |
+| Blocked on people | Merge of the design branch (team approval); BUILD-01 (Route Engine owners); G-08 / G-09 (authorship wording); PR #22 (W-01); the team's confirmation of REG-01 |
+| Pending, not started | EL-01 (elevation grid requested twice); card printed on paper; phone in daylight; browsers other than Chromium; on `main`: the plan's freeze, video and submission steps (older sections of this file) |
+
+**Merge preparation (Sun 15 Nov, 12:47-12:55 Asia/Manila; audit session; MERGE-01 note, R-27):** whole-branch `/code-review` (7 findings: 3 fixed,
+3 kept and recorded, 1 waits for the merge). Checks on the final tree: `npx vitest run` 31 files, 302/302 (one dead test
+removed with `stepIndex`); `npx tsc --noEmit` exit 0; `rm -rf dist && npm run build` OK; `node scripts/bundle-size.mjs`
+238,771 B of 250,000 B; `PW_CHROMIUM=... npx playwright test --trace off` 67/67; `(cd pipeline && ../.venv/bin/python -m pytest)`
+82 passed, 2 skipped; licences current; `git merge-tree --write-tree origin/main HEAD` clean. **Status: READY, NOT MERGED.**
+The merge waits for people (DECISIONS MERGE-01 and its note).
+**Merge preparation (Sun 15 Nov, about 12:55; MERGE-01): BLOCKED, not merged.** Checks green, /code-review low R-26 0 findings, pull request opened; waiting for the team's written decision on authorship wording and on adopting the redesign. See HANDOFF.
+
+**Second session's independent check (Sun 15 Nov, 12:42-12:52 Asia/Manila, container clock; fresh `npm ci` at 08f20f7; no code changed):**
+vitest 303/303; `npx tsc --noEmit` clean; build OK; `node scripts/bundle-size.mjs` 238,750 B of 250,000 B; Playwright 67/67;
+pytest 82 passed + 2 skipped; licences current. Status unchanged: audit A1-A6 VERIFIED, not merged. Open: AUD-13 (the
+"13 failing regression tests" of a resume brief are not in the repository), team review of the branch, PR #22 (W-01).
+
+## Design branch, third redesign "Bureau" (Sun 15 Nov 2026, until about 11:30 Asia/Manila; NOT merged, no PR)
+
+```text
+Part: Design branch B1-B3 (UI-11..UI-14, MOT-03)
+Owner: session from parcilla13's account (member not otherwise stated); Design review pending
+Status: VERIFIED on design/sharpwalk-ui-ux only; not merged (B-01, MOT-03 and team approval open)
+Scope completed: B1 foundation (tokens, Fraunces/Barlow Semi Condensed/VT323, Motion + Anime.js, terrain-class cursor
+  tag, stop card, move mode); B2 all seven screens in the Bureau style, desktop and phone; B3 e2e for the tour and
+  point and click, font test, /code-review R-24 (8 fixed, 2 kept), logs, screenshots.
+Files changed: src/app/{App,Screens,AssessPanel,PlanPanel,Tutorial,StopPopover,fx,motion,gauge,styles,fonts}.*,
+  src/map/{AreaSheet,planLayer,elevationLayer,readout,loadArea,terrainHint}.*, src/briefing/BriefingView.tsx,
+  src/field/FieldView.tsx, e2e/{bureau,flow,a11y,fonts}.spec.ts, package*.json, docs/licences.md, docs/design/*,
+  CLAUDE.md (visual and motion lines), README.md, DECISIONS.md, HANDOFF.md, SI_LOG.md, PHASES.md
+Checks run (exact commands): npx tsc --noEmit; npx vitest run; rm -rf dist && npm run build;
+  PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome npx playwright test --trace off;
+  (cd pipeline && ../.venv/bin/python -m pytest); .venv/bin/python scripts/licences.py > docs/licences.md
+Results: tsc clean; vitest 303/303 (31 files); build OK; Playwright 57/57; pytest 82 passed, 2 skipped
+Known limitations or failures: AC-12 NOT met (main 272.04 kB Vite gzip + worker 41,530 B = about 313.6 kB vs 250 KB, B-01);
+  Anime.js conflicts with CLAUDE.md (MOT-03); demo-preset card prints on two A5 pages (PRINT-02)
+Review status: /code-review high, R-24 in DECISIONS.md
+Commit SHA: the commit after 6380209 on design/sharpwalk-ui-ux (see git log)
+Next part / blocker owner: team (Design, Local Lead) for UI-11..UI-14 and MOT-03; bundle owners for B-01
+```
+
+## Design branch, second redesign "Frosted terrain" (Sun 15 Nov 2026, 01:58-02:40 Asia/Manila; NOT merged, no PR)
+
+Outside the plan's phase list. Phases D1-D5, each followed by `npx vitest run`, `npx tsc --noEmit`, `npm run build` and a screenshot or e2e check.
+
+| Part | Scope | Checks after the part | Result |
+|---|---|---|---|
+| D0 | Merge `main` ca2504a (REG-02) into the branch | vitest, tsc | 293/293; clean (46218f4) |
+| D1 | Tokens, Geist fonts, Lucide icons, glass shell over the full-bleed terrain | tsc, build, desktop screenshots of all steps | clean; built; issues found and fixed (Welcome chrome, figure wrap, footer contrast) |
+| D2 | Welcome, Setup, Planner | same, plus screenshots | OK |
+| D3 | Map, HUD, Assess; recalculation pill, click ring, empty and loading states | vitest, tsc, build, full Playwright | 295/295; clean; 51/55: STALE 1.3 s, print 2 pages, coverage point under the panel, sky drawer |
+| D3 fixes | Map beside the panel; no re-blurred canvas; drawer closes on a step change | targeted e2e | 15/17, then 10/10 |
+| D4 | Decision-focused card (`src/briefing/model.ts` summary tests first: 2 failing, then 8/8); print opens every section; print layout | e2e briefing; PDF rendered | one A5 page (blank scenario); two with the demo preset (PRINT-02) |
+| D4 fix | View transitions removed (STALE 1.09-1.18 s) | briefing STALE test x3 | 3/3 pass |
+| D5 | Full verification, /code-review R-23 (6 of 8 fixed), screenshots, logs | see below | all pass except AC-12 |
+
+Final checks (after the R-23 fixes):
+- `npx vitest run`: 29 files, 296/296 passed.
+- `npx tsc --noEmit`: clean.
+- `rm -rf dist && npm run build`: OK; main 216.92 kB gzip (Vite), worker 41,530 B (`gzip -9`), about 258.5 kB in all (AC-12: **not met**, B-01).
+- `PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome npx playwright test --trace off`: **55/55 passed**.
+- `(cd pipeline && ../.venv/bin/python -m pytest)`: 82 passed, 2 skipped (gdal_contour not installed).
+- `.venv/bin/python scripts/licences.py | diff -q - docs/licences.md`: no difference.
+- Screenshots: `docs/design/screenshots/` (7 desktop at 1440 x 900, 7 mobile at iPhone 13 width; real app, real data).
+
+## Design branch `design/sharpwalk-ui-ux` (Sun 15 Nov 2026, 00:58-01:55 Asia/Manila; NOT merged, no PR)
+
+A UI/UX redesign done on an isolated branch at the operator's request. It is outside the plan's phase list and changes no phase status on `main`.
+
+```text
+Part: UI redesign (UI-01..UI-06, MOT-01; docs/design/visual-system.md)
+Owner: session run from parcilla13's account (member identity not otherwise stated, G-05); Design to review
+Status: IMPLEMENTED AND CHECKED; NOT VERIFIED FOR MERGE (B-01 bundle overrun; team approval pending)
+Base: main 1ad41f6 (latest merged and deployed state; the open PR #21 branch yujin/reg-02-verification was not included)
+Scope completed:
+  - guided flow Welcome -> Setup -> Planner -> Map -> HUD -> Assess -> Brief;
+  - Geologic Folio visual system and new fonts;
+  - CSS-only motion and view transitions;
+  - briefing confirmation;
+  - e2e specs moved to step navigation, plus a new flow.spec.ts.
+Files changed: src/app/{App,Screens,AssessPanel,PlanPanel,PlanTimes,DrillPanel,ConditionsPanel,RouteProfile,RoverView,SourcePanel}.tsx,
+  src/app/{steps.ts,steps.test.ts,styles.css,fonts.css}, src/briefing/BriefingView.tsx, src/field/FieldView.tsx,
+  src/map/{AreaSheet.tsx,planLayer.ts,elevationLayer.ts}, vite.config.ts, package.json, package-lock.json, e2e/*,
+  docs/design/visual-system.md, docs/licences.md, CLAUDE.md (visual line), DECISIONS.md, SI_LOG.md, README.md, PHASES.md, HANDOFF.md
+Engine, contracts, pipeline, data and constants: unchanged
+Checks run (exact commands, at dbfdd6d's tree):
+  npx vitest run                                   -> 29 files, 290/290 passed
+  npx tsc --noEmit                                 -> clean
+  rm -rf dist && npm run build                     -> OK; main 212.60 kB gzip (Vite); worker 41,515 B (gzip -9)
+  PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome npx playwright test --trace off  -> 56/56 passed
+  (cd pipeline && ../.venv/bin/python -m pytest)   -> 82 passed, 2 skipped (gdal_contour not installed)
+  .venv/bin/python scripts/licences.py | diff -q - docs/licences.md   -> no difference
+  /code-review high on main...2b5f515              -> 10 findings, 8 fixed in dbfdd6d, 2 kept (R-22)
+Results: all pass except AC-12: about 254.1 kB of app JavaScript against 250 KB (B-01)
+Known limitations: B-01 overrun; MOT-01 conflict with the CLAUDE.md Motion rule; contrast pairs to recheck with a tool; paper print not rechecked; phone daylight check not done
+Review status: /code-review done; human Design and team review pending
+Commit SHA: 2b5f515 (redesign), dbfdd6d (review fixes and records), plus the logs commit
+Next: the team reviews the branch (UI-01..UI-06, MOT-01) and decides B-01 before any PR
+```
+
 ## Critical path
 
 **Contracts -> data pipeline and frame checks (G1) -> route engine (G2) -> Tier 1 integration (G3) -> Tier 2 and benchmarks (G4) -> freeze (G5) -> video -> submission.**

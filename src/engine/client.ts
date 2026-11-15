@@ -6,7 +6,11 @@ import type { EngineApi } from "./worker";
 
 export interface EngineClient { readonly api: Comlink.Remote<EngineApi>; terminate(): void }
 
+/** In the build the worker is the `engine-worker` entry of vite.config.ts (it shares one chunk with the page, B-01);
+ *  the dev server serves the module itself. Both are module workers. */
+const WORKER_URL = import.meta.env.DEV ? "/src/engine/worker.ts" : `${import.meta.env.BASE_URL}engine-worker.js`;
+
 export function createEngine(): EngineClient {
-  const worker = new Worker(new URL("./worker.ts", import.meta.url), { type: "module" });
+  const worker = new Worker(new URL(WORKER_URL, location.origin), { type: "module" });
   return { api: Comlink.wrap<EngineApi>(worker), terminate: () => worker.terminate() };
 }
