@@ -176,8 +176,19 @@ Known limitations: EL-01 (elevation grid still requested twice, as on main); car
   checked in daylight; BUILD-01 needs the Route Engine owners' confirmation; G-08 (attribution wording) for the team
 Review status: /code-review high, R-25 in DECISIONS.md; human Design review pending
 Commit SHA: 9107c42 (audit fixes, tests and records), then a logs commit recording this SHA
-Next part / blocker owner: team (Design, Route Engine, Local Lead) reviews the branch; PR #24 was opened from the app by the operator
+Next part / blocker owner: team (Design, Route Engine, Local Lead) reviews the branch; PR #24 (opened from the app
+  during the session) was closed unmerged at 12:40
 ```
+
+Handoff state (12:50 Asia/Manila, checks rerun at 08f20f7: vitest 303/303, tsc exit 0, build OK, bundle 238,750 B,
+Playwright 67/67, pytest 82 passed + 2 skipped, licences current):
+
+| State | Work |
+|---|---|
+| Completed and verified | Audit A1-A6 on `design/sharpwalk-ui-ux` (9107c42): MOT-04, B-01 (AC-12 met), BUILD-01, TER-01, PRINT-02, UX-16, A11Y-02, R-25, E2E-04 |
+| In progress | None. Working tree clean |
+| Blocked on people | Merge of the design branch (team approval); BUILD-01 (Route Engine owners); G-08 / G-09 (authorship wording); PR #22 (W-01); the team's confirmation of REG-01 |
+| Pending, not started | EL-01 (elevation grid requested twice); card printed on paper; phone in daylight; browsers other than Chromium; on `main`: the plan's freeze, video and submission steps (older sections of this file) |
 
 ## Design branch, third redesign "Bureau" (Sun 15 Nov 2026, until about 11:30 Asia/Manila; NOT merged, no PR)
 
