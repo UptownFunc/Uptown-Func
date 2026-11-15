@@ -15,7 +15,8 @@ import { addTick, fieldMarginAssumptionIds, fieldMarginRanges, newExecution, nex
 
 const SPEED_RATIO = CONSTANTS.walkSpeedRange.low / CONSTANTS.walkSpeedRange.high;
 
-export function FieldView({ output, hidden = false, briefed = false, next }: { output: PlanOutput | null; hidden?: boolean; briefed?: boolean; next?: ReactNode }) {
+export function FieldView({ output, hidden = false, briefed = false, next, toMap }: { output: PlanOutput | null; hidden?: boolean; briefed?: boolean; next?: ReactNode;
+  /** UX-24: the way out of the empty state (a key to the Map step). */ toMap?: ReactNode }) {
   const [exec, setExec] = useState<MissionExecution | null>(null);
   const [minutes, setMinutes] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -57,7 +58,8 @@ export function FieldView({ output, hidden = false, briefed = false, next }: { o
           <button type="button" className="textbtn" onClick={() => setExec(null)}>Start ticks for the current plan</button>
         </p>
       )}
-      {plan.stops.length === 0 ? <h1 className="hud-next">No stops in the plan yet.</h1> : <>
+      {plan.stops.length === 0 ? <div className="empty-lead"><h1 className="hud-next">No stops in the plan yet.</h1>
+        <p className="note">The HUD walks the planned stops in order. Place at least one stop on the map first.</p>{toMap}</div> : <>
         <div data-testid="field-next"><span className="field-label">Next</span><h1 className="hud-next">
           {next0 ? <>{next0.kind === "arrive" ? "Arrive at" : "Depart from"} <strong>{stopOf(next0.stopId)?.letter}</strong> {stopOf(next0.stopId)?.name}</> : "All stops ticked: walk back to the habitat"}
         </h1></div>

@@ -30,6 +30,7 @@ import { AnimatePresence, Appear, PANEL_FADE, PANEL_IN } from "./motion";
 import { Tutorial, orientationDone } from "./Tutorial";
 import { StopPopover } from "./StopPopover";
 import { GlossaryList } from "./Term";
+import { DEFAULT_LAYERS, type MapLayers } from "../map/layers";
 
 const AREA_URL = "area/";
 /** H-01 (DECISIONS.md, pending team confirmation): the slope-screened cell nearest the plan 19.2 suggestion
@@ -76,6 +77,8 @@ export function App() {
   // Tier 2: contour lines from the engine worker (computed once per habitat), shown as lines only.
   const [showContours, setShowContours] = useState(false);
   const [showSky, setShowSky] = useState(false);
+  /** MAP-02: the display layers shown on the sheet (console state; a later 3D view reads the same object). */
+  const [mapLayers, setMapLayers] = useState<MapLayers>(DEFAULT_LAYERS);
   const [skyState, setSkyState] = useState<"none" | "ok" | "failed">("none");
   const [skyAt, setSkyAt] = useState<SkySampler | null>(null);
   const [drillMin, setDrillMin] = useState<number | null>(null);
@@ -227,6 +230,8 @@ export function App() {
   const down = useRef<{ x: number; y: number } | null>(null);
   const plan = output?.plan;
   const next = (s: StepId, label: string) => <button type="button" className="go" onClick={() => go(s)}>{label}<ArrowRight {...ICON} aria-hidden="true" /></button>;
+  /** UX-24: an empty HUD or assessment offers the step that fills it. */
+  const toMap = <button type="button" className="key" onClick={() => go("map")}>Place stops on the map<ArrowRight {...ICON} aria-hidden="true" /></button>;
   const recalculating = pending > 0 && output !== null;
   // UX-17: the tour's "try it" lines the plan shows as done (read from the engine's plan, never from a click).
   // Recomputed only when the plan or the confirmation changes, not on every pointer move.
@@ -289,7 +294,7 @@ export function App() {
             popover={step === "map" && pickedStop && !moving ? <StopPopover stop={pickedStop} output={output!} onOpenSource={openSource} onClose={() => setPicked(null)}
               onMove={() => { setMoving(pickedStop.id); setPicked(null); }} onDelete={() => { send("delete_stop", { stopId: pickedStop.id }); setPicked(null); }}
               onEdit={(name, tasks) => send("edit_stop", { stopId: pickedStop.id, name, tasks })} /> : null}
-            terrainClasses={classesReady ? terrainClasses.current : null}
+            terrainClasses={classesReady ? terrainClasses.current : null} layers={mapLayers} onLayers={setMapLayers}
             cursorHint={step === "map" ? (movingStop ? `Click to move stop ${movingStop.letter} here · Esc to cancel` : true) : false}
             onSnapshotReady={(fn) => setSnapshot(() => fn)} hoverIndex={hover} onHoverIndex={setHover} onDatasets={setLayerDatasets} onCursor={setCursor}
             contours={contourDisplay} showSky={showSky} onSky={(st, f) => { setSkyState(st); if (f) setSkyAt(() => f); }}
@@ -308,7 +313,7 @@ export function App() {
             onSetTime={setTime} skyAt={showSky && skyState === "ok" ? skyAt : null} picked={picked} onPick={(id) => setPicked(id)}
             onMoveToCursor={cursor ? (stopId) => send("move_stop", { stopId, lat: cursor.lat, lon: cursor.lon }) : undefined} /></Appear>}
           {step === "assess" && <Appear key="assess" className="panel-host" enter={panelIn}><AssessPanel output={output} onOpenSource={openSource} drillMin={drillMin} onDrillMin={setDrillMin} busy={contourBusy}
-            next={next("brief", "Continue to the briefing")} /></Appear>}
+            next={next("brief", "Continue to the briefing")} toMap={toMap} /></Appear>}
           {step === "setup" && <Appear key="setup" className="screen-host" enter={panelIn}><SetupScreen output={output} rems={rems} rover={rover} onSet={setTime} onOpenSource={openSource}
             preset={presetEnabled(location.search)} onApplyPreset={applyPreset} next={next("planner", "Continue to the time budget")} /></Appear>}
           {step === "planner" && <Appear key="planner" className="screen-host" enter={panelIn}><PlannerScreen output={output} onSet={setTime} next={next("map", "Continue to the map")} /></Appear>}
@@ -316,7 +321,7 @@ export function App() {
         <BriefingView output={output} snapshot={snapshot} hidden={step !== "brief"} rover={rover}
           confirmed={confirmed} onConfirm={setConfirmed} next={next("hud", "Open the field HUD")} />
         {/* Kept mounted: the field view alone holds MissionExecution, so ticks survive step changes. */}
-        <FieldView output={output} hidden={step !== "hud"} briefed={!!version && confirmed === version} />
+        <FieldView output={output} hidden={step !== "hud"} briefed={!!version && confirmed === version} toMap={toMap} />
         <AnimatePresence>
           {message && <Appear as="p" key={message.n} className="toast" data-kind={message.text.startsWith("Plan updated") ? "ok" : "hold"} aria-hidden="true" data-testid="engine-message"
             enter={{ opacity: [0, 1], transform: ["translateY(-10px) scale(0.97)", "translateY(0px) scale(1)"] }} exit={{ opacity: [1, 0] }}>{message.text}</Appear>}

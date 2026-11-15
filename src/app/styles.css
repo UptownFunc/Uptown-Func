@@ -60,7 +60,7 @@ p { margin: 0; text-wrap: pretty; }
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='.9'/></svg>"); }
 
 /* ---------- Keys: plastic with travel ---------- */
-.key, .go, .set, .briefing-actions button, .textbtn, .ol-zoom button {
+.key, .go, .set, .briefing-actions button, .textbtn, .map-keys button {
   display: inline-flex; align-items: center; justify-content: center; gap: var(--s2); cursor: pointer; user-select: none;
   border: 1px solid #8a6a4a; border-radius: 10px; color: var(--ink); font: 700 var(--t-sm)/1 var(--ui); letter-spacing: 0.06em; text-transform: uppercase;
   background: linear-gradient(180deg, #f6ead3 0%, #e4cfa6 100%);
@@ -74,9 +74,9 @@ p { margin: 0; text-wrap: pretty; }
   background: linear-gradient(180deg, var(--orange-hi) 0%, var(--orange-deep) 100%);
   box-shadow: 0 1px 0 rgba(255, 220, 190, 0.6) inset, 0 -2px 0 rgba(90, 30, 8, 0.35) inset, 0 4px 0 #6e2a0e, 0 7px 14px rgba(0, 0, 0, 0.4); }
 .key.danger, .textbtn.danger { color: var(--over-ink); }
-:is(.key, .go, .set, .briefing-actions button, .textbtn, .ol-zoom button):active:not(:disabled) {
+:is(.key, .go, .set, .briefing-actions button, .textbtn, .map-keys button):active:not(:disabled) {
   transform: translateY(3px); box-shadow: 0 1px 0 rgba(255, 255, 255, 0.4) inset, 0 1px 0 #6e4e33, 0 2px 4px rgba(0, 0, 0, 0.35); }
-:is(.key, .go, .set, .briefing-actions button, .textbtn):disabled { filter: grayscale(0.7) brightness(0.85); opacity: 0.6; cursor: not-allowed; }
+:is(.key, .go, .set, .briefing-actions button, .textbtn, .map-keys button):disabled { filter: grayscale(0.7) brightness(0.85); opacity: 0.6; cursor: not-allowed; }
 .go[data-done]:disabled { filter: none; opacity: 1; color: #fff; border-color: #234d1b; background: linear-gradient(180deg, #5ea84f, #2f6b25); box-shadow: 0 4px 0 #1d3f16; }
 @media (hover: hover) and (pointer: fine) {
   :is(.key, .go, .set, .briefing-actions button, .textbtn):hover:not(:disabled) { filter: brightness(1.06); }
@@ -188,9 +188,6 @@ details[open] > summary::before { transform: rotate(90deg); }
 .status .label { color: var(--amber-dim); }
 .ol-scale-line { left: auto; right: 64px; bottom: 12px; padding: 3px 8px; }
 .ol-scale-line-inner { color: var(--amber); border-color: var(--amber); font: 400 15px var(--crt-font); }
-.ol-zoom { top: auto; left: auto; right: 12px; bottom: 12px; display: grid; gap: 8px; background: none; padding: 0; border-radius: 0; }
-.ol-zoom .ol-zoom-in, .ol-zoom .ol-zoom-out { width: 42px; height: 42px; margin: 0; padding: 0; font: 400 26px/1 var(--crt-font); color: var(--ink); }
-.ol-zoom button:focus { outline: none; } .ol-zoom button:focus-visible { outline: 3px solid var(--amber); }
 .cursor-tag { position: absolute; z-index: 6; top: 0; left: 0; display: inline-flex; align-items: center; gap: 8px; padding: 5px 10px; max-width: 340px;
   font: 400 18px/1.05 var(--crt-font); pointer-events: none; will-change: transform;
   /* UX-17: a long verdict wraps inside the tag instead of running out of it. */
@@ -209,7 +206,6 @@ details[open] > summary::before { transform: rotate(90deg); }
 .recalc[data-on="true"] { opacity: 1; transform: translate(-50%, 0); transition-delay: 120ms; }
 .recalc svg { animation: spin 700ms linear infinite; }
 .app:not([data-step="map"]) .recalc { display: none; }
-.error { position: fixed; inset: 0; display: grid; place-content: center; padding: var(--s6); text-align: center; color: var(--over); font: 400 24px var(--crt-font); }
 .layer-errors { position: absolute; z-index: 3; left: 12px; top: 58px; max-width: 70%; padding: 8px 12px; font: 500 var(--t-sm) var(--ui); color: #ffc0a8; }
 .sim-banner { position: absolute; z-index: 5; top: 58px; left: 50%; transform: translateX(-50%); width: max-content; max-width: calc(100% - 24px); padding: 7px 14px; margin: 0;
   font: 400 19px/1 var(--crt-font); letter-spacing: 0.04em; text-align: center; color: var(--crt); border: 1px solid #7a3a1a; border-radius: 8px;
@@ -616,9 +612,15 @@ details[open] > summary::before { transform: rotate(90deg); }
 .glossary dd { margin: 2px 0 0; font: 400 var(--t-sm)/1.45 var(--ui); color: var(--ink-2); }
 /* Under a form field: the variable's meaning, always shown. */
 .hint { display: block; margin-top: 2px; font: 400 var(--t-sm)/1.4 var(--ui); opacity: 0.85; }
-.tour-progress { display: flex; gap: 5px; margin: 14px 0; }
-.tour-progress span { flex: 1; height: 8px; border-radius: 4px; background: #e2cfaa; transition: background-color 200ms ease; }
-.tour-progress span[data-on="true"] { background: linear-gradient(90deg, var(--orange), var(--mustard)); }
+.tour-progress { display: flex; gap: 5px; margin: 8px 0; }
+/* TOUR-01: each segment is a jump to its card; the hit area is taller than the bar it draws. */
+.tour-progress button { flex: 1; height: 20px; padding: 6px 0; border: 0; border-radius: 4px; cursor: pointer; background: #e2cfaa content-box;
+  transition: background-color 200ms ease, transform 120ms var(--ease-out); }
+.tour-progress button[data-on="true"] { background: linear-gradient(90deg, var(--orange), var(--mustard)) content-box; }
+.tour-progress button:hover { transform: scaleY(1.35); }
+.tour-restart { display: inline-flex; align-items: center; gap: 5px; height: 28px; padding: 0 9px; border-radius: 6px; border: 1px solid var(--rule); cursor: pointer;
+  background: #fffaf0; color: var(--ink-2); font: 700 11px/1 var(--ui); letter-spacing: 0.08em; text-transform: uppercase; transition: background-color 140ms ease; }
+.tour-restart:hover { background: #fff3dc; color: var(--ink); }
 .tour-keys { display: flex; gap: 10px; justify-content: space-between; }
 
 /* ---------- Drawer and toasts ---------- */
@@ -805,4 +807,86 @@ h1:focus { outline: none; }
   .crt-badge { position: static; display: block; margin: 12px 4px 0; line-height: 1.4; text-align: center; }
   .card-verdict { grid-template-columns: auto 1fr; }
   .briefed { grid-column: 1 / -1; justify-self: start; margin: 10px 0 12px 6px; }
+}
+
+/* ---------- Final 2D map (MAP-01..MAP-08, Sun 15 Nov): keys, layer switches, key, load and error states ---------- */
+/* The sheet's own keys: zoom, then the two framings, one column at the lower right (cream keys with travel). */
+.map-keys { position: absolute; z-index: 4; right: 12px; bottom: 12px; display: grid; gap: 6px; }
+.map-keys button { width: 40px; height: 40px; padding: 0; border-radius: 9px; }
+.map-keys button:nth-child(3) { margin-top: 6px; }   /* framings sit apart from zoom */
+.map-keys button:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
+.ol-scale-line { right: 64px; }
+/* An engine message on a map step sits under the hint row at the sheet's left, clear of the Layers panel and the keys.
+   Wider than a phone only: phones keep the message docked at the bottom, centred (Phones block). */
+@media screen and (min-width: 801px) {
+  .app:is([data-step="map"], [data-step="hud"], [data-step="assess"]) .toast { top: calc(var(--top) + 78px); translate: 0 0; }
+  .app[data-step="map"] .toast { left: calc(var(--panel) + 2 * var(--gap) + 28px); }
+  .app[data-step="hud"] .toast { left: calc(480px + 2 * var(--gap) + 28px); }
+  .app[data-step="assess"] .toast { left: calc(440px + 2 * var(--gap) + 28px); }
+}
+@media screen and (min-width: 801px) and (max-width: 1240px) {
+  .app:is([data-step="hud"], [data-step="assess"]) .toast { left: calc(400px + 2 * var(--gap) + 28px); }
+}
+.layer-errors { top: 104px; }
+/* The Layers panel: a head, one row per layer (switch, swatch, its source line), strength, the Tier 2 switches, the key. */
+.legend { z-index: 6; max-height: calc(100% - 70px); padding: 10px 14px 14px; overscroll-behavior: contain; background: #100904; }
+.legend-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.legend-title { font: 400 18px/1 var(--crt-font); letter-spacing: 0.08em; text-transform: uppercase; color: var(--amber-dim); }
+.legend-x { display: grid; place-items: center; width: 30px; height: 30px; padding: 0; border: 1px solid var(--amber-line); border-radius: 7px;
+  background: transparent; color: var(--amber); cursor: pointer; transition: background-color 140ms ease; }
+.legend-x:hover { background: rgba(255, 179, 71, 0.14); }
+.legend ul.layer-list { margin: 0; padding: 0 0 10px; border-top: 0; border-bottom: 1px dashed var(--amber-line); }
+.legend .layer-list li { margin: 0; padding: 7px 0; border-top: 1px solid rgba(255, 179, 71, 0.12); }
+.legend .layer-list li:first-child { border-top: 0; }
+.layer-row { display: grid; grid-template-columns: 20px 26px 1fr; align-items: start; gap: 0 8px; }
+span.layer-row { grid-template-columns: 26px 1fr; padding-left: 28px; }
+label.layer-row { cursor: pointer; }
+.layer-row input { width: 16px; height: 16px; min-height: 0; padding: 0; margin: 1px 0 0; accent-color: var(--amber-2); cursor: pointer; box-shadow: none; }
+.legend li[data-off] .layer-row > span:last-child { color: var(--amber-dim); opacity: 0.7; }
+.legend li[data-off] .sw { opacity: 0.35; }
+.sw { width: 26px; height: 18px; border-radius: 4px; border: 1px solid rgba(255, 179, 71, 0.4); background-color: #2a2622; transition: opacity 160ms ease; }
+.sw[data-sw="d2"] { background: linear-gradient(135deg, #3b3936 0%, #8d8a84 45%, #cfcac1 70%, #5b5853 100%); }
+.sw[data-sw="hillshade"] { background: radial-gradient(circle at 30% 28%, #f2efe9 0%, #9b958c 38%, #34312d 80%); }
+.sw[data-sw="terrain"] { background: repeating-linear-gradient(135deg, #e8b341 0 1.5px, transparent 1.5px 6px), #2a2622; }
+.sw[data-sw="contours"] { background: radial-gradient(ellipse at 50% 60%, transparent 0 22%, rgba(232, 225, 213, 0.9) 23% 28%, transparent 29% 46%,
+  rgba(232, 225, 213, 0.6) 47% 51%, transparent 52%), #4a4641; }
+.strength { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 4px 10px; margin: 10px 0 0; font: 500 var(--t-xs)/1.3 var(--ui); color: var(--amber); }
+.strength span { grid-column: 1 / -1; }
+.strength input { width: 100%; min-height: 0; padding: 0; border: 0; background: none; box-shadow: none; accent-color: var(--amber-2); cursor: pointer; }
+.strength output { font: 400 17px/1 var(--crt-font); min-width: 4ch; text-align: right; }
+.legend .toggles { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--amber-line); display: grid; gap: 6px; }
+.map-key { display: grid; gap: 6px; margin: 12px 0 0; padding-top: 10px; border-top: 1px dashed var(--amber-line); }
+.map-key > div { display: grid; grid-template-columns: 30px 1fr; align-items: center; gap: 8px; }
+.map-key dt, .map-key dd { margin: 0; } .map-key dd { color: #f6d9b0; }
+.map-key dt { display: grid; place-items: center; height: 20px; }
+.k-route { width: 26px; height: 3px; border-radius: 2px; background: #fff; box-shadow: 0 0 0 2px rgba(22, 18, 15, 0.85); }
+.k-habitat { position: relative; isolation: isolate; width: 20px; height: 20px; display: grid; place-items: center; font: 700 10px/1 var(--ui); color: #16120f; }
+.k-habitat::before { content: ""; position: absolute; z-index: -1; inset: 3px; transform: rotate(45deg); background: #fff; border: 2px solid #16120f; }
+.k-stop { width: 20px; height: 20px; display: grid; place-items: center; border-radius: 50%; background: #b94c22; border: 2px solid #fff; font: 700 11px/1 var(--ui); color: #fff; }
+.k-tick { width: 4px; height: 18px; border-radius: 1px; background: linear-gradient(180deg, #f5c451 0 50%, #ff6b5e 50% 100%); }
+.k-sym { width: 26px; height: 18px; border-radius: 4px; border: 1px solid rgba(255, 179, 71, 0.4); background-color: #2a2622; }
+/* Load and error states of the sheet itself (the rest of the app keeps working). */
+.sheet-msg { position: absolute; z-index: 5; inset: 0; display: grid; place-content: center; justify-items: center; gap: 10px; margin: 0; padding: 24px;
+  text-align: center; color: var(--amber); font: 400 22px/1.2 var(--crt-font); text-shadow: 0 0 6px rgba(255, 170, 70, 0.45); pointer-events: none;
+  background: radial-gradient(60% 60% at 50% 50%, rgba(255, 150, 60, 0.07), transparent 70%), #120a05; border-radius: 12px; }
+.sheet-msg svg { animation: spin 900ms linear infinite; }
+p.sheet-msg { grid-auto-flow: column; align-content: center; }
+.sheet-msg[data-kind="error"] { color: #ffc0a8; pointer-events: auto; font-size: 20px; }
+.sheet-msg[data-kind="error"] span { max-width: 44ch; color: var(--amber-dim); font: 500 var(--t-sm)/1.45 var(--ui); text-shadow: none; }
+.sheet-msg[data-kind="error"] svg { animation: none; }
+.sheet-msg .key { margin-top: 6px; text-shadow: none; }
+@media screen and (max-width: 800px) {
+  .map-keys { bottom: 46px; gap: 4px; } .map-keys button { width: 38px; height: 38px; }
+  .map-keys button:nth-child(3) { margin-top: 4px; }
+  .status { max-width: calc(100% - 66px); }
+  .legend { max-height: calc(100% - 64px); }
+}
+/* UX-24: an empty HUD or assessment says why and offers the Map step. */
+.empty-lead { display: grid; gap: 10px; justify-items: start; }
+.empty-state .key { margin-top: 10px; }
+/* UX-25: the elevation profile's heading wraps to two lines on a laptop; the plot takes what is left of the box, so the
+   readout line under it is never cut off by the box's edge. */
+@media screen and (min-width: 801px) {
+  .profile:not(.empty) { display: flex; flex-direction: column; }
+  .profile:not(.empty) .profile-plot { flex: 1 1 auto; height: auto; min-height: 36px; }
 }

@@ -2,6 +2,13 @@
 
 This file is the handoff between team members and Claude sessions. Keep it factual and current. A new session must read this file before touching code.
 
+## Final 2D map baseline (Sun 15 Nov 2026, from 17:09 Asia/Manila): branch `claude/practical-johnson-hbw41e`, PR #30, approved and being merged (MERGE-06)
+
+- **What:** the final 2D map that the 3D upgrade will branch from (DECISIONS MAP-01..MAP-08, TOUR-01, UX-24, UX-25, R-30). The load view now shows the whole sheet, with the habitat (before, the habitat was off screen). The sheet has its own keys (zoom, fit the route, whole sheet). The Layers panel has switches, a strength slider and a key. The sheet shows its own loading and error states, with Try again. The tour opens on the current step and follows the user's navigation. Empty HUD and Assess lead to the Map. **No 3D code**; no engine, contract, constant, dataset or value change.
+- **For the 3D upgrade:** use `src/map/planGeometry.ts` (the plan as F1 features; project to F5 with `f1ToF5`) and `src/map/layers.ts` (`MapLayers`, the console's layer state). The 2D sheet does not depend on either 3D or Cesium. Its view is published on `data-view-f7`, and the e2e helpers `pixelAt`, `mapView` and `zoomTo` read it.
+- **Checks at `ab0ff2b`:** vitest 327/327; tsc clean; JS 245,635 B of 250,000 (**about 4.4 kB left**); Playwright 86/86; pytest 82 + 2 skipped; licences current. /code-review high R-30: 7 findings, all fixed.
+- **Approval and merge:** the operator confirmed the team's approval (MERGE-06). `main` had moved to `be056b7` (PR #31: HUD last, slow bound 0.56 m/s); it was merged into the branch and every check rerun: tsc clean, vitest 331/331, JS 245,896 B, Playwright 86/86. Then PR #30 was merged with a merge commit; the SHA and the live-site check are in the follow-up record. Live-site check: `curl -sS https://uptown-func.vercel.app/ | grep -o 'assets/index-[^"]*\.js'` against a local build of the merge commit (this container's network may refuse the site; a person may need to run it).
+- **Open for people:** a Design review of the map and tour changes; everything in the 15:10 handoff, section 3, below.
 ## BRANCH (Sun 15 Nov 2026, about 17:55 Asia/Manila): HUD after the briefing, margin logic cross-checked. Not merged
 
 - **Branch `claude/eager-hypatia-3w23ko`** (from `main` `c60d37e`). Step order is now Setup -> Planner -> Map -> Assess -> Brief -> HUD (DECISIONS UI-17), because the HUD is used during the walk. New test `src/field/consistency.test.ts` shows the HUD reproduces the planned margins when the crew is on plan (LOGIC-01).
