@@ -2,6 +2,23 @@
 
 This file is the handoff between team members and Claude sessions. Keep it factual and current. A new session must read this file before touching code.
 
+## Merge request (Sun 15 Nov 2026, about 12:55 Asia/Manila, container clock): prepared, NOT merged (MERGE-01)
+
+- **Asked:** merge `design/sharpwalk-ui-ux` into `main`. **Done:** audit of the diff against `main` (87 files; no
+  `src/contracts`, `src/constants`, `pipeline/` or `public/` change; engine change limited to the worker build and
+  `terrainClasses()`), `/code-review` low (R-26, 0 findings, partial pass as stated there), checks (see the addendum
+  below: all passed at 08f20f7; only log files changed since), SI headers present on every new source file, licences
+  current, a pull request opened.
+- **Not merged, two decisions needed from the team, in writing:**
+  1. **Authorship:** sole credit to Patrick Ezekiel A. Arcilla (this request, and G-06) or the whole team (G-07, now in
+     `CLAUDE.md` and `README.md`). No file was changed.
+  2. **The redesign itself:** the branch's own records say no merge until the team approves the interface (UI-01 to
+     UI-16). Merging replaces the live site's interface; after 13:00 `main` takes bug fixes only (G5).
+- **To merge once both are settled:** update the attribution text if the team chooses to, rerun
+  `npm ci && npx vitest run && npx tsc --noEmit && npm run build && node scripts/bundle-size.mjs && npx playwright test --trace off`,
+  merge the pull request with a merge commit, then check https://uptown-func.vercel.app (`/engine-worker.js` must answer 200).
+- **Also open:** AUD-13 (were the "13 defects" the UX-16 and A11Y-02 fixes?), BUILD-01 (worker build layout), PR #22 (W-01).
+
 ## Addendum (Sun 15 Nov 2026, 12:55 Asia/Manila, container clock): second session's independent check of 08f20f7
 
 A separate cloud session (the one that did REG-01 on Sat night) was asked to resume the audit and then to hand off. It

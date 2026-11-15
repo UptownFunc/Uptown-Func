@@ -190,6 +190,8 @@ Playwright 67/67, pytest 82 passed + 2 skipped, licences current):
 | Blocked on people | Merge of the design branch (team approval); BUILD-01 (Route Engine owners); G-08 / G-09 (authorship wording); PR #22 (W-01); the team's confirmation of REG-01 |
 | Pending, not started | EL-01 (elevation grid requested twice); card printed on paper; phone in daylight; browsers other than Chromium; on `main`: the plan's freeze, video and submission steps (older sections of this file) |
 
+**Merge preparation (Sun 15 Nov, about 12:55; MERGE-01): BLOCKED, not merged.** Checks green, /code-review low R-26 0 findings, pull request opened; waiting for the team's written decision on authorship wording and on adopting the redesign. See HANDOFF.
+
 **Second session's independent check (Sun 15 Nov, 12:42-12:52 Asia/Manila, container clock; fresh `npm ci` at 08f20f7; no code changed):**
 vitest 303/303; `npx tsc --noEmit` clean; build OK; `node scripts/bundle-size.mjs` 238,750 B of 250,000 B; Playwright 67/67;
 pytest 82 passed + 2 skipped; licences current. Status unchanged: audit A1-A6 VERIFIED, not merged. Open: AUD-13 (the
