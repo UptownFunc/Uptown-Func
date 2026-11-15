@@ -5,25 +5,26 @@ assumptions, and shows the estimated time margins. It does **not** certify a saf
 under stated assumptions, the route is slope-screened (not rock-free or validated), and suit life support is not
 modelled.
 
+- **Live app:** https://uptown-func.vercel.app (runs in the browser; no login or install)
+- **SI use:** code, data processing and documentation were drafted with SI tools (mainly Claude Code) under the
+  team's direction; see [SI use](#si-use) and [`SI_LOG.md`](SI_LOG.md)
+- **Sources:** every dataset, document, package and font is listed under [References](#references)
+
 Independent student project; not affiliated with or endorsed by NASA.
 
-## Authorship and credits
+## Team
 
-SharpWalk's concept, challenge framing, solution direction, requirements and project plan belong to the **whole
-four-member team** (DECISIONS G-01, restored by G-07). How the concept was formed is the team's account to give; it is
-pending in `SI_LOG.md`.
+SharpWalk is a whole-team project. All four members shaped the concept, the plan and the build, and the work is
+credited to the team as a whole.
 
-Team: Patrick Ezekiel A. Arcilla, Christian Jesus Alcazar, Eugene Ibañez Jr. ("Yujin"), John Malubay. Recorded
-contributions (from git history and the project logs; roles not yet recorded are marked as such):
-
-| Member | Recorded contributions |
+| Member | Role |
 |---|---|
-| Patrick Ezekiel A. Arcilla | Committed the team's project plan (`docs/plan`, on branch `claude/lucid-ptolemy-nz6qpw`); repository owner; starter instructions and shared logs; G0 scaffold and shared contracts (commits as `parcilla13`) |
-| Eugene Ibañez Jr. (Yujin) | Directed and reviewed the Claude Code sessions of Sat 14 Nov 10:21-12:20 Asia/Manila (G0 review; data pipeline, geo, constants, route engine, leg and margin functions, AREA sheet part 1); merged PR parcilla13/Uptown-Func#1; governance decisions G-01 and G-02; directed the REG-02 verification of every register value, constant and citation (Sun 15 Nov, from 00:02) |
-| John Malubay | Directed the Claude Code session from Sat 14 Nov 12:57 Asia/Manila (engine worker, route and briefing, planned margin, field view, accessibility, tier-2 contours and drill, resilience, README); decisions G-05, K-01, G-06 (since superseded by G-07) and the instruction to apply the plan's defaults |
-| Christian Jesus Alcazar | Directed the Claude Code session from Sat 14 Nov 18:29 Asia/Manila (pipeline reproducibility check RUN-01, merge of the branch work into `main`, G3 inputs); decisions G-07 and C-AGREE (session account; to be confirmed by the team) |
+| Christian Jesus Bolilan Alcazar | Team Leader, Planning, Programming |
+| Patrick Ezekiel A. Arcilla | UI/UX, Planning, Programming |
+| Eugene Ibañez Jr. ("Yujin") | Data Verification, Programming |
+| John Lyod R. Malubay | Data, Programming and Accessibility |
 
-Code in this repository was drafted with SI assistance under these members' direction; see **SI use** below. SI is not
+Code in this repository was drafted with SI assistance under the team's direction; see **SI use** below. SI is not
 credited with the concept, the plan or any team decision.
 
 ## What it does
