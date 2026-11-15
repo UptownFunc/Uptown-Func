@@ -1,6 +1,8 @@
-// SI-assisted: drafted with Claude Code (Claude Opus 5.5); Folio plate and HUD on design/sharpwalk-ui-ux; human Design review pending.
+// SI-assisted: drafted with Claude Code (Claude Opus 5.5); Folio plate and HUD on design/sharpwalk-ui-ux; final 2D map
+// polish (MAP-01..MAP-08) with Claude Opus 5.5; human Design review pending.
 // Plan 7.8 AREA level of the 2D sheet: D2 base, D1 hillshade multiplied, terrain classes, scale bar, cursor readout.
-// F7 is display only; the readout's east/north and elevation come from the F6 grid through src/geo.
+// F7 is display only; the readout's east/north and elevation come from the F6 grid through src/geo. What is shown
+// (MapLayers) and what is drawn (planGeometry) are renderer-free inputs, so a later 3D view can share them.
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import OlMap from "ol/Map";
@@ -8,7 +10,8 @@ import View from "ol/View";
 import ImageLayer from "ol/layer/Image";
 import Static from "ol/source/ImageStatic";
 import ScaleLine from "ol/control/ScaleLine";
-import Zoom from "ol/control/Zoom";
+import { defaults as defaultInteractions } from "ol/interaction/defaults";
+import type BaseLayer from "ol/layer/Base";
 import { f1ToF7, f7ToF1, offsetF1, type F1Point } from "../geo";
 import Feature from "ol/Feature";
 import Point from "ol/geom/Point";
@@ -21,7 +24,9 @@ import type { LatLon, PlanOutput } from "../engine/planner";
 import { createContourLayer, createMarkerLayer, createPlanLayer, drawContours, drawMarker, drawPlan, type ContourDisplay } from "./planLayer";
 import { snapshotMap, type MapSnapshot } from "./snapshot";
 import { F7_PROJECTION } from "./f7";
-import { INITIAL_RESOLUTION_F7 } from "./view";
+import { FIT_PADDING, MAX_RESOLUTION_F7, fitResolution, formatView } from "./view";
+import { DEFAULT_LAYERS, MIN_OVERLAY, clampOverlay, layerShown, type MapLayers } from "./layers";
+import { SYMBOLS, tileInk, type SymbolKind } from "./terrainPattern";
 import { loadArea, type LoadedArea } from "./loadArea";
 import { readoutAt, type Readout } from "./readout";
 import { coverageNote, coveragePolygonsF7, viewCoverage, type PolygonsF7 } from "./coverage";
@@ -31,9 +36,21 @@ import { createElevationLayer, drawElevationContours } from "./elevationLayer";
 import { createTerrainLayer } from "./terrainLayer";
 import { skySampleAt, type SkySampler } from "./skySample";
 import type { Quantity } from "../contracts";
-import { Layers, MousePointerClick } from "lucide-react";
+import { Layers, LoaderCircle, MousePointerClick, Minus, Plus, RotateCcw, Route, Scan, X } from "lucide-react";
 import Overlay from "ol/Overlay";
 import { terrainHint } from "./terrainHint";
+
+/** The view glides on the map keys (zoom, fit) follow the user's reduced-motion setting: then they jump. */
+const reducedMotion = () => typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+const EASE = (t: number) => 1 - (1 - t) ** 3;
+
+/** A terrain symbol's tile as a CSS background, for the key (the same ink the layer draws). Built once. */
+function swatchOf(kind: SymbolKind): string {
+  const p = SYMBOLS[kind].period;
+  const rects = tileInk(kind).map(([x, y]) => `<rect x='${x}' y='${y}' width='1' height='1'/>`).join("");
+  return `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='${p}' height='${p}' fill='${SYMBOLS[kind].colour}' shape-rendering='crispEdges'>${rects}</svg>`)}")`;
+}
+const SWATCH: Record<SymbolKind, string> = { steep: swatchOf("steep"), excluded: swatchOf("excluded"), unknown: swatchOf("unknown") };
 
 /** Displays a Quantity: unknown stays "unknown" (CLAUDE.md); one decimal for metres. */
 function fmt(q: Quantity): string {
@@ -91,12 +108,27 @@ export interface AreaSheetProps {
   /** The engine's terrain-class grid (a copy), for the cursor tag. Null until the engine has loaded it, or when the
    *  engine could not start: the tag then says the ground cannot be checked. The sheet never downloads it itself. */
   readonly terrainClasses?: Uint8Array | null;
+  /** MAP-02: which display layers are shown and how strong the overlays are (the console owns it). */
+  readonly layers?: MapLayers;
+  readonly onLayers?: (l: MapLayers) => void;
 }
 
 const cursorStyle = new Style({ image: new RegularShape({ points: 4, radius: 11, radius2: 0, angle: 0, stroke: new Stroke({ color: "#f3eee4", width: 2 }) }) });
 
-export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hoverIndex = null, onHoverIndex, onDatasets, onCursor, contours = null, showSky = false, onSky, tools, hint, onSelectStop, selectedStop = null, popover = null, cursorHint = false, terrainClasses = null }: AreaSheetProps) {
+export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hoverIndex = null, onHoverIndex, onDatasets, onCursor, contours = null, showSky = false, onSky, tools, hint, onSelectStop, selectedStop = null, popover = null, cursorHint = false, terrainClasses = null, layers = DEFAULT_LAYERS, onLayers }: AreaSheetProps) {
   const [layersOpen, setLayersOpen] = useState(false);
+  const layersBtn = useRef<HTMLButtonElement>(null);
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const keysRef = useRef<HTMLDivElement>(null);
+  const statusRef = useRef<HTMLDivElement>(null);
+  /** Retry key: a failed load can be tried again without reloading the page (the plan and the engine are kept). */
+  const [attempt, setAttempt] = useState(0);
+  /** True once the map has been built on the loaded area (the load message shows until then). */
+  const [ready, setReady] = useState(false);
+  const layersRef = useRef(layers);
+  layersRef.current = layers;
+  /** The OpenLayers layers the MapLayers switches act on, once built. */
+  const switched = useRef<{ relief?: BaseLayer; terrain?: BaseLayer }>({});
   const classesRef = useRef(terrainClasses);
   classesRef.current = terrainClasses;
   const selectRef = useRef(onSelectStop);
@@ -169,8 +201,19 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
   const datasetsRef = useRef(onDatasets);
   datasetsRef.current = onDatasets;
 
+  /** MAP-02: applies the switches and the overlay strength to the built layers (and to the next snapshot). */
+  const applyLayers = () => {
+    const L = layersRef.current, d = switched.current, op = clampOverlay(L.overlay);
+    d.relief?.setVisible(L.relief);
+    d.terrain?.setVisible(L.terrain); d.terrain?.setOpacity(op);
+    elevationLayer.current?.setVisible(L.elevation); elevationLayer.current?.setOpacity(op);
+  };
+  useEffect(applyLayers, [layers.relief, layers.terrain, layers.elevation, layers.overlay]); // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     let map: OlMap | null = null;
+    setError(null);
+    setReady(false);
     setLayerErrors([]); // a new area starts with no failed layers
     setCoverageNotes({});
     setCoverageError(null);
@@ -209,6 +252,8 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
         source.on("imageloaderror", () => fail(L));
         return new ImageLayer({ className, source });
       };
+      const relief = image("hillshade", "layer-hillshade"), terrainLayer = terrain();
+      switched.current = { relief, terrain: terrainLayer };
       // Plan 6.7 / 9.2: precomputed single-hue ramp; hidden until the user turns it on.
       skyLayer.current = null;
       setSkyFailed(false);
@@ -221,16 +266,21 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
       setSkyGridError(a.skyGrid.ok ? null : a.skyGrid.reason);
       skyRef.current?.(a.display.sky ? "ok" : "none", (p) => skySampleAt(p, sg));
       const o = f1ToF7(a.grid.origin);
+      const el = target.current;
       map = new OlMap({
-        target: target.current,
-        layers: [image("d2", "layer-d2"), image("hillshade", "layer-hillshade"), ...(skyLayer.current ? [skyLayer.current] : []), terrain(), elevationLayer.current!, coverageLayer.current!, contourLayer.current!, planLayer.current, markerLayerRef.current!, cursorLayer.current!],
-        controls: [new Zoom(), new ScaleLine({ units: "metric" })],
+        target: el,
+        layers: [image("d2", "layer-d2"), relief, ...(skyLayer.current ? [skyLayer.current] : []), terrainLayer, elevationLayer.current!, coverageLayer.current!, contourLayer.current!, planLayer.current, markerLayerRef.current!, cursorLayer.current!],
+        // The zoom keys are the sheet's own (MAP-06); wheel and double-click zoom jump under reduced motion.
+        controls: [new ScaleLine({ units: "metric" })],
+        interactions: defaultInteractions({ zoomDuration: reducedMotion() ? 0 : 250 }),
         view: new View({
-          projection: F7_PROJECTION, center: [o.x, o.y], resolution: INITIAL_RESOLUTION_F7,
+          // MAP-01: the load view shows the whole sheet, so the habitat and the boxwork are both on screen at once.
+          projection: F7_PROJECTION, center: [o.x, o.y], resolution: fitResolution(extent[2] - extent[0], extent[3] - extent[1], el.clientWidth, el.clientHeight),
           // Honest zoom: stop at twice the native 1 m display pixel.
-          minResolution: a.display.pixel_m / 2, maxResolution: 16, extent, constrainOnlyCenter: true,
+          minResolution: a.display.pixel_m / 2, maxResolution: MAX_RESOLUTION_F7, extent, constrainOnlyCenter: true,
         }),
       });
+      applyLayers();
       // Plan 7.8 coverage outlines, and the layer-list notes for the current view (recomputed after each move).
       const outlines: { dataset: string; label: string; polys: PolygonsF7 }[] = a.coverage.ok
         ? a.coverage.collection.features.map((f) => ({ dataset: f.properties.dataset, label: f.properties.label, polys: coveragePolygonsF7(f) }))
@@ -257,10 +307,14 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
       profXY.current = profileXY(planRef.current, a.grid);
       const m = map;
       mapRef.current = map;
-      map.on("moveend", () => { if (!cancelled) updateCoverageNotes(m); });
+      // The live view, published read-only for tests and tools that turn F1 positions into pixels (MAP-01).
+      const publish = () => { const c = m.getView().getCenter(), r = m.getView().getResolution(); if (c && r && target.current) target.current.dataset.viewF7 = formatView(c[0]!, c[1]!, r); };
+      publish();
+      map.on("moveend", () => { if (!cancelled) { updateCoverageNotes(m); publish(); } });
+      // The card names only the layers it draws: loaded, and switched on (MAP-02).
       snapRef.current?.(() => snapshotMap(m, planLayer.current, a.grid.origin.lat,
-        () => [...a.display.layers.filter((l) => !failed.current.has(l.id)).map((l) => l.name),
-          ...(a.contours.ok ? [contourLegend(a.contours.collection.properties)] : [])]));
+        () => [...a.display.layers.filter((l) => !failed.current.has(l.id) && layerShown(l.id, layersRef.current)).map((l) => l.name),
+          ...(a.contours.ok && layersRef.current.elevation ? [contourLegend(a.contours.collection.properties)] : [])]));
       overlay.current = new Overlay({ element: popEl.current!, positioning: "bottom-center", offset: [0, -24], stopEvent: true });
       map.addOverlay(overlay.current);
       map.on("singleclick", (e) => {
@@ -297,9 +351,10 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
           if (next !== lastHover.current) { lastHover.current = next; hoverRef.current?.(next); }
         });
       });
-    }).catch((e: unknown) => setError(e instanceof Error ? e.message : String(e)));
-    return () => { cancelled = true; if (raf) cancelAnimationFrame(raf); map?.setTarget(undefined); };
-  }, [dataUrl]);
+      setReady(true);
+    }).catch((e: unknown) => { if (!cancelled) setError(e instanceof Error ? e.message : String(e)); });
+    return () => { cancelled = true; if (raf) cancelAnimationFrame(raf); map?.setTarget(undefined); mapRef.current = null; };
+  }, [dataUrl, attempt]);
 
   // The engine's terrain classes arrive after the sheet has loaded (or before: see the load above).
   useEffect(() => { if (area.current) area.current = withClasses(area.current, terrainClasses); }, [terrainClasses]);
@@ -318,7 +373,7 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
     drawPlan(planLayer.current, plan, area.current.grid, selectedStop);
     profXY.current = profileXY(plan, area.current.grid);
     lastHover.current = null; // indices refer to the previous profile
-  }, [plan, selectedStop]);
+  }, [plan, selectedStop, ready]);
 
   useEffect(() => {
     if (area.current && target.current) target.current.dataset.contourLines = String(drawContours(contourLayer.current!, contours, area.current.grid));
@@ -360,13 +415,61 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
     }
   };
 
-  if (error) return <div className="error" role="alert">Area data could not be loaded: {error}</div>;
+  /** MAP-06: zoom by one step about the centre, like the wheel; a key pressed mid-glide continues from where it is. */
+  const zoomBy = (d: 1 | -1) => {
+    const v = mapRef.current?.getView(), z = v?.getZoom();
+    if (!v || z === undefined) return;
+    if (v.getAnimating()) v.cancelAnimations();
+    v.animate({ zoom: v.getConstrainedZoom(z + d), duration: reducedMotion() ? 0 : 220, easing: EASE });
+  };
+  /** MAP-06: frame the whole sheet, or the plan (habitat, route and stops; the habitat alone before any stop). */
+  const frame = (what: "sheet" | "route") => {
+    const m = mapRef.current, a = area.current;
+    if (!m || !a) return;
+    const v = m.getView();
+    const planExt = planLayerRef.current?.getSource()?.getExtent();
+    let ext: number[] = what === "route" && planExt ? [...planExt] : [...a.display.extentF7];
+    if (!ext.every(Number.isFinite)) ext = [...a.display.extentF7];
+    const cx = (ext[0]! + ext[2]!) / 2, cy = (ext[1]! + ext[3]!) / 2, half = 400; // a lone habitat is framed with 800 m of ground round it
+    if (ext[2]! - ext[0]! < 2 * half && ext[3]! - ext[1]! < 2 * half) ext = [cx - half, cy - half, cx + half, cy + half];
+    if (v.getAnimating()) v.cancelAnimations();
+    // The route is framed clear of the chrome as drawn now (hint row, readout, keys: their size changes with the window
+    // and the readout's line count); the whole sheet as at load.
+    const mapBox = target.current?.getBoundingClientRect(), edge = (el: Element | null | undefined) => el?.getBoundingClientRect();
+    const hintBox = edge(sheetRef.current?.querySelector(".map-hint")), keysBox = edge(keysRef.current), statusBox = edge(statusRef.current);
+    const padding = what === "route" && mapBox
+      ? [Math.max(40, (hintBox ? hintBox.bottom - mapBox.top : 0) + 20), Math.max(40, (keysBox ? mapBox.right - keysBox.left : 0) + 16),
+        Math.max(40, (statusBox ? mapBox.bottom - statusBox.top : 0) + 20), 40]
+      : [...FIT_PADDING];
+    v.fit(ext, { padding, duration: reducedMotion() ? 0 : 420, easing: EASE });
+  };
+  const setLayer = (patch: Partial<MapLayers>) => onLayers?.({ ...layers, ...patch });
+  /** The switch a layer row carries (none for the orthophoto base, a failed layer or a sheet without a console). */
+  const switchFor = (id: string): keyof Omit<MapLayers, "overlay"> | null =>
+    !onLayers ? null : id === "hillshade" ? "relief" : id === "terrain" ? "terrain" : id === "contours" ? "elevation" : null;
+  const layerRow = (id: string, body: ReactNode) => {
+    const k = switchFor(id);
+    return k ? <label className="layer-row"><input type="checkbox" checked={layers[k]} onChange={(e) => setLayer({ [k]: e.target.checked })} />
+      <span className="sw" data-sw={id} aria-hidden="true" /><span>{body}</span></label>
+      : <span className="layer-row"><span className="sw" data-sw={id} aria-hidden="true" /><span>{body}</span></span>;
+  };
+
+  if (error) return (
+    <div className="sheet">
+      <div className="sheet-msg" role="alert" data-kind="error">
+        <strong>Area data could not be loaded: {error}</strong>
+        <span>The sheet, its readout and the route need these files. Check the connection, then try again.</span>
+        <button type="button" className="key small" onClick={() => setAttempt((n) => n + 1)}><RotateCcw size={16} strokeWidth={1.75} aria-hidden="true" />Try again</button>
+      </div>
+    </div>
+  );
   return (
     <>
-      <div className="sheet">
+      <div className="sheet" data-ready={ready} ref={sheetRef}>
         <div className="map" ref={target} data-testid="area-map" tabIndex={0} onKeyDownCapture={onKeyDown} role="application"
           aria-label="Traverse sheet. Arrow keys move a cursor 10 m, Shift plus arrow 100 m; Enter adds a stop at the cursor." />
         <div className="sr-only" aria-live="polite" data-testid="cursor-announce">{announce}</div>
+        {!ready && <p className="sheet-msg" role="status" data-testid="sheet-loading"><LoaderCircle size={18} strokeWidth={1.75} aria-hidden="true" />Loading the terrain sheet…</p>}
         {createPortal(popover, popEl.current)}
         {cursorHint && pointer && readout && (() => {
           const stop = overStop ? plan?.plan.stops.find((s) => s.id === overStop) : undefined;
@@ -374,7 +477,8 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
             : stop ? { kind: "stop" as const, text: `Stop ${stop.letter} · click to edit it` } : terrainHint(readout.terrainClass);
           // Near the right or bottom edge the tag flips to the other side of the pointer, so it is never cut off.
           const w = target.current?.clientWidth ?? 0, hgt = target.current?.clientHeight ?? 0;
-          const x = pointer.x > w - 380 ? `calc(${pointer.x - 18}px - 100%)` : `${pointer.x + 18}px`;
+          // MAP-07: on a narrow sheet neither side has room for the whole tag, so it is also kept 8 px inside both edges.
+          const x = pointer.x > w - 380 ? `max(8px, calc(${pointer.x - 18}px - 100%))` : `max(8px, min(${pointer.x + 18}px, calc(${w - 8}px - 100%)))`;
           const y = pointer.y > hgt - 60 ? `calc(${pointer.y - 18}px - 100%)` : `${pointer.y + 18}px`;
           return <div className="cursor-tag" data-kind={h.kind} data-testid="cursor-tag" aria-hidden="true" style={{ transform: `translate(${x}, ${y})` }}>
             <span className="lamp" aria-hidden="true" />{h.text}</div>;
@@ -390,15 +494,25 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
           </div>
         )}
         {hint && <p className="map-hint"><MousePointerClick size={16} strokeWidth={1.5} aria-hidden="true" />{hint}</p>}
-        <button type="button" className="layers-btn" aria-expanded={layersOpen} aria-controls="layers-panel" onClick={() => setLayersOpen((o) => !o)}><Layers size={18} strokeWidth={1.5} aria-hidden="true" />Layers</button>
-        <div className="legend" id="layers-panel" aria-label="Layers" data-open={layersOpen}>
-          {tools}
-          <ul>{legend.map((l) => layerErrors.includes(l.name)
+        {/* MAP-06: the sheet's keys, one column at the lower right: zoom, then the two framings. */}
+        <div className="map-keys" role="group" aria-label="Map view" ref={keysRef}>
+          <button type="button" title="Zoom in" aria-label="Zoom in" onClick={() => zoomBy(1)} disabled={!ready}><Plus size={18} strokeWidth={2} aria-hidden="true" /></button>
+          <button type="button" title="Zoom out" aria-label="Zoom out" onClick={() => zoomBy(-1)} disabled={!ready}><Minus size={18} strokeWidth={2} aria-hidden="true" /></button>
+          <button type="button" title={plan?.plan.stops.length ? "Fit the route" : "Show the habitat"} aria-label={plan?.plan.stops.length ? "Fit the route" : "Show the habitat"}
+            onClick={() => frame("route")} disabled={!ready || !plan}><Route size={18} strokeWidth={1.75} aria-hidden="true" /></button>
+          <button type="button" title="Show the whole sheet" aria-label="Show the whole sheet" onClick={() => frame("sheet")} disabled={!ready}><Scan size={18} strokeWidth={1.75} aria-hidden="true" /></button>
+        </div>
+        <button ref={layersBtn} type="button" className="layers-btn" aria-expanded={layersOpen} aria-controls="layers-panel" onClick={() => setLayersOpen((o) => !o)}><Layers size={18} strokeWidth={1.5} aria-hidden="true" />Layers</button>
+        <div className="legend" id="layers-panel" aria-label="Layers" data-open={layersOpen} inert={!layersOpen}
+          onKeyDown={(e) => { if (e.key === "Escape") { e.stopPropagation(); setLayersOpen(false); layersBtn.current?.focus(); } }}>
+          <div className="legend-head"><span className="legend-title">Layers</span>
+            <button type="button" className="legend-x" aria-label="Close panel" onClick={() => { setLayersOpen(false); layersBtn.current?.focus(); }}><X size={16} strokeWidth={2} aria-hidden="true" /></button></div>
+          <ul className="layer-list">{legend.map((l) => layerErrors.includes(l.name)
             ? <li key={l.id} className="failed">{l.name} - not loaded</li>
-            : <li key={l.id} data-layer={l.id}>{l.name} - {l.valueClass.replace("_", " ")}, {l.source}, {fmt(l.resolution)}, built {l.builtOn}
-              {coverageNotes[l.source] && <span className="coverage-note"> · {coverageNotes[l.source]}</span>}</li>)}
+            : <li key={l.id} data-layer={l.id} data-off={!layerShown(l.id, layers) || undefined}>{layerRow(l.id, <>{l.name} - {l.valueClass.replace("_", " ")}, {l.source}, {fmt(l.resolution)}, built {l.builtOn}
+              {coverageNotes[l.source] && <span className="coverage-note"> · {coverageNotes[l.source]}</span>}</>)}</li>)}
             {contourEntry && (contourEntry.ok
-              ? <li data-layer="contours">{contourEntry.text}{contourEntry.source && coverageNotes[contourEntry.source] && <span className="coverage-note"> · {coverageNotes[contourEntry.source]}</span>}</li>
+              ? <li data-layer="contours" data-off={!layers.elevation || undefined}>{layerRow("contours", <>{contourEntry.text}{contourEntry.source && coverageNotes[contourEntry.source] && <span className="coverage-note"> · {coverageNotes[contourEntry.source]}</span>}</>)}</li>
               : <li data-layer="contours" className="failed">Contours (D1) - not loaded: {contourEntry.text}</li>)}
             {showSky && sky && skyFailed && <li data-layer="sky" className="failed">Sky obstruction - not loaded</li>}
             {showSky && sky && !skyFailed && <li data-layer="sky">Sky obstruction, % of the upper hemisphere (geometry, not dose) - model derived, D1 near and
@@ -409,9 +523,24 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
               : <li className="muted" data-testid="coverage-status">{coverageDatasets.length
                 ? `Dotted outline: edge of the ${coverageDatasets.join(" and ")} data on this sheet; blank beyond it`
                 : "No valid data on this sheet for any dataset: no coverage outline to draw"}</li>)}</ul>
+          {onLayers && <label className="strength"><span>Symbol and contour strength</span>
+            <input type="range" min={MIN_OVERLAY} max={1} step={0.05} value={clampOverlay(layers.overlay)} onChange={(e) => setLayer({ overlay: Number(e.target.value) })}
+              aria-valuetext={`${Math.round(clampOverlay(layers.overlay) * 100)} %`} />
+            <output aria-hidden="true">{Math.round(clampOverlay(layers.overlay) * 100)} %</output></label>}
+          {tools}
+          {/* MAP-04: what each mark on the sheet means; the same marks the layers draw. */}
+          <dl className="map-key" aria-label="Map key">
+            <div><dt><span className="k-route" /></dt><dd>Route on the 2 m grid path; the chevrons show each leg's direction</dd></div>
+            <div><dt><span className="k-habitat">H</span></dt><dd>Habitat (an Assumed scenario input)</dd></div>
+            <div><dt><span className="k-stop">A</span></dt><dd>Stop; click one to edit it</dd></div>
+            <div><dt><span className="k-tick" /></dt><dd>Margin marks: 10 % of the EVA left (amber), none left (red)</dd></div>
+            <div><dt><span className="k-sym" style={{ backgroundImage: SWATCH.steep }} /></dt><dd>Steep but under the Assumed limit</dd></div>
+            <div><dt><span className="k-sym" style={{ backgroundImage: SWATCH.excluded }} /></dt><dd>Excluded: steeper than the Assumed limit</dd></div>
+            <div><dt><span className="k-sym" style={{ backgroundImage: SWATCH.unknown }} /></dt><dd>Unknown ground: no slope value</dd></div>
+          </dl>
         </div>
       </div>
-      <div className="status" data-testid="status-line">
+      <div className="status" data-testid="status-line" ref={statusRef}>
         {readout ? (
           <>
             <span><span className="label">lat </span>{readout.lat}</span>

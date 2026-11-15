@@ -1,7 +1,7 @@
 // SI-assisted: drafted with Claude Code (Claude Opus 5.5); human Design review pending.
 // Draws the engine's plan on the AREA sheet: grid-path legs, the habitat and lettered stops (plan 9.4).
-// Cells go cell -> F1 (src/geo/grid) -> F7 (src/geo); F7 is display only. The line is the grid path the margins are
-// computed on (D-04 smoothing undecided), so nothing is smoothed here.
+// The features come in F1 from src/map/planGeometry (renderer-free, MAP-03) and go to F7 here through src/geo; F7 is
+// display only. The line is the grid path the margins are computed on (D-04 smoothing undecided): nothing is smoothed.
 import Feature from "ol/Feature";
 import LineString from "ol/geom/LineString";
 import Point from "ol/geom/Point";
@@ -9,9 +9,10 @@ import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import { Fill, RegularShape, Stroke, Style, Text } from "ol/style";
 import CircleStyle from "ol/style/Circle";
-import { f1ToF7 } from "../geo";
+import { f1ToF7, type F1Point } from "../geo";
 import { cellCentreF1, type GridDef } from "../geo/grid";
 import type { PlanOutput } from "../engine/planner";
+import { planFeatures } from "./planGeometry";
 import type { ContourLevel } from "../engine/contours";
 
 // UI-07: the route is a white line on a dark casing (reads on any terrain); stops carry the oxide accent (plan
@@ -34,10 +35,15 @@ const tickStyle = (kind: "NEAR_LIMIT" | "OVER") => new Style({
 });
 const markerStyle = new Style({ image: new CircleStyle({ radius: 6, fill: new Fill({ color: PAPER }), stroke: new Stroke({ color: INK, width: 2 }) }) });
 
-const habitatStyle = new Style({
-  image: new RegularShape({ points: 4, radius: 9, angle: Math.PI / 4, fill: new Fill({ color: PAPER }), stroke: new Stroke({ color: INK, width: 2 }) }),
-  text: new Text({ text: "H", font: "600 11px 'Barlow Semi Condensed', sans-serif", fill: new Fill({ color: INK }) }),
-});
+const habitatStyle = [
+  new Style({
+    image: new RegularShape({ points: 4, radius: 10, angle: Math.PI / 4, fill: new Fill({ color: PAPER }), stroke: new Stroke({ color: INK, width: 2 }) }),
+    text: new Text({ text: "H", font: "700 11px 'Barlow Semi Condensed', sans-serif", fill: new Fill({ color: INK }) }),
+  }),
+  // MAP-04: the habitat is the walk's anchor, so it carries its name (the habitat itself is an Assumed scenario input).
+  new Style({ text: new Text({ text: "HABITAT", offsetY: 20, font: "700 10px 'Barlow Semi Condensed', sans-serif", fill: new Fill({ color: PAPER }),
+    stroke: new Stroke({ color: INK, width: 3 }) }) }),
+];
 const stopStyle = (letter: string) => new Style({
   image: new CircleStyle({ radius: 12, fill: new Fill({ color: PLAN }), stroke: new Stroke({ color: PAPER, width: 2.5 }) }),
   text: new Text({ text: letter, font: "700 12px 'Barlow Semi Condensed', sans-serif", fill: new Fill({ color: PAPER }) }),
@@ -48,55 +54,44 @@ const selectedStopStyle = (letter: string) => [
   new Style({ image: new CircleStyle({ radius: 19, fill: new Fill({ color: "rgba(255, 179, 71, 0.22)" }), stroke: new Stroke({ color: "#ffb347", width: 2 }) }) }),
   stopStyle(letter),
 ];
+/** MAP-04: which way each leg walks, a small paper chevron on the route's casing (turns with the view). */
+const arrowStyle = (rotation: number) => new Style({
+  image: new RegularShape({ points: 3, radius: 5.5, rotation, rotateWithView: true, fill: new Fill({ color: PAPER }), stroke: new Stroke({ color: INK, width: 1.5 }) }),
+});
 
 export function createPlanLayer(): VectorLayer<VectorSource> {
   return new VectorLayer({ source: new VectorSource(), className: "layer-plan" });
 }
 
+const toF7 = (p: F1Point) => { const q = f1ToF7(p); return [q.x, q.y]; };
+
 export function drawPlan(layer: VectorLayer<VectorSource>, out: PlanOutput | null, grid: GridDef, selected: string | null = null): void {
   const src = layer.getSource()!;
   src.clear();
   if (!out) return;
-  const xy = (cell: number) => {
-    const p = f1ToF7(cellCentreF1({ r: Math.floor(cell / grid.cols), c: cell % grid.cols }, grid));
-    return [p.x, p.y];
-  };
+  const g = planFeatures(out, grid);
   const features: Feature[] = [];
-  // Split the walk at the OVER tick: everything after it is drawn in the over colour.
-  const over = out.geometry.marginTicks.find((t) => t.kind === "OVER");
-  const prof = out.geometry.profile;
-  const overAt = over ? prof.findIndex((p) => p.s_m >= over.s_m) : -1;
-  const cut = overAt >= 0 ? overAt : prof.length;
-  const line = (from: number, to: number, style: Style[], kind: string) => {
-    if (to - from < 1) return;
-    const f = new Feature({ geometry: new LineString(prof.slice(from, to + 1).map((p) => xy(p.cell))), kind });
-    f.setStyle(style);
+  for (const l of g.lines) {
+    const f = new Feature({ geometry: new LineString(l.points.map(toF7)), kind: l.kind });
+    f.setStyle(l.kind === "route-over" ? overRouteStyle : routeStyle);
     features.push(f);
-  };
-  if (prof.length) {
-    line(0, Math.min(cut, prof.length - 1), routeStyle, "route");
-    if (overAt >= 0) line(overAt, prof.length - 1, overRouteStyle, "route-over");
-  } else {
-    // No whole-walk profile (a leg is unreachable): draw the legs that exist, each on its own.
-    for (const leg of out.geometry.legs) {
-      if (leg.cells.length < 2) continue;
-      const f = new Feature({ geometry: new LineString(leg.cells.map(xy)), kind: "leg" });
-      f.setStyle(routeStyle);
-      features.push(f);
-    }
   }
-  for (const t of out.geometry.marginTicks) {
-    const f = new Feature({ geometry: new Point(xy(t.cell)), kind: `tick-${t.kind}` });
+  for (const a of g.arrows) {
+    const [x0, y0] = toF7(a.at), [x1, y1] = toF7(a.toward);
+    const f = new Feature({ geometry: new Point([x0!, y0!]), kind: "leg-arrow" });
+    f.setStyle(arrowStyle(Math.PI / 2 - Math.atan2(y1! - y0!, x1! - x0!)));
+    features.push(f);
+  }
+  for (const t of g.ticks) {
+    const f = new Feature({ geometry: new Point(toF7(t.at)), kind: `tick-${t.kind}` });
     f.setStyle(tickStyle(t.kind));
     features.push(f);
   }
-  const h = new Feature({ geometry: new Point(xy(out.geometry.habitatCell)), kind: "habitat" });
+  const h = new Feature({ geometry: new Point(toF7(g.habitat.at)), kind: "habitat" });
   h.setStyle(habitatStyle);
   features.push(h);
-  for (const s of out.plan.stops) {
-    const cell = out.geometry.stopCells[s.id];
-    if (cell === undefined) continue;
-    const f = new Feature({ geometry: new Point(xy(cell)), kind: "stop", stopId: s.id });
+  for (const s of g.stops) {
+    const f = new Feature({ geometry: new Point(toF7(s.at)), kind: "stop", stopId: s.id, letter: s.letter });
     f.setStyle(s.id === selected ? selectedStopStyle(s.letter) : stopStyle(s.letter));
     features.push(f);
   }

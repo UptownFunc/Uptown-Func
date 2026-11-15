@@ -1268,6 +1268,34 @@ Commit SHA: 4be709c
 Next part / blocker owner: the other members confirm or reject W-01 and K-01; then merge after PR #21
 ```
 
+```text
+Part: FINAL-2D - final 2D map baseline (MAP-01..MAP-08), tour navigation (TOUR-01), empty states (UX-24, UX-25)
+Owner: session operator (cloud session from the claude.ai web app; member not named); SI-assisted (Claude Code, Claude Opus 5.5)
+Status: VERIFIED on the branch claude/practical-johnson-hbw41e; NOT merged (team approval required, MERGE-06)
+Scope completed: load view frames the whole sheet with the habitat; map keys (zoom, fit route, whole sheet); layer
+  switches and strength; map key; renderer-free plan features and layer state for the 3D upgrade; in-sheet loading and
+  error states with Try again; tour opens on the current step, follows navigation, Start over, progress jumps, resize;
+  empty HUD/assessment lead to the map; profile readout on a laptop. No 3D code. No engine, contract, constant,
+  dataset, pipeline or value change.
+Files changed: src/map/{AreaSheet.tsx,planLayer.ts,view.ts,layers.ts (new),planGeometry.ts (new),mapFinal.test.ts (new)},
+  src/app/{App.tsx,Tutorial.tsx,AssessPanel.tsx,styles.css}, src/field/FieldView.tsx, src/briefing/BriefingView.tsx (one
+  caption), e2e/{helpers.ts,map-final.spec.ts (new),audit.spec.ts,bureau.spec.ts,contours.spec.ts}; logs
+Checks run (exact commands), cloud container, Node 22.23.4, fresh npm ci:
+  npx vitest run ; npx tsc --noEmit ; rm -rf dist && npm run build && node scripts/bundle-size.mjs ;
+  PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome npx playwright test --trace off ;
+  (cd pipeline && ../.venv/bin/python -m pytest) ; .venv/bin/python scripts/licences.py | diff -q - docs/licences.md
+Results at ab0ff2b: vitest 33 files 327/327 (11 new); tsc clean; build OK; JS 245,635 B of 250,000 (AC-12);
+  Playwright 86/86 (10 new); pytest 82 passed, 2 skipped (gdal_contour not installed); licences: no difference.
+  Baseline on main c60d37e before the work: vitest 316/316, Playwright 76/76, JS 242,652 B (same script).
+  The map-only commit 7f5844f was also checked alone in a worktree: tsc clean, vitest 326/326, and the map, audit,
+  bureau, contour and tour specs 33/33.
+Known limitations: Design review of MAP-01..MAP-08 and TOUR-01 pending; screenshots inspected at 1440 x 900, 1024 x 768
+  and 390 x 844 (Chromium only); paper print not re-checked (the print spec passes); live site not checked from here.
+Review status: /code-review high of origin/main...ddbfad0: 7 findings, all fixed in ab0ff2b (R-30)
+Commit SHA: 7f5844f (map), ddbfad0 (tour, empty states), ab0ff2b (review fixes), plus the logs commit
+Next part / blocker owner: the team approves (or not) PR #30 for main (MERGE-06)
+```
+
 ## Phase-part completion record
 
 Copy this block for every phase part and update its table row above:
@@ -1345,5 +1373,9 @@ Checks: local build of be056b7 -> assets/index-BahgxpwT.js; the live site served
   config, deleted, --workers=1): 75 passed / 1 failed on the first run (tour-timing "a refusal does not outlive the
   next action": the map canvas did not appear within 20 s over the network); that test alone, --repeat-each=3: 3/3
   passed. Recorded as a load-time flake, not a code failure.
-Next part / blocker owner: the other two members confirm W-01/W-02 and UI-17; PR #30's owner merges main and reruns
+Later: PR #30's own session merged main into it and merged it as d97ff38 (MERGE-06). Checked on d97ff38 (about
+  18:20): tsc clean; vitest 331/331; JS 245,896 B; live index-YVIcYmuh.js and engine-worker.js identical to a local
+  build (cmp); Playwright against the live URL 86/86 (--workers=1, --retries=0). UI-17 order and the 0.56 m/s bound
+  survived the MERGE-06 merge.
+Next part / blocker owner: the other two members confirm W-01/W-02 and UI-17
 ```
