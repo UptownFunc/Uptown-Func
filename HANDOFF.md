@@ -9,6 +9,11 @@ This file is the handoff between team members and Claude sessions. Keep it factu
 - **What (DECISIONS FLOW-04):** Assess shows a large "Plan not feasible (reason). You can either change the time values or redraw the plan." with those two keys and no way on; the HUD key in the step index is closed; the HUD allows no tick forward while the plan or the crew's margin is OVER.
 - **Budget:** AC-12 249,980 B of 250,000 (20 B left).
 - **3D line (3D-CHECK-01):** not reproduced on the live site; needs the exact steps. 3D-BUG-01 stays open.
+## MERGED (Sun 15 Nov 2026, 22:44 Asia/Manila): streamlined flow, Undo and the 24 h limit (MERGE-11). Start here
+
+- **`main` = `bcca613`** (PR #43, which carried PR #39), plus this record. The live site serves `assets/index-DA16-8us.js` and `engine-worker.js`, byte-identical to a local build of `bcca613`.
+- **Checks:** tsc clean; vitest 356/356; AC-12 249,963 B of 250,000 (**37 B left**: nothing more fits without savings); Playwright app 93/95 (two tour frame-timing misses on this Windows machine, TIME-01), 3D 10/10.
+- **For people:** submit for judging (resubmitting is allowed); Design reviews the new start and the banners; the team confirms FLOW-02 (not feasible = OVER or an unreachable stop) and V-15 (24 h).
 
 ## Streamlined flow (Sun 15 Nov 2026, from 22:02 Asia/Manila): branch `yujin/streamlined-flow` (MERGE-11, carries PR #39). Start here
 
