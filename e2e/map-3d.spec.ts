@@ -213,7 +213,7 @@ test("relief lighting (3D-09): shades the terrain once, keeps the D2 colour, and
   await page.mouse.move(2, 2);
   await expect(lighting).toHaveAttribute("aria-pressed", "true");
   await expect(scene(page)).toHaveAttribute("data-layers", "plain lit");
-  await expect(page.getByTestId("status-line-3d")).toContainText("Lit from the north-west, 45° up, as the hillshade; not the sun.");
+  await expect(page.getByTestId("status-line-3d")).toContainText("Lit from the north-west, 45° up, as the hillshade (its image is off while lit); not the sun.");
   await grab(page, "lit");
   const lit = await compare(page, "plain", "lit", "hillshade");
   expect(lit.n).toBeGreaterThan(50_000);
@@ -255,6 +255,14 @@ test("relief lighting (3D-09): shades the terrain once, keeps the D2 colour, and
   await expect(scene(page)).toHaveAttribute("data-layers", "relief");
   await grab(page, "hillshade again");
   expect((await compare(page, "hillshade", "hillshade again")).maxDiff).toBeLessThanOrEqual(1);
+
+  // A switch to 2D and back keeps the lighting as the user left it (like the shared layer switches).
+  await lighting.click();
+  await page.getByRole("button", { name: "2D", exact: true }).click();
+  await expect(page.getByTestId("scene-3d")).toHaveCount(0);
+  await open3d(page);
+  await expect(page.getByRole("button", { name: "Relief lighting", exact: true })).toHaveAttribute("aria-pressed", "true");
+  await expect(scene(page)).toHaveAttribute("data-layers", "plain lit");
 });
 
 test("missing 3D library: the app says why and stays on the 2D sheet, which keeps working", async ({ page }) => {

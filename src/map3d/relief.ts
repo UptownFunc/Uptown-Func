@@ -59,6 +59,13 @@ export const RELIEF_SHADER = `czm_material czm_getMaterial(czm_materialInput m)
 export const reliefSource = (hillshade: boolean, lighting: boolean): "lit" | "hillshade" | "none" =>
   lighting ? "lit" : hillshade ? "hillshade" : "none";
 
+/** The base image to show for the wanted one and whether to light it: the wanted image, else the plain one; with the
+ *  lighting on and no plain image, the hillshade image unlit. Never the lighting over the hillshade image. */
+export function pickBase<T>(base: { relief?: T; plain?: T }, want: "relief" | "plain", lit: boolean): { shown: T | undefined; light: boolean } {
+  const shown = base[want] ?? base.plain ?? (lit ? base.relief : undefined);
+  return { shown, light: lit && shown !== undefined && shown === base.plain };
+}
+
 export const reliefMaterial = (C: Cesium, origin: F1Point): CesiumNS.Material =>
   new C.Material({ fabric: { uniforms: { strength: RELIEF_STRENGTH, upWC: new C.Cartesian3(...reliefUpF5(origin)) }, source: RELIEF_SHADER } });
 

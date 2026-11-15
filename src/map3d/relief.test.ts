@@ -4,7 +4,7 @@
 // vertex normals, and the 3D view never shows the lighting and the hillshade image together.
 import { describe, expect, it } from "vitest";
 import { f1, f5ToF6, localFrame } from "../geo";
-import { RELIEF_LIGHT, RELIEF_SHADER, RELIEF_STRENGTH, reliefLightF5, reliefSource, reliefUpF5 } from "./relief";
+import { RELIEF_LIGHT, RELIEF_SHADER, RELIEF_STRENGTH, pickBase, reliefLightF5, reliefSource, reliefUpF5 } from "./relief";
 
 const origin = f1(-4.815, 137.39, -3506);
 /** The light's direction of travel back in the F6 frame at the origin (east, north, up), through a point 1,000 km
@@ -92,5 +92,26 @@ describe("3D-09 one relief at a time", () => {
     expect(reliefSource(false, true)).toBe("lit");
     expect(reliefSource(true, false)).toBe("hillshade");
     expect(reliefSource(false, false)).toBe("none");
+  });
+});
+
+describe("3D-09 the base image under the lighting", () => {
+  const relief = "relief image", plain = "plain image";
+  it("lights the plain image; shows the hillshade image unlit if the plain one could not be loaded", () => {
+    expect(pickBase({ relief, plain }, "plain", true)).toEqual({ shown: plain, light: true });
+    expect(pickBase({ relief }, "plain", true)).toEqual({ shown: relief, light: false });
+    expect(pickBase({}, "plain", true)).toEqual({ shown: undefined, light: false });
+  });
+  it("without lighting behaves as before 3D-09 (a missing hillshade image falls back to the plain one)", () => {
+    expect(pickBase({ relief, plain }, "relief", false)).toEqual({ shown: relief, light: false });
+    expect(pickBase({ plain }, "relief", false)).toEqual({ shown: plain, light: false });
+    expect(pickBase({ relief }, "plain", false)).toEqual({ shown: undefined, light: false });
+  });
+  it("never lights the hillshade image, whatever is loaded", () => {
+    for (const base of [{}, { relief }, { plain }, { relief, plain }]) for (const want of ["relief", "plain"] as const) for (const lit of [false, true]) {
+      const r = pickBase(base as { relief?: string; plain?: string }, want, lit);
+      expect(r.light && r.shown === relief).toBe(false);
+      expect(r.light).toBe(lit && r.shown === plain);
+    }
   });
 });
