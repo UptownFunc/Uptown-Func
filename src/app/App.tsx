@@ -26,7 +26,7 @@ import { DEMO_PRESET, presetEnabled } from "./demoPreset";
 import { STEPS, stepFromHash, type StepId } from "./steps";
 import { ArrowRight, BookOpen, CircleHelp, LoaderCircle } from "lucide-react";
 import { ICON } from "./icons";
-import { AnimatePresence, MotionRoot, m, panelMotion } from "./motion";
+import { AnimatePresence, Appear, PANEL_IN } from "./motion";
 import { Tutorial, orientationDone } from "./Tutorial";
 import { StopPopover } from "./StopPopover";
 
@@ -47,7 +47,16 @@ export function App() {
   const engine = useRef<EngineClient | null>(null);
   const [output, setOutput] = useState<PlanOutput | null>(null);
   const [message, setMessage] = useState<{ text: string; n: number } | null>(null);
-  const say = (text: string) => setMessage((m) => ({ text, n: (m?.n ?? 0) + 1 }));
+  /** The latest engine message for assistive technology: one live region that stays mounted (a toast that remounts
+   *  for every message is not announced reliably). */
+  const [announce, setAnnounce] = useState("");
+  const say = (text: string) => { setMessage((m) => ({ text, n: (m?.n ?? 0) + 1 })); setAnnounce(text); };
+  // A success clears itself; a refusal or an error explains why nothing changed, so it stays until the next message.
+  useEffect(() => {
+    if (!message?.text.startsWith("Plan updated")) return;
+    const timer = setTimeout(() => setMessage((m) => (m?.n === message.n ? null : m)), 4000);
+    return () => clearTimeout(timer);
+  }, [message]);
   const [pending, setPending] = useState(0);
   const [engineFailed, setEngineFailed] = useState(false);
   const [hover, setHover] = useState<number | null>(null);
@@ -70,8 +79,14 @@ export function App() {
   /** Point and click (UI-11): the stop picked on the map, and the stop waiting to be moved by the next map click. */
   const [picked, setPicked] = useState<string | null>(null);
   const [moving, setMoving] = useState<string | null>(null);
+  /** The engine's terrain classes, for the sheet's cursor tag. The grid stays in a ref (CLAUDE.md: grids never in
+   *  React state); the state is only the flag that tells the sheet the grid has arrived. */
+  const terrainClasses = useRef<Uint8Array | null>(null);
+  const [classesReady, setClassesReady] = useState(false);
   const [tour, setTour] = useState(false);
   const [toured, setToured] = useState(orientationDone);
+  /** The masthead key that reopens the tour; focus returns to it when the tour closes. */
+  const tourKey = useRef<HTMLButtonElement>(null);
 
   // ---- Steps (UI-01): the hash is the step; history entries make the browser's Back button work. ----
   const [step, setStep] = useState<StepId>(() => stepFromHash(location.hash));
@@ -85,6 +100,8 @@ export function App() {
       setStep(next);
       setVisited((v) => (v.has(next) ? v : new Set(v).add(next)));
       setDrawer(false); // a new step starts uncovered; the drawer opens again from any number or the masthead
+      // A refusal belongs to the step it happened on; only a failed engine start concerns every step.
+      setMessage((m) => (m && !m.text.startsWith("Engine could not start") ? null : m));
       setPicked(null); setMoving(null);
       if (push) history.pushState(null, "", next === "welcome" ? location.pathname + location.search : `#${next}`);
     };
@@ -101,6 +118,19 @@ export function App() {
     return () => { removeEventListener("popstate", onPop); removeEventListener("keydown", onKey); };
   }, [show]);
   const onMap = STEPS.find((s) => s.id === step)?.map ?? false;
+  // Keyboard and screen-reader users land on the new step's heading: the control that changed the step is usually
+  // gone (it belonged to the old step), and focus would otherwise fall back to the top of the page. Not while the
+  // orientation is open: its card takes focus itself.
+  const tourOpen = useRef(false);
+  tourOpen.current = tour;
+  const firstStep = useRef(true);
+  useEffect(() => {
+    if (firstStep.current) { firstStep.current = false; return; }
+    // Nor from the masthead's step index: someone walking the steps with the keyboard keeps their place there.
+    if (tourOpen.current || document.activeElement?.closest(".masthead nav")) return;
+    const heading = [...document.querySelectorAll<HTMLElement>(".app h1")].find((h) => h.getClientRects().length > 0);
+    if (heading) { heading.tabIndex = -1; heading.focus(); }
+  }, [step]);
 
   const wantContours = showContours || drillMin !== null;
   const engineReady = output !== null;
@@ -148,6 +178,8 @@ export function App() {
         outputRef.current = o;
         setOutput(o);
         if (presetEnabled(location.search)) applyPreset(); // skipped with ?preset=none
+        // UI-11: one download of the terrain classes (the worker's); the cursor tag reads the engine's own copy.
+        e.api.terrainClasses().then((c) => { if (live) { terrainClasses.current = c; setClassesReady(true); } }).catch(() => undefined); // without it the tag says "cannot be checked"
       })
       .catch((err: unknown) => { if (live) { setEngineFailed(true); say(`Engine could not start: ${errText(err)}`); } });
     return () => { live = false; e.terminate(); engine.current = null; };
@@ -196,7 +228,6 @@ export function App() {
   };
 
   return (
-    <MotionRoot>
     <div className="app" data-step={step} data-busy={pending > 0 || (!output && !engineFailed) || contourBusy} data-moving={!!moving}>
       <div className="ambient" aria-hidden="true" />
       <header className="masthead" inert={step === "welcome"}>
@@ -215,7 +246,7 @@ export function App() {
           </ol>
         </nav>
         <div className="mast-tools">
-          <button type="button" className="key small" data-new={!toured || undefined} onClick={() => setTour(true)}><CircleHelp {...ICON} aria-hidden="true" /><span>Orientation</span></button>
+          <button ref={tourKey} type="button" className="key small" data-new={!toured || undefined} onClick={() => setTour(true)}><CircleHelp {...ICON} aria-hidden="true" /><span>Orientation</span></button>
           <button type="button" className="key small" aria-expanded={drawer} onClick={() => setDrawer((o) => !o)}><BookOpen {...ICON} aria-hidden="true" /><span>Sources</span></button>
         </div>
         <span className="progress" aria-hidden="true" />
@@ -234,6 +265,7 @@ export function App() {
             popover={step === "map" && pickedStop && !moving ? <StopPopover stop={pickedStop} output={output!} onOpenSource={openSource} onClose={() => setPicked(null)}
               onMove={() => { setMoving(pickedStop.id); setPicked(null); }} onDelete={() => { send("delete_stop", { stopId: pickedStop.id }); setPicked(null); }}
               onEdit={(name, tasks) => send("edit_stop", { stopId: pickedStop.id, name, tasks })} /> : null}
+            terrainClasses={classesReady ? terrainClasses.current : null}
             cursorHint={step === "map" ? (movingStop ? `Click to move stop ${movingStop.letter} here · Esc to cancel` : true) : false}
             onSnapshotReady={(fn) => setSnapshot(() => fn)} hoverIndex={hover} onHoverIndex={setHover} onDatasets={setLayerDatasets} onCursor={setCursor}
             contours={contourDisplay} showSky={showSky} onSky={(st, f) => { setSkyState(st); if (f) setSkyAt(() => f); }}
@@ -247,36 +279,36 @@ export function App() {
         </div>
         <RouteProfile output={output} hoverIndex={hover} onHoverIndex={setHover} />
         {/* Step panels enter with Motion and leave at once, so a click right after a step change reaches the new step. */}
-          {step === "map" && <m.div key="map" className="panel-host" {...panelMotion}><PlanPanel output={output} onOpenSource={openSource} next={next("hud", "Continue to the field HUD")}
+          {step === "map" && <Appear key="map" className="panel-host" enter={PANEL_IN}><PlanPanel output={output} onOpenSource={openSource} next={next("hud", "Continue to the field HUD")}
             onDeleteStop={(id) => send("delete_stop", { stopId: id })} onEditStop={(stopId, name, tasks) => send("edit_stop", { stopId, name, tasks })}
             onSetTime={setTime} skyAt={showSky && skyState === "ok" ? skyAt : null} picked={picked} onPick={(id) => setPicked(id)}
-            onMoveToCursor={cursor ? (stopId) => send("move_stop", { stopId, lat: cursor.lat, lon: cursor.lon }) : undefined} /></m.div>}
-          {step === "assess" && <m.div key="assess" className="panel-host" {...panelMotion}><AssessPanel output={output} onOpenSource={openSource} drillMin={drillMin} onDrillMin={setDrillMin} busy={contourBusy}
-            next={next("brief", "Continue to the briefing")} /></m.div>}
-          {step === "setup" && <m.div key="setup" className="screen-host" {...panelMotion}><SetupScreen output={output} rems={rems} rover={rover} onSet={setTime} onOpenSource={openSource}
-            preset={presetEnabled(location.search)} onApplyPreset={applyPreset} next={next("planner", "Continue to the time budget")} /></m.div>}
-          {step === "planner" && <m.div key="planner" className="screen-host" {...panelMotion}><PlannerScreen output={output} onSet={setTime} next={next("map", "Continue to the map")} /></m.div>}
+            onMoveToCursor={cursor ? (stopId) => send("move_stop", { stopId, lat: cursor.lat, lon: cursor.lon }) : undefined} /></Appear>}
+          {step === "assess" && <Appear key="assess" className="panel-host" enter={PANEL_IN}><AssessPanel output={output} onOpenSource={openSource} drillMin={drillMin} onDrillMin={setDrillMin} busy={contourBusy}
+            next={next("brief", "Continue to the briefing")} /></Appear>}
+          {step === "setup" && <Appear key="setup" className="screen-host" enter={PANEL_IN}><SetupScreen output={output} rems={rems} rover={rover} onSet={setTime} onOpenSource={openSource}
+            preset={presetEnabled(location.search)} onApplyPreset={applyPreset} next={next("planner", "Continue to the time budget")} /></Appear>}
+          {step === "planner" && <Appear key="planner" className="screen-host" enter={PANEL_IN}><PlannerScreen output={output} onSet={setTime} next={next("map", "Continue to the map")} /></Appear>}
         {/* Kept mounted so a built card keeps its version stamp and shows STALE after a plan change. */}
         <BriefingView output={output} snapshot={snapshot} hidden={step !== "brief"} rover={rover}
           confirmed={confirmed} onConfirm={setConfirmed} next={next("hud", "Open the field HUD")} />
         {/* Kept mounted: the field view alone holds MissionExecution, so ticks survive step changes. */}
         <FieldView output={output} hidden={step !== "hud"} briefed={!!version && confirmed === version} next={next("assess", "Continue to the assessment")} />
         <AnimatePresence>
-          {message && <m.p key={message.n} className="toast" data-kind={message.text.startsWith("Plan updated") ? "ok" : "hold"} role="status" data-testid="engine-message"
-            initial={{ opacity: 0, y: -10, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, transition: { duration: 0.12 } }}>{message.text}</m.p>}
+          {message && <Appear as="p" key={message.n} className="toast" data-kind={message.text.startsWith("Plan updated") ? "ok" : "hold"} aria-hidden="true" data-testid="engine-message"
+            enter={{ opacity: [0, 1], transform: ["translateY(-10px) scale(0.97)", "translateY(0px) scale(1)"] }} exit={{ opacity: [1, 0] }}>{message.text}</Appear>}
         </AnimatePresence>
+        <p className="sr-only" role="status" data-testid="engine-announce">{announce}</p>
         {/* Always mounted (inert and hidden while closed) so the datasets-in-view list stays current. */}
         <aside className="drawer" data-open={drawer} aria-label="Source drawer" inert={!drawer}>
           <SourcePanel selected={selected} provenance={provenance} assumptions={plan?.assumptions ?? []}
             datasetsInView={datasetsInView} extraSources={extraSources} onClose={() => { setSelected(null); setDrawer(false); }} />
         </aside>
       </main>
-      <Tutorial open={tour} onClose={() => { setTour(false); setToured(true); }} go={go} />
+      <Tutorial open={tour} step={step} onClose={() => { setTour(false); setToured(true); tourKey.current?.focus(); }} go={go} />
       <footer className="colophon">
         <span>Independent student project; not affiliated with or endorsed by NASA.</span>
         {plan && <span className="stamp">Plan {plan.versionHash} · {plan.engineVersion} · suit life support not modelled</span>}
       </footer>
     </div>
-    </MotionRoot>
   );
 }

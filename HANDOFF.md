@@ -2,7 +2,37 @@
 
 This file is the handoff between team members and Claude sessions. Keep it factual and current. A new session must read this file before touching code.
 
-## Latest session (Sun 15 Nov 2026, until about 11:30 Asia/Manila): "Bureau" redesign, design branch, NOT merged
+## Latest session (Sun 15 Nov 2026, 11:34 to about 12:50 Asia/Manila): audit of the "Bureau" redesign, design branch, NOT merged
+
+**Read this first if you work on the interface.** `main` is untouched.
+
+- **Branch:** `design/sharpwalk-ui-ux`, on top of 62fa3bd. Pushed to that branch only. Not merged. A pull request
+  (#24) was opened from the Claude Code app by the operator during the session; this session opened none.
+- **Model:** Claude Fable 5.2 (configured and serving). Superpowers loaded; tests first; /code-review high (R-25).
+- **What changed:**
+  - **Bundle (B-01): AC-12 met.** 310,521 B -> 238,750 B (`gzip -9`, every `.js` in `dist/`). Check it with
+    `npm run build && node scripts/bundle-size.mjs`.
+  - **Anime.js removed (MOT-04).** Motion alone animates: `src/app/fx.ts` (four timelines) and `src/app/motion.tsx`
+    (`Appear`, enter and exit). Do not import `m`/`motion` components again: they add about 30 kB.
+  - **Worker build (BUILD-01).** The engine worker is the `engine-worker` entry in `vite.config.ts` and shares
+    `assets/shared-<hash>.js` with the page. `src/engine/client.ts` addresses `/engine-worker.js` (dev: the module).
+  - **Terrain (TER-01).** Only the worker downloads `terrain_class.uint8.bin`; `engineApi.terrainClasses()` gives the
+    sheet a copy for the cursor tag.
+  - **Print (PRINT-02).** The demonstration card is one A5 page, 6 pt minimum.
+  - **Design, UX, accessibility (UX-16, A11Y-02):** see DECISIONS for the list.
+- **Checks:** vitest 303/303; tsc clean; build OK; bundle 238,750 B of 250,000 B; Playwright 67/67 (new
+  `e2e/audit.spec.ts`, 10 tests); pytest 82 passed + 2 skipped; licences regenerated.
+- **Open for the team:**
+  1. Approve or change the branch (UI-11 to UI-16, MOT-04) before any merge.
+  2. BUILD-01: Route Engine owners confirm the worker build layout.
+  3. EL-01: the elevation grid is still requested twice (page and worker), as on `main`.
+  4. G-08: the brief asked to credit one member with the concept and plan; the records credit the whole team (G-07).
+     Nothing was changed. The team decides.
+  5. Print the card on paper once; try the phone layout in daylight.
+- **To look at it:** `git fetch origin design/sharpwalk-ui-ux && git checkout design/sharpwalk-ui-ux && npm ci && npm run build && npx vite preview`.
+- **Pipeline tests here need Python 3.11:** `python3.11 -m venv .venv && .venv/bin/pip install -r pipeline/requirements.txt`.
+
+## Earlier session (Sun 15 Nov 2026, until about 11:30 Asia/Manila): "Bureau" redesign, design branch, NOT merged
 
 **Read this first if you work on the interface.** `main` is untouched.
 

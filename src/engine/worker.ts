@@ -7,6 +7,8 @@ import { Planner, type ApplyResult, type LatLon, type PlanOutput } from "./plann
 import { timeContours, type ContourLevel } from "./contours";
 
 let planner: Planner | null = null;
+/** The terrain classes the planner was built from, kept to hand a copy to the sheet (UI-11). */
+let classes: Uint8Array | null = null;
 
 const need = (): Planner => {
   if (!planner) throw new Error("engine not initialised");
@@ -17,8 +19,17 @@ export const engineApi = {
   /** areaBaseUrl must be absolute: a relative URL would resolve against this worker script, not the page. */
   async init(areaBaseUrl: string, habitat: LatLon): Promise<PlanOutput> {
     if (!/^[a-z]+:/i.test(areaBaseUrl)) throw new Error(`area URL must be absolute, got ${areaBaseUrl}`);
-    planner = new Planner(await loadPlannerGrid(areaBaseUrl), habitat);
+    const grid = await loadPlannerGrid(areaBaseUrl);
+    planner = new Planner(grid, habitat);
+    classes = grid.classes;
     return planner.current();
+  },
+  /** A copy of the terrain-class grid the planner uses (0 unknown, 1 slope-screened, 2 excluded), for the sheet's
+   *  cursor tag: one download, and the tag can never disagree with the engine's refusal. The copy is transferred. */
+  terrainClasses(): Uint8Array {
+    need();
+    const copy = classes!.slice();
+    return Comlink.transfer(copy, [copy.buffer]);
   },
   /** Time-to-habitat contour lines (tier 2) at the given levels in minutes, on a 4 m display grid. */
   contours(levels_min: number[]): ContourLevel[] {

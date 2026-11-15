@@ -15,6 +15,8 @@ import { QuantityText } from "./QuantityText";
 
 const RANGE = CONSTANTS.walkSpeedRange;
 const ZONE_WORD = { OVER: "OVER", NEAR_LIMIT: "NEAR LIMIT", OK: "OK" } as const;
+/** Dial geometry in the 240 x 140 viewBox; the stylesheet's needle pivot (.needle transform-origin) is the same point. */
+const CX = 120, CY = 124, R = 78;
 
 /** The return-margin meter: zones by word and colour, needle at the slow-bound margin (UI-14). */
 function Meter({ angle, live }: { angle: number; live: boolean }) {
@@ -22,12 +24,15 @@ function Meter({ angle, live }: { angle: number; live: boolean }) {
   useEffect(() => { if (needle.current) swingNeedle(needle.current, angle); }, [angle]);
   return (
     <svg className="meter" viewBox="0 0 240 140" role="img" aria-label={live ? "Return-margin meter; the needle reads the slow-bound margin" : "Return-margin meter at rest: margin unknown"}>
-      {ZONES.map((z) => <path key={z.state} className={`zone zone-${z.state}`} d={arc(120, 122, 92, z.from, z.to)} />)}
+      {ZONES.map((z) => <path key={z.state} className={`zone zone-${z.state}`} d={arc(CX, CY, R, z.from, z.to)} />)}
+      {/* Each word sits outside the arc beside its own zone, so the needle (shorter than the arc) never crosses a word
+          and cannot seem to point at the neighbouring zone's label. */}
       {ZONES.map((z) => {
-        const mid = ((z.from + z.to) / 2) * (Math.PI / 180);
-        return <text key={z.state} className={`zone-word zone-${z.state}`} x={120 + 64 * Math.sin(mid)} y={126 - 64 * Math.cos(mid)} textAnchor="middle">{ZONE_WORD[z.state]}</text>;
+        const deg = (z.from + z.to) / 2, mid = deg * (Math.PI / 180);
+        return <text key={z.state} className={`zone-word zone-${z.state}`} x={CX + (R + 18) * Math.sin(mid)} y={CY - (R + 18) * Math.cos(mid) + 4}
+          textAnchor={deg < -20 ? "end" : deg > 20 ? "start" : "middle"}>{ZONE_WORD[z.state]}</text>;
       })}
-      <g ref={needle} className="needle" data-live={live}><line x1="120" y1="122" x2="120" y2="38" /><circle cx="120" cy="122" r="7" /></g>
+      <g ref={needle} className="needle" data-live={live}><line x1={CX} y1={CY} x2={CX} y2={CY - R + 12} /><circle cx={CX} cy={CY} r="7" /></g>
     </svg>
   );
 }
@@ -36,7 +41,7 @@ export function AssessPanel({ output, onOpenSource, drillMin, onDrillMin, busy, 
   output: PlanOutput | null; onOpenSource: (q: Quantity) => void; drillMin: number | null; onDrillMin: (m: number | null) => void;
   busy: boolean; next: ReactNode;
 }) {
-  if (!output) return <aside className="side" aria-label="Assessment"><div className="side-scroll"><p className="unknown">Loading the route engine…</p></div></aside>;
+  if (!output) return <aside className="side" aria-label="Assessment"><div className="side-scroll"><header className="side-head"><h1>Return margin</h1><p className="unknown">Loading the route engine…</p></header></div></aside>;
   const { plan, geometry } = output;
   const last = plan.plannedMargins[plan.plannedMargins.length - 1];
   const ticks = geometry.marginTicks.map((t) => t.kind);

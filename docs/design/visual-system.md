@@ -58,15 +58,23 @@ walk in, Rename, Move, Delete). Move arms the next map click; Esc cancels.
 "Begin orientation" opens eight cards that walk through the real screens with a spotlight on each control. The app
 stays usable under it; arrows and Esc work; it is remembered and can be reopened from the masthead.
 
-## Motion (MOT-03, team decision pending)
+## Motion (MOT-04)
 
-- **Motion** (`motion/react` 14.11.1): panel and screen enter/exit, the tour cards, the toast, the drawer.
-- **Anime.js** 4.5.0: the CRT power-on on the start page, the tour spotlight glide, the meter needle swing, the stamp.
-- **CSS:** key press and hover (gated to fine pointers), lamp blink while loading, the marching spotlight ring.
-- One owner per element. `prefers-reduced-motion` turns the timelines off and keeps opacity only (tested).
+- **Motion** 14.11.1 owns all scripted motion. `src/app/motion.tsx` (`Appear`): panel and screen enter, the tour cards
+  and the toast (enter and exit under `AnimatePresence`). `src/app/fx.ts`: the CRT power-on on the start page, the tour
+  spotlight glide, the meter needle swing, the stamp. Both use Motion's small `animate` (`motion/mini`, Web Animations
+  API); the full `motion` component is not bundled. Anime.js is removed (it broke the CLAUDE.md rule and was not needed).
+- **CSS:** key press and hover (gated to fine pointers), the drawer and Layers panel, the lamp blink while loading, the
+  click ring, spinners. No endless decorative loops: the spotlight ring and the Orientation lamp are steady.
+- One owner per element. Under `prefers-reduced-motion` nothing is animated and end states are set directly (tested).
+
+## Print (PRINT-02)
+
+A5 portrait, 12 mm margins, black on white. The demonstration card fits one page; the smallest text is 6 pt; the status
+word prints dark on white; longer plans continue on a second page without cutting a row, a stop or a picture.
 
 ## Open
 
-- B-01: the bundle is about 313.6 kB against the 250 KB AC-12 budget. MOT-03: Anime.js against the CLAUDE.md rule.
-- PRINT-02: the demonstration-preset card prints on two A5 pages.
-- Design review by the team.
+- Design review by the team (UI-11 to UI-16, MOT-04).
+- A person should print the card on paper once, and try the phone layout in daylight.
+- EL-01: the elevation grid is still requested by both the page and the engine worker (as on `main`).

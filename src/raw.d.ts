@@ -6,3 +6,6 @@ declare module "*?raw" {
 
 // Vite handles CSS side-effect imports.
 declare module "*.css";
+
+// Vite's build-time constants used by the app (the full `vite/client` types are not loaded: tsconfig `types` is empty).
+interface ImportMeta { readonly env: { readonly DEV: boolean; readonly BASE_URL: string } }

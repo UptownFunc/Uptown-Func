@@ -25,7 +25,7 @@ export interface BriefingViewProps {
   readonly next?: ReactNode;
 }
 
-/** The rubber stamp lands once when the briefing is confirmed (Anime.js); screen only, never printed. */
+/** The rubber stamp lands once when the briefing is confirmed (Motion, fx.ts); screen only, never printed. */
 function Stamp() {
   const el = useRef<HTMLDivElement>(null);
   useEffect(() => { if (el.current) stampSlam(el.current); }, []);
@@ -85,6 +85,7 @@ export function BriefingView({ output, snapshot, hidden = false, rover = null, c
     <section className="screen briefing" aria-label="Briefing" hidden={hidden}>
       <div className="screen-inner">
       <header className="screen-head">
+        <p className="form-no">Form 06 · Mission briefing</p>
         <h1>Brief the crew</h1>
         <p className="lede">One card, built from the engine's current plan and stamped with its version. Any plan change marks it stale until it is rebuilt.</p>
       </header>
@@ -108,7 +109,6 @@ export function BriefingView({ output, snapshot, hidden = false, rover = null, c
         </div>
       ) : (
         <article ref={cardRef} className={`card${stale ? " card-stale" : ""}`} data-testid="briefing-card">
-          {isConfirmed && <Stamp />}
           {stale && <div className="stale-stamp" role="alert" data-testid="stale">STALE - plan {current ?? "none"} differs from card plan {card.model.versionHash}</div>}
           <header className="card-head">
             <strong>SharpWalk traverse briefing</strong>
@@ -121,6 +121,8 @@ export function BriefingView({ output, snapshot, hidden = false, rover = null, c
               <div className="label">Remaining EVA margin at the habitat</div>
               <div className={`margin ${card.model.margin.unknown ? "unknown" : "est"}`}>{card.model.margin.text}</div>
             </div>
+            {/* The stamp has its own cell beside the margin, so it can never cover the number or the state. */}
+            {isConfirmed && <Stamp />}
           </div>
           <dl className="card-kpis">
             <div><dt>Return walk</dt><dd className={card.model.summary.returnWalk.unknown ? "unknown" : "est"}>{card.model.summary.returnWalk.text}</dd></div>

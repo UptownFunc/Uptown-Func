@@ -48,7 +48,8 @@ export function AssumedNote({ output }: { output: PlanOutput }) {
 }
 
 export function PlanPanel({ output, onDeleteStop, onEditStop, onSetTime, onOpenSource, onMoveToCursor, skyAt, next, picked = null, onPick }: PlanPanelProps) {
-  if (!output) return <aside className="side" aria-label="Plan"><div className="side-scroll"><p className="unknown">Loading the route engine…</p></div></aside>;
+  // The loading state keeps the heading (same place in the tree), so focus given to it on a step change survives the load.
+  if (!output) return <aside className="side" aria-label="Plan"><div className="side-scroll"><header className="side-head"><h1>Route</h1><p className="unknown">Loading the route engine…</p></header></div></aside>;
   const { plan, geometry } = output;
   const name = (id: string) => (id === "habitat" ? "Habitat" : plan.stops.find((s) => s.id === id)?.letter ?? id);
   const end = formatDuration(plan.endMargin);

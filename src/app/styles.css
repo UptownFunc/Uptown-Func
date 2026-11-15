@@ -3,7 +3,8 @@
    lamps that light, and the real D2/D1 terrain on a curved CRT. Burnt orange is the only interaction colour; mustard
    only decorates; amber phosphor is the voice of the machine (map readouts, counters). Status keeps word + shape +
    colour (OK check green, NEAR LIMIT triangle amber, OVER octagon red), shown as lamps. Italic is for estimates only.
-   Motion (MOT-03): Motion for enter/exit/layout, Anime.js for timelines, CSS for hover and press feedback only. */
+   Motion (MOT-04): the Motion library owns enter, exit and the four timelines (fx.ts); CSS owns hover, press and the
+   small state changes below. One owner per element. */
 
 /* ---------- Tokens ---------- */
 :root {
@@ -36,7 +37,9 @@ button, input, select, textarea { font: inherit; color: inherit; }
 h1, h2, h3 { margin: 0; text-wrap: balance; }
 p { margin: 0; text-wrap: pretty; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
-.est, .qty.est, .qty-static.est { font-style: italic; }   /* estimates only (CLAUDE.md) */
+/* Estimates are italic wherever they stand (CLAUDE.md hard rule). !important because many figures set their type with
+   the `font` shorthand, which would otherwise reset the style (found on the briefing card's margin and return walk). */
+.est, .qty.est, .qty-static.est { font-style: italic !important; }
 .note { font-size: var(--t-sm); color: var(--ink-2); }
 .unknown, .muted { color: var(--ink-3); }
 .assumed { font-weight: 600; }
@@ -124,7 +127,7 @@ details[open] > summary::before { transform: rotate(90deg); }
   border: 1px solid #6a4a32; color: #3a2414; font: 700 var(--t-sm)/1 var(--ui); letter-spacing: 0.06em; text-transform: uppercase;
   background: linear-gradient(180deg, #e9d6b0, #cdb184); box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset, 0 3px 0 #5a3d27;
   transition: transform 90ms var(--ease-out), box-shadow 90ms var(--ease-out), filter 160ms ease; }
-.step-key .no { font: 400 20px/1 var(--crt-font); color: #6a4a32; }
+.step-key .no { font: 400 20px/1 var(--crt-font); color: #5a3d27; }
 .lamp { display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex: none; background: #4b3424; box-shadow: 0 1px 0 rgba(255, 255, 255, 0.3), 0 0 0 2px rgba(0, 0, 0, 0.25) inset; }
 .step-key[data-done="true"] .lamp { background: #8fae4e; box-shadow: 0 0 6px rgba(143, 174, 78, 0.8); }
 .step-key[aria-current] { transform: translateY(3px); background: linear-gradient(180deg, #f4b778, #df8b4a); border-color: #7a2e10; color: #2a1206;
@@ -194,7 +197,7 @@ details[open] > summary::before { transform: rotate(90deg); }
 .cursor-tag[data-kind="no"] { color: #ffc0a8; border-color: rgba(255, 90, 70, 0.5); }
 .cursor-tag[data-kind="no"] .lamp { background: var(--over); box-shadow: 0 0 8px var(--over); }
 .cursor-tag[data-kind="unknown"] .lamp { background: #7a6a5a; }
-.cursor-tag[data-kind="move"] .lamp { background: var(--amber); box-shadow: 0 0 8px var(--amber); }
+.cursor-tag:is([data-kind="move"], [data-kind="stop"]) .lamp { background: var(--amber); box-shadow: 0 0 8px var(--amber); }
 .app[data-moving="true"] .sheet .map { cursor: crosshair; }
 .ping { position: absolute; z-index: 4; width: 56px; height: 56px; margin: -28px 0 0 -28px; border-radius: 50%; border: 2px solid var(--amber); pointer-events: none;
   box-shadow: 0 0 14px var(--amber); animation: ping 650ms var(--ease-out) both; }
@@ -387,6 +390,11 @@ details[open] > summary::before { transform: rotate(90deg); }
 .seg.cont { background: repeating-linear-gradient(90deg, #d98f3a 0 14px, #c17a2a 14px 16px); }
 .seg.stops { background: repeating-linear-gradient(90deg, #e36a32 0 14px, #c9561f 14px 16px); }
 .seg.walk { flex: 1 1 0; color: var(--amber); background: repeating-linear-gradient(90deg, rgba(255, 179, 71, 0.14) 0 14px, rgba(255, 179, 71, 0.05) 14px 16px); }
+.seg > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.budget-key { display: none; list-style: none; margin: 10px 0 0; padding: 0; gap: 6px 16px; flex-wrap: wrap; font: 600 var(--t-sm)/1.2 var(--ui); color: var(--ink-2); }
+.budget-key li { display: inline-flex; align-items: center; gap: 8px; }
+.budget-key .seg { flex: none; width: 22px; height: 14px; padding: 0; border-radius: 3px; border: 1px solid #1a0f09; }
+.budget-key .seg.walk { background-color: var(--crt); }
 .budget .note { margin-top: 10px; }
 .times { display: grid; }
 .time-row { display: grid; grid-template-columns: minmax(200px, 1.05fr) 140px minmax(200px, 1.4fr) auto; gap: 16px; align-items: center; padding: 14px 0; border-bottom: 1px dashed var(--rule); }
@@ -406,10 +414,10 @@ details[open] > summary::before { transform: rotate(90deg); }
 /* ---------- Assess: the meter and the traverse ---------- */
 .verdict-block { position: relative; padding: 16px 16px 18px; margin-bottom: var(--s4); border-radius: 16px; background: #fffaf0; border: 1px solid var(--rule); box-shadow: 0 3px 0 var(--rule); text-align: center; }
 .meter { width: 100%; max-width: 300px; display: block; margin: 0 auto 6px; overflow: visible; }
-.zone { fill: none; stroke-width: 22; }
+.zone { fill: none; stroke-width: 18; }
 .zone.zone-OVER { stroke: #e2654f; } .zone.zone-NEAR_LIMIT { stroke: #efc24a; } .zone.zone-OK { stroke: #7fbe63; }
 .zone-word { font: 800 11px/1 var(--ui); letter-spacing: 0.08em; fill: var(--ink); }
-.needle { transform-box: view-box; transform-origin: 120px 122px; transform: rotate(-90deg); }
+.needle { transform-box: view-box; transform-origin: 120px 124px; transform: rotate(-90deg); }
 .needle line { stroke: var(--ink); stroke-width: 3.5; stroke-linecap: round; }
 .needle circle { fill: var(--ink); stroke: var(--cream-2); stroke-width: 3; }
 .needle[data-live="false"] line { stroke: #a08a74; }
@@ -488,7 +496,7 @@ details[open] > summary::before { transform: rotate(90deg); }
 .card-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; padding-bottom: 3mm; border-bottom: 2px solid #1f140d; }
 .card-head strong { font: 800 15pt/1 var(--display); font-variation-settings: "SOFT" 100, "WONK" 1; }
 .card-head .meta { font: 400 11pt/1.05 var(--crt-font); color: #5a4232; text-align: right; }
-.card-verdict { display: grid; grid-template-columns: auto 1fr; gap: 2mm 5mm; align-items: center; padding: 4mm 0 3mm; }
+.card-verdict { display: grid; grid-template-columns: auto 1fr auto; gap: 2mm 5mm; align-items: center; padding: 4mm 0 3mm; }
 .card-verdict .state { font-size: 9pt; }
 .card-verdict .label { font-size: 7.5pt; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #6b5a4a; }
 .card-verdict .margin { font: 800 16pt/1.05 var(--display); font-variation-settings: "SOFT" 100; }
@@ -515,9 +523,10 @@ details[open] > summary::before { transform: rotate(90deg); }
 .card-stale > :not(.stale-stamp) { opacity: 0.4; }
 .stale-stamp { position: absolute; top: 34%; left: 6%; right: 6%; z-index: 3; text-align: center; font: 800 15pt/1.1 var(--display); color: #b42318; letter-spacing: 0.04em;
   border: 4px double #b42318; border-radius: 8px; background: rgba(255, 248, 235, 0.92); padding: 8px; transform: rotate(-5deg); }
-.briefed { position: absolute; top: 8mm; right: 6mm; z-index: 3; pointer-events: none; padding: 6px 14px; border: 4px double var(--orange-deep); border-radius: 8px;
+/* The stamp sits in its own cell of the verdict row; the margins leave room for its tilt. */
+.briefed { justify-self: end; margin: 16px 6px 16px 0; pointer-events: none; padding: 5px 10px; border: 3px double var(--orange-deep); border-radius: 8px;
   color: var(--orange-deep); transform: rotate(-12deg); mix-blend-mode: multiply; opacity: 0.92; }
-.briefed span { font: 800 22px/1 var(--display); letter-spacing: 0.16em; text-transform: uppercase; }
+.briefed span { font: 800 16px/1 var(--display); letter-spacing: 0.16em; text-transform: uppercase; }
 
 /* ---------- Welcome: the terminal on the desk ---------- */
 .welcome { position: fixed; inset: 0 0 var(--bottom); z-index: 25; overflow-y: auto; display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: var(--s6);
@@ -558,8 +567,9 @@ details[open] > summary::before { transform: rotate(90deg); }
 
 /* ---------- Orientation (UI-12) ---------- */
 .tour { position: fixed; inset: 0; z-index: 60; pointer-events: none; }
-.tour-dim { position: absolute; inset: 0; }
-.tour-ring { fill: none; stroke: var(--amber); stroke-width: 3; stroke-dasharray: 10 8; filter: drop-shadow(0 0 8px rgba(255, 170, 70, 0.7)); animation: march 1.2s linear infinite; }
+/* The spotlight: one box whose huge shadow dims everything else. Motion moves it (fx.ts); it never takes a click. */
+.tour-hole { position: absolute; border-radius: 18px; box-shadow: 0 0 0 200vmax rgba(18, 10, 5, 0.62); }
+.tour-ring { outline: 3px dashed var(--amber); outline-offset: -1px; }
 .tour-card { position: absolute; pointer-events: auto; padding: 18px 20px 18px 40px; border-radius: 6px 16px 16px 6px; color: var(--ink); background-color: var(--paper);
   box-shadow: 0 26px 50px rgba(0, 0, 0, 0.6);
   background-image: radial-gradient(circle at 16px 20px, var(--wn-800) 5px, transparent 6px), linear-gradient(90deg, transparent 30px, #e7b9a0 30px 31px, transparent 31px);
@@ -601,7 +611,6 @@ details[open] > summary::before { transform: rotate(90deg); }
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes scan { from { transform: translateX(-100%); } to { transform: translateX(420%); } }
 @keyframes blink { 50% { opacity: 0.25; } }
-@keyframes march { to { stroke-dashoffset: -36; } }
 @keyframes pop-in { from { opacity: 0; transform: translateY(6px) scale(0.96); } }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; animation-delay: 0s !important;
@@ -667,7 +676,9 @@ details[open] > summary::before { transform: rotate(90deg); }
 }
 
 /* Card-only print applies only while "Print briefing" runs (body.print-card); Ctrl+P elsewhere prints the page as is.
-   Plan 9.2: A5 portrait, 12 mm margins, black on white; every detail section is opened for print by the card. */
+   Plan 9.2: A5 portrait, 12 mm margins, black on white; every detail section is opened for print by the card.
+   PRINT-02: the demonstration card (REG-01 rationales, two or three stops) fits one page with no text under 6 pt.
+   A longer plan flows onto a second page; rows, stops, list items and pictures are never cut by the page edge. */
 @media print {
   @page { size: A5 portrait; margin: 12mm; }
   body.print-card { background: #fff; }
@@ -677,23 +688,52 @@ details[open] > summary::before { transform: rotate(90deg); }
   body.print-card .briefing :is(.screen-head, .briefing-actions, .confirm) { display: none !important; }
   body.print-card :is(.screen, .screen-inner, .desk, .screen-host) { position: static; display: block; height: auto; overflow: visible; padding: 0; margin: 0; background: none; transform: none !important; }
   body.print-card .card, body.print-card .card * { visibility: visible; }
-  body.print-card .card { position: absolute; left: 0; top: 0; width: 100%; padding: 0; margin: 0; background: #fff; color: #000; box-shadow: none; border-radius: 0; font-size: 7pt; line-height: 1.3; }
+  body.print-card .card { position: absolute; left: 0; top: 0; width: 100%; padding: 0; margin: 0; background: #fff; color: #000; box-shadow: none; border-radius: 0; font-size: 7pt; line-height: 1.25; }
   body.print-card .card::before, body.print-card .briefed { display: none; }
-  body.print-card .card details > summary::before { display: none; }
-  body.print-card .card :is(.card-kpis div, .card-concern) { background: #fff; border-color: #000; }
-  body.print-card .card-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; align-items: start; }
+  body.print-card .card :is(.unknown, .small, .label, dt, th, figcaption, .card-foot, .card-assumptions, .meta) { color: #000; }
+  /* Head: one line of title, the version stamp beside it. */
+  body.print-card .card-head { flex-wrap: wrap; gap: 0.8mm 4mm; padding-bottom: 1.2mm; border-bottom-width: 1.5pt; }
+  body.print-card .card-head strong { font-size: 12pt; }
+  body.print-card .card-head .meta { flex: 1 1 100%; max-width: none; text-align: left; font-size: 7.5pt; line-height: 1; }
+  body.print-card .card-head .meta br { display: none; }
+  body.print-card .card-head [data-testid="card-version"]::after { content: " · "; }
+  /* Status: the word and its shape, dark on white (the lamp is a screen idea). */
+  body.print-card .card .state { background: none; color: #000; box-shadow: none; border: 1pt solid #000; padding: 1mm 2.5mm 1mm 1.5mm; font-size: 8pt; }
+  body.print-card .card .state svg { background: none; box-shadow: none; color: #000; }
+  /* Decision summary beside the map. */
+  body.print-card .card-summary { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 4mm; align-items: start; }
+  body.print-card .card-verdict { padding: 2mm 0 1.5mm; gap: 1mm 3mm; }
+  body.print-card .card-verdict .label { font-size: 6pt; }
+  body.print-card .card-verdict .margin { font-size: 11pt; }
+  body.print-card .card-kpis { grid-template-columns: 1fr 1fr; gap: 1.2mm; margin-bottom: 1.5mm; }
+  body.print-card .card :is(.card-kpis div, .card-concern) { background: #fff; border-color: #000; border-radius: 0; }
+  body.print-card .card-kpis div { padding: 1mm 1.5mm; }
+  body.print-card .card-kpis dt { font-size: 6pt; letter-spacing: 0.04em; }
+  body.print-card .card-kpis dd { margin-top: 0.5mm; font-size: 11pt; }
+  body.print-card .card-concern { margin-bottom: 0; padding: 1mm 1.5mm; font-size: 6.5pt; }
+  body.print-card .card-concern svg { color: #000; }
+  body.print-card .card-map { margin: 2mm 0 0; }
+  body.print-card .card-map img { max-height: 52mm; object-fit: cover; border-radius: 0; border-width: 0.75pt; }
+  body.print-card .card-map figcaption { margin-top: 0.8mm; font-size: 6pt; line-height: 1.2; }
+  body.print-card .card-limits { margin: 1.5mm 0; padding-left: 3.5mm; font-size: 6.5pt; }
+  body.print-card .card-limits li { margin: 0; }
+  /* Details in two columns. */
   body.print-card .card-more { columns: 2; column-gap: 4mm; }
-  body.print-card .card-more details > summary { min-height: 0; padding: 0.8mm 0; font-size: 7.5pt; }
-  body.print-card .card-kpis { grid-template-columns: 1fr 1fr; gap: 1.5mm; margin-bottom: 2mm; }
-  body.print-card .card-kpis div { padding: 1.2mm 2mm; } body.print-card .card-kpis dd { font-size: 11pt; }
-  body.print-card .card-verdict { padding: 2mm 0; } body.print-card .card-verdict .margin { font-size: 11pt; }
-  body.print-card .card-concern { margin-bottom: 0; font-size: 7pt; }
-  body.print-card .card-limits { font-size: 6.8pt; margin-bottom: 1.5mm; }
-  body.print-card .card .small, body.print-card .card-assumptions, body.print-card .card-legs { font-size: 6.3pt; }
-  body.print-card .rover-compact figcaption { font-size: 5pt; line-height: 1.2; }
-  body.print-card .card-assumptions { font-size: 5.8pt; line-height: 1.25; padding-left: 3mm; }
-  body.print-card .card-map img { max-height: 62mm; object-fit: cover; }
-  body.print-card .card-map figcaption { font-size: 5.5pt; line-height: 1.25; }
+  body.print-card .card details { border-top: 0.75pt solid #000; }
+  body.print-card .card details > :not(summary) { margin-bottom: 1.2mm; }
+  body.print-card .card details > summary { min-height: 0; padding: 0.8mm 0; font-size: 7.5pt; break-after: avoid; }
+  body.print-card .card details > summary::before { display: none; }
+  body.print-card .card :is(.card-legs, .small) { font-size: 6.3pt; }
+  body.print-card .card-legs :is(th, td) { padding: 0.5mm 1mm 0.5mm 0; border-bottom-color: #000; border-bottom-width: 0.5pt; }
+  body.print-card .card-stop { padding: 0.8mm 0; border-bottom: 0.5pt solid #000; }
+  body.print-card .card .blanks { font-size: 9pt; }
+  body.print-card .card-assumptions { padding-left: 3mm; font-size: 6pt; line-height: 1.2; }
+  body.print-card .card-assumptions li { margin: 0 0 0.4mm; }
+  body.print-card .rover-compact .rover-strip { gap: 1.5mm; }
+  body.print-card .rover-compact img { aspect-ratio: 4 / 3; }
+  body.print-card .rover-compact figcaption { margin-top: 0.5mm; font-size: 6pt; line-height: 1.15; color: #000; }
+  body.print-card .card-foot { margin-top: 1.5mm; padding-top: 1mm; border-top: 0.75pt solid #000; font-size: 6pt; }
+  body.print-card .card :is(tr, li, figure, .card-stop, .card-kpis, .card-verdict, .card-concern, .card-map) { break-inside: avoid; }
 }
 
 /* ---------- B2 fit fixes ---------- */
@@ -701,8 +741,8 @@ details[open] > summary::before { transform: rotate(90deg); }
 .legs caption.section-title::after { display: none; }
 .hud-brief { margin-bottom: 14px; }
 .card-head .meta { max-width: 62%; }
-.briefed { top: 30mm; right: 8mm; }
-.status { max-width: calc(100% - 150px); }
+/* The readout leaves the bottom-right corner to the scale bar and the zoom keys. */
+.status { max-width: calc(100% - 236px); }
 .app[data-step="welcome"] .toast { display: none; }
 @media screen and (max-width: 800px) {
   .crt-glass { height: auto; min-height: 520px; }
@@ -715,5 +755,17 @@ details[open] > summary::before { transform: rotate(90deg); }
 }
 /* The cursor tag answers for the ground, so it hides while the pointer is on the stop card. */
 .sheet:has(.pop:hover) .cursor-tag { display: none; }
-/* The Orientation key's lamp blinks until the tour has been seen once (remembered on this device). */
-.mast-tools .key[data-new]::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--orange); box-shadow: 0 0 8px var(--orange); animation: blink 1.4s steps(2) infinite; }
+/* The Orientation key's lamp is lit until the tour has been seen once (remembered on this device). Steady, not
+   blinking: CLAUDE.md allows no gratuitous loops, and a lamp that blinks for ever is one. */
+.mast-tools .key[data-new]::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--orange); box-shadow: 0 0 8px var(--orange); }
+/* A heading that takes focus after a step change is not a control: no ring. */
+h1:focus { outline: none; }
+@media screen and (max-width: 800px) {
+  h1 { scroll-margin-top: 200px; }   /* clear of the sticky masthead when a step change scrolls to it */
+  .status { bottom: 46px; max-width: calc(100% - 70px); }   /* above the scale bar's row, beside the zoom keys */
+  .budget-bar .seg > span { display: none; }
+  .budget-key { display: flex; }
+  .crt-badge { position: static; display: block; margin: 12px 4px 0; line-height: 1.4; text-align: center; }
+  .card-verdict { grid-template-columns: auto 1fr; }
+  .briefed { grid-column: 1 / -1; justify-self: start; margin: 10px 0 12px 6px; }
+}

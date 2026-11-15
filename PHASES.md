@@ -136,6 +136,49 @@ Deadline still Sun 15 Nov 23:59 local (portal confirmation by a person still pen
 | 5.5 | PENDING (last phase) | Includes the deferred two-machine check and FortiGuard request (G5-DEFER); internal submit Sun 21:00 |
 | 5.4 | IN PROGRESS | README SI use and references current (D5, D6, D12, papers); concept-origin account (B-5) and native-library licences open; D12 licence terms not read |
 
+## Design branch, audit of the "Bureau" redesign (Sun 15 Nov 2026, 11:34 to about 12:50 Asia/Manila; NOT merged)
+
+```text
+Part: Design branch audit A1-A6 (MOT-04, B-01, BUILD-01, TER-01, PRINT-02, UX-16, A11Y-02, R-25, E2E-04)
+Owner: session from parcilla13's account (member not otherwise stated); model Claude Fable 5.2; Design and Route Engine review pending
+Status: VERIFIED on design/sharpwalk-ui-ux only; not merged (team approval of the branch pending)
+Scope completed:
+  A1 bundle: contributors measured from source maps; Anime.js removed; Motion reduced to motion/mini + AnimatePresence;
+     worker built as a second entry sharing one chunk with the page (Zod no longer shipped twice)
+  A2 animation: CRT power-on, tour spotlight, meter needle and stamp on Motion (src/app/fx.ts); enter/exit in
+     src/app/motion.tsx; a crash found and fixed (Motion committing styles on a hidden toast)
+  A3 terrain: terrain_class.uint8.bin requested once (engine worker), handed to the sheet
+  A4 print: demonstration card on one A5 page, 6 pt minimum, status word dark on white
+  A5 design, UX and accessibility sweep at 1440 x 900 and iPhone 13 (UX-16, A11Y-02)
+  A6 /code-review high (R-25: 8 findings, 8 fixed), records, screenshots
+Files changed: src/app/{App,AssessPanel,PlanPanel,Screens,Tutorial,fx,motion,styles}.*, src/briefing/BriefingView.tsx,
+  src/engine/{client,worker}.ts, src/map/{AreaSheet,loadArea}.*, src/raw.d.ts, vite.config.ts, vercel.json,
+  package.json, package-lock.json, e2e/audit.spec.ts (new), scripts/bundle-size.mjs (new), docs/licences.md,
+  docs/design/visual-system.md, docs/design/screenshots/*, CLAUDE.md (motion line), README.md, DECISIONS.md,
+  HANDOFF.md, SI_LOG.md, PHASES.md
+Engine calculations, contracts (src/contracts), constants, pipeline and data: unchanged
+Tests first: scripts/bundle-size.mjs failed at 310,521 B; e2e/audit.spec.ts failed on the terrain count (2 requests),
+  the card's italic estimate and page count, and all five UX/accessibility tests, before the fixes
+Checks run (exact commands, final tree):
+  npx vitest run                                   -> 31 files, 303/303 passed
+  npx tsc --noEmit                                 -> clean
+  rm -rf dist && npm run build                     -> OK; index 198.08 kB, shared 34.98 kB, engine-worker 8.56 kB (Vite gzip)
+  node scripts/bundle-size.mjs                     -> 238,750 B of 250,000 B (gzip -9, every .js in dist): within budget
+  PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome npx playwright test --trace off  -> 67/67 passed
+     (includes e2e/a11y.spec.ts with axe: no serious or critical violation; e2e/audit.spec.ts 10/10)
+  (cd pipeline && ../.venv/bin/python -m pytest)   -> 82 passed, 2 skipped (Python 3.11.18; gdal_contour not installed)
+  .venv/bin/python scripts/licences.py > docs/licences.md   -> regenerated (animejs gone); the licence test passes
+  vite dev server                                  -> engine ready (the development worker path works)
+  print check: demonstration card, two stops -> 1 A5 page (420 x 595 pt), card 642 px of 703 px, smallest text 6 pt
+Bundle before / after: 310,521 B -> 238,750 B (gzip -9); 313.6 kB -> 241.6 kB (Vite gzip); AC-12 MET
+Terrain download: terrain_class.uint8.bin 2 requests (up to 2 x 2.25 MB) -> 1 request
+Known limitations: EL-01 (elevation grid still requested twice, as on main); card not printed on paper; phone not
+  checked in daylight; BUILD-01 needs the Route Engine owners' confirmation; G-08 (attribution wording) for the team
+Review status: /code-review high, R-25 in DECISIONS.md; human Design review pending
+Commit SHA: the commit after 62fa3bd on design/sharpwalk-ui-ux (recorded in HANDOFF.md by the following logs commit)
+Next part / blocker owner: team (Design, Route Engine, Local Lead) reviews the branch; PR #24 was opened from the app by the operator
+```
+
 ## Design branch, third redesign "Bureau" (Sun 15 Nov 2026, until about 11:30 Asia/Manila; NOT merged, no PR)
 
 ```text

@@ -15,6 +15,8 @@ import { ICON } from "./icons";
 import { crtPowerOn } from "./fx";
 import { TOUR } from "./Tutorial";
 
+const WALK_PART = "Left for walking and margin";
+
 type OnSet = (id: string, value_s: number, rationale: string, stopId?: string) => void;
 
 /** ready: true when the engine is up, null when it could not start, false while loading. */
@@ -149,10 +151,15 @@ export function PlannerScreen({ output, onSet, next }: { output: PlanOutput | nu
             {T ? (
               <div className="budget-bar">
                 {parts.map((p) => p.v !== undefined && p.v > 0 &&
-                  <span key={p.k} className={`seg ${p.k}`} style={{ flexBasis: `${(p.v / scale) * 100}%` }}>{p.label}</span>)}
-                {used < T && <span className="seg walk">Left for walking and margin</span>}
+                  <span key={p.k} className={`seg ${p.k}`} style={{ flexBasis: `${(p.v / scale) * 100}%` }}><span>{p.label}</span></span>)}
+                {used < T && <span className="seg walk"><span>{WALK_PART}</span></span>}
               </div>
             ) : <div className="budget-bar empty">Set the EVA duration to see how it divides.</div>}
+            {/* On a phone the parts are too narrow for words: the bar is colour only and this key names the parts. */}
+            {T ? <ul className="budget-key">
+              {parts.map((p) => p.v !== undefined && p.v > 0 && <li key={p.k}><i className={`seg ${p.k}`} aria-hidden="true" />{p.label}</li>)}
+              {used < T && <li><i className="seg walk" aria-hidden="true" />{WALK_PART}</li>}
+            </ul> : null}
             <p className="note">Proportions of the Assumed inputs below. Walking times come from the route on the Map step.
               {parts.some((p) => p.v === undefined) && " Unset parts are not drawn."}</p>
             {T !== undefined && used >= T && <p className="problem" role="status">Tasks, contingency and stops alone fill the EVA duration: nothing is left for walking.</p>}
