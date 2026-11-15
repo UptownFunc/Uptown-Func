@@ -16,6 +16,9 @@ type Frames = Record<string, (string | number)[]>;
 /** A panel or page that settles in when its step opens. It leaves at once (no exit animation): a leaving panel would
  *  sit over the new step and take the user's first click. */
 export const PANEL_IN: Frames = { opacity: [0, 1], transform: ["translateY(14px)", "translateY(0px)"], filter: ["blur(4px)", "blur(0px)"] };
+/** UX-17: while the orientation tour leads, a step's panel only fades in. It does not travel, so the spotlight can lock
+ *  on to its control in the same frame instead of chasing a moving box. */
+export const PANEL_FADE: Frames = { opacity: [0, 1] };
 
 interface AppearProps extends HTMLAttributes<HTMLElement> {
   /** Keyframes played once when the element mounts; the last one must equal the stylesheet state. */
