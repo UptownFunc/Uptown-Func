@@ -1296,6 +1296,21 @@ Commit SHA: 7f5844f (map), ddbfad0 (tour, empty states), ab0ff2b (review fixes),
 Next part / blocker owner: the team approves (or not) PR #30 for main (MERGE-06)
 ```
 
+```text
+Part: MERGE-06 - PR #30 (final 2D map baseline) merged into main; live-site check
+Owner: session operator, confirming the team's approval ("Team approved: merge now"); SI-assisted (Claude Code, Claude Opus 5.5)
+Status: VERIFIED
+Merge: main had moved to be056b7 (PR #31); it was merged into the branch (d30678d; conflicts in App.tsx, HANDOFF, SI_LOG
+  resolved), checks rerun, then PR #30 merged as d97ff38 (parents be056b7, d30678d). No squash, no force push.
+  git rev-parse origin/main^{tree} == d30678d^{tree} (26d1e2e6).
+Checks on main d97ff38 (fresh npm ci, worktree): npx tsc --noEmit clean; npx vitest run 331/331; build OK;
+  node scripts/bundle-size.mjs 245,896 B of 250,000; PW_CHROMIUM=... npx playwright test --trace off 86/86;
+  (cd pipeline && ../.venv/bin/python -m pytest) 82 passed, 2 skipped.
+Live site: assets/index-YVIcYmuh.js and engine-worker.js byte-identical (cmp) to the local build of d97ff38; Playwright
+  against https://uptown-func.vercel.app (temporary config, deleted): 86/86.
+Next part / blocker owner: 3D upgrade (separate phase) from d97ff38; Design review of MAP-01..MAP-08 and TOUR-01
+```
+
 ## Phase-part completion record
 
 Copy this block for every phase part and update its table row above:

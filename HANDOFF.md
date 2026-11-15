@@ -2,7 +2,14 @@
 
 This file is the handoff between team members and Claude sessions. Keep it factual and current. A new session must read this file before touching code.
 
-## Final 2D map baseline (Sun 15 Nov 2026, from 17:09 Asia/Manila): branch `claude/practical-johnson-hbw41e`, PR #30, approved and being merged (MERGE-06)
+## MERGED (Sun 15 Nov 2026, about 18:30 Asia/Manila): final 2D map baseline (MERGE-06). Start here
+
+- **`main` = `d97ff38`** (PR #30), plus this record. Its tree is identical to the approved branch. The live site serves `assets/index-YVIcYmuh.js` and `engine-worker.js`, byte-identical to a local build of `d97ff38`. Playwright passed **86/86 against the live URL**.
+- **Checks on `main`:** vitest 331/331; tsc clean; JS 245,896 B of 250,000 (**about 4.1 kB left**); Playwright 86/86; pytest 82 + 2 skipped.
+- **Next (separate phase):** the 3D upgrade branches from `main` `d97ff38` and uses `src/map/planGeometry.ts` and `src/map/layers.ts`. The 2D sheet stays independent of it. Note that the bundle budget leaves about 4 kB.
+- **Still for people:** a Design review of MAP-01..MAP-08 and TOUR-01; everything in the 15:10 handoff, section 3 (portal deadline, concept account, video, submission fields, submit).
+
+## Detail: final 2D map baseline (Sun 15 Nov 2026, from 17:09 Asia/Manila): branch `claude/practical-johnson-hbw41e`, PR #30 (merged as `d97ff38`)
 
 - **What:** the final 2D map that the 3D upgrade will branch from (DECISIONS MAP-01..MAP-08, TOUR-01, UX-24, UX-25, R-30). The load view now shows the whole sheet, with the habitat (before, the habitat was off screen). The sheet has its own keys (zoom, fit the route, whole sheet). The Layers panel has switches, a strength slider and a key. The sheet shows its own loading and error states, with Try again. The tour opens on the current step and follows the user's navigation. Empty HUD and Assess lead to the Map. **No 3D code**; no engine, contract, constant, dataset or value change.
 - **For the 3D upgrade:** use `src/map/planGeometry.ts` (the plan as F1 features; project to F5 with `f1ToF5`) and `src/map/layers.ts` (`MapLayers`, the console's layer state). The 2D sheet does not depend on either 3D or Cesium. Its view is published on `data-view-f7`, and the e2e helpers `pixelAt`, `mapView` and `zoomTo` read it.
