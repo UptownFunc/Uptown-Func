@@ -75,6 +75,6 @@ word prints dark on white; longer plans continue on a second page without cuttin
 
 ## Open
 
-- Design review by the team (UI-11 to UI-16, MOT-04).
+- Merged into `main` on the session operator's confirmation (MERGE-02). The other members' written review of the look (UI-01 to UI-16, MOT-04) is still to be recorded.
 - A person should print the card on paper once, and try the phone layout in daylight.
 - EL-01: the elevation grid is still requested by both the page and the engine worker (as on `main`).
