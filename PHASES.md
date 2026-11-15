@@ -1221,6 +1221,22 @@ Next part / blocker owner: the team (HANDOFF section 3): portal deadline, concep
   two-machine check and FortiGuard, submission fields, PR #22, submit
 ```
 
+```text
+Part: UX-22, UX-23 on yujin/onboarding-terms: every variable explained in plain words; tour card height (not merged)
+Owner: Yujin (set the brief); SI-assisted (Claude Code, Claude Opus 5.5)
+Status: VERIFIED on the branch; NOT merged (after the G5 freeze: the team decides)
+Files changed: new src/app/glossary.ts, src/app/Term.tsx; src/app/Tutorial.tsx, PlanTimes.tsx, ConditionsPanel.tsx,
+  PlanPanel.tsx, AssessPanel.tsx, Screens.tsx, App.tsx, styles.css, src/field/FieldView.tsx, src/engine/margin.ts
+  (a named constant only), src/app/tour.test.ts, e2e/tour-timing.spec.ts; logs
+Checks run (exact commands), a team member's Windows computer, Node 24.16.0:
+  npx vitest run ; npx tsc --noEmit ; npm run build ; gzip -9 sum of dist/**/*.js ; npx playwright test --trace off --workers=1
+Results: vitest 316/316 (5 new: glossary rules and numbers from the code); tsc clean; build OK; JS 241,933 B of 250,000;
+  Playwright 76/76 (2 new: every variable explains itself; a laptop card stays in the window with its terms open)
+Review status: /code-review high of the working tree: 10 findings, all fixed (R-29)
+Commit SHA: 534698a
+Next part / blocker owner: the team decides whether UX-22/UX-23 go into main; Data and Science check the glossary
+```
+
 ## Phase-part completion record
 
 Copy this block for every phase part and update its table row above:
