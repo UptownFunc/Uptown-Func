@@ -1,4 +1,4 @@
-// SI-assisted: drafted with Claude Code (Claude Opus 5.5); human Route Engine review pending.
+// SI-assisted: drafted with Claude Code (Claude Opus 5.5); AUD-01 report check added with Claude Code (Claude Fable 5.2); human Route Engine review pending.
 // Loads the pipeline's elevation and terrain-class grids into typed arrays for the engine (never into React state).
 // The grids are checked against the sizes in build_report.json; a mismatch is an error, not a silent truncation.
 import { f1 } from "../geo";
@@ -19,6 +19,8 @@ export async function loadPlannerGrid(base: string, fetchFn: typeof fetch = fetc
     return m;
   };
   const em = meta("elevation", "uint16"), cm = meta("terrain_class", "uint8");
+  // AUD-01: non-finite scale or offset, or no cell size, would turn every height into NaN and every leg "unreachable".
+  if (!(Number.isFinite(em.scale + em.offset) && report.cellSize_m > 0)) throw new Error("build_report.json: bad scale, offset or cell size");
   const n = report.rows * report.cols;
   const q = new Uint16Array(await (await get(em.path)).arrayBuffer());
   const classes = new Uint8Array(await (await get(cm.path)).arrayBuffer());

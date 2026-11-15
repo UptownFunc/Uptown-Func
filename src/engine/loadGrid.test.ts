@@ -38,4 +38,16 @@ describe("loadPlannerGrid", () => {
   it("reports a missing file with its URL", async () => {
     await expect(loadPlannerGrid("area/", fakeFetch({ "build_report.json": report }))).rejects.toThrow(/area\/e\.bin \(404\)/);
   });
+
+  // AUD-01: a report without finite scale, offset or cell size would decode every height to NaN, and every leg would
+  // then read "unreachable" with no error. The load is refused instead.
+  it.each([
+    ["scale", { ...report, grids: [{ ...report.grids[0]!, scale: undefined }, report.grids[1]] }],
+    ["offset", { ...report, grids: [{ ...report.grids[0]!, offset: "x" }, report.grids[1]] }],
+    ["cell size", { ...report, cellSize_m: 0 }],
+  ])("refuses a build report with a bad %s", async (_what, bad) => {
+    await expect(loadPlannerGrid("area/", fakeFetch({
+      "build_report.json": bad, "e.bin": Uint16Array.of(0, 100, 65535, 50), "c.bin": Uint8Array.of(1, 1, 0, 2),
+    }))).rejects.toThrow(/build_report/);
+  });
 });
