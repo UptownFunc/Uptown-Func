@@ -49,12 +49,23 @@ export function crtPowerOn(screen: HTMLElement, lines: HTMLElement[]): void {
   lines.forEach((line, i) => void play(line, { opacity: [0, 1], transform: ["translateY(10px)", "translateY(0px)"] }, { duration: 0.52, delay: 0.64 + i * 0.09, ease: EXPO_OUT }));
 }
 
-/** Glides the orientation spotlight to a target rectangle (one overshoot, then it settles; interruptible).
+/** One glide for the orientation tour (UX-17): the spotlight and the card share it, so they arrive together. Fast out
+ *  of the gate (most of the way in the first third), so the ring is on its new target almost at once, then it eases in. */
+export const GLIDE_S = 0.34;
+
+/** Glides the orientation spotlight to a target rectangle (interruptible: a new target carries on from where it is).
  *  instant: the target itself moved (the page scrolled or was resized), so the spotlight keeps up with it. */
 export function moveSpotlight(el: HTMLElement, r: { x: number; y: number; w: number; h: number }, instant = false): void {
   const to = { left: `${r.x}px`, top: `${r.y}px`, width: `${r.w}px`, height: `${r.h}px` };
   if (instant || still(el)) { animate(el, to, { duration: 0 }); return; }
-  animate(el, to, { duration: 0.52, ease: [0.3, 1.25, 0.5, 1] });
+  animate(el, to, { duration: GLIDE_S, ease: EXPO_OUT });
+}
+
+/** The orientation card follows its spotlight: it is laid out at its new place at once and glides there from where it
+ *  was seen (dx, dy: that offset), with the spotlight's timing. A transform only, so nothing is laid out again. */
+export function glideCard(el: HTMLElement, dx: number, dy: number): void {
+  if (still(el) || (Math.abs(dx) < 1 && Math.abs(dy) < 1)) { el.style.removeProperty("transform"); return; }
+  void play(el, { transform: [`translate(${dx}px, ${dy}px)`, "translate(0px, 0px)"] }, { duration: GLIDE_S, ease: EXPO_OUT });
 }
 
 /** Swings the meter needle to an angle in degrees, with a little overshoot like a moving-coil meter. */

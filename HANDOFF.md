@@ -2,6 +2,13 @@
 
 This file is the handoff between team members and Claude sessions. Keep it factual and current. A new session must read this file before touching code.
 
+## Latest (Sun 15 Nov 2026, 14:14-15:00 Asia/Manila): orientation timing and interaction polish on `yujin/ux-polish`, NOT merged
+
+- **Branch:** `yujin/ux-polish` from `main` `943d30e`; commit `6fb67ca` plus logs. **Not merged:** it comes after the G5 freeze, so the team decides.
+- **What changed (DECISIONS UX-17..UX-21):** the tour's words, spotlight and card now move together (words in the frame of the press, spotlight on target at 220-345 ms, was 630-1,055 ms); shorter copy with a "try it" line that turns to Done when the plan shows it; the card is placed beside, below or above its control; keyboard focus stays on one key; each card is announced; a refusal no longer outlives the next click; the cursor tag's words fit.
+- **Checks:** vitest 311/311; tsc clean; Playwright 74/74 (7 new); JS 238,947 B of 250,000.
+- **Not changed:** engine, contracts, constants, datasets, values, the Bureau visual tokens.
+
 ## MERGED INTO MAIN (Sun 15 Nov 2026, 13:27 Asia/Manila, container clock): start here
 
 - **`main` = merge commit `b0896ad`** (parents `ca2504a` = previous `main`, `52965ae` = `design/sharpwalk-ui-ux`), plus

@@ -4,7 +4,7 @@
 // worker, so it survives every step change. The AREA sheet stays mounted and laid out on every step, so the map view,
 // its layers and the briefing snapshot never reset; the field view and the briefing card stay mounted for their state.
 // The engine worker is the only writer of MissionPlan; the console sends it Commands and shows the copies it returns.
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AreaSheet } from "../map/AreaSheet";
 import type { SkySampler } from "../map/skySample";
 import { createEngine, type EngineClient } from "../engine/client";
@@ -26,7 +26,7 @@ import { DEMO_PRESET, presetEnabled } from "./demoPreset";
 import { STEPS, stepFromHash, type StepId } from "./steps";
 import { ArrowRight, BookOpen, CircleHelp, LoaderCircle } from "lucide-react";
 import { ICON } from "./icons";
-import { AnimatePresence, Appear, PANEL_IN } from "./motion";
+import { AnimatePresence, Appear, PANEL_FADE, PANEL_IN } from "./motion";
 import { Tutorial, orientationDone } from "./Tutorial";
 import { StopPopover } from "./StopPopover";
 
@@ -51,6 +51,12 @@ export function App() {
    *  for every message is not announced reliably). */
   const [announce, setAnnounce] = useState("");
   const say = (text: string) => { setMessage((m) => ({ text, n: (m?.n ?? 0) + 1 })); setAnnounce(text); };
+  /** A message answers one action. The next action (or step) clears it, except a failed engine start, which concerns
+   *  every action; `refusalsOnly` clears only a refusal (the map's click, before the engine has the pick). */
+  const clearActionMessage = useCallback((refusalsOnly = false) => setMessage((m) => {
+    if (!m || m.text.startsWith("Engine could not start")) return m;
+    return !refusalsOnly || m.text.startsWith("Not changed") ? null : m;
+  }), []);
   // A success clears itself; a refusal or an error explains why nothing changed, so it stays until the next message.
   useEffect(() => {
     if (!message?.text.startsWith("Plan updated")) return;
@@ -101,7 +107,7 @@ export function App() {
       setVisited((v) => (v.has(next) ? v : new Set(v).add(next)));
       setDrawer(false); // a new step starts uncovered; the drawer opens again from any number or the masthead
       // A refusal belongs to the step it happened on; only a failed engine start concerns every step.
-      setMessage((m) => (m && !m.text.startsWith("Engine could not start") ? null : m));
+      clearActionMessage();
       setPicked(null); setMoving(null);
       if (push) history.pushState(null, "", next === "welcome" ? location.pathname + location.search : `#${next}`);
     };
@@ -118,6 +124,7 @@ export function App() {
     return () => { removeEventListener("popstate", onPop); removeEventListener("keydown", onKey); };
   }, [show]);
   const onMap = STEPS.find((s) => s.id === step)?.map ?? false;
+  const panelIn = tour ? PANEL_FADE : PANEL_IN;
   // Keyboard and screen-reader users land on the new step's heading: the control that changed the step is usually
   // gone (it belonged to the old step), and focus would otherwise fall back to the top of the page. Not while the
   // orientation is open: its card takes focus itself.
@@ -194,6 +201,8 @@ export function App() {
 
   const send = useCallback((type: string, payload: Record<string, unknown>) => {
     setPending((n) => n + 1);
+    // UX-17: an old refusal never sits over the engine's work on the new action.
+    clearActionMessage();
     queue.current = queue.current.then(async () => {
       const e = engine.current, cur = outputRef.current;
       try {
@@ -218,6 +227,18 @@ export function App() {
   const plan = output?.plan;
   const next = (s: StepId, label: string) => <button type="button" className="go" onClick={() => go(s)}>{label}<ArrowRight {...ICON} aria-hidden="true" /></button>;
   const recalculating = pending > 0 && output !== null;
+  // UX-17: the tour's "try it" lines the plan shows as done (read from the engine's plan, never from a click).
+  // Recomputed only when the plan or the confirmation changes, not on every pointer move.
+  const tourDone = useMemo(() => {
+    const has = (id: string) => !!plan?.assumptions.some((a) => a.id === `A-${id}`);
+    return new Set<string>([
+      // All four Planner times, as the card says ("every time is set").
+      ...(has("T_EVA") && has("t_ops") && has("t_cont") && has("stop_duration") ? ["budget"] : []),
+      ...(plan && plan.stops.length > 0 ? ["map"] : []),
+      ...(plan && plan.endMargin.valueClass !== "unknown" ? ["route"] : []),
+      ...(version && confirmed === version ? ["brief"] : []),
+    ]);
+  }, [plan, version, confirmed]);
   const pickedStop = plan?.stops.find((s) => s.id === picked) ?? null;
   const movingStop = plan?.stops.find((s) => s.id === moving) ?? null;
   // A map click: move the stop waiting to move, else add a stop (the engine refuses ground that is not slope-screened).
@@ -258,7 +279,9 @@ export function App() {
           onPointerUp={(e) => { // a click, not a pan: the ring marks where the pick went (the engine then answers)
             const d = down.current; down.current = null;
             if (!d || Math.hypot(e.clientX - d.x, e.clientY - d.y) > 4) return;
-            const r = e.currentTarget.getBoundingClientRect(); setPing((p) => ({ x: e.clientX - r.left, y: e.clientY - r.top, n: (p?.n ?? 0) + 1 })); }}>
+            const r = e.currentTarget.getBoundingClientRect(); setPing((p) => ({ x: e.clientX - r.left, y: e.clientY - r.top, n: (p?.n ?? 0) + 1 }));
+            // UX-17: the map waits out the double-click window before it picks; a refusal from the last click goes now.
+            clearActionMessage(true); }}>
           <div className="bezel" aria-hidden="true" />
           <AreaSheet dataUrl={AREA_URL} plan={output} onPick={step === "map" ? onPick : undefined}
             onSelectStop={step === "map" ? (id) => { setPicked(id); setMoving(null); } : undefined} selectedStop={picked}
@@ -279,15 +302,15 @@ export function App() {
         </div>
         <RouteProfile output={output} hoverIndex={hover} onHoverIndex={setHover} />
         {/* Step panels enter with Motion and leave at once, so a click right after a step change reaches the new step. */}
-          {step === "map" && <Appear key="map" className="panel-host" enter={PANEL_IN}><PlanPanel output={output} onOpenSource={openSource} next={next("hud", "Continue to the field HUD")}
+          {step === "map" && <Appear key="map" className="panel-host" enter={panelIn}><PlanPanel output={output} onOpenSource={openSource} next={next("hud", "Continue to the field HUD")}
             onDeleteStop={(id) => send("delete_stop", { stopId: id })} onEditStop={(stopId, name, tasks) => send("edit_stop", { stopId, name, tasks })}
             onSetTime={setTime} skyAt={showSky && skyState === "ok" ? skyAt : null} picked={picked} onPick={(id) => setPicked(id)}
             onMoveToCursor={cursor ? (stopId) => send("move_stop", { stopId, lat: cursor.lat, lon: cursor.lon }) : undefined} /></Appear>}
-          {step === "assess" && <Appear key="assess" className="panel-host" enter={PANEL_IN}><AssessPanel output={output} onOpenSource={openSource} drillMin={drillMin} onDrillMin={setDrillMin} busy={contourBusy}
+          {step === "assess" && <Appear key="assess" className="panel-host" enter={panelIn}><AssessPanel output={output} onOpenSource={openSource} drillMin={drillMin} onDrillMin={setDrillMin} busy={contourBusy}
             next={next("brief", "Continue to the briefing")} /></Appear>}
-          {step === "setup" && <Appear key="setup" className="screen-host" enter={PANEL_IN}><SetupScreen output={output} rems={rems} rover={rover} onSet={setTime} onOpenSource={openSource}
+          {step === "setup" && <Appear key="setup" className="screen-host" enter={panelIn}><SetupScreen output={output} rems={rems} rover={rover} onSet={setTime} onOpenSource={openSource}
             preset={presetEnabled(location.search)} onApplyPreset={applyPreset} next={next("planner", "Continue to the time budget")} /></Appear>}
-          {step === "planner" && <Appear key="planner" className="screen-host" enter={PANEL_IN}><PlannerScreen output={output} onSet={setTime} next={next("map", "Continue to the map")} /></Appear>}
+          {step === "planner" && <Appear key="planner" className="screen-host" enter={panelIn}><PlannerScreen output={output} onSet={setTime} next={next("map", "Continue to the map")} /></Appear>}
         {/* Kept mounted so a built card keeps its version stamp and shows STALE after a plan change. */}
         <BriefingView output={output} snapshot={snapshot} hidden={step !== "brief"} rover={rover}
           confirmed={confirmed} onConfirm={setConfirmed} next={next("hud", "Open the field HUD")} />
@@ -304,7 +327,7 @@ export function App() {
             datasetsInView={datasetsInView} extraSources={extraSources} onClose={() => { setSelected(null); setDrawer(false); }} />
         </aside>
       </main>
-      <Tutorial open={tour} step={step} onClose={() => { setTour(false); setToured(true); tourKey.current?.focus(); }} go={go} />
+      <Tutorial open={tour} step={step} onClose={() => { setTour(false); setToured(true); tourKey.current?.focus(); }} go={go} done={tourDone} />
       <footer className="colophon">
         <span>Independent student project; not affiliated with or endorsed by NASA.</span>
         {plan && <span className="stamp">Plan {plan.versionHash} · {plan.engineVersion} · suit life support not modelled</span>}

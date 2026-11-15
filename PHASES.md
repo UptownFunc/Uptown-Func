@@ -1184,6 +1184,29 @@ Next part / blocker owner: the other members review REG-01 and REG-02; a person 
   W-01 Data and Science
 ```
 
+```text
+Part: UX-17..UX-21 on yujin/ux-polish: orientation timing, copy and placement; map feedback (after the G5 freeze; not merged)
+Owner: Yujin (directed the session and set the scope); SI-assisted (Claude Code, Claude Opus 5.5)
+Status: VERIFIED on the branch; NOT merged (G5 freeze: the team decides)
+Scope completed: see DECISIONS UX-17..UX-21 and R-28. No engine, contract, constant, dataset, value or design token changed.
+Files changed: src/app/Tutorial.tsx, src/app/fx.ts, src/app/motion.tsx, src/app/App.tsx, src/app/styles.css;
+  new: src/app/tour.test.ts, e2e/tour-timing.spec.ts; logs: DECISIONS.md, PHASES.md, HANDOFF.md, SI_LOG.md, README.md
+Checks run (exact commands), a team member's Windows computer, Node 24.16.0 (repo pins 22.x):
+  npm ci ; npx vitest run ; npx tsc --noEmit ; npm run build ; gzip -9 sum of dist/**/*.js ;
+  npx playwright test --trace off --workers=1
+Results: vitest 311/311 (32 files; tour.test.ts new, 9 tests); tsc clean; build OK; JS 238,947 B gzip of 250,000;
+  Playwright 74/74 (67 existing unchanged + 7 new in tour-timing.spec.ts: desktop 1440, laptop 1024 and phone 390 timing,
+  reduced motion, keyboard, the Done line, refusal clearing and the cursor tag). The frame-by-frame numbers before and
+  after are in DECISIONS UX-17.
+Known limitations or failures: scripts/bundle-size.mjs fails on Windows (it builds the path as D:\D:\...); the bundle was
+  measured by the same gzip-9 sum by hand. pytest not run (no pipeline file changed). Two phone targets (the conditions
+  sheet, the map) are taller than the screen, so the docked card overlaps them; the test allows that only where no free
+  place exists.
+Review status: /code-review high of the working tree: 10 findings, all fixed (R-28)
+Commit SHA: 6fb67ca
+Next part / blocker owner: the team decides whether UX-17..UX-21 go into main after the freeze; Design review of the copy
+```
+
 ## Phase-part completion record
 
 Copy this block for every phase part and update its table row above:

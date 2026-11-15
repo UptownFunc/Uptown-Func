@@ -131,7 +131,9 @@ it.
   map and an orientation tour. From 11:34 that day a **Claude Fable 5.2** session audited that redesign on the same
   branch: it removed Anime.js (Motion alone animates), brought the JavaScript back inside the 250 kB budget, stopped
   the doubled terrain download, made the demonstration card print on one A5 page and fixed the design and
-  accessibility findings (DECISIONS MOT-04, B-01, TER-01, PRINT-02, UX-16, A11Y-02). Details per task: `SI_LOG.md`.
+  accessibility findings (DECISIONS MOT-04, B-01, TER-01, PRINT-02, UX-16, A11Y-02). From 14:14 that day a
+  **Claude Opus 5.5** session directed by Eugene Ibañez Jr. reworked the orientation tour's timing and copy and the
+  map's feedback on the branch `yujin/ux-polish` (UX-17 to UX-21; not merged, after the freeze). Details per task: `SI_LOG.md`.
 - **What SI contributed:** drafted the data pipeline and its tests; the frame conversions and constants register;
   the route engine, margins and field-margin functions; the engine worker; the AREA sheet, console, profile, sources
   panel, briefing card and field view; accessibility and resilience tests; tier-2 contours and drill; this README and
