@@ -190,7 +190,7 @@ test("every variable explains itself: card terms, field meanings, tap-to-explain
 test("on a laptop the card's terms start folded, and opening them keeps the card inside the window", async ({ page }) => {
   await page.setViewportSize({ width: 1366, height: 768 });
   await beginTour(page);
-  for (let k = 0; k < 5; k++) await page.locator(".tour-card .key.primary").click();
+  for (let k = 0; k < 7; k++) await page.locator(".tour-card .key.primary").click();
   const card = page.getByRole("dialog", { name: "Carry it in the field" });
   const terms = card.locator(".tour-terms");
   await expect(terms).not.toHaveAttribute("open");

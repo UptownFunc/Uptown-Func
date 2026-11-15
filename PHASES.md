@@ -1247,6 +1247,25 @@ Checks: local build of f1fd37f -> assets/index-3s757jEt.js; the live site served
   index-3s757jEt.js and engine-worker.js with the local build: identical; Playwright against https://uptown-func.vercel.app
   (temporary config, deleted, --workers=1): 76 passed / 76.
 Next part / blocker owner: the team (HANDOFF 15:10 section 3); Data and Science read src/app/glossary.ts
+Part: 2.1 / 5.2 decisions: W-01 slow walking bound 0.64 -> 0.56 m/s; K-01 slope factors kept at 1
+Owner: Yujin (delegated the choice: "choose what is best"); chosen and drafted by SI (Claude Code, Claude Fable 5.2)
+Status: IN PROGRESS - applied on branch yujin/w-01-slow-bound; NOT merged; the other members must confirm (plan value)
+Scope completed: walkSpeedRange.low 0.56 with its citation (EVA-EXP-0042 Rev B, 4.2.1.3.1.1, p. 40); the contour label
+  reads the bound from the constant; planner tests follow the constant; CLAUDE.md, README and DECISIONS updated.
+Files changed: src/constants/index.ts, src/constants/constants.test.ts, src/engine/planner.test.ts, src/app/DrillPanel.tsx,
+  CLAUDE.md, README.md, DECISIONS.md, PHASES.md, HANDOFF.md, SI_LOG.md, docs/data/reg-02-verification.md
+Checks run (exact commands), Windows computer, Node 24.16.0 (repo pins 22.x):
+  npx vitest run ; npx tsc --noEmit ; rm -rf dist && npm run build ; gzip -9 -c dist/assets/worker-*.js | wc -c ;
+  npx playwright test --trace off --workers=1
+Results: vitest 290/290 (2 tests written first and shown failing; then 3 planner tests that had 0.64 typed in were
+  pointed at the constant); tsc clean; build main 208.39 kB + worker 41,560 B = ~249.95 of 250 KB.
+  Playwright: 50/50 with `--workers=1`.
+  Demo stop end margin, read from the built app: est. 77.6 to 127.2 min, OK (was est. 92.3 to 127.2 min).
+Known limitations or failures: route bench not re-run (the time field uses the slow bound; its cost does not depend on
+  the value). pytest not re-run (no pipeline file changed). About 50 bytes of bundle budget left.
+Review status: /code-review low of commit 4be709c: 0 findings
+Commit SHA: 4be709c
+Next part / blocker owner: the other members confirm or reject W-01 and K-01; then merge after PR #21
 ```
 
 ## Phase-part completion record
@@ -1265,4 +1284,50 @@ Known limitations or failures:
 Review status:
 Commit SHA:
 Next part / blocker owner:
+```
+
+```text
+Part: UI-17 + LOGIC-01 - HUD moved after the briefing; planned vs field margin cross-check
+Owner: this cloud session's operator (a team member: "lets do A but first check if our logic is correct"); SI-assisted
+  (Claude Code, Claude Opus 5.5)
+Status: VERIFIED on branch claude/eager-hypatia-3w23ko (not merged; after the G5 freeze, the team decides)
+Scope completed: new test src/field/consistency.test.ts (LOGIC-01); step order Setup -> Planner -> Map -> Assess ->
+  Brief -> HUD (src/app/steps.ts, App.tsx continue keys, Tutorial.tsx card order); tests updated (steps.test.ts,
+  e2e/flow.spec.ts, tour-timing.spec.ts, phone.spec.ts, helpers.ts)
+Checks run: npx tsc --noEmit; npx vitest run; PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome
+  npx playwright test --trace off --workers=2; node scripts/bundle-size.mjs; /code-review low on the diff
+Results: tsc clean; vitest 318/318 (316 + 2 new); Playwright 76/76; JS 242,650 B gzip of 250,000 (AC-12 within
+  budget); review 0 findings. Mutation check: removing the stop time from "continue" fails consistency.test.ts.
+Known limitations: the elapsed-time convention question in DECISIONS LOGIC-01 (no code change)
+Commit SHA: see git log of claude/eager-hypatia-3w23ko
+Next part / blocker owner: the team: approve UI-17, then merge (checks above) and verify the live site
+```
+
+```text
+Part: UI-17 follow-up - orientation tour checked
+Owner: same operator ("did you do the same for the onboarding/tutorial"); SI-assisted (Claude Code, Claude Opus 5.5)
+Status: VERIFIED on branch claude/eager-hypatia-3w23ko (not merged)
+Scope completed: the tour already had the HUD card last (dcacef2); its text now says "During the walk, after the
+  briefing."; stale step-order comment in App.tsx fixed. Welcome screen lists no step order (unchanged).
+Checks run: npx tsc --noEmit; npx vitest run; npx playwright test e2e/tour-timing.spec.ts e2e/flow.spec.ts
+  e2e/audit.spec.ts --trace off --workers=2; node scripts/bundle-size.mjs; a scripted browser walk of all 8 tour cards
+Results: tsc clean; vitest 318/318; Playwright 24/24; JS 242,663 B of 250,000; tour cards 1-8 on #setup, #setup,
+  #planner, #map, #map, #assess, #brief, #hud
+Next part / blocker owner: the team: approve UI-17 and merge
+```
+
+```text
+Part: W-02 - slow walking bound re-checked; PR #22 (W-01) merged into claude/eager-hypatia-3w23ko
+Owner: this cloud session's operator (a team member: "check what is best and merge"); SI-assisted (Claude Code,
+  Claude Opus 5.5)
+Status: VERIFIED on the branch
+Scope completed: merged origin/yujin/w-01-slow-bound (520e796); conflicts: DrillPanel.tsx (main's redesigned panel
+  kept), PHASES.md (both sides kept); the contour label in LayerToggles now reads the slow bound from the constant;
+  walkSpeedRange limitation cites NASA/TP-2010-216125 p. 70 and the Apollo 14 uphill caveat; record
+  docs/data/w-02-walking-speed.md; DECISIONS W-02; CLAUDE.md W-01 line
+Checks run: npx tsc --noEmit; npx vitest run; PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome npx
+  playwright test --trace off --workers=2; node scripts/bundle-size.mjs; /code-review low
+Results: tsc clean; vitest 320/320; Playwright 76/76; JS 242,912 B of 250,000; review 0 findings
+Known limitations: lunar sources, not Mars-validated; climbs may still be optimistic (k_v = 1)
+Next part / blocker owner: merge to main (this operator's instruction); the other two members confirm W-01/W-02
 ```

@@ -5,6 +5,9 @@ import { f1 } from "../geo";
 import { cellCentreF1 } from "../geo/grid";
 import { CLASS } from "./route";
 import { KV_ASSUMED } from "./assumptions";
+import { CONSTANTS } from "../constants";
+
+const SLOW = CONSTANTS.walkSpeedRange.low; // slow speed bound (W-01); the tests follow the constant
 import { Planner, type PlannerGrid } from "./planner";
 
 // 41 x 41 flat 2 m grid at the demo origin, with an excluded wall in column 20 except a gap at rows 30-32.
@@ -71,7 +74,7 @@ describe("engine planner (only writer of MissionPlan)", () => {
     // 8 orthogonal 2 m steps on flat ground: 16 m / 0.83 m/s nominal.
     expect(t.value!).toBeCloseTo(16 / 0.83, 6);
     expect(t.low!).toBeCloseTo(16 / 0.97, 6);
-    expect(t.high!).toBeCloseTo(16 / 0.64, 6);
+    expect(t.high!).toBeCloseTo(16 / SLOW, 6);
   });
 
   it("keeps margins and stop durations unknown while the Assumed plan times are unset", () => {
@@ -202,7 +205,7 @@ describe("Assumed plan times via set_assumption (plan 6.6, UX-03; T-01: no value
     const e = plan.endMargin;
     expect(e.valueClass).toBe("estimated");
     expect(e.unit).toBe("s");
-    expect(e.low!).toBeCloseTo(m(0.64), 6);
+    expect(e.low!).toBeCloseTo(m(SLOW), 6);
     expect(e.value!).toBeCloseTo(m(0.83), 6);
     expect(e.high!).toBeCloseTo(m(0.97), 6);
     expect(e.assumptionIds).toEqual(expect.arrayContaining(["A-kv", "A-T_EVA", "A-t_ops", "A-t_cont", "A-stop_duration"]));
@@ -344,11 +347,11 @@ describe("time back to the habitat from each stop (plan 6.6 t_return, slow bound
     const { g, p } = plannerWithHabitat();
     expect(p.current().geometry.stopReturn_s).toEqual({});
     p.apply(cmd("add_stop", { ...at(g, 2, 10), name: "A" }, p.current().plan.versionHash));
-    expect(p.current().geometry.stopReturn_s[p.current().plan.stops[0]!.id]).toBeCloseTo(16 / 0.64, 6);
+    expect(p.current().geometry.stopReturn_s[p.current().plan.stops[0]!.id]).toBeCloseTo(16 / SLOW, 6);
     for (const [id, value_s] of Object.entries({ T_EVA: 14400, t_ops: 1200, t_cont: 1800, stop_duration: 600 }))
       p.apply(cmd("set_assumption", { id, value_s, rationale: "test" }, p.current().plan.versionHash));
     const id = p.current().plan.stops[0]!.id;
-    expect(p.current().geometry.stopReturn_s[id]).toBeCloseTo(16 / 0.64, 6); // 8 flat 2 m steps at 0.64 m/s
+    expect(p.current().geometry.stopReturn_s[id]).toBeCloseTo(16 / SLOW, 6); // 8 flat 2 m steps at the slow bound
   });
 });
 
