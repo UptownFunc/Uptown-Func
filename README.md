@@ -133,7 +133,9 @@ it.
   the doubled terrain download, made the demonstration card print on one A5 page and fixed the design and
   accessibility findings (DECISIONS MOT-04, B-01, TER-01, PRINT-02, UX-16, A11Y-02). From 14:14 that day a
   **Claude Opus 5.5** session directed by Eugene Ibañez Jr. reworked the orientation tour's timing and copy and the
-  map's feedback on the branch `yujin/ux-polish` (UX-17 to UX-21; not merged, after the freeze). Details per task: `SI_LOG.md`.
+  map's feedback on the branch `yujin/ux-polish` (UX-17 to UX-21; merged at his instruction, MERGE-03). From 15:14 the same
+  session wrote the plain-language glossary of every variable on the branch `yujin/onboarding-terms` (UX-22, UX-23).
+  Details per task: `SI_LOG.md`.
 - **What SI contributed:** drafted the data pipeline and its tests; the frame conversions and constants register;
   the route engine, margins and field-margin functions; the engine worker; the AREA sheet, console, profile, sources
   panel, briefing card and field view; accessibility and resilience tests; tier-2 contours and drill; this README and

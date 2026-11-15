@@ -11,39 +11,44 @@
 // together (one shared duration). There is one card element for the whole tour: only its words change, so no card
 // waits for another to leave. While a step's panel is still settling the spotlight keeps tracking it.
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { ArrowLeft, ArrowRight, CircleCheck, MousePointerClick, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpenText, CircleCheck, MousePointerClick, X } from "lucide-react";
+import { GLOSSARY, type TermKey } from "./glossary";
 import type { StepId } from "./steps";
 import { AnimatePresence, Appear } from "./motion";
 import { glideCard, moveSpotlight, reduced } from "./fx";
 
-export interface TourCard { readonly step: StepId; readonly target: string; readonly title: string; readonly body: string; readonly act: string }
+export interface TourCard {
+  readonly step: StepId; readonly target: string; readonly title: string; readonly body: string; readonly act: string;
+  /** UX-22: the variables this screen shows, each explained in a few plain words on the card. */
+  readonly terms: readonly TermKey[];
+}
 
 /** Short, one idea per card, each with one thing to try. The words keep the plan's honesty rules (Assumed, estimate). */
 export const TOUR: readonly TourCard[] = [
   { step: "setup", target: "scenario", title: "Pick a scenario",
     body: "Demonstration loads cited plan times, each marked Assumed and editable. Blank starts empty.",
-    act: "Choose a scenario." },
+    act: "Choose a scenario.", terms: ["EVA", "assumed"] },
   { step: "setup", target: "conditions", title: "Check the conditions",
     body: "The walk's date and time set the sun angle (Mars24, model-derived).",
-    act: "Change the time here if you need to, with a reason." },
+    act: "Change the time here if you need to, with a reason.", terms: ["lmst", "sun", "ls"] },
   { step: "planner", target: "budget", title: "Set the time budget",
     body: "Walking gets what the EVA leaves after tasks, contingency and stops. The margin stays unknown until every time is set.",
-    act: "Enter each time with a one-line reason." },
+    act: "Enter each time with a one-line reason.", terms: ["T_EVA", "t_ops", "t_cont", "stop"] },
   { step: "map", target: "map", title: "Point and click to place stops",
     body: "The tag under the cursor says whether the ground takes a stop before you click. Steeper ground is refused.",
-    act: "Click ground to add a stop; click a stop to edit it." },
+    act: "Click ground to add a stop; click a stop to edit it.", terms: ["slope"] },
   { step: "map", target: "route", title: "Read the route",
     body: "Each leg shows an estimated walking time range. The end margin updates after every change.",
-    act: "Check the end margin after each stop." },
+    act: "Check the end margin after each stop.", terms: ["leg", "est", "margin"] },
   { step: "hud", target: "hud", title: "Carry it in the field",
     body: "The margins for continuing and for turning back follow your manual entries.",
-    act: "Type the elapsed time, then tick each arrival and departure." },
+    act: "Type the elapsed time, then tick each arrival and departure.", terms: ["elapsed", "tick", "goOn", "goBack"] },
   { step: "assess", target: "gauge", title: "Judge the return margin",
     body: "OK, NEAR LIMIT or OVER, read at the slow walking speed. An estimate, never a guarantee.",
-    act: "Check the state before you brief." },
+    act: "Check the state before you brief.", terms: ["states", "slow"] },
   { step: "brief", target: "brief", title: "Brief and confirm",
     body: "The card is built from the current plan. Any later change marks it STALE.",
-    act: "Generate the card, tick the three checks and confirm." },
+    act: "Generate the card, tick the three checks and confirm.", terms: ["stale"] },
 ];
 
 const STORE = "sharpwalk.orientation.done";
@@ -160,30 +165,45 @@ export function Tutorial({ open, onClose, go, step, done }: { open: boolean; onC
 
   // The spotlight and the card start their glide in the same frame as the new words, with one shared duration.
   const lastCard = useRef<{ x: number; y: number } | null>(null);
-  /** The card's height as last drawn, for placing it above or below a wide control. */
-  const cardH = useRef(330);
+  /** The card's height as drawn, for placing it; a card with more terms is taller, so it is re-placed before paint. */
+  const [cardH, setCardH] = useState(330);
+  const vw = typeof innerWidth === "number" ? innerWidth : 1280, vh = typeof innerHeight === "number" ? innerHeight : 800;
+  const place = placeCard(box, vw, vh, 380, cardH);
+
+  // The card glides from where it is seen now (its layout place plus any glide still running) to its new place, with
+  // the spotlight's timing, whatever moved it (a new spotlight, or its own height). It runs before the spotlight's
+  // effect below, which clears the "follow the page" flag.
+  const placeKey = `${place.dock ?? ""}|${place.style.left ?? ""}|${place.style.top ?? ""}|${place.style.bottom ?? ""}`;
+  useLayoutEffect(() => {
+    const c = card.current;
+    if (!open || !c || c.dataset.dock) { lastCard.current = null; return; } // docked by the stylesheet: it does not travel
+    const now = { x: c.offsetLeft, y: c.offsetTop }, was = lastCard.current;
+    if (was && !follow.current && (was.x !== now.x || was.y !== now.y)) {
+      const m = new DOMMatrixReadOnly(getComputedStyle(c).transform === "none" ? undefined : getComputedStyle(c).transform);
+      glideCard(c, was.x - now.x + m.m41, was.y - now.y + m.m42);
+    }
+    lastCard.current = now;
+  }, [open, placeKey]);
+
   useLayoutEffect(() => {
     const el = hole.current;
-    if (!open || !el) { lastCard.current = null; return; }
+    if (!open || !el) return;
     const to = box ?? { x: innerWidth / 2, y: innerHeight / 2, w: 0, h: 0 };
     // It opens from a point at the centre. Its position is never a React style prop: a re-render must not move it.
     const fresh = !el.style.width;
     if (fresh) Object.assign(el.style, { left: `${innerWidth / 2}px`, top: `${innerHeight / 2}px`, width: "0px", height: "0px" });
     moveSpotlight(el, to, follow.current && !fresh);
-    // The card glides from where it is seen now (its layout place plus any glide still running) to its new place.
-    const c = card.current;
-    if (c) cardH.current = c.offsetHeight || cardH.current;
-    if (c && c.dataset.dock) lastCard.current = null; // docked by the stylesheet: it does not travel with the spotlight
-    else if (c) {
-      const now = { x: c.offsetLeft, y: c.offsetTop }, was = lastCard.current;
-      if (was && !follow.current && (was.x !== now.x || was.y !== now.y)) {
-        const m = new DOMMatrixReadOnly(getComputedStyle(c).transform === "none" ? undefined : getComputedStyle(c).transform);
-        glideCard(c, was.x - now.x + m.m41, was.y - now.y + m.m42);
-      }
-      lastCard.current = now;
-    }
     follow.current = false;
   }, [open, box]);
+
+  // Watch the card's height (more terms, or its terms list opened) and place it again before the next paint.
+  useLayoutEffect(() => {
+    const c = card.current;
+    if (!open || !c || typeof ResizeObserver !== "function") return;
+    const ro = new ResizeObserver(() => { const h = c.offsetHeight; setCardH((v) => (h && Math.abs(h - v) > 2 ? h : v)); });
+    ro.observe(c);
+    return () => ro.disconnect();
+  }, [open]);
 
   // Back turns disabled on the first card: keep the keyboard on the card's main key instead of losing focus.
   useEffect(() => { if (open && i === 0 && document.activeElement?.closest(".tour-keys")) primary.current?.focus(); }, [open, i]);
@@ -202,8 +222,6 @@ export function Tutorial({ open, onClose, go, step, done }: { open: boolean; onC
     return () => removeEventListener("keydown", onKey);
   }, [open, step]); // eslint-disable-line react-hooks/exhaustive-deps -- turn() reads the step it compares against
 
-  const vw = typeof innerWidth === "number" ? innerWidth : 1280, vh = typeof innerHeight === "number" ? innerHeight : 800;
-  const place = placeCard(box, vw, vh, 380, cardH.current);
   const last = i === TOUR.length - 1;
 
   return (
@@ -221,7 +239,7 @@ export function Tutorial({ open, onClose, go, step, done }: { open: boolean; onC
             </div>
             {/* Screen readers hear each card from one region that stays mounted (a remounted region is not announced
                 reliably); the visible words below only animate. */}
-            <p className="sr-only" aria-live="polite" data-testid="tour-announce">{`Card ${i + 1} of ${TOUR.length}. ${t.title}. ${t.body} ${done?.has(t.target) ? "Done" : "Try it"}: ${t.act}`}</p>
+            <p className="sr-only" aria-live="polite" data-testid="tour-announce">{`Card ${i + 1} of ${TOUR.length}. ${t.title}. ${t.body} ${done?.has(t.target) ? "Done" : "Try it"}: ${t.act} Terms: ${t.terms.map((k) => `${GLOSSARY[k].term}, ${GLOSSARY[k].brief}`).join("; ")}.`}</p>
             <Appear key={i} className="tour-words" enter={{ opacity: [0, 1], transform: ["translateX(10px)", "translateX(0px)"] }}>
               <h2 id="tour-title">{t.title}</h2>
               <p>{t.body}</p>
@@ -229,6 +247,12 @@ export function Tutorial({ open, onClose, go, step, done }: { open: boolean; onC
               <p className="tour-act" data-done={done?.has(t.target) || undefined} data-testid="tour-act">
                 {done?.has(t.target) ? <CircleCheck size={16} strokeWidth={2} aria-hidden="true" /> : <MousePointerClick size={16} strokeWidth={2} aria-hidden="true" />}
                 <span><span className="sr-only">{done?.has(t.target) ? "Done: " : "Try it: "}</span>{t.act}</span></p>
+              {/* UX-22: what each variable on this screen means, in a few words. Open on a large window; on a laptop or a phone it
+                  folds so the card stays small (the same words are on the screen itself, under each field). */}
+              <details className="tour-terms" open={(vw > 1240 && vh >= 860) || undefined}>
+                <summary><BookOpenText size={15} strokeWidth={2} aria-hidden="true" />Terms on this screen ({t.terms.length})</summary>
+                <dl>{t.terms.map((k) => <div key={k}><dt title={GLOSSARY[k].term}>{GLOSSARY[k].short}</dt><dd>{GLOSSARY[k].brief}</dd></div>)}</dl>
+              </details>
             </Appear>
             <div className="tour-progress" aria-hidden="true">{TOUR.map((_, k) => <span key={k} data-on={k <= i} />)}</div>
             <div className="tour-keys">

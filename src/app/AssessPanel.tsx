@@ -5,6 +5,7 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import { ZONES, arc, needleAngle } from "./gauge";
 import { swingNeedle } from "./fx";
+import { Term } from "./Term";
 import type { Quantity } from "../contracts";
 import type { PlanOutput } from "../engine/planner";
 import { CONSTANTS } from "../constants";
@@ -57,11 +58,11 @@ export function AssessPanel({ output, onOpenSource, drillMin, onDrillMin, busy, 
         </header>
         <div className="verdict-block" data-testid="assess-margin" data-tour="gauge">
           <Meter angle={needleAngle(low, tEva)} live={low !== null && tEva !== null} />
-          <span className="k">Planned return margin</span>
+          <span className="k"><Term k="margin">Planned return margin</Term></span>
           <p className="big-figure flash" key={plan.versionHash}><QuantityText q={plan.endMargin} onOpen={onOpenSource} label="Planned return margin" /></p>
           {last ? <p className="big-state"><MarginState state={last.state} /></p> : <p className="note">Unknown until a reachable stop and every plan time are set.</p>}
           <p className="caveat">Estimate under stated assumptions, not a guarantee. Range from the slow ({RANGE.low} m/s) to the fast ({RANGE.high} m/s) bound;
-            the state uses the slow bound: OK at or above 10% of T_EVA, NEAR LIMIT from 0 to under 10%, OVER below 0.
+            the state uses the <Term k="slow">slow bound</Term>: OK at or above 10% of <Term k="T_EVA">T_EVA</Term>, NEAR LIMIT from 0 to under 10%, OVER below 0.
             {ticks.length > 0 && ` The profile and the map mark where the margin ${ticks.includes("OVER") ? "reaches 0" : "falls under 10%"}.`}</p>
         </div>
         <AssumedNote output={output} />
@@ -80,7 +81,7 @@ export function AssessPanel({ output, onOpenSource, drillMin, onDrillMin, busy, 
             })}
           </ol>
         )}
-        <p className="section-title">Time to habitat</p>
+        <p className="section-title"><Term k="toHab" /></p>
         <DrillPanel output={output} drillMin={drillMin} onDrillMin={onDrillMin} busy={busy} />
       </div>
       <div className="side-foot">{next}</div>

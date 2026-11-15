@@ -5,6 +5,7 @@
 import { useState, type ReactNode } from "react";
 import type { MissionExecution, Quantity } from "../contracts";
 import { CONSTANTS } from "../constants";
+import { Term } from "../app/Term";
 import type { PlanOutput } from "../engine/planner";
 import { marginState } from "../engine/margin";
 import { MarginState } from "../app/MarginState";
@@ -68,11 +69,11 @@ export function FieldView({ output, hidden = false, briefed = false, next }: { o
         )}
         <div className="hud-pair">
           <div className="hud-box" data-testid="field-continue">
-            <span className="field-label">Margin if we continue</span>
+            <span className="field-label"><Term k="goOn" /></span>
             {m && tEva ? <><QuantityText q={q(m.continue_s, "field:6.6-continue")} label="Field margin, continue" /> {state(m.continue_s)}</> : nothing}
           </div>
           <div className="hud-box" data-testid="field-return">
-            <span className="field-label">Margin if we turn back now</span>
+            <span className="field-label"><Term k="goBack" /></span>
             {m && tEva ? <><QuantityText q={q(m.returnNow_s, "field:6.6-return-now")} label="Field margin, return now" /> {state(m.returnNow_s)}</> : nothing}
           </div>
         </div>

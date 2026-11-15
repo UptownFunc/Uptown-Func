@@ -29,6 +29,7 @@ import { ICON } from "./icons";
 import { AnimatePresence, Appear, PANEL_FADE, PANEL_IN } from "./motion";
 import { Tutorial, orientationDone } from "./Tutorial";
 import { StopPopover } from "./StopPopover";
+import { GlossaryList } from "./Term";
 
 const AREA_URL = "area/";
 /** H-01 (DECISIONS.md, pending team confirmation): the slope-screened cell nearest the plan 19.2 suggestion
@@ -325,6 +326,7 @@ export function App() {
         <aside className="drawer" data-open={drawer} aria-label="Source drawer" inert={!drawer}>
           <SourcePanel selected={selected} provenance={provenance} assumptions={plan?.assumptions ?? []}
             datasetsInView={datasetsInView} extraSources={extraSources} onClose={() => { setSelected(null); setDrawer(false); }} />
+          <GlossaryList />
         </aside>
       </main>
       <Tutorial open={tour} step={step} onClose={() => { setTour(false); setToured(true); tourKey.current?.focus(); }} go={go} done={tourDone} />

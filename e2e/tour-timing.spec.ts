@@ -82,6 +82,9 @@ for (const size of [{ name: "desktop", width: 1440, height: 900 }, { name: "lapt
     // such place exists (a control that fills the window) may the card cover it.
     for (const t of turns) if (!t.huge) expect(t.overlap, `${t.title}: the card does not cover the spotlight`).toBeLessThan(0.05);
     expect(turns.filter((t) => !t.huge).length, "most cards are checked for overlap").toBeGreaterThanOrEqual(5);
+    // Every card, with its list of terms, fits inside the window.
+    const fits = await page.locator(".tour-card").evaluate((e) => { const r = e.getBoundingClientRect(); return r.top >= 0 && r.bottom <= innerHeight + 1; });
+    expect(fits, "the last card fits inside the window").toBe(true);
     // The card is placed (beside, below or docked) at its full width, never left shrunk in the window's top-left corner.
     const c = (await page.locator(".tour-card").boundingBox())!;
     expect(c.width).toBeGreaterThan(300);
@@ -153,4 +156,46 @@ test("a refusal does not outlive the next action, and the cursor tag keeps its w
   await clickAt(page, STOP);
   await expect(page.locator('.toast[data-kind="hold"]')).toHaveCount(0, { timeout: 400 });
   await expect(msg).toContainText("Plan updated", { timeout: 20_000 });
+});
+
+test("every variable explains itself: card terms, field meanings, tap-to-explain labels and the glossary (UX-22)", async ({ page }) => {
+  await beginTour(page);
+  for (let k = 0; k < 2; k++) await page.locator(".tour-card .key.primary").click();
+  const card = page.getByRole("dialog", { name: "Set the time budget" });
+  await expect(card.locator(".tour-terms dt")).toHaveText(["T_EVA", "t_ops", "t_cont", "Stop time"]);
+  await expect(card.locator(".tour-terms dd").first()).toHaveText("the whole EVA, egress to ingress");
+  await expect(page.getByTestId("tour-announce")).toContainText("Terms: EVA duration (T_EVA), the whole EVA, egress to ingress");
+  await page.keyboard.press("Escape");
+  // Under each plan-time field: what the variable is.
+  await expect(page.locator(".time-row").first()).toContainText("The planned length of the EVA, egress to ingress.");
+  // A screen reader hears the same meaning when it reaches the field.
+  await expect(page.getByLabel("Planned EVA duration (T_EVA), minutes")).toHaveAccessibleDescription(/The planned length of the EVA/);
+  // Set every time, add a stop: the route panel's terms open their meaning in place.
+  await page.goto("/#map");
+  await expect.poll(() => page.locator(".app").getAttribute("data-busy"), { timeout: 20_000 }).toBe("false");
+  await clickAt(page, STOP);
+  await expect(page.getByTestId("legs")).toBeVisible({ timeout: 20_000 });
+  await expect(page.locator(".legs-note")).toContainText("Climb: height gained along it.");
+  const key = page.getByRole("button", { name: "End margin, what it means" });
+  await expect(key).toHaveAttribute("aria-expanded", "false");
+  await key.click();
+  await expect(key).toHaveAttribute("aria-expanded", "true");
+  await expect(page.getByRole("note").filter({ hasText: "The EVA time left once walking" })).toBeVisible();
+  // The whole glossary, from the Sources drawer.
+  await page.getByRole("button", { name: "Sources", exact: true }).click();
+  await page.getByTestId("glossary").locator("summary").click();
+  await expect(page.getByTestId("glossary").locator("dt")).toContainText(["EVA", "Local mean solar time", "Slope factor kᵥ"]);
+});
+
+test("on a laptop the card's terms start folded, and opening them keeps the card inside the window", async ({ page }) => {
+  await page.setViewportSize({ width: 1366, height: 768 });
+  await beginTour(page);
+  for (let k = 0; k < 5; k++) await page.locator(".tour-card .key.primary").click();
+  const card = page.getByRole("dialog", { name: "Carry it in the field" });
+  const terms = card.locator(".tour-terms");
+  await expect(terms).not.toHaveAttribute("open");
+  await terms.locator("summary").click();
+  await expect(terms).toHaveAttribute("open", "");
+  await expect(card.locator(".tour-terms dt")).toHaveText(["Elapsed", "Tick", "If we continue", "If we turn back"]);
+  await expect.poll(() => card.evaluate((e) => { const r = e.getBoundingClientRect(); return r.top >= 0 && r.bottom <= innerHeight + 1; })).toBe(true);
 });
