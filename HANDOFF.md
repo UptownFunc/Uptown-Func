@@ -2,6 +2,14 @@
 
 This file is the handoff between team members and Claude sessions. Keep it factual and current. A new session must read this file before touching code.
 
+
+## Streamlined flow (Sun 15 Nov 2026, from 22:02 Asia/Manila): branch `yujin/streamlined-flow` (MERGE-11, carries PR #39). Start here
+
+- **What (DECISIONS FLOW-01..03):** Welcome asks "Begin orientation" or "Go", then "NASA-sourced preset" or "Custom times"; then Map -> Assess -> HUD (the step index holds those three). Setup, Planner and Brief are kept, off the index (link, the custom choice, or the Assess key). Assess and the HUD say "OVER · Plan not feasible (reason)" at once; the HUD adds "Turn back now"; Assess's only key opens the times.
+- **Budget:** AC-12 249,963 B of 250,000 (37 B left).
+- **Merge:** this branch includes PR #39 (Undo, 24 h limit). The session's permission check refused `gh pr merge`; a person merges (one merge brings both), then checks the live site.
+- **For people:** Design reviews the start and the banners; the team confirms "not feasible" = OVER or an unreachable stop (FLOW-02); the submission.
+
 ## Undo for a placed stop, limit on typed times (Sun 15 Nov 2026, from 20:53 Asia/Manila): branch `yujin/stop-undo-time-limits` (MERGE-09). Start here
 
 - **What (DECISIONS UNDO-01, V-15):** a click on the map still adds a stop at once; the "Plan updated" message now has an **Undo stop X** key for 6 s (it waits while the pointer or focus is on it), and **Ctrl+Z** does the same. Any plan time or stop duration over **1440 min (24 h)** is refused (engine, Planner form with "At most 1440 min (24 h)"); the HUD's elapsed time over **2880 min**.

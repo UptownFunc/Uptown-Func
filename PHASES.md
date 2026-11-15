@@ -1578,3 +1578,20 @@ After merging main eca1720 (PRs #40-#42; only log files conflicted, both sides k
 Next part / blocker owner: the team confirms the 24 h figure (V-15); Design reviews the Undo key (UNDO-01); any new
   app code needs savings first (B-04)
 ```
+
+```text
+Part: FLOW-01 - streamlined flow (start, data choice, Map, Assess, HUD) and infeasible plans announced at once
+Owner: Yujin (team member), on his own computer (Personal PC); SI-assisted (Claude Code, Claude Opus 5.5)
+Status: VERIFIED (branch yujin/streamlined-flow on top of yujin/stop-undo-time-limits = PR #39; commits b2413fa,
+  b4da2a4, R-37 fixes)
+Scope completed: src/app/{steps.ts,Screens.tsx,App.tsx,AssessPanel.tsx,Tutorial.tsx,feasible.ts,styles.css},
+  src/field/FieldView.tsx; unit tests steps, tour, mapFinal, feasible; e2e flow-01 (new) and the specs that followed
+  the old flow (a11y, audit, bureau, flow, fonts, map-final, phone, tour-timing, helpers.goStep); DECISIONS FLOW-01..03,
+  B-05, E2E-09, R-37, TIME-01, MERGE-11
+Checks run: npx tsc --noEmit; npx vitest run; rm -rf dist && npm run build && node scripts/bundle-size.mjs;
+  npx playwright test --trace off --workers=1; --project=3d --no-deps; /code-review medium (R-37)
+Results: tsc clean; vitest 356/356; AC-12 249,963 B of 250,000 (37 B left); Playwright: see the PR (final run after
+  R-37); tour-timing misses on this machine recorded as TIME-01
+Next part / blocker owner: Design reviews the new start and the banners; the team confirms what "not feasible" means
+  (FLOW-02)
+```
