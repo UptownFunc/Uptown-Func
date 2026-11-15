@@ -544,6 +544,17 @@ Yujin's brief (pasted, urgent): "IF THERE ARE ANY EXISITNG MERGES, MERGE AND FIX
 | E2E-09 | Tests | `e2e/flow-01.spec.ts` (4 real-input tests: go + preset to the HUD with only three keys in the index; custom + orientation to the Planner card; an infeasible plan on Assess and on the HUD; a late tick on the HUD). `goStep` reaches Setup, Planner and Brief by their link. Unit: `src/app/feasible.test.ts`, steps and tour tests updated. | Done |
 | MERGE-11 | Merge of `yujin/streamlined-flow` (with PR #39) into `main` | After the G5 freeze; on Yujin's brief ("merge and fix"); the merge itself waits for his explicit word or click (the session's permission check refused a merge). | **Waiting** |
 
+## Session Sun 15 Nov 2026, from about 22:56 Asia/Manila (yujin/infeasible-blocks): a plan that is not feasible cannot proceed
+
+Yujin's brief (with two screenshots of the live site): "once in assessment if a plan is not feasable IT CANNOT PROCEED for example it must say a big prompt or omsehting PLA NOT FEASABLE (REASON) YOU CAN EITHER CHANGE THJE TIME VALUES OR REDRAW PLAN THEN FOR THE HUD IF THE TIME ELAPSED IS ERRORED THEN IT MUST NOT BE ABLE TO PROCEED AS OF NOW BOTH CAN PROCEED IT MUST NOT BE CHECK OTHER THINGS AS WELL. CHeck also in 3d the line dissapears". Model: Claude Opus 5.5 (Claude Code), on his computer.
+
+| ID | Topic | Decision / finding | Status |
+|---|---|---|---|
+| FLOW-04 | Not feasible = cannot proceed | **Assess:** a large prompt, "OVER · Plan not feasible (reason). You can either change the time values or redraw the plan.", with the keys **Change the time values** (the Planner) and **Redraw the plan** (the Map); the panel has no key on to the HUD. **Step index:** the HUD key is disabled while the plan is not feasible. **HUD** (reached by link): it says why and the tick key is disabled while the plan, or after a tick the crew's margin for carrying on, is OVER: no tick forward. Other ways round checked: the Brief screen's "Open the field HUD" and a typed `#hud` reach the HUD, which then allows no tick. Known limit: a mistyped elapsed time that makes the margin OVER cannot be taken back (no tick undo); changing the plan marks the ticks as old and "Start ticks for the current plan" clears them. | Done; Design review pending |
+| B-06 | Budget | Over by 57 B; the Setup screen's strings (off the main flow) shortened, honesty words kept: **AC-12 249,980 B of 250,000 (20 B left)**. | Recorded |
+| 3D-CHECK-01 | "In 3D the line disappears" | Checked on the live site with real input (a stop, the 3D key, the home view, then four "Tilt towards overhead" presses, the 3D-BUG-01 sequence): the route was drawn in every screenshot. Not reproduced; the zoomed and relief-lit views were not reached by the probe. The route is drawn 3 m above D1 without depth-test override (the markers have one), so terrain drawn above the sampled height can hide parts of it; 3D-BUG-01 (a frame without route after the tilt keys) stays open. Needs the exact steps from the person who saw it. | **Open:** 3D view owner |
+| MERGE-12 | Merge of `yujin/infeasible-blocks` into `main` | On Yujin's word. | **Waiting** |
+
 ## Fixed technical / presentation constraints
 
 - `MissionPlan` is written only by the engine; `MissionExecution` only by the field view. Console changes the plan by Commands.

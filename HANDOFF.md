@@ -3,6 +3,13 @@
 This file is the handoff between team members and Claude sessions. Keep it factual and current. A new session must read this file before touching code.
 
 
+
+## Not feasible = cannot proceed (Sun 15 Nov 2026, from 22:56 Asia/Manila): branch `yujin/infeasible-blocks` (MERGE-12). Start here
+
+- **What (DECISIONS FLOW-04):** Assess shows a large "Plan not feasible (reason). You can either change the time values or redraw the plan." with those two keys and no way on; the HUD key in the step index is closed; the HUD allows no tick forward while the plan or the crew's margin is OVER.
+- **Budget:** AC-12 249,980 B of 250,000 (20 B left).
+- **3D line (3D-CHECK-01):** not reproduced on the live site; needs the exact steps. 3D-BUG-01 stays open.
+
 ## Streamlined flow (Sun 15 Nov 2026, from 22:02 Asia/Manila): branch `yujin/streamlined-flow` (MERGE-11, carries PR #39). Start here
 
 - **What (DECISIONS FLOW-01..03):** Welcome asks "Begin orientation" or "Go", then "NASA-sourced preset" or "Custom times"; then Map -> Assess -> HUD (the step index holds those three). Setup, Planner and Brief are kept, off the index (link, the custom choice, or the Assess key). Assess and the HUD say "OVER · Plan not feasible (reason)" at once; the HUD adds "Turn back now"; Assess's only key opens the times.
