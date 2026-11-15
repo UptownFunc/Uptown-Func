@@ -2,7 +2,11 @@
 
 This file is the handoff between team members and Claude sessions. Keep it factual and current. A new session must read this file before touching code.
 
-## MERGED (Sun 15 Nov 2026, about 18:30 Asia/Manila): final 2D map baseline (MERGE-06). Start here
+## README team credits (Sun 15 Nov 2026, about 18:45 Asia/Manila): G-12. Start here, then the MERGE-06 section below
+
+- The README's "Authorship and credits" section is now "Team": whole-team credit and one role per member, as a member set them (DECISIONS G-12). **The other three members should confirm their roles.**
+
+## MERGED (Sun 15 Nov 2026, about 18:30 Asia/Manila): final 2D map baseline (MERGE-06)
 
 - **`main` = `d97ff38`** (PR #30), plus the MERGE-05 and MERGE-06 records (PRs #32, #33). Its tree is identical to the approved branch. The live site serves `assets/index-YVIcYmuh.js` and `engine-worker.js`, byte-identical to a local build of `d97ff38`. Playwright passed **86/86 against the live URL**.
 - **Checks on `main`:** vitest 331/331; tsc clean; JS 245,896 B of 250,000 (**about 4.1 kB left**); Playwright 86/86; pytest 82 + 2 skipped.

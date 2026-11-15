@@ -1394,3 +1394,15 @@ Later: PR #30's own session merged main into it and merged it as d97ff38 (MERGE-
   survived the MERGE-06 merge.
 Next part / blocker owner: the other two members confirm W-01/W-02 and UI-17
 ```
+
+```text
+Part: G-12 - README "Team" section replaces "Authorship and credits"
+Owner: this cloud session's operator (a team member, wording and roles given by the member); SI-assisted (Claude
+  Code, Claude Opus 5.5)
+Status: VERIFIED (docs only)
+Scope completed: README.md section replaced (whole-team credit, one role per member, SI sentence kept); DECISIONS
+  G-12 (with the member's note on G-08..G-10); no link pointed to the old heading
+Checks run: npx tsc --noEmit; npx vitest run (docs-only change; run for completeness); /code-review low
+Results: tsc clean; vitest 331/331; review 0 findings; no code changed
+Next part / blocker owner: the other three members confirm their roles (G-12)
+```
