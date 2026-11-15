@@ -29,7 +29,9 @@ credited with the concept, the plan or any team decision.
 ## What it does
 
 - **AREA sheet (2D):** a north-up map of a 3 x 3 km area at the boxwork (4.790-4.840 S, 137.365-137.415 E,
-  planetocentric, east-positive) with the D2 orthophoto, a D1 hillshade and slope-screened terrain classes.
+  planetocentric, east-positive) with the D2 orthophoto, a D1 hillshade and slope-screened terrain classes. It opens
+  on the whole sheet; its keys zoom, fit the route or show the whole sheet, and its Layers panel switches the relief,
+  terrain classes and contours, sets their strength and explains every mark.
 - **Route engine (Web Worker):** time-optimal A* routes on a 2 m grid of slope-screened cells (slope limit 20 deg,
   Assumed, from the lunar xEVA concept of operations); leg lengths, climb and walking times as estimated ranges.
 - **Planned margin:** time left in the planned EVA at every route point after walking, stops, tasks, the walk back and
@@ -135,7 +137,10 @@ it.
   **Claude Opus 5.5** session directed by Eugene Ibañez Jr. reworked the orientation tour's timing and copy and the
   map's feedback on the branch `yujin/ux-polish` (UX-17 to UX-21; merged at his instruction, MERGE-03). From 15:14 the same
   session wrote the plain-language glossary of every variable on the branch `yujin/onboarding-terms` (UX-22, UX-23).
-  Details per task: `SI_LOG.md`.
+  From 17:09 that day a **Claude Opus 5.5** cloud session (Superpowers not installed) drafted the final 2D map
+  baseline on `claude/practical-johnson-hbw41e`: the whole-sheet load view, map keys, layer switches and key, load and
+  error states, renderer-free plan features for the later 3D view, and the tour's answers to navigation (MAP-01 to
+  MAP-08, TOUR-01, UX-24, UX-25; pull request #30, awaiting the team). Details per task: `SI_LOG.md`.
 - **What SI contributed:** drafted the data pipeline and its tests; the frame conversions and constants register;
   the route engine, margins and field-margin functions; the engine worker; the AREA sheet, console, profile, sources
   panel, briefing card and field view; accessibility and resilience tests; tier-2 contours and drill; this README and

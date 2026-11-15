@@ -78,3 +78,15 @@ word prints dark on white; longer plans continue on a second page without cuttin
 - Merged into `main` on the session operator's confirmation (MERGE-02). The other members' written review of the look (UI-01 to UI-16, MOT-04) is still to be recorded.
 - A person should print the card on paper once, and try the phone layout in daylight.
 - EL-01: the elevation grid is still requested by both the page and the engine worker (as on `main`).
+
+## Final 2D map baseline (MAP-01..MAP-08, TOUR-01; Sun 15 Nov 2026)
+
+- **Load view:** the whole 3 x 3 km sheet, habitat included, never closer than 4 m per pixel.
+- **Map keys:** one column of cream keys at the lower right: Zoom in, Zoom out, then (set apart) Fit the route / Show
+  the habitat and Show the whole sheet. Glides 220-420 ms ease-out; none under reduced motion.
+- **Layers panel:** opaque amber-on-black. One row per layer (switch, swatch, source line), the strength slider, the
+  Tier 2 switches, then the map key, whose terrain swatches are drawn from the layer's own tiles.
+- **Marks:** habitat diamond with the word HABITAT; one paper chevron per leg on the route; stops unchanged.
+- **Messages:** on wide windows the engine message sits under the hint row at the sheet's left; on phones it docks at
+  the bottom. Loading and errors are shown inside the sheet.
+- **Tour:** a Start over key in the card head; the progress bar's segments jump to their card.

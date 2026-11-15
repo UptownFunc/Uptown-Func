@@ -1249,6 +1249,34 @@ Checks: local build of f1fd37f -> assets/index-3s757jEt.js; the live site served
 Next part / blocker owner: the team (HANDOFF 15:10 section 3); Data and Science read src/app/glossary.ts
 ```
 
+```text
+Part: FINAL-2D - final 2D map baseline (MAP-01..MAP-08), tour navigation (TOUR-01), empty states (UX-24, UX-25)
+Owner: session operator (cloud session from the claude.ai web app; member not named); SI-assisted (Claude Code, Claude Opus 5.5)
+Status: VERIFIED on the branch claude/practical-johnson-hbw41e; NOT merged (team approval required, MERGE-05)
+Scope completed: load view frames the whole sheet with the habitat; map keys (zoom, fit route, whole sheet); layer
+  switches and strength; map key; renderer-free plan features and layer state for the 3D upgrade; in-sheet loading and
+  error states with Try again; tour opens on the current step, follows navigation, Start over, progress jumps, resize;
+  empty HUD/assessment lead to the map; profile readout on a laptop. No 3D code. No engine, contract, constant,
+  dataset, pipeline or value change.
+Files changed: src/map/{AreaSheet.tsx,planLayer.ts,view.ts,layers.ts (new),planGeometry.ts (new),mapFinal.test.ts (new)},
+  src/app/{App.tsx,Tutorial.tsx,AssessPanel.tsx,styles.css}, src/field/FieldView.tsx, src/briefing/BriefingView.tsx (one
+  caption), e2e/{helpers.ts,map-final.spec.ts (new),audit.spec.ts,bureau.spec.ts,contours.spec.ts}; logs
+Checks run (exact commands), cloud container, Node 22.23.4, fresh npm ci:
+  npx vitest run ; npx tsc --noEmit ; rm -rf dist && npm run build && node scripts/bundle-size.mjs ;
+  PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome npx playwright test --trace off ;
+  (cd pipeline && ../.venv/bin/python -m pytest) ; .venv/bin/python scripts/licences.py | diff -q - docs/licences.md
+Results at ab0ff2b: vitest 33 files 327/327 (11 new); tsc clean; build OK; JS 245,635 B of 250,000 (AC-12);
+  Playwright 86/86 (10 new); pytest 82 passed, 2 skipped (gdal_contour not installed); licences: no difference.
+  Baseline on main c60d37e before the work: vitest 316/316, Playwright 76/76, JS 242,652 B (same script).
+  The map-only commit 7f5844f was also checked alone in a worktree: tsc clean, vitest 326/326, and the map, audit,
+  bureau, contour and tour specs 33/33.
+Known limitations: Design review of MAP-01..MAP-08 and TOUR-01 pending; screenshots inspected at 1440 x 900, 1024 x 768
+  and 390 x 844 (Chromium only); paper print not re-checked (the print spec passes); live site not checked from here.
+Review status: /code-review high of origin/main...ddbfad0: 7 findings, all fixed in ab0ff2b (R-30)
+Commit SHA: 7f5844f (map), ddbfad0 (tour, empty states), ab0ff2b (review fixes), plus the logs commit
+Next part / blocker owner: the team approves (or not) PR #30 for main (MERGE-05)
+```
+
 ## Phase-part completion record
 
 Copy this block for every phase part and update its table row above:
