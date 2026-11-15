@@ -175,7 +175,7 @@ Terrain download: terrain_class.uint8.bin 2 requests (up to 2 x 2.25 MB) -> 1 re
 Known limitations: EL-01 (elevation grid still requested twice, as on main); card not printed on paper; phone not
   checked in daylight; BUILD-01 needs the Route Engine owners' confirmation; G-08 (attribution wording) for the team
 Review status: /code-review high, R-25 in DECISIONS.md; human Design review pending
-Commit SHA: the commit after 62fa3bd on design/sharpwalk-ui-ux (recorded in HANDOFF.md by the following logs commit)
+Commit SHA: 9107c42 (audit fixes, tests and records), then a logs commit recording this SHA
 Next part / blocker owner: team (Design, Route Engine, Local Lead) reviews the branch; PR #24 was opened from the app by the operator
 ```
 

@@ -6,7 +6,7 @@ This file is the handoff between team members and Claude sessions. Keep it factu
 
 **Read this first if you work on the interface.** `main` is untouched.
 
-- **Branch:** `design/sharpwalk-ui-ux`, on top of 62fa3bd. Pushed to that branch only. Not merged. A pull request
+- **Branch:** `design/sharpwalk-ui-ux`, commit 9107c42 on top of 62fa3bd (plus a logs commit). Pushed to that branch only. Not merged. A pull request
   (#24) was opened from the Claude Code app by the operator during the session; this session opened none.
 - **Model:** Claude Fable 5.2 (configured and serving). Superpowers loaded; tests first; /code-review high (R-25).
 - **What changed:**
