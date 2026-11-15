@@ -1360,6 +1360,58 @@ Live site: assets/index-DIhEGVs4.js, engine-worker.js, the 3D chunk, cesium-1.14
 Next part / blocker owner: Data and Science confirm 3D-03 and 3D-04; Design reviews the 3D look; the team's submission
 ```
 
+```text
+Part: 3D-09 - relief lighting in the 3D view (3D-09, 3D-10, PERF-3D-09, E2E-08, R-35)
+Owner: session operator (cloud session from the claude.ai web app; member not named); SI-assisted (Claude Code, Claude Opus 5.5)
+Status: VERIFIED on the branch ccr-59efed41-jlwyn8 (from main bdd041b); NOT merged (after the G5 freeze: team approval needed)
+Scope completed: one Fabric globe material (facet normal from screen-space derivatives; Lambert with the D1 hillshade's
+  light, 315 deg / 45 deg, built in F6 through src/geo; black output with alpha, so one factor for R, G and B); tile-skirt
+  guard; one relief at a time (the hillshade image is off while lit; pickBase); "Relief lighting" key, off by default,
+  kept across 2D/3D; status line wording; phone key spacing. Nothing outside the lazy 3D chunk except 3D-scoped CSS.
+Files changed: src/map3d/relief.ts (new), src/map3d/relief.test.ts (new), src/map3d/TerrainView.tsx,
+  src/app/styles.css (3D keys only), e2e/map-3d.spec.ts; logs (DECISIONS, PHASES, HANDOFF, SI_LOG, CLAUDE.md V-16, README)
+Checks run (exact commands), cloud container, Node v22.23.4, Chromium /opt/pw-browsers/chromium (software WebGL):
+  npx tsc --noEmit ; npx vitest run ; npm run build && node scripts/bundle-size.mjs ;
+  PW_CHROMIUM=/opt/pw-browsers/chromium npx playwright test --reporter=line ;
+  PW_CHROMIUM=/opt/pw-browsers/chromium npx playwright test --project=3d --no-deps ;
+  PW_CHROMIUM=/opt/pw-browsers/chromium npx playwright test --project=3d --no-deps -g "relief lighting" --repeat-each=3 ;
+  PW_CHROMIUM=/opt/pw-browsers/chromium npx playwright test e2e/tour-timing.spec.ts --project=app --repeat-each=3 (branch, and main bdd041b in a worktree)
+Results (after the R-35 fixes): tsc clean; vitest 349/349 (37 files; 13 new); AC-12 app JavaScript 248,265 B of 250,000
+  (baseline 248,267); 3D chunk 7,569 B of 10,000 (baseline 6,738); CesiumJS vendor 2,112,862 B of 2,120,000, unmodified;
+  Playwright 3D project 10/10 (1 new); the new test 3/3 repeated; app project 85/86 on the full run (before R-32, which
+  touches only the lazy 3D chunk), the one failure the tour timing flake (FLAKE-01: 23/27 alone on this branch, 25/27 on main).
+Not run: pytest (no pipeline or data change; this container has no pipeline venv, rasterio missing); scripts/licences.py
+  (no dependency change).
+Render checks (scratch Playwright harness, not committed; frames read from the WebGL canvas): five cameras (home, two and
+  five zoom steps, low oblique turned 90 deg, overhead): lit with the Hillshade switch on = lit alone, max difference 0 at
+  all five; shade factor never above 1; chroma residual p99 1.2-1.3 levels; tile seam lines found, fixed by the skirt
+  guard and checked again; strength 0.5 / 0.4 / 0.3 compared, 0.4 chosen; terrain classes legible when lit; phone layout.
+Performance: PERF-3D-09 (+14 to 17 % per frame on software WebGL; idle costs nothing).
+Known limitations: 3D-10. Found, not fixed: 3D-BUG-01 (overlays missing after the tilt-to-overhead keys, pre-existing).
+Review status: /code-review medium (R-35; R-32 in the commit message): 8 findings; 5 code findings fixed (660a0c4), 2 log findings done here, 1 not
+  valid (reason recorded).
+Commit SHA: 4b88b1c (lighting), 660a0c4 (review fixes), plus the logs commit
+Next part / blocker owner: the team decides whether to merge after the freeze (it is opt-in and off by default); Design
+  reviews the look; Data and Science confirm the light and strength (V-16); 3D view owner: 3D-BUG-01; nobody has tested a GPU
+```
+
+```text
+Part: MERGE-10 - PR #41 (3D-09 relief lighting) merged into main
+Owner: session operator ("merge it to main"); SI-assisted (Claude Code, Claude Opus 5.5)
+Status: VERIFIED (live site not checked: the container's proxy refuses it, 403)
+Merge: main had moved to 49d852d (PRs #38, #40); merged into the branch as dd844a1 (log conflicts: both sides kept;
+  E2E-07/R-32 taken by main, V-15/R-33/MERGE-09 by open PR #39, so this work uses E2E-08, R-35, R-36, V-16, MERGE-10).
+  /code-review medium on the final diff (R-36): 5 fixed in ce720a8, 3 recorded with reasons. PR #41 merged as 6f06b62
+  (parents 49d852d, ce720a8); origin/main^{tree} == ce720a8^{tree}.
+Checks on the merged tree (commands as in the 3D-09 record): npx tsc --noEmit clean; npx vitest run 353/353 (38 files);
+  node scripts/bundle-size.mjs: app 249,570 B of 250,000 (430 B left), 3D chunk 7,609 B of 10,000, Cesium 2,112,862 B
+  of 2,120,000 (unmodified); Playwright full 99/99 (app 89 incl. tour timing, 3D 10) at dd844a1; after the R-36 fixes
+  (lazy 3D chunk only; entry and worker byte-identical apart from file names) --project=3d --no-deps 10/10.
+GitHub: Vercel preview deployment success; Vercel Preview Comments success; no conflicts.
+Next part / blocker owner: a person checks https://uptown-func.vercel.app serves the new build and opens 3D with the
+  Relief lighting key; Design reviews the look; Data and Science confirm V-16; 3D view owner: 3D-BUG-01
+```
+
 ## Phase-part completion record
 
 Copy this block for every phase part and update its table row above:
@@ -1491,6 +1543,19 @@ Results: tsc clean; vitest 340/340 (37 files); AC-12 249,567 B of 250,000 (433 B
   first trace colour read as the rail fading: changed to ink with an amber tip)
 Next part / blocker owner: Design confirms ASSESS-01 (the one deliberate loop) and the HUD-01 look; the team decides
   HUD-02 (minutes in the label)
+```
+
+```text
+Part: ORIGIN-01 - the team's concept-origin account in SI_LOG.md and the README
+Owner: this cloud session's operator (a team member wrote the account); SI-assisted (Claude Code, Claude Opus 5.5;
+  wording only)
+Status: VERIFIED (docs only)
+Scope completed: SI_LOG.md concept-origin section filled from the account; README SI use opens with the account;
+  DECISIONS ORIGIN-01 keeps the original text verbatim
+Checks run: npx tsc --noEmit; npx vitest run (docs-only change; run for completeness); /code-review low
+Results: tsc clean; vitest 340/340 (37 files); /code-review low: 1 finding (this placeholder), fixed; no code changed
+Next part / blocker owner: the other three members confirm the account; the team states whether SI was used while
+  forming the concept or writing the plan, and the brainstorm date if known
 ```
 
 ```text
