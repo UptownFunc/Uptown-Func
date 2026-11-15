@@ -3,7 +3,8 @@
 // stamps it with that plan version. When the plan changes the card shows STALE at once and cannot be printed until it
 // is regenerated. Print layout: A5 portrait, two columns, 12 mm margins, black on white (plan 9.2).
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { BadgeCheck, FileText, LoaderCircle, Mountain, Printer, RefreshCw } from "lucide-react";
+import { FileText, LoaderCircle, Mountain, Printer, RefreshCw } from "lucide-react";
+import { stampSlam } from "../app/fx";
 import type { PlanOutput } from "../engine/planner";
 import type { MapSnapshot } from "../map/snapshot";
 import { MarginState } from "../app/MarginState";
@@ -22,6 +23,13 @@ export interface BriefingViewProps {
   readonly confirmed?: string | null;
   readonly onConfirm?: (version: string | null) => void;
   readonly next?: ReactNode;
+}
+
+/** The rubber stamp lands once when the briefing is confirmed (Anime.js); screen only, never printed. */
+function Stamp() {
+  const el = useRef<HTMLDivElement>(null);
+  useEffect(() => { if (el.current) stampSlam(el.current); }, []);
+  return <div ref={el} className="briefed" aria-hidden="true"><span>Briefed</span></div>;
 }
 
 const ACKS = [
@@ -80,7 +88,7 @@ export function BriefingView({ output, snapshot, hidden = false, rover = null, c
         <h1>Brief the crew</h1>
         <p className="lede">One card, built from the engine's current plan and stamped with its version. Any plan change marks it stale until it is rebuilt.</p>
       </header>
-      <div className="briefing-actions">
+      <div className="briefing-actions" data-tour="brief">
         <button type="button" className="secondary" onClick={() => void generate()} disabled={!output || busy}>
           {busy ? <LoaderCircle size={16} strokeWidth={1.5} className="spin" aria-hidden="true" /> : <RefreshCw size={16} strokeWidth={1.5} aria-hidden="true" />}
           {card ? "Regenerate from current plan" : "Generate card from current plan"}
@@ -100,7 +108,7 @@ export function BriefingView({ output, snapshot, hidden = false, rover = null, c
         </div>
       ) : (
         <article ref={cardRef} className={`card${stale ? " card-stale" : ""}`} data-testid="briefing-card">
-          {isConfirmed && <div className="briefed" aria-hidden="true"><BadgeCheck size={16} strokeWidth={2} />Briefed</div>}
+          {isConfirmed && <Stamp />}
           {stale && <div className="stale-stamp" role="alert" data-testid="stale">STALE - plan {current ?? "none"} differs from card plan {card.model.versionHash}</div>}
           <header className="card-head">
             <strong>SharpWalk traverse briefing</strong>

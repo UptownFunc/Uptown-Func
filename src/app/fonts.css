@@ -1,8 +1,14 @@
 /* SI-assisted: drafted with Claude Code (Claude Opus 5.5) on design/sharpwalk-ui-ux; human Design review pending.
- * UI-08 type system: Geist (interface and display; its italic carries estimates only) and Geist Mono (coordinates,
- * plan hashes and other technical identifiers only). Packages @fontsource-variable/geist 5.3.0 and
- * @fontsource-variable/geist-mono 5.3.0: exact pins, SIL Open Font Licence 1.1, no install scripts, no dependencies,
- * font-display: swap, served from our origin. Numbers use tabular figures (styles.css). System stacks are the fallback. */
-@import "@fontsource-variable/geist/wght.css";
-@import "@fontsource-variable/geist/wght-italic.css";
-@import "@fontsource-variable/geist-mono/wght.css";
+ * UI-13 "Bureau" type system, all SIL Open Font Licence 1.1, exact pins, no install scripts, served from our origin:
+ *   Fraunces (variable: weight, optical size, SOFT, WONK) for display: the soft 1970s serif of the office signage;
+ *   Barlow Semi Condensed for the interface, labels and body (its italic carries estimates only);
+ *   VT323 for what a CRT or a segment display would show: coordinates, readouts, counters.
+ * Packages: @fontsource-variable/fraunces 5.3.0, @fontsource/barlow-semi-condensed 5.3.0, @fontsource/vt323 5.3.0. */
+@import "@fontsource-variable/fraunces/full.css";
+@import "@fontsource/barlow-semi-condensed/400.css";
+@import "@fontsource/barlow-semi-condensed/400-italic.css";
+@import "@fontsource/barlow-semi-condensed/500.css";
+@import "@fontsource/barlow-semi-condensed/600.css";
+@import "@fontsource/barlow-semi-condensed/600-italic.css";
+@import "@fontsource/barlow-semi-condensed/700.css";
+@import "@fontsource/vt323/400.css";

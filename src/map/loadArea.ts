@@ -63,14 +63,20 @@ export async function loadArea(base: string): Promise<LoadedArea> {
       return { ok: false, reason: e instanceof Error ? e.message : `${s.grid.path} could not be loaded` };
     }
   };
-  const [coverage, contours, skyGrid] = await Promise.all([
+  // UI-11: the terrain classes drive the cursor hint only; a missing file leaves the hint unknown, never the map broken.
+  const cg = (report.grids as GridMeta[]).find((g) => g.name === "terrain_class");
+  const loadClasses = async (): Promise<Uint8Array | undefined> => {
+    try { return cg && cg.dtype === "uint8" ? new Uint8Array(await (await get(cg.path)).arrayBuffer()) : undefined; } catch { return undefined; }
+  };
+  const [coverage, contours, skyGrid, classes] = await Promise.all([
     loadOptional(base, raw.coverage?.path, CoverageCollection, "coverage"),
     loadOptional(base, raw.contours?.path, ContourCollection, "contours"),
     loadSky(),
+    loadClasses(),
   ]);
   return {
     grid: { origin, rows: report.rows, cols: report.cols, cell_m: report.cellSize_m, elevation,
-      elevationSource: `D1, ${report.cellSize_m} m F6 grid` },
+      elevationSource: `D1, ${report.cellSize_m} m F6 grid`, ...(classes && classes.length === report.rows * report.cols ? { classes } : {}) },
     display,
     coverage,
     contours,

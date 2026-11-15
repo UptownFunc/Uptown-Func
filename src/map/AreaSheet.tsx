@@ -2,6 +2,7 @@
 // Plan 7.8 AREA level of the 2D sheet: D2 base, D1 hillshade multiplied, terrain classes, scale bar, cursor readout.
 // F7 is display only; the readout's east/north and elevation come from the F6 grid through src/geo.
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import OlMap from "ol/Map";
 import View from "ol/View";
 import ImageLayer from "ol/layer/Image";
@@ -31,6 +32,8 @@ import { createTerrainLayer } from "./terrainLayer";
 import { skySampleAt, type SkySampler } from "./skySample";
 import type { Quantity } from "../contracts";
 import { Layers, MousePointerClick } from "lucide-react";
+import Overlay from "ol/Overlay";
+import { terrainHint } from "./terrainHint";
 
 /** Displays a Quantity: unknown stays "unknown" (CLAUDE.md); one decimal for metres. */
 function fmt(q: Quantity): string {
@@ -72,12 +75,27 @@ export interface AreaSheetProps {
   readonly tools?: ReactNode;
   /** One line telling the user what a click on the sheet does in the current step. */
   readonly hint?: string;
+  /** UI-11 point and click: a click on a stop marker selects it instead of adding a stop. */
+  readonly onSelectStop?: ((stopId: string) => void) | undefined;
+  readonly selectedStop?: string | null;
+  /** A card pinned to the selected stop (an OpenLayers overlay keeps it on the stop while the map moves). */
+  readonly popover?: ReactNode;
+  /** Cursor tag: true shows the terrain-class hint under the pointer; a string replaces it (e.g. move mode). */
+  readonly cursorHint?: boolean | string;
 }
 
 const cursorStyle = new Style({ image: new RegularShape({ points: 4, radius: 11, radius2: 0, angle: 0, stroke: new Stroke({ color: "#f3eee4", width: 2 }) }) });
 
-export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hoverIndex = null, onHoverIndex, onDatasets, onCursor, contours = null, showSky = false, onSky, tools, hint }: AreaSheetProps) {
+export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hoverIndex = null, onHoverIndex, onDatasets, onCursor, contours = null, showSky = false, onSky, tools, hint, onSelectStop, selectedStop = null, popover = null, cursorHint = false }: AreaSheetProps) {
   const [layersOpen, setLayersOpen] = useState(false);
+  const selectRef = useRef(onSelectStop);
+  selectRef.current = onSelectStop;
+  // The overlay element belongs to OpenLayers (it moves it into its own container); React renders into it by portal.
+  const popEl = useRef<HTMLDivElement | null>(null);
+  popEl.current ??= Object.assign(document.createElement("div"), { className: "pop-anchor" });
+  const overlay = useRef<Overlay | null>(null);
+  /** Pointer position over the map (CSS px within the sheet) for the cursor tag; null when the pointer is off it. */
+  const [pointer, setPointer] = useState<{ x: number; y: number } | null>(null);
   const target = useRef<HTMLDivElement>(null);
   const area = useRef<LoadedArea | null>(null);
   const planLayerRef = useRef<ReturnType<typeof createPlanLayer> | null>(null);
@@ -230,10 +248,17 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
       snapRef.current?.(() => snapshotMap(m, planLayer.current, a.grid.origin.lat,
         () => [...a.display.layers.filter((l) => !failed.current.has(l.id)).map((l) => l.name),
           ...(a.contours.ok ? [contourLegend(a.contours.collection.properties)] : [])]));
+      overlay.current = new Overlay({ element: popEl.current!, positioning: "bottom-center", offset: [0, -24], stopEvent: true });
+      map.addOverlay(overlay.current);
       map.on("singleclick", (e) => {
+        // A click on a stop marker selects that stop (UI-11); anywhere else it is a pick for a new stop.
+        const hit = selectRef.current ? m.forEachFeatureAtPixel(e.pixel, (f) => (f.get("kind") === "stop" ? (f.get("stopId") as string) : undefined),
+          { hitTolerance: 6, layerFilter: (l) => l === planLayer.current }) : undefined;
+        if (hit) { selectRef.current?.(hit); return; }
         const p = f7ToF1({ frame: "F7", x: e.coordinate[0]!, y: e.coordinate[1]! }, 0);
         pickRef.current?.({ lat: p.lat, lon: p.lon });
       });
+      m.getViewport()?.addEventListener("pointerleave", () => setPointer(null));
       // Readouts are throttled to one per animation frame; the grid frame is cached in src/geo/grid.
       let pending: number[] | null = null;
       map.on("pointermove", (e) => {
@@ -243,6 +268,8 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
           raf = 0;
           if (!pending || !area.current) return;
           setReadout(readoutAt(pending, area.current.grid));
+          const px = m.getPixelFromCoordinate(pending);
+          if (px) setPointer({ x: px[0]!, y: px[1]! });
           // Nearest profile sample within 10 screen pixels drives the shared scrub marker (UX-06).
           const xy = profXY.current, tol = 10 * (m.getView().getResolution() ?? 1);
           let best = -1, bestD = tol * tol;
@@ -258,12 +285,21 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
     return () => { cancelled = true; if (raf) cancelAnimationFrame(raf); map?.setTarget(undefined); };
   }, [dataUrl]);
 
+  // The pinned stop card follows the selected stop (and drops when the stop is gone).
+  useEffect(() => {
+    const a = area.current, o = overlay.current, cell = selectedStop ? plan?.geometry.stopCells[selectedStop] : undefined;
+    if (!a || !o) return;
+    if (cell === undefined || !popover) { o.setPosition(undefined); return; }
+    const p = f1ToF7(cellCentreF1({ r: Math.floor(cell / a.grid.cols), c: cell % a.grid.cols }, a.grid));
+    o.setPosition([p.x, p.y]);
+  }, [selectedStop, plan, !!popover]); // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     if (!area.current) return;
-    drawPlan(planLayer.current, plan, area.current.grid);
+    drawPlan(planLayer.current, plan, area.current.grid, selectedStop);
     profXY.current = profileXY(plan, area.current.grid);
     lastHover.current = null; // indices refer to the previous profile
-  }, [plan]);
+  }, [plan, selectedStop]);
 
   useEffect(() => {
     if (area.current && target.current) target.current.dataset.contourLines = String(drawContours(contourLayer.current!, contours, area.current.grid));
@@ -309,6 +345,12 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
         <div className="map" ref={target} data-testid="area-map" tabIndex={0} onKeyDownCapture={onKeyDown} role="application"
           aria-label="Traverse sheet. Arrow keys move a cursor 10 m, Shift plus arrow 100 m; Enter adds a stop at the cursor." />
         <div className="sr-only" aria-live="polite" data-testid="cursor-announce">{announce}</div>
+        {createPortal(popover, popEl.current)}
+        {cursorHint && pointer && readout && (() => {
+          const h = typeof cursorHint === "string" ? { kind: "move" as const, text: cursorHint } : terrainHint(readout.terrainClass);
+          return <div className="cursor-tag" data-kind={h.kind} data-testid="cursor-tag" style={{ transform: `translate(${pointer.x + 18}px, ${pointer.y + 18}px)` }}>
+            <span className="lamp" aria-hidden="true" />{h.text}</div>;
+        })()}
         {contours?.drill_s != null && (
           <div className="sim-banner" role="note" data-testid="simulation-banner">
             SIMULATION · SIMULATED DRILL · ASSUMED {Math.round(contours.drill_s / 60)} MIN WARNING · not a live alert, not a measurement

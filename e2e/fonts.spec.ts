@@ -1,11 +1,11 @@
-// SI-assisted: drafted with Claude Code (Claude Opus 5.5); rewritten for the UI-08 type system on design/sharpwalk-ui-ux.
-// UI-08: Geist (interface and display) and Geist Mono (coordinates and technical identifiers) load from this origin and
-// are what the console renders with; the mono's digits are equal width; if the files fail, the console falls back to
-// system fonts and keeps working.
+// SI-assisted: drafted with Claude Code (Claude Opus 5.5); rewritten for the UI-13 "Bureau" type system on design/sharpwalk-ui-ux.
+// UI-13: Fraunces (display), Barlow Semi Condensed (interface) and VT323 (machine readouts: coordinates, counters) load
+// from this origin and are what the console renders with; the readout digits are equal width; if the files fail, the
+// console falls back to system fonts and keeps working.
 import { expect, test, type Page } from "@playwright/test";
 import { goStep, openStep } from "./helpers";
 
-const FAMILIES = ["Geist Variable", "Geist Mono Variable"];
+const FAMILIES = ["Fraunces Variable", "Barlow Semi Condensed", "VT323"];
 
 /** Every UI-02 FontFace the page knows, with its load status (read from document.fonts after it settles). */
 async function faces(page: Page) {
@@ -24,12 +24,12 @@ async function widths(page: Page, text: string, fonts: string[]) {
   }, { text, fonts });
 }
 
-test("Geist and Geist Mono load from this origin and are what the console renders with", async ({ page }) => {
+test("Fraunces, Barlow Semi Condensed and VT323 load from this origin and are what the console renders with", async ({ page }) => {
   const fontResponses: { url: string; status: number }[] = [];
   page.on("response", (r) => { if (/\.woff2?(\?|$)/.test(r.url())) fontResponses.push({ url: r.url(), status: r.status() }); });
   await openStep(page, "map");
   await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
-  await page.getByTestId("area-map").hover(); // the status line (Geist Mono) appears with the pointer
+  await page.getByTestId("area-map").hover(); // the status line (VT323) appears with the pointer
   await expect(page.getByTestId("status-line")).toContainText("elev");
 
   const all = await faces(page);
@@ -40,19 +40,19 @@ test("Geist and Geist Mono load from this origin and are what the console render
   expect(fontResponses.length).toBeGreaterThan(0);
   for (const r of fontResponses) { expect(r.url.startsWith(origin), r.url).toBe(true); expect(r.status).toBe(200); }
 
-  await expect(page.locator("body")).toHaveCSS("font-family", /^"Geist Variable"/);
+  await expect(page.locator("body")).toHaveCSS("font-family", /^"Barlow Semi Condensed"/);
   await expect(page.locator("body")).toHaveCSS("font-variant-numeric", "tabular-nums"); // measurements and telemetry line up
-  await expect(page.getByTestId("status-line")).toHaveCSS("font-family", /^"Geist Mono Variable"/);
-  await expect(page.locator(".side-head h1")).toHaveCSS("font-family", /^"Geist Variable"/);
+  await expect(page.getByTestId("status-line")).toHaveCSS("font-family", /^VT323|^"VT323"/);
+  await expect(page.locator(".side-head h1")).toHaveCSS("font-family", /^"Fraunces Variable"/);
 
   const [sans, sansFallback, mono, monoFallback] = await widths(page, "Slope-screened route 0123456789", [
-    '15px "Geist Variable", sans-serif', "15px sans-serif", '13px "Geist Mono Variable", monospace', "13px monospace"]);
+    '500 15px "Barlow Semi Condensed", sans-serif', "500 15px sans-serif", '13px VT323, monospace', "13px monospace"]);
   expect(sans).not.toBe(sansFallback);
   expect(mono).not.toBe(monoFallback);
 
-  // Coordinates use Geist Mono: every digit has the same advance.
-  const w = await widths(page, "0", ['13px "Geist Mono Variable"']);
-  for (const d of "123456789") expect((await widths(page, d, ['13px "Geist Mono Variable"']))[0], `Geist Mono digit ${d}`).toBeCloseTo(w[0]!, 3);
+  // Coordinates use VT323: every digit has the same advance.
+  const w = await widths(page, "0", ["13px VT323"]);
+  for (const d of "123456789") expect((await widths(page, d, ["13px VT323"]))[0], `VT323 digit ${d}`).toBeCloseTo(w[0]!, 3);
 });
 
 test("if the font files cannot load, the console falls back to system fonts and keeps working", async ({ page }) => {

@@ -2,7 +2,23 @@
 
 This file is the handoff between team members and Claude sessions. Keep it factual and current. A new session must read this file before touching code.
 
-## Latest session (Sun 15 Nov 2026, 01:58-02:40 Asia/Manila): "Frosted terrain" redesign, design branch, NOT merged
+## Latest session (Sun 15 Nov 2026, until about 11:30 Asia/Manila): "Bureau" redesign, design branch, NOT merged
+
+**Read this first if you work on the interface.** `main` is untouched.
+
+- **Branch:** `design/sharpwalk-ui-ux`, one commit on top of 6380209. Pushed to that branch only; no PR, as the operator asked.
+- **What changed:** "Bureau" (UI-13) replaces Frosted terrain on this branch: walnut, cream index cards and forms, keys
+  with travel, lamps, the real terrain on a CRT, Fraunces / Barlow Semi Condensed / VT323. New: point and click on the
+  map (UI-11: cursor tag, stop card with Rename/Move/Delete, move mode), an 8-card orientation tour (UI-12), a
+  return-margin meter (UI-14). Motion 14.11.1 and Anime.js 4.5.0 installed at the operator's request (MOT-03).
+  Records: `docs/design/visual-system.md`, `docs/design/screenshots/` (now also `desktop-8-orientation`,
+  `desktop-9-stop-card`), DECISIONS UI-11..UI-14, MOT-03, R-24, E2E-03, B-01.
+- **Checks:** vitest 303/303; tsc clean; build OK; Playwright 57/57 (new `e2e/bureau.spec.ts`); pytest 82 + 2 skipped; licences regenerated.
+- **Blockers before any PR:** B-01 (about 313.6 kB vs 250 KB; Motion + Anime.js added about 55 kB); MOT-03 (Anime.js vs
+  the CLAUDE.md rule); team approval of UI-11..UI-14; PRINT-02.
+- **Next:** team review of the look; if kept, cut bundle size (drop Anime.js or lazy-load both libraries; Zod into the worker).
+
+## Earlier session (Sun 15 Nov 2026, 01:58-02:40 Asia/Manila): "Frosted terrain" redesign, design branch, NOT merged
 
 **Read this first if you work on the interface.** `main` is untouched.
 

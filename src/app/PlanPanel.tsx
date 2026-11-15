@@ -29,6 +29,9 @@ export interface PlanPanelProps {
   /** Plan 6.7: the nearest 20 m sky-obstruction value at a stop, given only while the sky layer is shown. */
   readonly skyAt?: SkySampler | null;
   readonly next?: ReactNode;
+  /** UI-11: the stop picked on the map (its card opens and is highlighted); picking a card picks the stop on the map. */
+  readonly picked?: string | null;
+  readonly onPick?: (stopId: string) => void;
 }
 
 /** The K-01 note, shown wherever walking times are (Map and Assess). */
@@ -44,7 +47,7 @@ export function AssumedNote({ output }: { output: PlanOutput }) {
   );
 }
 
-export function PlanPanel({ output, onDeleteStop, onEditStop, onSetTime, onOpenSource, onMoveToCursor, skyAt, next }: PlanPanelProps) {
+export function PlanPanel({ output, onDeleteStop, onEditStop, onSetTime, onOpenSource, onMoveToCursor, skyAt, next, picked = null, onPick }: PlanPanelProps) {
   if (!output) return <aside className="side" aria-label="Plan"><div className="side-scroll"><p className="unknown">Loading the route engine…</p></div></aside>;
   const { plan, geometry } = output;
   const name = (id: string) => (id === "habitat" ? "Habitat" : plan.stops.find((s) => s.id === id)?.letter ?? id);
@@ -54,7 +57,7 @@ export function PlanPanel({ output, onDeleteStop, onEditStop, onSetTime, onOpenS
     : geometry.unreachable.length > 0 ? "a leg has no slope-screened path."
     : "EVA duration, task, contingency and stop times are Assumed inputs not yet set on the Planner step.";
   return (
-    <aside className="side" aria-label="Plan">
+    <aside className="side" aria-label="Plan" data-tour="route">
       <div className="side-scroll">
       <header className="side-head">
         <h1>Route</h1>
@@ -70,10 +73,10 @@ export function PlanPanel({ output, onDeleteStop, onEditStop, onSetTime, onOpenS
       ) : (
         <ol className="stops">
           {plan.stops.map((s) => (
-            <li key={s.id} className="stop">
+            <li key={s.id} className="stop" data-picked={picked === s.id || undefined}>
               <div className="stop-head">
                 <span className="letter" aria-hidden="true">{s.letter}</span>
-                <span className="stop-name">{s.name}</span>
+                <button type="button" className="stop-name" onClick={() => onPick?.(s.id)} title="Show this stop on the map">{s.name}</button>
                 <span className="stop-dur"><QuantityText q={s.duration} onOpen={onOpenSource} label={`Stop ${s.letter} duration`} /></span>
                 <span className="stop-acts">
                   <button type="button" className="textbtn" disabled={!onMoveToCursor} onClick={() => onMoveToCursor?.(s.id)} aria-label={`Move stop ${s.letter} to the map cursor`}
@@ -82,7 +85,7 @@ export function PlanPanel({ output, onDeleteStop, onEditStop, onSetTime, onOpenS
                     <Trash2 {...ICON_SM} aria-hidden="true" /></button>
                 </span>
               </div>
-              <details className="stop-more">
+              <details className="stop-more" open={picked === s.id || undefined}>
                 <summary>Duration, name and tasks{s.tasks.length ? ` (${s.tasks.length})` : ""}</summary>
                 <TimeRow id="stop_duration" stopId={s.id} label={`Stop ${s.letter} duration`} onSet={onSetTime}
                   current={plan.assumptions.find((a) => a.id === `A-stop_duration-${s.id}`)}

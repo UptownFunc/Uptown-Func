@@ -81,7 +81,7 @@ test("every step of the guided flow has no serious or critical axe violations", 
   await page.goto("/?preset=none");
   await expect(page.getByRole("heading", { name: /Plan the walk/ })).toBeVisible();
   expect(await serious(page), "welcome").toEqual([]);
-  await page.getByRole("button", { name: /Begin mission setup/ }).click();
+  await page.getByRole("button", { name: /Skip to mission setup/ }).click();
   for (const step of ["Setup", "Planner", "Assess", "Brief"] as const) {
     await goStep(page, step);
     expect(await serious(page), step).toEqual([]);

@@ -2,7 +2,9 @@
 // Assess step: the planned return margin as the one large figure, the traverse as a ladder of legs and stops (each
 // number a Quantity that opens its source), and the simulated drill. Margins are estimates under stated assumptions:
 // the word set is OK / NEAR LIMIT / OVER with shape and colour, and there is no SAFE state.
-import type { ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
+import { ZONES, arc, needleAngle } from "./gauge";
+import { swingNeedle } from "./fx";
 import type { Quantity } from "../contracts";
 import type { PlanOutput } from "../engine/planner";
 import { CONSTANTS } from "../constants";
@@ -12,6 +14,23 @@ import { AssumedNote } from "./PlanPanel";
 import { QuantityText } from "./QuantityText";
 
 const RANGE = CONSTANTS.walkSpeedRange;
+const ZONE_WORD = { OVER: "OVER", NEAR_LIMIT: "NEAR LIMIT", OK: "OK" } as const;
+
+/** The return-margin meter: zones by word and colour, needle at the slow-bound margin (UI-14). */
+function Meter({ angle, live }: { angle: number; live: boolean }) {
+  const needle = useRef<SVGGElement>(null);
+  useEffect(() => { if (needle.current) swingNeedle(needle.current, angle); }, [angle]);
+  return (
+    <svg className="meter" viewBox="0 0 240 140" role="img" aria-label={live ? "Return-margin meter; the needle reads the slow-bound margin" : "Return-margin meter at rest: margin unknown"}>
+      {ZONES.map((z) => <path key={z.state} className={`zone zone-${z.state}`} d={arc(120, 122, 92, z.from, z.to)} />)}
+      {ZONES.map((z) => {
+        const mid = ((z.from + z.to) / 2) * (Math.PI / 180);
+        return <text key={z.state} className={`zone-word zone-${z.state}`} x={120 + 64 * Math.sin(mid)} y={126 - 64 * Math.cos(mid)} textAnchor="middle">{ZONE_WORD[z.state]}</text>;
+      })}
+      <g ref={needle} className="needle" data-live={live}><line x1="120" y1="122" x2="120" y2="38" /><circle cx="120" cy="122" r="7" /></g>
+    </svg>
+  );
+}
 
 export function AssessPanel({ output, onOpenSource, drillMin, onDrillMin, busy, next }: {
   output: PlanOutput | null; onOpenSource: (q: Quantity) => void; drillMin: number | null; onDrillMin: (m: number | null) => void;
@@ -22,6 +41,8 @@ export function AssessPanel({ output, onOpenSource, drillMin, onDrillMin, busy, 
   const last = plan.plannedMargins[plan.plannedMargins.length - 1];
   const ticks = geometry.marginTicks.map((t) => t.kind);
   const stopOf = (id: string) => plan.stops.find((s) => s.id === id);
+  const tEva = plan.assumptions.find((a) => a.id === "A-T_EVA")?.value ?? null;
+  const low = plan.endMargin.valueClass === "unknown" ? null : plan.endMargin.low ?? plan.endMargin.value;
   return (
     <aside className="side assess" aria-label="Assessment">
       <div className="side-scroll">
@@ -29,7 +50,8 @@ export function AssessPanel({ output, onOpenSource, drillMin, onDrillMin, busy, 
           <h1>Return margin</h1>
           <p>What the walk leaves of the EVA, with the route as planned.</p>
         </header>
-        <div className="verdict-block" data-testid="assess-margin">
+        <div className="verdict-block" data-testid="assess-margin" data-tour="gauge">
+          <Meter angle={needleAngle(low, tEva)} live={low !== null && tEva !== null} />
           <span className="k">Planned return margin</span>
           <p className="big-figure flash" key={plan.versionHash}><QuantityText q={plan.endMargin} onOpen={onOpenSource} label="Planned return margin" /></p>
           {last ? <p className="big-state"><MarginState state={last.state} /></p> : <p className="note">Unknown until a reachable stop and every plan time are set.</p>}

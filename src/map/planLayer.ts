@@ -30,24 +30,30 @@ const overRouteStyle = [
 const tickStyle = (kind: "NEAR_LIMIT" | "OVER") => new Style({
   image: new RegularShape({ points: 2, radius: 12, angle: Math.PI / 2, stroke: new Stroke({ color: kind === "OVER" ? OVER : CAUTION, width: 4 }) }),
   text: new Text({ text: kind === "OVER" ? "margin 0 here · OVER beyond" : "margin 10% here", offsetY: -16,
-    font: "600 11px 'Geist Variable', system-ui", fill: new Fill({ color: INK }), backgroundFill: new Fill({ color: PAPER }), padding: [1, 3, 1, 3] }),
+    font: "600 11px 'Barlow Semi Condensed', sans-serif", fill: new Fill({ color: INK }), backgroundFill: new Fill({ color: PAPER }), padding: [1, 3, 1, 3] }),
 });
 const markerStyle = new Style({ image: new CircleStyle({ radius: 6, fill: new Fill({ color: PAPER }), stroke: new Stroke({ color: INK, width: 2 }) }) });
 
 const habitatStyle = new Style({
   image: new RegularShape({ points: 4, radius: 9, angle: Math.PI / 4, fill: new Fill({ color: PAPER }), stroke: new Stroke({ color: INK, width: 2 }) }),
-  text: new Text({ text: "H", font: "600 11px 'Geist Variable', system-ui", fill: new Fill({ color: INK }) }),
+  text: new Text({ text: "H", font: "600 11px 'Barlow Semi Condensed', sans-serif", fill: new Fill({ color: INK }) }),
 });
 const stopStyle = (letter: string) => new Style({
   image: new CircleStyle({ radius: 12, fill: new Fill({ color: PLAN }), stroke: new Stroke({ color: PAPER, width: 2.5 }) }),
-  text: new Text({ text: letter, font: "700 12px 'Geist Variable', system-ui", fill: new Fill({ color: PAPER }) }),
+  text: new Text({ text: letter, font: "700 12px 'Barlow Semi Condensed', sans-serif", fill: new Fill({ color: PAPER }) }),
 });
+
+/** UI-11: the stop picked on the map carries a wider amber ring, so the pinned card's anchor is unmistakable. */
+const selectedStopStyle = (letter: string) => [
+  new Style({ image: new CircleStyle({ radius: 19, fill: new Fill({ color: "rgba(255, 179, 71, 0.22)" }), stroke: new Stroke({ color: "#ffb347", width: 2 }) }) }),
+  stopStyle(letter),
+];
 
 export function createPlanLayer(): VectorLayer<VectorSource> {
   return new VectorLayer({ source: new VectorSource(), className: "layer-plan" });
 }
 
-export function drawPlan(layer: VectorLayer<VectorSource>, out: PlanOutput | null, grid: GridDef): void {
+export function drawPlan(layer: VectorLayer<VectorSource>, out: PlanOutput | null, grid: GridDef, selected: string | null = null): void {
   const src = layer.getSource()!;
   src.clear();
   if (!out) return;
@@ -91,7 +97,7 @@ export function drawPlan(layer: VectorLayer<VectorSource>, out: PlanOutput | nul
     const cell = out.geometry.stopCells[s.id];
     if (cell === undefined) continue;
     const f = new Feature({ geometry: new Point(xy(cell)), kind: "stop", stopId: s.id });
-    f.setStyle(stopStyle(s.letter));
+    f.setStyle(s.id === selected ? selectedStopStyle(s.letter) : stopStyle(s.letter));
     features.push(f);
   }
   src.addFeatures(features);
@@ -118,13 +124,13 @@ export interface ContourDisplay { readonly levels: readonly ContourLevel[]; read
 
 const contourStyle = (label: string) => new Style({
   stroke: new Stroke({ color: "rgba(243, 238, 228, 0.7)", width: 1 }),
-  text: new Text({ text: label, placement: "line", font: "10px 'Geist Mono Variable', monospace", fill: new Fill({ color: PAPER }),
+  text: new Text({ text: label, placement: "line", font: "10px VT323, monospace", fill: new Fill({ color: PAPER }),
     stroke: new Stroke({ color: INK, width: 3 }) }),
 });
 const drillStyle = (min: number) => [
   new Style({ stroke: new Stroke({ color: INK, width: 6 }) }),
   new Style({ stroke: new Stroke({ color: PAPER, width: 3, lineDash: [10, 5] }),
-    text: new Text({ text: `SIMULATED DRILL · ASSUMED ${min} MIN WARNING`, placement: "line", font: "600 11px 'Geist Variable', system-ui",
+    text: new Text({ text: `SIMULATED DRILL · ASSUMED ${min} MIN WARNING`, placement: "line", font: "600 11px 'Barlow Semi Condensed', sans-serif",
       fill: new Fill({ color: INK }), stroke: new Stroke({ color: PAPER, width: 4 }) }) }),
 ];
 

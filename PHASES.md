@@ -136,6 +136,30 @@ Deadline still Sun 15 Nov 23:59 local (portal confirmation by a person still pen
 | 5.5 | PENDING (last phase) | Includes the deferred two-machine check and FortiGuard request (G5-DEFER); internal submit Sun 21:00 |
 | 5.4 | IN PROGRESS | README SI use and references current (D5, D6, D12, papers); concept-origin account (B-5) and native-library licences open; D12 licence terms not read |
 
+## Design branch, third redesign "Bureau" (Sun 15 Nov 2026, until about 11:30 Asia/Manila; NOT merged, no PR)
+
+```text
+Part: Design branch B1-B3 (UI-11..UI-14, MOT-03)
+Owner: session from parcilla13's account (member not otherwise stated); Design review pending
+Status: VERIFIED on design/sharpwalk-ui-ux only; not merged (B-01, MOT-03 and team approval open)
+Scope completed: B1 foundation (tokens, Fraunces/Barlow Semi Condensed/VT323, Motion + Anime.js, terrain-class cursor
+  tag, stop card, move mode); B2 all seven screens in the Bureau style, desktop and phone; B3 e2e for the tour and
+  point and click, font test, /code-review R-24 (8 fixed, 2 kept), logs, screenshots.
+Files changed: src/app/{App,Screens,AssessPanel,PlanPanel,Tutorial,StopPopover,fx,motion,gauge,styles,fonts}.*,
+  src/map/{AreaSheet,planLayer,elevationLayer,readout,loadArea,terrainHint}.*, src/briefing/BriefingView.tsx,
+  src/field/FieldView.tsx, e2e/{bureau,flow,a11y,fonts}.spec.ts, package*.json, docs/licences.md, docs/design/*,
+  CLAUDE.md (visual and motion lines), README.md, DECISIONS.md, HANDOFF.md, SI_LOG.md, PHASES.md
+Checks run (exact commands): npx tsc --noEmit; npx vitest run; rm -rf dist && npm run build;
+  PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome npx playwright test --trace off;
+  (cd pipeline && ../.venv/bin/python -m pytest); .venv/bin/python scripts/licences.py > docs/licences.md
+Results: tsc clean; vitest 303/303 (31 files); build OK; Playwright 57/57; pytest 82 passed, 2 skipped
+Known limitations or failures: AC-12 NOT met (main 272.04 kB Vite gzip + worker 41,530 B = about 313.6 kB vs 250 KB, B-01);
+  Anime.js conflicts with CLAUDE.md (MOT-03); demo-preset card prints on two A5 pages (PRINT-02)
+Review status: /code-review high, R-24 in DECISIONS.md
+Commit SHA: the commit after 6380209 on design/sharpwalk-ui-ux (see git log)
+Next part / blocker owner: team (Design, Local Lead) for UI-11..UI-14 and MOT-03; bundle owners for B-01
+```
+
 ## Design branch, second redesign "Frosted terrain" (Sun 15 Nov 2026, 01:58-02:40 Asia/Manila; NOT merged, no PR)
 
 Outside the plan's phase list. Phases D1-D5, each followed by `npx vitest run`, `npx tsc --noEmit`, `npm run build` and a screenshot or e2e check.

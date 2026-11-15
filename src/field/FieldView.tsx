@@ -48,7 +48,7 @@ export function FieldView({ output, hidden = false, briefed = false, next }: { o
   const nothing = <span className="unknown">{last ? "unknown (plan times or durations not set)" : "no tick yet"}</span>;
   return (
     <section className="side field" aria-label="Field view" hidden={hidden} data-testid="field-view">
-      <div className="side-scroll">
+      <div className="side-scroll" data-tour="hud">
       <span className={briefed ? "hud-brief ok" : "hud-brief"}>{briefed ? "Briefing confirmed for this plan" : "Rehearsal: briefing not confirmed yet"}</span>
       {stale && (
         <p className="field-warning" role="alert">

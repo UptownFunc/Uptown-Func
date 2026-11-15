@@ -12,7 +12,7 @@ import { contourLabel, type ContourLineF7, type ContourProps } from "./elevation
 const regular = new Style({ stroke: new Stroke({ color: "rgba(25, 27, 32, 0.55)", width: 0.75 }) });
 const indexStyle = (label: string | null) => new Style({
   stroke: new Stroke({ color: "rgba(25, 27, 32, 0.8)", width: 1.5 }),
-  text: label ? new Text({ text: label, placement: "line", font: "10px 'Geist Mono Variable', monospace",
+  text: label ? new Text({ text: label, placement: "line", font: "10px VT323, monospace",
     fill: new Fill({ color: "#e8e1d5" }), stroke: new Stroke({ color: "#191b20", width: 3 }) }) : undefined,
 });
 

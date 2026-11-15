@@ -13,7 +13,7 @@ test("the whole journey with clicks: every screen, the plan kept between steps, 
   await expect(page.getByText("Slope-screened, not rock-free.")).toBeVisible();
   await expect(page.getByText("Independent student project; not affiliated with or endorsed by NASA.")).toBeVisible();
   await expect(page.getByText("Terrain and route engine ready")).toBeVisible({ timeout: 20_000 });
-  await page.getByRole("button", { name: /Begin mission setup/ }).click();
+  await page.getByRole("button", { name: /Skip to mission setup/ }).click();
   await settle(page);
   await expect(page).toHaveURL(/#setup$/);
 
@@ -122,7 +122,7 @@ test("clicks on the plate add stops only on the Map step", async ({ page }) => {
 test("reduced motion: the flow still works with every animation off", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/?preset=none");
-  await page.getByRole("button", { name: /Begin mission setup/ }).click();
+  await page.getByRole("button", { name: /Skip to mission setup/ }).click();
   await expect(page).toHaveURL(/#setup$/);
   const duration = await page.getByRole("heading", { name: "Choose the scenario" }).evaluate((el) => parseFloat(getComputedStyle(el).animationDuration));
   expect(duration).toBeLessThan(0.01);
