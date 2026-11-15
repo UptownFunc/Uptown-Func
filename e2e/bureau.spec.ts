@@ -28,9 +28,14 @@ test("orientation: eight cards walk the real screens, keyboard works, Escape clo
   await page.keyboard.press("Escape");
   await expect(page.locator(".tour")).toHaveCount(0);
   expect(await page.evaluate(() => localStorage.getItem("sharpwalk.orientation.done"))).toBe("1");
-  // It can be reopened from the masthead at any time.
+  // It can be reopened from the masthead at any time: on the Planner it opens at the Planner's card (TOUR-01), and
+  // "Start over" goes back to the first card and its step.
   await page.getByRole("button", { name: "Orientation" }).click();
+  await expect(page.getByRole("dialog", { name: "Set the time budget" })).toBeVisible();
+  await page.getByRole("button", { name: "Start over" }).click();
   await expect(page.getByRole("dialog", { name: "Pick a scenario" })).toBeVisible();
+  await expect(page).toHaveURL(/#setup$/);
+  await expect(page.getByRole("button", { name: "Start over" })).toHaveCount(0); // nothing to start over from card 1
   await page.getByRole("button", { name: "Close orientation" }).click();
   await expect(page.locator(".tour")).toHaveCount(0);
 });

@@ -10,8 +10,13 @@
 // frame is painted, so the new text, the spotlight and the card all start moving in the same frame and arrive
 // together (one shared duration). There is one card element for the whole tour: only its words change, so no card
 // waits for another to leave. While a step's panel is still settling the spotlight keeps tracking it.
+//
+// Navigation (TOUR-01, Sun 15 Nov): opened on a step, the tour starts at that step's first card (help for the screen
+// the user is on); "Start over" returns to card 1. When the user changes step on their own (masthead, browser Back, a
+// Continue key) the tour follows to that step's first card instead of leaving a card about another screen. A resize
+// places the card again even when its target did not move.
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { ArrowLeft, ArrowRight, BookOpenText, CircleCheck, MousePointerClick, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpenText, CircleCheck, MousePointerClick, RotateCcw, X } from "lucide-react";
 import { GLOSSARY, type TermKey } from "./glossary";
 import type { StepId } from "./steps";
 import { AnimatePresence, Appear } from "./motion";
@@ -53,6 +58,9 @@ export const TOUR: readonly TourCard[] = [
 
 const STORE = "sharpwalk.orientation.done";
 export const orientationDone = (): boolean => { try { return localStorage.getItem(STORE) === "1"; } catch { return false; } };
+
+/** The first card about a step, or -1 when the step has none (the Welcome screen). */
+export const firstCardOf = (s: StepId): number => TOUR.findIndex((c) => c.step === s);
 
 export type Box = { x: number; y: number; w: number; h: number };
 const same = (a: Box | null, b: Box | null) => !!a && !!b && a.x === b.x && a.y === b.y && a.w === b.w && a.h === b.h;
@@ -118,19 +126,37 @@ export function Tutorial({ open, onClose, go, step, done }: { open: boolean; onC
     at.current = 0; setI(0); wanted.current = null; boxNow.current = null; setBox(null); onClose();
   };
 
-  // Opening: the first card's step comes up in the same frame as the tour.
+  // Opening: on a step with cards the tour starts at that step's first card; elsewhere at card 1, whose step comes up
+  // in the same frame as the tour.
   useLayoutEffect(() => {
     if (!open) return;
-    const s = TOUR[at.current]!.step;
-    if (s !== step) { wanted.current = s; go(s); }
+    const here = firstCardOf(step);
+    if (here >= 0) { at.current = here; setI(here); } else { const s = TOUR[at.current]!.step; wanted.current = s; go(s); }
     card.current?.focus({ preventScroll: true });
   }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // The user changed step on their own: follow to that step's first card (a step the tour asked for is not followed).
+  useLayoutEffect(() => {
+    if (!open || wanted.current || step === TOUR[at.current]!.step) return;
+    const n = firstCardOf(step);
+    if (n >= 0) { at.current = n; setI(n); }
+  }, [open, step]);
+
+  // A resize re-places the card even when the target kept its box (the card's room changed).
+  const [, setViewport] = useState(0);
+  useEffect(() => {
+    if (!open) return;
+    const onResize = () => setViewport((n) => n + 1);
+    addEventListener("resize", onResize);
+    return () => removeEventListener("resize", onResize);
+  }, [open]);
 
   // Measure before paint. While the requested step has not arrived yet, hold the spotlight where it is.
   useLayoutEffect(() => {
     if (!open) return;
     if (step === wanted.current) wanted.current = null;
     if (step !== t.step && wanted.current === t.step) return;
+    if (step !== t.step && firstCardOf(step) >= 0) return; // about to follow the user's step (above): no detour
     const find = () => (step === t.step ? document.querySelector<HTMLElement>(`[data-tour="${t.target}"]`) : null);
     /** Returns whether the spotlight has somewhere new to go. */
     const measure = (): boolean => {
@@ -235,6 +261,7 @@ export function Tutorial({ open, onClose, go, step, done }: { open: boolean; onC
             <div className="tour-head">
               <span className="tour-kicker">Orientation</span>
               <span className="tour-count" aria-label={`Card ${i + 1} of ${TOUR.length}`}>{i + 1} / {TOUR.length}</span>
+              {i > 0 && <button type="button" className="tour-restart" onClick={() => show(0)}><RotateCcw size={14} strokeWidth={2} aria-hidden="true" />Start over</button>}
               <button type="button" className="tour-x" onClick={close} aria-label="Close orientation"><X size={16} strokeWidth={2} /></button>
             </div>
             {/* Screen readers hear each card from one region that stays mounted (a remounted region is not announced
@@ -254,7 +281,9 @@ export function Tutorial({ open, onClose, go, step, done }: { open: boolean; onC
                 <dl>{t.terms.map((k) => <div key={k}><dt title={GLOSSARY[k].term}>{GLOSSARY[k].short}</dt><dd>{GLOSSARY[k].brief}</dd></div>)}</dl>
               </details>
             </Appear>
-            <div className="tour-progress" aria-hidden="true">{TOUR.map((_, k) => <span key={k} data-on={k <= i} />)}</div>
+            {/* Pointer users can jump to any card; keyboard users have Back, Next and the arrow keys (one tab stop). */}
+            <div className="tour-progress">{TOUR.map((c, k) => <button key={k} type="button" tabIndex={-1} data-on={k <= i} aria-current={k === i ? "step" : undefined}
+              aria-label={`Card ${k + 1}: ${c.title}`} title={c.title} onClick={() => k !== i && show(k)} />)}</div>
             <div className="tour-keys">
               <button type="button" className="key" onClick={() => turn(-1)} disabled={i === 0}><ArrowLeft size={16} strokeWidth={2} aria-hidden="true" />Back</button>
               {/* One key for Next and Finish, so focus stays on it from the first card to the last. */}

@@ -38,9 +38,9 @@ function Meter({ angle, live }: { angle: number; live: boolean }) {
   );
 }
 
-export function AssessPanel({ output, onOpenSource, drillMin, onDrillMin, busy, next }: {
+export function AssessPanel({ output, onOpenSource, drillMin, onDrillMin, busy, next, toMap }: {
   output: PlanOutput | null; onOpenSource: (q: Quantity) => void; drillMin: number | null; onDrillMin: (m: number | null) => void;
-  busy: boolean; next: ReactNode;
+  busy: boolean; next: ReactNode; /** UX-24: the way out of the empty state. */ toMap?: ReactNode;
 }) {
   if (!output) return <aside className="side" aria-label="Assessment"><div className="side-scroll"><header className="side-head"><h1>Return margin</h1><p className="unknown">Loading the route engine…</p></header></div></aside>;
   const { plan, geometry } = output;
@@ -67,7 +67,7 @@ export function AssessPanel({ output, onOpenSource, drillMin, onDrillMin, busy, 
         </div>
         <AssumedNote output={output} />
         <p className="section-title">Traverse</p>
-        {plan.legs.length === 0 ? <div className="empty-state"><strong>No route yet</strong><span>Add stops on the Map step.</span></div> : (
+        {plan.legs.length === 0 ? <div className="empty-state"><strong>No route yet</strong><span>Add stops on the Map step.</span>{toMap}</div> : (
           <ol className="ladder" aria-label="Traverse, leg by leg">
             <li className="node">Habitat <span className="kind">depart</span></li>
             {plan.legs.map((l) => {

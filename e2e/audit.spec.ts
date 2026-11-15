@@ -169,11 +169,11 @@ test("the tour stays out of the way: arrows in a field or on the map do not turn
   const errors = trackErrors(page);
   await page.goto("/?preset=none#planner");
   await expect(page.getByLabel("EVA duration (T_EVA), minutes")).toBeVisible({ timeout: 20_000 });
+  // TOUR-01: opened on the Planner, the tour starts at the Planner's card.
   await page.getByRole("button", { name: "Orientation" }).click();
-  await expect(page.getByRole("dialog", { name: "Pick a scenario" })).toBeVisible();
-  for (let i = 0; i < 2; i++) await page.getByRole("dialog").getByRole("button", { name: /Next/ }).click();
   const budget = page.getByRole("dialog", { name: "Set the time budget" });
   await expect(budget).toBeVisible();
+  await expect(budget.getByLabel("Card 3 of 8")).toBeVisible();
   // Typing in a field with the tour open: the field keeps the keys and the card stays.
   await setTime(page, "EVA duration (T_EVA)", "300");
   await expect(page.getByTestId("current-T_EVA")).toHaveText("300.0 min · assumed");
@@ -183,14 +183,17 @@ test("the tour stays out of the way: arrows in a field or on the map do not turn
   await minutes.press("ArrowRight");
   await expect(budget).toBeVisible();
   await expect(page).toHaveURL(/#planner$/);
-  // The user walks off to the map on their own: the spotlight lets go of the planner's control and the map keeps its keys.
+  // The user walks off to the map on their own: the tour follows to the Map's first card (TOUR-01), its spotlight on the
+  // map, and the map keeps its keys.
   await goStep(page, "Map");
   await expect(page.getByTestId("area-map").locator("canvas").first()).toBeVisible();
-  await expect(page.locator(".tour-ring")).toHaveCount(0);
+  const mapCard = page.getByRole("dialog", { name: "Point and click to place stops" });
+  await expect(mapCard).toBeVisible();
+  await expect(page.locator(".tour-ring")).toHaveCount(1);
   await page.getByTestId("area-map").focus();
   for (let i = 0; i < 4; i++) await page.keyboard.press("ArrowRight"); // 40 m east of the centre is slope-screened (resilience.spec)
   await expect(page.getByTestId("cursor-announce")).toContainText("Cursor at latitude");
-  await expect(budget).toBeVisible(); // still card 3: the arrow moved the map cursor, not the tour
+  await expect(mapCard).toBeVisible(); // still card 4: the arrow moved the map cursor, not the tour
   await page.keyboard.press("Enter");
   await expect(page.locator(".stops > .stop")).toHaveCount(1, { timeout: 20_000 });
   await page.getByRole("button", { name: "Close orientation" }).click();

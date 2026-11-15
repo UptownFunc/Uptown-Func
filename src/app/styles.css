@@ -616,9 +616,15 @@ details[open] > summary::before { transform: rotate(90deg); }
 .glossary dd { margin: 2px 0 0; font: 400 var(--t-sm)/1.45 var(--ui); color: var(--ink-2); }
 /* Under a form field: the variable's meaning, always shown. */
 .hint { display: block; margin-top: 2px; font: 400 var(--t-sm)/1.4 var(--ui); opacity: 0.85; }
-.tour-progress { display: flex; gap: 5px; margin: 14px 0; }
-.tour-progress span { flex: 1; height: 8px; border-radius: 4px; background: #e2cfaa; transition: background-color 200ms ease; }
-.tour-progress span[data-on="true"] { background: linear-gradient(90deg, var(--orange), var(--mustard)); }
+.tour-progress { display: flex; gap: 5px; margin: 8px 0; }
+/* TOUR-01: each segment is a jump to its card; the hit area is taller than the bar it draws. */
+.tour-progress button { flex: 1; height: 20px; padding: 6px 0; border: 0; border-radius: 4px; cursor: pointer; background: #e2cfaa content-box;
+  transition: background-color 200ms ease, transform 120ms var(--ease-out); }
+.tour-progress button[data-on="true"] { background: linear-gradient(90deg, var(--orange), var(--mustard)) content-box; }
+.tour-progress button:hover { transform: scaleY(1.35); }
+.tour-restart { display: inline-flex; align-items: center; gap: 5px; height: 28px; padding: 0 9px; border-radius: 6px; border: 1px solid var(--rule); cursor: pointer;
+  background: #fffaf0; color: var(--ink-2); font: 700 11px/1 var(--ui); letter-spacing: 0.08em; text-transform: uppercase; transition: background-color 140ms ease; }
+.tour-restart:hover { background: #fff3dc; color: var(--ink); }
 .tour-keys { display: flex; gap: 10px; justify-content: space-between; }
 
 /* ---------- Drawer and toasts ---------- */
@@ -876,6 +882,9 @@ p.sheet-msg { grid-auto-flow: column; align-content: center; }
   .status { max-width: calc(100% - 66px); }
   .legend { max-height: calc(100% - 64px); }
 }
+/* UX-24: an empty HUD or assessment says why and offers the Map step. */
+.empty-lead { display: grid; gap: 10px; justify-items: start; }
+.empty-state .key { margin-top: 10px; }
 /* UX-25: the elevation profile's heading wraps to two lines on a laptop; the plot takes what is left of the box, so the
    readout line under it is never cut off by the box's edge. */
 @media screen and (min-width: 801px) {

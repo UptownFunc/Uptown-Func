@@ -1,6 +1,6 @@
-// SI-assisted: drafted with Claude Code (Claude Opus 5.5) (MAP-01..MAP-03); human review pending.
+// SI-assisted: drafted with Claude Code (Claude Opus 5.5) (MAP-01..MAP-03, TOUR-01); human review pending.
 // The final 2D map's renderer-free pieces: the load view's fit, the published view string, the layer switches, the
-// plan as F1 features (what a later 3D view will share).
+// plan as F1 features (what a later 3D view will share), and which card the tour opens on.
 import { describe, expect, it } from "vitest";
 import { FIT_PADDING, INITIAL_RESOLUTION_F7, MAX_RESOLUTION_F7, fitResolution, formatView, parseView } from "./view";
 import { DEFAULT_LAYERS, MIN_OVERLAY, clampOverlay, layerShown } from "./layers";
@@ -8,6 +8,7 @@ import { cellF1, planFeatures } from "./planGeometry";
 import { f1 } from "../geo";
 import type { GridDef } from "../geo/grid";
 import type { PlanOutput } from "../engine/planner";
+import { TOUR, firstCardOf } from "../app/Tutorial";
 
 describe("MAP-01 load view", () => {
   it("fits the whole 3 km sheet inside the padding", () => {
@@ -86,5 +87,14 @@ describe("MAP-03 plan features in F1 (renderer-free)", () => {
     expect(g.arrows[1]!.at).toEqual(cellF1(6, grid));
     expect(g.arrows[0]!.toward.lon).toBeGreaterThan(g.arrows[0]!.at.lon); // walking east along the row
     expect(g.arrows[1]!.toward.lon).toBeLessThan(g.arrows[1]!.at.lon);
+  });
+});
+
+describe("TOUR-01 the tour opens on the screen the user is on", () => {
+  it("names the first card of each step, and none for the welcome screen", () => {
+    expect(firstCardOf("setup")).toBe(0);
+    expect(TOUR[firstCardOf("map")]!.title).toBe("Point and click to place stops");
+    expect(TOUR[firstCardOf("assess")]!.target).toBe("gauge");
+    expect(firstCardOf("welcome")).toBe(-1);
   });
 });

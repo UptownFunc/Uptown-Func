@@ -1,7 +1,7 @@
-// SI-assisted: drafted with Claude Code (Claude Opus 5.5) (MAP-01..MAP-08); human review pending.
+// SI-assisted: drafted with Claude Code (Claude Opus 5.5) (MAP-01..MAP-08, TOUR-01, UX-24); human review pending.
 // The final 2D map, through real input only (clicks, keys, the pointer, the window size): the load view, the map keys,
-// the layer switches, coordinate and layer alignment, keyboard use, reduced motion, and missing data and recovery.
-// Pixels are read from the layer canvases (read only), never written.
+// the layer switches, coordinate and layer alignment, keyboard use, reduced motion, missing data and recovery, and the
+// orientation tour's answers to navigation. Pixels are read from the layer canvases (read only), never written.
 import { readFileSync } from "node:fs";
 import { expect, test, type Page } from "@playwright/test";
 import { HABITAT, ORIGIN, STOP, clickAt, goStep, mapView, openStep, pixelAt } from "./helpers";
@@ -229,6 +229,48 @@ test("loading: the sheet says it is loading until the terrain is drawn", async (
   release();
   await expect(page.getByTestId("sheet-loading")).toHaveCount(0, { timeout: 20_000 });
   await expect(page.getByRole("button", { name: "Zoom in", exact: true })).toBeEnabled();
+});
+
+test("empty HUD and assessment say why and lead to the map", async ({ page }) => {
+  await openStep(page, "hud");
+  await ready(page);
+  await expect(page.getByRole("heading", { name: "No stops in the plan yet." })).toBeVisible();
+  await page.getByRole("button", { name: "Place stops on the map" }).click();
+  await expect(page).toHaveURL(/#map$/);
+  await goStep(page, "Assess");
+  await expect(page.getByText("No route yet")).toBeVisible();
+  await page.getByRole("button", { name: "Place stops on the map" }).click();
+  await expect(page).toHaveURL(/#map$/);
+});
+
+test("the tour answers navigation: it opens on the current step, jumps from its progress bar, follows Back, and re-places its card on resize", async ({ page }) => {
+  await openStep(page, "map");
+  await ready(page);
+  await page.getByRole("button", { name: "Orientation" }).click();
+  const mapCard = page.getByRole("dialog", { name: "Point and click to place stops" });
+  await expect(mapCard.getByLabel("Card 4 of 8")).toBeVisible();
+  await expect(page.locator(".tour-ring")).toHaveCount(1);
+  // A pointer user jumps straight to card 7 from the progress bar; the step comes with it.
+  await page.getByRole("button", { name: "Card 7: Judge the return margin" }).click();
+  await expect(page).toHaveURL(/#assess$/);
+  const gauge = page.getByRole("dialog", { name: "Judge the return margin" });
+  await expect(gauge).toBeVisible();
+  // Browser Back: the app returns to the map and the tour follows to the map's card.
+  await page.goBack();
+  await expect(page).toHaveURL(/#map$/);
+  await expect(mapCard).toBeVisible();
+  // A resize: the card stays whole inside the window and off its spotlight.
+  for (const size of [{ width: 1024, height: 700 }, { width: 1440, height: 900 }]) {
+    await page.setViewportSize(size);
+    await expect.poll(async () => {
+      const c = (await page.locator(".tour-card").boundingBox())!, s = (await page.locator(".tour-hole").boundingBox())!;
+      const inside = c.x >= 0 && c.y >= 0 && c.x + c.width <= size.width + 1 && c.y + c.height <= size.height + 1;
+      const apart = c.x >= s.x + s.width - 1 || c.x + c.width <= s.x + 1 || c.y >= s.y + s.height - 1 || c.y + c.height <= s.y + 1;
+      return inside && (apart || size.width <= 1024); // a narrow laptop may overlap a full-width map spotlight
+    }, { message: `card placed at ${size.width} x ${size.height}` }).toBe(true);
+  }
+  await page.keyboard.press("Escape");
+  await expect(page.locator(".tour")).toHaveCount(0);
 });
 
 test.describe("phone", () => {
