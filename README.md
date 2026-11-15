@@ -118,7 +118,7 @@ cd pipeline && ../.venv/bin/python -m sharpwalk.run_d1 ../public/area && ../.ven
 
 ## SI use
 
-The 2026 guides call AI "Super Intelligence (SI)". The dated, per-task record is `SI_LOG.md`; this section summarises
+The 2026 guides use the term "Super Intelligence (SI)"; this project uses it throughout. The dated, per-task record is `SI_LOG.md`; this section summarises
 it.
 
 **Concept origin (the team's own account).** About a week after registering for the hackathon, the four of us brainstormed together. We went through the available challenges, looking for one that suited our skills and interests. At first we wanted something easy. Then we came across this challenge, and it caught our interest at once. We have always been inspired by the dashboards in science fiction where someone plots two locations and gets details on the route between them, including whether the route is even feasible. As we refined the idea, we arrived at a question: what if there were a way to know automatically whether a route is feasible? SharpWalk came from that question.

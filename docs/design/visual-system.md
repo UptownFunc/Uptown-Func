@@ -3,7 +3,7 @@
 SI-assisted: drafted with Claude Code (Claude Opus 5.5) at a team member's direction, Sun 15 Nov 2026, on the
 unmerged branch `design/sharpwalk-ui-ux`. **Pending team approval.**
 
-This supersedes "Frosted terrain" (UI-07), which the operator called "still AI slop". The operator chose this
+This supersedes "Frosted terrain" (UI-07), which the operator called "still [SI] slop". The operator chose this
 direction ("Warm 70s Bureau") from seven Higgsfield frames. The Marvel "Time Variance Authority" look was named as a
 mood reference only: **no Marvel names, logos, characters or artwork are used**, and no generated image ships in the
 app. Screenshots of every step: `docs/design/screenshots/` (desktop 1440 x 900, iPhone 13 width).
