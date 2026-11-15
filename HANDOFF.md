@@ -2,7 +2,14 @@
 
 This file is the handoff between team members and Claude sessions. Keep it factual and current. A new session must read this file before touching code.
 
-## Latest (Sun 15 Nov 2026, 15:14-16:20 Asia/Manila): every variable explained, on `yujin/onboarding-terms`, NOT merged
+## MERGED (Sun 15 Nov 2026, 15:57 Asia/Manila): every variable explained (MERGE-04). Start here, then read the 15:10 handoff below
+
+- **`main` = `f1fd37f`** (PR #28) plus this record. The live site serves `assets/index-3s757jEt.js` and `engine-worker.js`, byte-identical to a local build of `f1fd37f`; Playwright **76/76 against the live URL** (15:57-16:02).
+- **New on `main`:** the plain-language glossary (`src/app/glossary.ts`) in the tour cards, under each plan-time and condition field, as tap-to-explain names in the Route, Field and Assess panels, and in full in the Sources drawer (DECISIONS UX-22, UX-23).
+- **Still for the team:** everything in section 3 of the 15:10 handoff below (portal deadline, concept account and authorship, video, two-machine check and FortiGuard, submission fields, PR #22, submit), plus Data and Science reading `src/app/glossary.ts` once.
+- Checks on `main`: vitest 316/316; tsc clean; JS 241,933 B of 250,000 (about 8 kB left: any new code needs savings first).
+
+## Detail (Sun 15 Nov 2026, 15:14-15:57 Asia/Manila): every variable explained, on `yujin/onboarding-terms` (merged at 15:57 as `f1fd37f`, MERGE-04)
 
 - **Branch:** `yujin/onboarding-terms` from `main` `13fb96c`; commit `534698a` plus logs. **Not merged** (after the freeze): the team decides.
 - **What it does (DECISIONS UX-22, UX-23):** a 27-term plain-language glossary used in the tour (each card lists its screen's terms), under each plan-time and condition field, as tap-to-explain names in the Route, Field and Assess panels, and in full in the Sources drawer. Plainer Planner heading and Demonstration tile.

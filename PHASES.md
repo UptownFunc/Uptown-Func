@@ -1237,6 +1237,18 @@ Commit SHA: 534698a
 Next part / blocker owner: the team decides whether UX-22/UX-23 go into main; Data and Science check the glossary
 ```
 
+```text
+Part: MERGE-04 - yujin/onboarding-terms merged into main; live-site check
+Owner: Yujin (instruction "Merge it"); SI-assisted (Claude Code, Claude Opus 5.5)
+Status: VERIFIED
+Merge: PR #28 merged as f1fd37f (Sun 15 Nov 2026 15:57 Asia/Manila); main was 13fb96c and had not moved; GitHub clean;
+  Vercel preview passed. After the G5 freeze: an exception at the member's instruction (DECISIONS MERGE-04).
+Checks: local build of f1fd37f -> assets/index-3s757jEt.js; the live site served it within a minute; cmp of the live
+  index-3s757jEt.js and engine-worker.js with the local build: identical; Playwright against https://uptown-func.vercel.app
+  (temporary config, deleted, --workers=1): 76 passed / 76.
+Next part / blocker owner: the team (HANDOFF 15:10 section 3); Data and Science read src/app/glossary.ts
+```
+
 ## Phase-part completion record
 
 Copy this block for every phase part and update its table row above:
