@@ -2,13 +2,16 @@
 
 This file is the handoff between team members and Claude sessions. Keep it factual and current. A new session must read this file before touching code.
 
-## Merge preparation (Sun 15 Nov 2026, 12:55 Asia/Manila, container clock): READY, NOT MERGED; read this first
+## Merge preparation, audit session (Sun 15 Nov 2026, 12:55 Asia/Manila, container clock): READY, NOT MERGED; read this first
+
+Two sessions received the merge request at the same time and both stopped before the merge, for the same reasons.
+This section is the audit session's; the next section is the second session's (MERGE-01).
 
 - **Asked:** merge `design/sharpwalk-ui-ux` into `main` (request from parcilla13's account, about 12:47).
-- **Done:** whole-branch `/code-review` (R-26; 3 findings fixed in this commit, 3 kept and recorded); every check rerun
+- **Done:** whole-branch `/code-review` (R-27; 3 findings fixed in 79c9c56, 3 kept and recorded); every check rerun
   and green: vitest 302/302, tsc exit 0, build OK, bundle 238,771 B of 250,000 B, Playwright 67/67, pytest 82 passed +
   2 skipped, licences current. The merge is conflict-free (`main` ca2504a is already inside the branch). AUD-13 closed.
-- **Not done: the merge itself.** Three points need a person's yes (DECISIONS MERGE-01): the team approval the records
+- **Not done: the merge itself.** Three points need a person's yes (DECISIONS MERGE-01 and its note): the team approval the records
   require for the redesign; merging a whole new interface at the G5 freeze (13:00, bug fixes only) into the branch
   Vercel deploys; and the authorship wording (G-10), which does not match the records.
 - **To merge once confirmed** (no force push; keep the history):
@@ -23,6 +26,22 @@ This file is the handoff between team members and Claude sessions. Keep it factu
 
   In the same merge, rewrite the "pending team approval / not merged" wording in CLAUDE.md (visual and motion lines),
   HANDOFF and PHASES, and record the merge commit SHA.
+## Merge request (Sun 15 Nov 2026, about 12:55 Asia/Manila, container clock): prepared, NOT merged (MERGE-01)
+
+- **Asked:** merge `design/sharpwalk-ui-ux` into `main`. **Done:** audit of the diff against `main` (87 files; no
+  `src/contracts`, `src/constants`, `pipeline/` or `public/` change; engine change limited to the worker build and
+  `terrainClasses()`), `/code-review` low (R-26, 0 findings, partial pass as stated there), checks (see the addendum
+  below: all passed at 08f20f7; only log files changed since), SI headers present on every new source file, licences
+  current, a pull request opened.
+- **Not merged, two decisions needed from the team, in writing:**
+  1. **Authorship:** sole credit to Patrick Ezekiel A. Arcilla (this request, and G-06) or the whole team (G-07, now in
+     `CLAUDE.md` and `README.md`). No file was changed.
+  2. **The redesign itself:** the branch's own records say no merge until the team approves the interface (UI-01 to
+     UI-16). Merging replaces the live site's interface; after 13:00 `main` takes bug fixes only (G5).
+- **To merge once both are settled:** update the attribution text if the team chooses to, rerun
+  `npm ci && npx vitest run && npx tsc --noEmit && npm run build && node scripts/bundle-size.mjs && npx playwright test --trace off`,
+  merge the pull request with a merge commit, then check https://uptown-func.vercel.app (`/engine-worker.js` must answer 200).
+- **Also open:** AUD-13 (were the "13 defects" the UX-16 and A11Y-02 fixes?), BUILD-01 (worker build layout), PR #22 (W-01).
 
 ## Addendum (Sun 15 Nov 2026, 12:55 Asia/Manila, container clock): second session's independent check of 08f20f7
 
