@@ -2,12 +2,19 @@
 
 This file is the handoff between team members and Claude sessions. Keep it factual and current. A new session must read this file before touching code.
 
-## BRANCH (Sun 15 Nov 2026, about 21:30 Asia/Manila): relief lighting in the 3D view (3D-09), NOT merged. Start here
+## MERGED (Sun 15 Nov 2026, about 21:35 Asia/Manila): relief lighting in the 3D view (MERGE-10). Start here
+
+- **`main` = `6f06b62`** (PR #41), plus this record. Its tree equals the tested branch `ce720a8`. Checks on the merged tree: tsc clean; vitest 353/353; app JS **249,570 B of 250,000 (430 B left)**; 3D chunk 7,609 B of 10,000; Cesium vendor unmodified; Playwright 99/99, then 3D 10/10 after the last lazy-chunk-only fixes.
+- **Live site not checked from here** (the container's proxy refuses it). A person: open https://uptown-func.vercel.app, go to the Map step, press 3D, then the mountain key (Relief lighting); confirm the page source names a new `assets/index-*.js`.
+- **Open PR #39** (Yujin, undo and time limits) uses V-15, R-33 and MERGE-09; this work took V-16, R-35, R-36 and MERGE-10 so they do not collide. #39 will need `main` merged in (log files) before it merges.
+- **For people:** Design reviews the lighting look; Data and Science confirm V-16 (light and strength); 3D view owner: 3D-BUG-01.
+
+## Detail: relief lighting in the 3D view (3D-09), branch `ccr-59efed41-jlwyn8` (merged as `6f06b62`, MERGE-10)
 
 - **Branch `ccr-59efed41-jlwyn8`** from `main` `bdd041b`: `4b88b1c` (lighting), `660a0c4` (review fixes), plus the logs commit. No pull request (not asked). `main` is unchanged.
 - **What:** a "Relief lighting" key in the 3D view lights the rendered D1 terrain with the D1 hillshade's own light (north-west, 45 deg up). It is one Fabric globe material, chosen after reading Cesium 1.147's globe shader: this terrain has no vertex normals, so built-in lighting shows no relief. It only darkens, by one factor for R, G and B, so D2 keeps its published hue. While it is on, the hillshade image is not drawn (relief once). **Off by default:** the 3D view opens as approved. Nothing in the 2D sheet, data, frames, contracts or dependencies changed (DECISIONS 3D-09, 3D-10).
 - **Checks:** tsc clean; vitest 349/349; app JS 248,265 B of 250,000; 3D chunk 7,569 B of 10,000; Cesium vendor unmodified; Playwright 3D project 10/10. The app project failed only the tour frame-timing spec, which fails on unmodified `main` in this container too (FLAKE-01).
-- **For people:** decide whether to merge after the freeze (23:59 deadline; the feature is opt-in). Design: review the look. Data and Science: confirm register row V-16 (light and strength). 3D view owner: **3D-BUG-01** (route and markers sometimes missing for one frame after the tilt-to-overhead keys; pre-existing, reproduced on `main`'s code).
+- **For people:** (merged: MERGE-10 above). Design: review the look. Data and Science: confirm register row V-16 (light and strength). 3D view owner: **3D-BUG-01** (route and markers sometimes missing for one frame after the tilt-to-overhead keys; pre-existing, reproduced on `main`'s code).
 - **Not done / limits:** no GPU test (none here, no attached computer); software WebGL frames are 14-17 % slower when lit (PERF-3D-09); not the sun, no shadows.
 
 ## Crew progress on the map, Assess trace (Sun 15 Nov 2026, from 19:48 Asia/Manila): branch `yujin/hud-marker-assess-anim` (MERGE-08). Start here
