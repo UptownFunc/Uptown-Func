@@ -1361,7 +1361,7 @@ Next part / blocker owner: Data and Science confirm 3D-03 and 3D-04; Design revi
 ```
 
 ```text
-Part: 3D-09 - relief lighting in the 3D view (3D-09, 3D-10, PERF-3D-09, E2E-07, R-32)
+Part: 3D-09 - relief lighting in the 3D view (3D-09, 3D-10, PERF-3D-09, E2E-08, R-33)
 Owner: session operator (cloud session from the claude.ai web app; member not named); SI-assisted (Claude Code, Claude Opus 5.5)
 Status: VERIFIED on the branch ccr-59efed41-jlwyn8 (from main bdd041b); NOT merged (after the G5 freeze: team approval needed)
 Scope completed: one Fabric globe material (facet normal from screen-space derivatives; Lambert with the D1 hillshade's
@@ -1376,7 +1376,7 @@ Checks run (exact commands), cloud container, Node v22.23.4, Chromium /opt/pw-br
   PW_CHROMIUM=/opt/pw-browsers/chromium npx playwright test --project=3d --no-deps ;
   PW_CHROMIUM=/opt/pw-browsers/chromium npx playwright test --project=3d --no-deps -g "relief lighting" --repeat-each=3 ;
   PW_CHROMIUM=/opt/pw-browsers/chromium npx playwright test e2e/tour-timing.spec.ts --project=app --repeat-each=3 (branch, and main bdd041b in a worktree)
-Results (after the R-32 fixes): tsc clean; vitest 349/349 (37 files; 13 new); AC-12 app JavaScript 248,265 B of 250,000
+Results (after the R-33 fixes): tsc clean; vitest 349/349 (37 files; 13 new); AC-12 app JavaScript 248,265 B of 250,000
   (baseline 248,267); 3D chunk 7,569 B of 10,000 (baseline 6,738); CesiumJS vendor 2,112,862 B of 2,120,000, unmodified;
   Playwright 3D project 10/10 (1 new); the new test 3/3 repeated; app project 85/86 on the full run (before R-32, which
   touches only the lazy 3D chunk), the one failure the tour timing flake (FLAKE-01: 23/27 alone on this branch, 25/27 on main).
@@ -1388,7 +1388,7 @@ Render checks (scratch Playwright harness, not committed; frames read from the W
   guard and checked again; strength 0.5 / 0.4 / 0.3 compared, 0.4 chosen; terrain classes legible when lit; phone layout.
 Performance: PERF-3D-09 (+14 to 17 % per frame on software WebGL; idle costs nothing).
 Known limitations: 3D-10. Found, not fixed: 3D-BUG-01 (overlays missing after the tilt-to-overhead keys, pre-existing).
-Review status: /code-review medium (R-32): 8 findings; 5 code findings fixed (660a0c4), 2 log findings done here, 1 not
+Review status: /code-review medium (R-33; R-32 in the commit message): 8 findings; 5 code findings fixed (660a0c4), 2 log findings done here, 1 not
   valid (reason recorded).
 Commit SHA: 4b88b1c (lighting), 660a0c4 (review fixes), plus the logs commit
 Next part / blocker owner: the team decides whether to merge after the freeze (it is opt-in and off by default); Design
@@ -1502,4 +1502,41 @@ Checks run: npm ci; npx tsc --noEmit; npx vitest run (docs-only change; run for 
 Results: tsc clean; vitest 331/331 (34 files); live site 200; /code-review low: 1 finding (SI_LOG wording), fixed
 Next part / blocker owner: Captain - choose the portal Project link (recommended: the GitHub repository) and check
   both links in a private window; FortiGuard request optional (HANDOFF section 3, task 4)
+```
+
+```text
+Part: HUD-01, ASSESS-01, B-03 - crew progress on the 2D map from the HUD ticks; looping trace on the Assess ladder;
+  bundle-size check on Windows
+Owner: Yujin (team member), on his own computer (Personal PC); SI-assisted (Claude Code, Claude Opus 5.5)
+Status: VERIFIED (branch yujin/hud-marker-assess-anim; commits 5c82dcc, e37aa6c, merged with main bdd041b)
+Scope completed: src/field/progress.ts (+ test), src/map/planLayer.ts (progress layers), src/map/AreaSheet.tsx,
+  src/map/snapshot.ts, src/field/FieldView.tsx, src/app/{App.tsx,AssessPanel.tsx,fx.ts,styles.css},
+  scripts/bundle-size.mjs, e2e/hud-progress.spec.ts (new), e2e/map-3d.spec.ts (note text); DECISIONS HUD-01, ASSESS-01,
+  HUD-02, B-03, E2E-07, R-32, MERGE-08; CLAUDE.md Motion line (five timelines)
+Checks run: npm ci; npx tsc --noEmit; npx vitest run; rm -rf dist && npm run build && node scripts/bundle-size.mjs;
+  npx playwright test --trace off --workers=1 (full); npx playwright test --project=3d --no-deps; tour-timing spec
+  --repeat-each=3 on the branch and on main; /code-review high (R-32)
+Results: tsc clean; vitest 340/340 (37 files); AC-12 249,567 B of 250,000 (433 B left; main 248,267 B on the same
+  Windows machine), 3D chunk 6,739 B of 10,000, Cesium 2,112,862 B unmodified; Playwright app project 88/89, 3D
+  project 9/9; the one failure is tour-timing "desktop" (spotlight 122-138 ms after the words, limit 120 ms), which
+  also fails on main on this machine (4 of 9 runs: 120-145 ms, and 42-44 ms on the 40 ms limit): this computer's
+  speed, not this change (HANDOFF known flake); the new spec 3/3 (the map mark follows each tick and stays centred on
+  the stop after zoom; the trace draws, loops, pauses out of view, stops on another step and under reduced motion);
+  screenshots inspected (the first showed the route cutting the label: fixed with a label layer above the route; the
+  first trace colour read as the rail fading: changed to ink with an amber tip)
+Next part / blocker owner: Design confirms ASSESS-01 (the one deliberate loop) and the HUD-01 look; the team decides
+  HUD-02 (minutes in the label)
+```
+
+```text
+Part: ORIGIN-01 - the team's concept-origin account in SI_LOG.md and the README
+Owner: this cloud session's operator (a team member wrote the account); SI-assisted (Claude Code, Claude Opus 5.5;
+  wording only)
+Status: VERIFIED (docs only)
+Scope completed: SI_LOG.md concept-origin section filled from the account; README SI use opens with the account;
+  DECISIONS ORIGIN-01 keeps the original text verbatim
+Checks run: npx tsc --noEmit; npx vitest run (docs-only change; run for completeness); /code-review low
+Results: tsc clean; vitest 340/340 (37 files); /code-review low: 1 finding (this placeholder), fixed; no code changed
+Next part / blocker owner: the other three members confirm the account; the team states whether SI was used while
+  forming the concept or writing the plan, and the brainstorm date if known
 ```

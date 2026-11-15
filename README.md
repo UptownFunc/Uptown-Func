@@ -121,6 +121,11 @@ cd pipeline && ../.venv/bin/python -m sharpwalk.run_d1 ../public/area && ../.ven
 The 2026 guides call AI "Super Intelligence (SI)". The dated, per-task record is `SI_LOG.md`; this section summarises
 it.
 
+**Concept origin (the team's own account).** About a week after registering for the hackathon, the four of us brainstormed together. We went through the available challenges, looking for one that suited our skills and interests. At first we wanted something easy. Then we came across this challenge, and it caught our interest at once. We have always been inspired by the dashboards in science fiction where someone plots two locations and gets details on the route between them, including whether the route is even feasible. As we refined the idea, we arrived at a question: what if there were a way to know automatically whether a route is feasible? SharpWalk came from that question.
+
+The concept came from the team; SI was used to help build SharpWalk, as recorded below. SI edited the wording of
+this account for grammar and clarity only.
+
 - **Tool and model:** Claude Code (Anthropic) running **Claude Opus 5.5**, in two cloud sessions on Sat 14 Nov 2026
   (directed by Eugene Ibañez Jr. from 10:21, and by John Malubay from 12:57). Claude Fable 5.2 was not used in them. The
   Superpowers workflow skill was loaded in the first session; it was not installed in the second, where its

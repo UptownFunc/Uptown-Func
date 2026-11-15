@@ -10,6 +10,14 @@ This file is the handoff between team members and Claude sessions. Keep it factu
 - **For people:** decide whether to merge after the freeze (23:59 deadline; the feature is opt-in). Design: review the look. Data and Science: confirm register row V-15 (light and strength). 3D view owner: **3D-BUG-01** (route and markers sometimes missing for one frame after the tilt-to-overhead keys; pre-existing, reproduced on `main`'s code).
 - **Not done / limits:** no GPU test (none here, no attached computer); software WebGL frames are 14-17 % slower when lit (PERF-3D-09); not the sun, no shadows.
 
+## Crew progress on the map, Assess trace (Sun 15 Nov 2026, from 19:48 Asia/Manila): branch `yujin/hud-marker-assess-anim` (MERGE-08). Start here
+
+- **What (DECISIONS HUD-01, ASSESS-01):** on the HUD step the 2D sheet shows where the crew is, from the HUD's manual ticks only: an arrival puts an amber ring on that stop; a departure marks the whole next leg as a band labelled "position on the leg not tracked" (the ticks give no point on the leg, and nothing is guessed from a clock). The map hint, the map key and the HUD say the same words. On the Assess step a pen line traces the traverse ladder, habitat to habitat, and loops (4.6 s), with a note that it is an illustration, not a live run; it stops on other steps, pauses out of view and never runs under reduced motion.
+- **Budget:** AC-12 **249,567 B of 250,000: 433 B left.** Any further app code needs savings first. `scripts/bundle-size.mjs` now runs on Windows too (B-03).
+- **Checks:** tsc clean; vitest 340/340; Playwright app 88/89 and 3D 9/9; new spec 3/3. The failure is the tour's frame-timing spec on this Windows machine: it fails on `main` here too (4 of 9 runs), so it is the machine, not this change.
+- **Merge:** on Yujin's word ("Once, done. Merge it", 20:25) in place of the team approval his brief asked for (MERGE-08); the merge SHA and the live check follow in the record.
+- **For people:** Design confirms ASSESS-01 (the one deliberate Motion loop, CLAUDE.md updated) and the HUD-01 look; the team decides HUD-02 (minutes in the map label); everything in the SUB-01 section below (submission).
+
 ## MERGED (Sun 15 Nov 2026, about 19:35 Asia/Manila): 3D view (MERGE-07). Start here
 
 - **`main` = `158ece1`** (PR #36), plus this record. Its tree is identical to the approved branch. The live site serves `assets/index-DIhEGVs4.js`, and the entry bundle, worker, 3D chunk, Cesium.js and D2 colour image are byte-identical to a local build. Playwright passed **95/95 against the live URL**.
@@ -24,6 +32,10 @@ This file is the handoff between team members and Claude sessions. Keep it factu
 - **Checks:** vitest 336/336; tsc clean; Playwright 95/95 (the 3D spec runs as a second project after the rest); pytest 83 + 2 skipped; licences current.
 - **For people:** team approval to merge (MERGE-07); Data and Science to confirm 3D-03 (the F1 sphere as the globe, D-05 still open) and 3D-04 (the D2 colour step); Design to review the look.
 - **Not done / limits:** nothing beyond the 3 x 3 km sheet; contours, time lines and the sky layer stay 2D-only; only headless Chromium with software WebGL tested here.
+
+## Concept origin (Sun 15 Nov 2026, about 19:15 Asia/Manila): ORIGIN-01
+
+- The team's concept-origin account is now in `SI_LOG.md` and at the top of the README's SI use section; the member's original wording is kept in DECISIONS ORIGIN-01. **The other three members confirm it**, and the team states whether SI was used while forming the concept or writing the plan.
 
 ## Submission links (Sun 15 Nov 2026, about 19:00 Asia/Manila): SUB-01. Start here
 

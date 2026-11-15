@@ -129,7 +129,7 @@ test("layers in 3D: the terrain-class symbols switch and take the strength slide
   await expect(scene(page)).toHaveAttribute("data-layers", "relief terrain");
   await page.getByRole("button", { name: "Layers", exact: true }).click();
   const panel = page.locator("#layers-panel");
-  await expect(panel).toContainText("In 3D: elevation contours, time-to-habitat lines and the sky layer are drawn on the 2D sheet only.");
+  await expect(panel).toContainText("In 3D: elevation contours, time-to-habitat lines, the sky layer and the crew progress mark are drawn on the 2D sheet only.");
   const strength = panel.getByRole("slider", { name: "Symbol and contour strength" });
   await strength.focus();
   await page.keyboard.press("Home");

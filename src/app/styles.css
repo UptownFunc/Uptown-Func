@@ -434,6 +434,12 @@ details[open] > summary::before { transform: rotate(90deg); }
 .ladder .node .letter { width: 26px; height: 26px; font-size: 12px; box-shadow: none; }
 .ladder .node .kind { font: 600 12px var(--ui); color: var(--ink-3); letter-spacing: 0.06em; text-transform: uppercase; }
 .ladder .node .dur { margin-left: auto; font: 600 var(--t-sm) var(--ui); color: var(--ink-2); }
+/* ASSESS-01: the pen line over the rail (Motion draws it; hidden at rest, so reduced motion shows the plain rail). Painted
+   first, so the node dots stay on top of it. */
+.ladder > .ladder-trace { position: absolute; left: 8px; top: 12px; bottom: 12px; width: 5px; border-radius: 3px; opacity: 0; transform-origin: 50% 0;
+  pointer-events: none; background: linear-gradient(180deg, rgba(42, 26, 16, 0.2), var(--ink) 78%, var(--amber) 96%); box-shadow: 0 0 7px rgba(255, 179, 71, 0.7); }
+.trace-note { display: none; margin: -4px 0 10px; font-size: 12px; color: var(--ink-3); }
+.assess:has(.ladder-trace[data-on]) .trace-note { display: block; }
 .ladder .leg { display: flex; justify-content: space-between; gap: 12px; font-size: var(--t-sm); color: var(--ink-2); padding: 2px 0; }
 .switch { position: relative; display: inline-flex; align-items: center; gap: 12px; cursor: pointer; font: 700 var(--t-sm) var(--ui); }
 .switch input { position: absolute; inset: 0; width: 100%; height: 100%; min-height: 0; margin: 0; opacity: 0; cursor: pointer; z-index: 1; }
@@ -863,6 +869,7 @@ label.layer-row { cursor: pointer; }
 .k-habitat { position: relative; isolation: isolate; width: 20px; height: 20px; display: grid; place-items: center; font: 700 10px/1 var(--ui); color: #16120f; }
 .k-habitat::before { content: ""; position: absolute; z-index: -1; inset: 3px; transform: rotate(45deg); background: #fff; border: 2px solid #16120f; }
 .k-stop { width: 20px; height: 20px; display: grid; place-items: center; border-radius: 50%; background: #b94c22; border: 2px solid #fff; font: 700 11px/1 var(--ui); color: #fff; }
+.k-progress { width: 22px; height: 22px; border-radius: 50%; border: 3px solid #ffb347; box-shadow: 0 0 0 2px #16120f, inset 0 0 0 2px #16120f; }
 .k-tick { width: 4px; height: 18px; border-radius: 1px; background: linear-gradient(180deg, #f5c451 0 50%, #ff6b5e 50% 100%); }
 .k-sym { width: 26px; height: 18px; border-radius: 4px; border: 1px solid rgba(255, 179, 71, 0.4); background-color: #2a2622; }
 /* Load and error states of the sheet itself (the rest of the app keeps working). */
