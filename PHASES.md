@@ -1492,3 +1492,22 @@ Results: tsc clean; vitest 340/340 (37 files); AC-12 249,567 B of 250,000 (433 B
 Next part / blocker owner: Design confirms ASSESS-01 (the one deliberate loop) and the HUD-01 look; the team decides
   HUD-02 (minutes in the label)
 ```
+
+```text
+Part: UNDO-01, V-15 - Undo for a stop placed by a click on the map; upper limit on typed times
+Owner: Yujin (team member), on his own computer (Personal PC); SI-assisted (Claude Code, Claude Opus 5.5)
+Status: VERIFIED (branch yujin/stop-undo-time-limits from main 3df441b; commits 4e4b90c, 3b09c32)
+Scope completed: src/app/App.tsx (Undo key, Ctrl+Z, pause on hover/focus), src/app/styles.css, src/app/PlanTimes.tsx,
+  src/engine/assumptions.ts (TIME_LIMIT_MIN), src/engine/planner.ts, src/field/execution.ts, unit tests in
+  src/engine/planner.test.ts and src/field/execution.test.ts, e2e/undo-limits.spec.ts (new); CLAUDE.md register row
+  V-15; DECISIONS UNDO-01, V-15, R-33, B-04, MERGE-08 record, MERGE-09
+Checks run: npx tsc --noEmit; npx vitest run; rm -rf dist && npm run build && node scripts/bundle-size.mjs;
+  npx playwright test --trace off --workers=1 (full); --project=3d --no-deps; the reduced-motion tour spec
+  --repeat-each=3; /code-review high (R-33)
+Results: tsc clean; vitest 340/340; AC-12 249,880 B of 250,000 (120 B left); Playwright app 90/91, 3D 9/9; the one
+  failure is the tour's reduced-motion timing at 40.9 ms on a 40 ms limit (frame timing on this machine; it passed
+  3/3 when rerun alone, and main fails the same class here); new spec 2/2 (Undo by double click sends one delete,
+  Ctrl+Z, the key clears itself, 1,000,000 min refused in the Planner and the HUD); screenshots inspected
+Next part / blocker owner: the team confirms the 24 h figure (V-15); Design reviews the Undo key (UNDO-01); any new
+  app code needs savings first (B-04)
+```

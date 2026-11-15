@@ -2,6 +2,15 @@
 
 This file is the handoff between team members and Claude sessions. Keep it factual and current. A new session must read this file before touching code.
 
+
+## Undo for a placed stop, limit on typed times (Sun 15 Nov 2026, from 20:53 Asia/Manila): branch `yujin/stop-undo-time-limits` (MERGE-09). Start here
+
+- **What (DECISIONS UNDO-01, V-15):** a click on the map still adds a stop at once; the "Plan updated" message now has an **Undo stop X** key for 6 s (it waits while the pointer or focus is on it), and **Ctrl+Z** does the same. Any plan time or stop duration over **1440 min (24 h)** is refused (engine, Planner form with "At most 1440 min (24 h)"); the HUD's elapsed time over **2880 min**.
+- **Budget:** AC-12 **249,880 B of 250,000: 120 B left.** Nothing more fits without savings first (B-04).
+- **Checks:** tsc clean; vitest 340/340; Playwright app 90/91 and 3D 9/9 (the miss: the tour's reduced-motion timing at 40.9 ms on a 40 ms limit, passed 3/3 alone).
+- **PR #38 (MERGE-08) record:** merged `3df441b` 20:31; live byte-identical; Playwright 96/98 against the live URL (2 tour-timing misses); 3D branch fast-forwarded to `3df441b`.
+- **For people:** confirm the 24 h figure (V-15); Design reviews the Undo key; the submission tasks in the SUB-01 section below.
+
 ## Crew progress on the map, Assess trace (Sun 15 Nov 2026, from 19:48 Asia/Manila): branch `yujin/hud-marker-assess-anim` (MERGE-08). Start here
 
 - **What (DECISIONS HUD-01, ASSESS-01):** on the HUD step the 2D sheet shows where the crew is, from the HUD's manual ticks only: an arrival puts an amber ring on that stop; a departure marks the whole next leg as a band labelled "position on the leg not tracked" (the ticks give no point on the leg, and nothing is guessed from a clock). The map hint, the map key and the HUD say the same words. On the Assess step a pen line traces the traverse ladder, habitat to habitat, and loops (4.6 s), with a note that it is an illustration, not a live run; it stops on other steps, pauses out of view and never runs under reduced motion.
