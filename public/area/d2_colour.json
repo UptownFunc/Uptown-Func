@@ -1,0 +1,23 @@
+{
+  "id": "d2colour",
+  "path": "d2_colour.jpg",
+  "source": "D2",
+  "valueClass": "directly_measured",
+  "name": "Orthophoto (D2 colour mosaic, as published)",
+  "frame": "F7",
+  "extentF7": [
+    8142244.492786024,
+    -286908.075189438,
+    8145256.492786024,
+    -283907.075189438
+  ],
+  "pixel_m": 1.0,
+  "size": [
+    3012,
+    3001
+  ],
+  "nativeResolution_m": 0.25,
+  "method": "D2 RGB averaged from 0.25 m to the 1 m display grid of layers.json; no stretch, no tint",
+  "builtOn": "2026-11-15",
+  "sha256": "7c5fdc81930f6645f9c28fc1fcf69fef0cea0591be9f23c4712de73bfc1685a5"
+}
