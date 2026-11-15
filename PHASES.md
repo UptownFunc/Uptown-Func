@@ -1207,6 +1207,20 @@ Commit SHA: 6fb67ca
 Next part / blocker owner: the team decides whether UX-17..UX-21 go into main after the freeze; Design review of the copy
 ```
 
+```text
+Part: MERGE-03 - yujin/ux-polish merged into main; live-site check; session handoff
+Owner: Yujin (instruction "Merge to main now, and prepare a handoff. Push."); SI-assisted (Claude Code, Claude Opus 5.5)
+Status: VERIFIED
+Merge: PR #26 merged as 598cafe (Sun 15 Nov 2026 15:03 Asia/Manila), GitHub mergeable, state clean, head dc5bde3; main was
+  943d30e and had not moved. After the G5 freeze: an exception at the member's instruction (DECISIONS MERGE-03).
+Checks: local build of 598cafe -> assets/index-5xmFCMnS.js; the live site served it within a minute of the merge;
+  cmp of the live index-5xmFCMnS.js and engine-worker.js with the local build: identical; Playwright against
+  https://uptown-func.vercel.app (temporary config, deleted, --workers=1): 74 passed / 74.
+Known limitations or failures: scripts/licences.py not re-run (Windows); pytest not run (no pipeline file changed).
+Next part / blocker owner: the team (HANDOFF section 3): portal deadline, concept account and authorship, video,
+  two-machine check and FortiGuard, submission fields, PR #22, submit
+```
+
 ## Phase-part completion record
 
 Copy this block for every phase part and update its table row above:
