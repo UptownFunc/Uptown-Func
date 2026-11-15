@@ -643,6 +643,7 @@ details[open] > summary::before { transform: rotate(90deg); }
 .src-value :is(.unknown, .why) { color: var(--amber-dim); }
 .toast { position: fixed; z-index: 40; left: 50%; top: calc(var(--top) + 64px); translate: -50% 0; margin: 0; max-width: min(560px, calc(100% - 2 * var(--gap))); padding: 8px 14px;
   font: 400 20px/1.1 var(--crt-font); pointer-events: none; }
+.toast button { pointer-events: auto; margin-left: 12px; } /* UNDO-01: the one key a message carries */
 .toast[data-kind="hold"] { color: #ffc0a8; border-color: rgba(255, 90, 70, 0.6); }
 .app:is([data-step="map"], [data-step="assess"]) .toast { left: calc(50% + (var(--panel) + 2 * var(--gap)) / 2); }
 .app[data-step="hud"] .toast { left: calc(50% + (480px + 2 * var(--gap)) / 2); }

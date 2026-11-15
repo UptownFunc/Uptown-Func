@@ -5,6 +5,7 @@ import { useId, useState } from "react";
 import type { Assumption } from "../contracts";
 import { Hint } from "./Term";
 import type { TermKey } from "./glossary";
+import { TIME_LIMIT_MIN } from "../engine/assumptions";
 
 export const FIELDS = [
   { id: "T_EVA", label: "Planned EVA duration (T_EVA)", short: "EVA duration", term: "T_EVA" },
@@ -24,7 +25,8 @@ export function TimeRow({ id, label, current, onSet, stopId, inherited, hint }: 
   const hintId = useId();
   const [why, setWhy] = useState("");
   const n = Number(minutes);
-  const valid = minutes.trim() !== "" && Number.isFinite(n) && n >= 0 && why.trim() !== "";
+  const over = n > TIME_LIMIT_MIN; // V-15: a typing mistake such as 1,000,000 min is refused, with the reason
+  const valid = minutes.trim() !== "" && Number.isFinite(n) && n >= 0 && !over && why.trim() !== "";
   return (
     <form className="time-row" onSubmit={(e) => { e.preventDefault(); if (valid) onSet(id, n * 60, why.trim(), stopId); }}>
       <div className="time-what">
@@ -40,6 +42,7 @@ export function TimeRow({ id, label, current, onSet, stopId, inherited, hint }: 
       </label>
       <input className="time-why" aria-label={`${label}, rationale`} placeholder="One-line rationale (required)" value={why} onChange={(e) => setWhy(e.target.value)} />
       <button type="submit" className="set" disabled={!valid}>Set</button>
+      {over && <span className="field-error" role="alert">At most {TIME_LIMIT_MIN} min (24 h)</span>}
     </form>
   );
 }

@@ -175,13 +175,18 @@ describe("Assumed plan times via set_assumption (plan 6.6, UX-03; T-01: no value
     expect(a).toMatchObject({ value: 14400, unit: "s", source: "team choice", rationale: "test value for T_EVA" });
   });
 
-  it("refuses a missing rationale, an unknown id, a negative time and a zero T_EVA", () => {
+  it("refuses a missing rationale, an unknown id, a negative time, a zero T_EVA and a time over 24 h", () => {
     const { p } = plannerWithHabitat();
     const v = () => p.current().plan.versionHash;
     expect(p.apply(cmd("set_assumption", { id: "T_EVA", value_s: 3600, rationale: "" }, v())).ok).toBe(false);
     expect(p.apply(cmd("set_assumption", { id: "k_v", value_s: 1, rationale: "x" }, v())).ok).toBe(false);
     expect(p.apply(cmd("set_assumption", { id: "t_ops", value_s: -1, rationale: "x" }, v())).ok).toBe(false);
     expect(p.apply(cmd("set_assumption", { id: "T_EVA", value_s: 0, rationale: "x" }, v())).ok).toBe(false);
+    // V-15: above 24 h is a typing mistake (1,000,000 min), refused with the reason; 24 h itself is accepted.
+    const big = p.apply(cmd("set_assumption", { id: "T_EVA", value_s: 1_000_000 * 60, rationale: "x" }, v()));
+    expect(big.ok).toBe(false);
+    expect(big.ok ? "" : big.reason).toMatch(/at most 1440 min/);
+    expect(p.apply(cmd("set_assumption", { id: "stop_duration", value_s: 1441 * 60, rationale: "x" }, v())).ok).toBe(false);
     expect(p.current().plan.assumptions.some((a) => a.id.startsWith("A-T"))).toBe(false);
   });
 

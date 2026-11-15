@@ -41,3 +41,8 @@ export const SLOPE_LIMIT_ASSUMPTION: Assumption = {
 
 /** Limits on a stop's name and tasks (C-19 edit_stop, add_stop), shared by the engine and the Plan panel editor. */
 export const STOP_LIMITS = { nameChars: 60, tasks: 10, taskChars: 120 } as const;
+
+/** V-15 (register): the most a time typed in minutes may be (plan times, stop durations, the HUD's elapsed time):
+ *  24 h. An interface limit against typing mistakes such as 1,000,000 min, not a science value; it is three times the
+ *  8 h top of the 6±2 h EVA range (EVA-EXP-0042 Rev B, 4.1.4, p. 29), so no plausible plan is refused. */
+export const TIME_LIMIT_MIN = 1440;

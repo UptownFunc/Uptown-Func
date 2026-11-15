@@ -57,11 +57,12 @@ const errText = (e: unknown) => (e instanceof Error ? e.message : String(e));
 export function App() {
   const engine = useRef<EngineClient | null>(null);
   const [output, setOutput] = useState<PlanOutput | null>(null);
-  const [message, setMessage] = useState<{ text: string; n: number } | null>(null);
+  /** UNDO-01: a stop just added carries an Undo key in its message (one click undoes an accidental click on the map). */
+  const [message, setMessage] = useState<{ text: string; n: number; undo?: { id: string; letter: string } | undefined } | null>(null);
   /** The latest engine message for assistive technology: one live region that stays mounted (a toast that remounts
    *  for every message is not announced reliably). */
   const [announce, setAnnounce] = useState("");
-  const say = (text: string) => { setMessage((m) => ({ text, n: (m?.n ?? 0) + 1 })); setAnnounce(text); };
+  const say = (text: string, undo?: { id: string; letter: string }) => { setMessage((m) => ({ text, n: (m?.n ?? 0) + 1, undo })); setAnnounce(undo ? `${text} Undo stop ${undo.letter} is in the message.` : text); };
   /** A message answers one action. The next action (or step) clears it, except a failed engine start, which concerns
    *  every action; `refusalsOnly` clears only a refusal (the map's click, before the engine has the pick). */
   const clearActionMessage = useCallback((refusalsOnly = false) => setMessage((m) => {
@@ -71,7 +72,7 @@ export function App() {
   // A success clears itself; a refusal or an error explains why nothing changed, so it stays until the next message.
   useEffect(() => {
     if (!message?.text.startsWith("Plan updated")) return;
-    const timer = setTimeout(() => setMessage((m) => (m?.n === message.n ? null : m)), 4000);
+    const timer = setTimeout(() => setMessage((m) => (m?.n === message.n ? null : m)), message.undo ? 6000 : 4000);
     return () => clearTimeout(timer);
   }, [message]);
   const [pending, setPending] = useState(0);
@@ -238,7 +239,8 @@ export function App() {
         });
         outputRef.current = next;
         setOutput(next);
-        say(result.ok ? `Plan updated in ${Math.round(elapsed_ms)} ms.` : `Not changed: ${result.reason}.`);
+        say(result.ok ? `Plan updated in ${Math.round(elapsed_ms)} ms.` : `Not changed: ${result.reason}.`,
+          type === "add_stop" && result.ok ? next.plan.stops.find((s) => !cur.plan.stops.some((o) => o.id === s.id)) : undefined);
       } catch (err: unknown) {
         say(`Engine error: ${errText(err)}`);
       } finally { setPending((n) => n - 1); }
@@ -358,8 +360,9 @@ export function App() {
         {/* Kept mounted: the field view alone holds MissionExecution, so ticks survive step changes. */}
         <FieldView output={output} hidden={step !== "hud"} briefed={!!version && confirmed === version} toMap={toMap} onExec={setFieldExec} />
         <AnimatePresence>
-          {message && <Appear as="p" key={message.n} className="toast" data-kind={message.text.startsWith("Plan updated") ? "ok" : "hold"} aria-hidden="true" data-testid="engine-message"
-            enter={{ opacity: [0, 1], transform: ["translateY(-10px) scale(0.97)", "translateY(0px) scale(1)"] }} exit={{ opacity: [1, 0] }}>{message.text}</Appear>}
+          {message && <Appear as="p" key={message.n} className="toast" data-kind={message.text.startsWith("Plan updated") ? "ok" : "hold"} data-testid="engine-message"
+            enter={{ opacity: [0, 1], transform: ["translateY(-10px) scale(0.97)", "translateY(0px) scale(1)"] }} exit={{ opacity: [1, 0] }}><span aria-hidden="true">{message.text}</span>
+            {message.undo && <button type="button" className="textbtn" onClick={() => send("delete_stop", { stopId: message.undo!.id })}>Undo stop {message.undo.letter}</button>}</Appear>}
         </AnimatePresence>
         <p className="sr-only" role="status" data-testid="engine-announce">{announce}</p>
         {/* Always mounted (inert and hidden while closed) so the datasets-in-view list stays current. */}
