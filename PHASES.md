@@ -1573,6 +1573,8 @@ Results: tsc clean; vitest 340/340; AC-12 249,880 B of 250,000 (120 B left); Pla
   failure is the tour's reduced-motion timing at 40.9 ms on a 40 ms limit (frame timing on this machine; it passed
   3/3 when rerun alone, and main fails the same class here); new spec 2/2 (Undo by double click sends one delete,
   Ctrl+Z, the key clears itself, 1,000,000 min refused in the Planner and the HUD); screenshots inspected
+After merging main eca1720 (PRs #40-#42; only log files conflicted, both sides kept): tsc clean; vitest 353/353;
+  AC-12 249,904 B (96 B left); Playwright app 90/91 (desktop tour timing 120.4 ms on 120) and 3D 10/10
 Next part / blocker owner: the team confirms the 24 h figure (V-15); Design reviews the Undo key (UNDO-01); any new
   app code needs savings first (B-04)
 ```
