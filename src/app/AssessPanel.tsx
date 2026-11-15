@@ -4,7 +4,7 @@
 // the word set is OK / NEAR LIMIT / OVER with shape and colour, and there is no SAFE state.
 import { useEffect, useRef, type ReactNode } from "react";
 import { ZONES, arc, needleAngle } from "./gauge";
-import { swingNeedle } from "./fx";
+import { swingNeedle, traceLadder } from "./fx";
 import { Term } from "./Term";
 import type { Quantity } from "../contracts";
 import type { PlanOutput } from "../engine/planner";
@@ -38,6 +38,22 @@ function Meter({ angle, live }: { angle: number; live: boolean }) {
   );
 }
 
+/** ASSESS-01: the ladder's looping trace. It lives only while the Assess step is open (the panel unmounts on any other
+ *  step), pauses while the ladder is scrolled out of view, and stops for good if the user turns on reduced motion. */
+function Trace() {
+  const ref = useRef<HTMLLIElement>(null);
+  useEffect(() => {
+    const a = ref.current && traceLadder(ref.current);
+    if (!a) return;
+    const io = new IntersectionObserver(([en]) => (en?.isIntersecting ? a.play() : a.pause()));
+    io.observe(ref.current!.parentElement!); // the ladder, not the trace: the trace has no height at the start of a pass
+    const mq = matchMedia("(prefers-reduced-motion: reduce)"), off = () => { if (mq.matches) a.cancel(); };
+    mq.addEventListener("change", off);
+    return () => { io.disconnect(); mq.removeEventListener("change", off); a.cancel(); };
+  }, []);
+  return <li ref={ref} className="ladder-trace" aria-hidden="true" data-testid="ladder-trace" />;
+}
+
 export function AssessPanel({ output, onOpenSource, drillMin, onDrillMin, busy, next, toMap }: {
   output: PlanOutput | null; onOpenSource: (q: Quantity) => void; drillMin: number | null; onDrillMin: (m: number | null) => void;
   busy: boolean; next: ReactNode; /** UX-24: the way out of the empty state. */ toMap?: ReactNode;
@@ -67,8 +83,10 @@ export function AssessPanel({ output, onOpenSource, drillMin, onDrillMin, busy, 
         </div>
         <AssumedNote output={output} />
         <p className="section-title">Traverse</p>
+        {plan.legs.length > 0 && <p className="note trace-note">The moving line shows the order the margin is added up: each walk and stop, habitat to habitat. An illustration, not a live run.</p>}
         {plan.legs.length === 0 ? <div className="empty-state"><strong>No route yet</strong><span>Add stops on the Map step.</span>{toMap}</div> : (
           <ol className="ladder" aria-label="Traverse, leg by leg">
+            <Trace />
             <li className="node">Habitat <span className="kind">depart</span></li>
             {plan.legs.map((l) => {
               const to = stopOf(l.toId);

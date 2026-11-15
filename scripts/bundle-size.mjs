@@ -8,7 +8,8 @@
 // file may import it statically, so it cannot slip into the first load). AC-12 counts everything else, lazy app code
 // included. Run after `npm run build`.
 import { readdirSync, readFileSync, statSync, existsSync } from "node:fs";
-import { join, relative } from "node:path";
+import { join, relative as rel0, sep } from "node:path";
+import { fileURLToPath } from "node:url";
 import { gzipSync } from "node:zlib";
 
 const BUDGET_BYTES = 250_000;
@@ -16,8 +17,11 @@ const BUDGET_BYTES = 250_000;
 const VENDOR_CEILING_BYTES = 2_120_000;
 /** B-02 amended: the 3D view's own code (src/map3d), loaded with Cesium only. */
 const VIEW3D_CEILING_BYTES = 10_000;
-const dist = new URL("../dist/", import.meta.url).pathname;
-const build = new URL("../node_modules/cesium/Build/Cesium/", import.meta.url).pathname;
+// fileURLToPath, not URL.pathname: on Windows the pathname is /D:/... and join() made it D:\D:\... (HANDOFF known issue).
+const dist = fileURLToPath(new URL("../dist/", import.meta.url));
+const build = fileURLToPath(new URL("../node_modules/cesium/Build/Cesium/", import.meta.url));
+/** Relative paths with forward slashes on every OS, so the patterns below match on Windows too. */
+const relative = (a, b) => rel0(a, b).split(sep).join("/");
 const walk = (dir) => readdirSync(dir).flatMap((n) => { const p = join(dir, n); return statSync(p).isDirectory() ? walk(p) : [p]; });
 const files = walk(dist).filter((p) => p.endsWith(".js"));
 if (files.length === 0) { console.error("No JavaScript in dist/: run `npm run build` first."); process.exit(2); }

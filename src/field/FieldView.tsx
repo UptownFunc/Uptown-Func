@@ -2,7 +2,7 @@
 // Field View (plan 3.3, 6.6, UX-12): one column, at most five items, readable at arm's length. The crew ticks arrival
 // and departure by hand; this component alone holds and writes MissionExecution. Field margins are labelled as coming
 // from manual entries with the last tick time, and never replace the planned margin. Suit life support is not modelled.
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import type { MissionExecution, Quantity } from "../contracts";
 import { CONSTANTS } from "../constants";
 import { Term } from "../app/Term";
@@ -12,14 +12,20 @@ import { MarginState } from "../app/MarginState";
 import { QuantityText } from "../app/QuantityText";
 import { formatLength } from "../app/format";
 import { addTick, fieldMarginAssumptionIds, fieldMarginRanges, newExecution, nextEvent, type Range } from "./execution";
+import { progressOf, progressText } from "./progress";
 
 const SPEED_RATIO = CONSTANTS.walkSpeedRange.low / CONSTANTS.walkSpeedRange.high;
 
-export function FieldView({ output, hidden = false, briefed = false, next, toMap }: { output: PlanOutput | null; hidden?: boolean; briefed?: boolean; next?: ReactNode;
-  /** UX-24: the way out of the empty state (a key to the Map step). */ toMap?: ReactNode }) {
+export function FieldView({ output, hidden = false, briefed = false, next, toMap, onExec }: { output: PlanOutput | null; hidden?: boolean; briefed?: boolean; next?: ReactNode;
+  /** UX-24: the way out of the empty state (a key to the Map step). */ toMap?: ReactNode;
+  /** HUD-01: a read-only copy of the ticks for the current plan (null: none, or they belong to an older plan), so the
+   *  map can show the crew's progress. This component stays the only writer of MissionExecution. */
+  onExec?: (e: MissionExecution | null) => void }) {
   const [exec, setExec] = useState<MissionExecution | null>(null);
   const [minutes, setMinutes] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const current = exec && output && exec.planVersion === output.plan.versionHash ? exec : null;
+  useEffect(() => { onExec?.(current); }, [current]); // eslint-disable-line react-hooks/exhaustive-deps -- the console's setter is stable
   if (!output) return <section className="side field" aria-label="Field view" hidden={hidden}><div className="side-scroll"><h1 className="hud-next">Field HUD</h1><p>Loading the route engine…</p></div></section>;
   const { plan, geometry } = output;
   const e = exec && exec.planVersion === plan.versionHash ? exec : null;
@@ -91,6 +97,7 @@ export function FieldView({ output, hidden = false, briefed = false, next, toMap
         <p className="field-note" data-testid="field-provenance">
           From manual entries{last ? `, last tick at ${last.enteredAt.slice(11, 16)} UTC (${last.kind} ${stopOf(last.stopId)?.letter}, elapsed ${last.elapsed_min} min)` : "; no tick yet"}.
           Estimates under stated assumptions; the planned margin is unchanged. Suit life support not modelled.
+          {" "}<span data-testid="field-map-progress">On the map, the amber mark: {(() => { const p = progressOf(output, e); return p ? `${progressText(p)}.` : "it appears with the first tick."; })()}</span>
         </p>
       </>}
       </div>

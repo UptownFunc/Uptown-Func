@@ -18,9 +18,10 @@ import { PlannerScreen, SetupScreen, Welcome } from "./Screens";
 import { RoverImages, roverSource } from "./rover";
 import { RemsSnapshot, remsSource } from "./rems";
 import type { ContourLevel } from "../engine/contours";
-import { Provenance, type Quantity } from "../contracts";
+import { Provenance, type MissionExecution, type Quantity } from "../contracts";
 import { BriefingView } from "../briefing/BriefingView";
 import { FieldView } from "../field/FieldView";
+import { progressOf } from "../field/progress";
 import type { MapSnapshot } from "../map/snapshot";
 import { DEMO_PRESET, presetEnabled } from "./demoPreset";
 import { STEPS, stepFromHash, type StepId } from "./steps";
@@ -87,6 +88,8 @@ export function App() {
   const [showSky, setShowSky] = useState(false);
   /** MAP-02: the display layers shown on the sheet (console state; a later 3D view reads the same object). */
   const [mapLayers, setMapLayers] = useState<MapLayers>(DEFAULT_LAYERS);
+  /** HUD-01: a read-only copy of the field view's ticks, for the crew's progress on the sheet. */
+  const [fieldExec, setFieldExec] = useState<MissionExecution | null>(null);
   /** 3D-05: which view the map plate shows. The 2D sheet stays mounted under the 3D view, so nothing resets. */
   const [view, setView] = useState<"2d" | "3d">("2d");
   const [tries3d, setTries3d] = useState(0);
@@ -145,6 +148,8 @@ export function App() {
     return () => { removeEventListener("popstate", onPop); removeEventListener("keydown", onKey); };
   }, [show]);
   const onMap = STEPS.find((s) => s.id === step)?.map ?? false;
+  /** HUD-01: shown on the HUD step only, where the ticks are entered (2D sheet; the 3D view does not draw it). */
+  const progress = useMemo(() => (step === "hud" ? progressOf(output, fieldExec) : null), [step, output, fieldExec]);
   const panelIn = tour ? PANEL_FADE : PANEL_IN;
   // Keyboard and screen-reader users land on the new step's heading: the control that changed the step is usually
   // gone (it belonged to the old step), and focus would otherwise fall back to the top of the page. Not while the
@@ -311,13 +316,14 @@ export function App() {
             popover={step === "map" && pickedStop && !moving ? <StopPopover stop={pickedStop} output={output!} onOpenSource={openSource} onClose={() => setPicked(null)}
               onMove={() => { setMoving(pickedStop.id); setPicked(null); }} onDelete={() => { send("delete_stop", { stopId: pickedStop.id }); setPicked(null); }}
               onEdit={(name, tasks) => send("edit_stop", { stopId: pickedStop.id, name, tasks })} /> : null}
-            terrainClasses={classesReady ? terrainClasses.current : null} layers={mapLayers} onLayers={setMapLayers}
+            terrainClasses={classesReady ? terrainClasses.current : null} layers={mapLayers} onLayers={setMapLayers} progress={progress}
             cursorHint={step === "map" ? (movingStop ? `Click to move stop ${movingStop.letter} here · Esc to cancel` : true) : false}
             onSnapshotReady={(fn) => setSnapshot(() => fn)} hoverIndex={hover} onHoverIndex={setHover} onDatasets={setLayerDatasets} onCursor={setCursor}
             contours={contourDisplay} showSky={showSky} onSky={(st, f) => { setSkyState(st); if (f) setSkyAt(() => f); }}
-            tools={<>{view === "3d" && <p className="muted view-note">In 3D: elevation contours, time-to-habitat lines and the sky layer are drawn on the 2D sheet only.</p>}
+            tools={<>{view === "3d" && <p className="muted view-note">In 3D: elevation contours, time-to-habitat lines, the sky layer and the crew progress mark are drawn on the 2D sheet only.</p>}
               <LayerToggles showContours={showContours} onShowContours={setShowContours} showSky={showSky} onShowSky={setShowSky} skyAvailable={skyState !== "none"} busy={contourBusy} /></>}
-            hint={step === "map" ? (movingStop ? `Moving stop ${movingStop.letter}: click its new place` : "Click ground to add a stop · click a stop to edit it") : "View only · edit the route on the Map step"} />
+            hint={step === "map" ? (movingStop ? `Moving stop ${movingStop.letter}: click its new place` : "Click ground to add a stop · click a stop to edit it")
+              : step === "hud" ? "View only · amber = crew from HUD ticks, not GPS" : "View only · edit the route on the Map step"} />
           {ping && <span key={ping.n} className="ping" style={{ left: ping.x, top: ping.y }} aria-hidden="true" />}
           {/* Recalculation feedback: shown while a Command is with the engine (route search, margins). */}
           {/* 3D-05: one switch for the plate; 3D needs the engine (its heights come from the engine's grid). */}
@@ -350,7 +356,7 @@ export function App() {
         <BriefingView output={output} snapshot={snapshot} hidden={step !== "brief"} rover={rover}
           confirmed={confirmed} onConfirm={setConfirmed} next={next("hud", "Open the field HUD")} />
         {/* Kept mounted: the field view alone holds MissionExecution, so ticks survive step changes. */}
-        <FieldView output={output} hidden={step !== "hud"} briefed={!!version && confirmed === version} toMap={toMap} />
+        <FieldView output={output} hidden={step !== "hud"} briefed={!!version && confirmed === version} toMap={toMap} onExec={setFieldExec} />
         <AnimatePresence>
           {message && <Appear as="p" key={message.n} className="toast" data-kind={message.text.startsWith("Plan updated") ? "ok" : "hold"} aria-hidden="true" data-testid="engine-message"
             enter={{ opacity: [0, 1], transform: ["translateY(-10px) scale(0.97)", "translateY(0px) scale(1)"] }} exit={{ opacity: [1, 0] }}>{message.text}</Appear>}
