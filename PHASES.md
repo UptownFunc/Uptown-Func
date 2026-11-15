@@ -1468,3 +1468,27 @@ Results: tsc clean; vitest 331/331 (34 files); live site 200; /code-review low: 
 Next part / blocker owner: Captain - choose the portal Project link (recommended: the GitHub repository) and check
   both links in a private window; FortiGuard request optional (HANDOFF section 3, task 4)
 ```
+
+```text
+Part: HUD-01, ASSESS-01, B-03 - crew progress on the 2D map from the HUD ticks; looping trace on the Assess ladder;
+  bundle-size check on Windows
+Owner: Yujin (team member), on his own computer (Personal PC); SI-assisted (Claude Code, Claude Opus 5.5)
+Status: VERIFIED (branch yujin/hud-marker-assess-anim; commits 5c82dcc, e37aa6c, merged with main bdd041b)
+Scope completed: src/field/progress.ts (+ test), src/map/planLayer.ts (progress layers), src/map/AreaSheet.tsx,
+  src/map/snapshot.ts, src/field/FieldView.tsx, src/app/{App.tsx,AssessPanel.tsx,fx.ts,styles.css},
+  scripts/bundle-size.mjs, e2e/hud-progress.spec.ts (new), e2e/map-3d.spec.ts (note text); DECISIONS HUD-01, ASSESS-01,
+  HUD-02, B-03, E2E-07, R-32, MERGE-08; CLAUDE.md Motion line (five timelines)
+Checks run: npm ci; npx tsc --noEmit; npx vitest run; rm -rf dist && npm run build && node scripts/bundle-size.mjs;
+  npx playwright test --trace off --workers=1 (full); npx playwright test --project=3d --no-deps; tour-timing spec
+  --repeat-each=3 on the branch and on main; /code-review high (R-32)
+Results: tsc clean; vitest 340/340 (37 files); AC-12 249,567 B of 250,000 (433 B left; main 248,267 B on the same
+  Windows machine), 3D chunk 6,739 B of 10,000, Cesium 2,112,862 B unmodified; Playwright app project 88/89, 3D
+  project 9/9; the one failure is tour-timing "desktop" (spotlight 122-138 ms after the words, limit 120 ms), which
+  also fails on main on this machine (4 of 9 runs: 120-145 ms, and 42-44 ms on the 40 ms limit): this computer's
+  speed, not this change (HANDOFF known flake); the new spec 3/3 (the map mark follows each tick and stays centred on
+  the stop after zoom; the trace draws, loops, pauses out of view, stops on another step and under reduced motion);
+  screenshots inspected (the first showed the route cutting the label: fixed with a label layer above the route; the
+  first trace colour read as the rail fading: changed to ink with an amber tip)
+Next part / blocker owner: Design confirms ASSESS-01 (the one deliberate loop) and the HUD-01 look; the team decides
+  HUD-02 (minutes in the label)
+```

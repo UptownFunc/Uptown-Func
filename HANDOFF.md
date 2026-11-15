@@ -2,6 +2,14 @@
 
 This file is the handoff between team members and Claude sessions. Keep it factual and current. A new session must read this file before touching code.
 
+## Crew progress on the map, Assess trace (Sun 15 Nov 2026, from 19:48 Asia/Manila): branch `yujin/hud-marker-assess-anim` (MERGE-08). Start here
+
+- **What (DECISIONS HUD-01, ASSESS-01):** on the HUD step the 2D sheet shows where the crew is, from the HUD's manual ticks only: an arrival puts an amber ring on that stop; a departure marks the whole next leg as a band labelled "position on the leg not tracked" (the ticks give no point on the leg, and nothing is guessed from a clock). The map hint, the map key and the HUD say the same words. On the Assess step a pen line traces the traverse ladder, habitat to habitat, and loops (4.6 s), with a note that it is an illustration, not a live run; it stops on other steps, pauses out of view and never runs under reduced motion.
+- **Budget:** AC-12 **249,567 B of 250,000: 433 B left.** Any further app code needs savings first. `scripts/bundle-size.mjs` now runs on Windows too (B-03).
+- **Checks:** tsc clean; vitest 340/340; Playwright app 88/89 and 3D 9/9; new spec 3/3. The failure is the tour's frame-timing spec on this Windows machine: it fails on `main` here too (4 of 9 runs), so it is the machine, not this change.
+- **Merge:** on Yujin's word ("Once, done. Merge it", 20:25) in place of the team approval his brief asked for (MERGE-08); the merge SHA and the live check follow in the record.
+- **For people:** Design confirms ASSESS-01 (the one deliberate Motion loop, CLAUDE.md updated) and the HUD-01 look; the team decides HUD-02 (minutes in the map label); everything in the SUB-01 section below (submission).
+
 ## MERGED (Sun 15 Nov 2026, about 19:35 Asia/Manila): 3D view (MERGE-07). Start here
 
 - **`main` = `158ece1`** (PR #36), plus this record. Its tree is identical to the approved branch. The live site serves `assets/index-DIhEGVs4.js`, and the entry bundle, worker, 3D chunk, Cesium.js and D2 colour image are byte-identical to a local build. Playwright passed **95/95 against the live URL**.
