@@ -64,7 +64,7 @@ export function FieldView({ output, hidden = false, next, toMap, onExec }: { out
           <button type="button" className="textbtn" onClick={() => setExec(null)}>Start ticks for the current plan</button>
         </p>
       )}
-      {bad && <p className="infeasible" role="alert" data-testid="hud-infeasible"><MarginState state="OVER" /> <strong>Plan not feasible</strong> ({bad}).
+      {bad && <p className="infeasible" role="alert" data-testid="hud-infeasible"><strong>Plan not feasible</strong> ({bad}).
         <strong> Turn back now.</strong> Estimate under stated assumptions.</p>}
       {plan.stops.length === 0 ? <div className="empty-lead"><h1 className="hud-next">No stops in the plan yet.</h1>
         <p className="note">The HUD walks the planned stops in order. Place at least one stop on the map first.</p>{toMap}</div> : <>

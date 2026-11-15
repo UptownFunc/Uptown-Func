@@ -79,7 +79,7 @@ export function AssessPanel({ output, onOpenSource, drillMin, onDrillMin, busy, 
           <h1>Return margin</h1>
           <p>What the walk leaves of the EVA, with the route as planned.</p>
         </header>
-        {bad && <p className="infeasible" role="alert" data-testid="assess-infeasible"><MarginState state="OVER" /> <strong>Plan not feasible</strong> ({bad}). Estimate under stated assumptions.</p>}
+        {bad && <p className="infeasible" role="alert" data-testid="assess-infeasible"><strong>Plan not feasible</strong> ({bad}). Estimate under stated assumptions.</p>}
         <div className="verdict-block" data-testid="assess-margin" data-tour="gauge">
           <Meter angle={needleAngle(low, tEva)} live={low !== null && tEva !== null} />
           <span className="k"><Term k="margin">Planned return margin</Term></span>

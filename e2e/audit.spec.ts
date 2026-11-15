@@ -122,8 +122,9 @@ test("Motion timelines end in the right state: needle, stamp, spotlight and the 
   // Orientation: the spotlight settles on its target.
   await expect(page.getByText("Terrain and route engine ready")).toBeVisible({ timeout: 20_000 });
   await page.getByRole("button", { name: /Begin orientation/ }).click();
-  await expect(page.getByRole("dialog", { name: "Pick a scenario" })).toBeVisible();
-  const target = page.locator('[data-tour="scenario"]');
+  await page.getByRole("button", { name: "Custom times" }).click();
+  await expect(page.getByRole("dialog", { name: "Set the time budget" })).toBeVisible();
+  const target = page.locator('[data-tour="budget"]');
   await expect.poll(async () => {
     const [t, h, view] = [await target.boundingBox(), await page.locator(".tour-hole").boundingBox(), page.viewportSize()!];
     if (!t || !h) return 999;
@@ -173,7 +174,7 @@ test("the tour stays out of the way: arrows in a field or on the map do not turn
   await page.getByRole("button", { name: "Orientation" }).click();
   const budget = page.getByRole("dialog", { name: "Set the time budget" });
   await expect(budget).toBeVisible();
-  await expect(budget.getByLabel("Card 3 of 8")).toBeVisible();
+  await expect(budget.getByLabel("Card 1 of 5")).toBeVisible();
   // Typing in a field with the tour open: the field keeps the keys and the card stays.
   await setTime(page, "EVA duration (T_EVA)", "300");
   await expect(page.getByTestId("current-T_EVA")).toHaveText("300.0 min · assumed");
