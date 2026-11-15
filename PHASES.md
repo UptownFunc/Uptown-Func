@@ -1283,3 +1283,16 @@ Known limitations: the elapsed-time convention question in DECISIONS LOGIC-01 (n
 Commit SHA: see git log of claude/eager-hypatia-3w23ko
 Next part / blocker owner: the team: approve UI-17, then merge (checks above) and verify the live site
 ```
+
+```text
+Part: UI-17 follow-up - orientation tour checked
+Owner: same operator ("did you do the same for the onboarding/tutorial"); SI-assisted (Claude Code, Claude Opus 5.5)
+Status: VERIFIED on branch claude/eager-hypatia-3w23ko (not merged)
+Scope completed: the tour already had the HUD card last (dcacef2); its text now says "During the walk, after the
+  briefing."; stale step-order comment in App.tsx fixed. Welcome screen lists no step order (unchanged).
+Checks run: npx tsc --noEmit; npx vitest run; npx playwright test e2e/tour-timing.spec.ts e2e/flow.spec.ts
+  e2e/audit.spec.ts --trace off --workers=2; node scripts/bundle-size.mjs; a scripted browser walk of all 8 tour cards
+Results: tsc clean; vitest 318/318; Playwright 24/24; JS 242,663 B of 250,000; tour cards 1-8 on #setup, #setup,
+  #planner, #map, #map, #assess, #brief, #hud
+Next part / blocker owner: the team: approve UI-17 and merge
+```

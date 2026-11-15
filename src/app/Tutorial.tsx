@@ -47,7 +47,7 @@ export const TOUR: readonly TourCard[] = [
     body: "The card is built from the current plan. Any later change marks it STALE.",
     act: "Generate the card, tick the three checks and confirm.", terms: ["stale"] },
   { step: "hud", target: "hud", title: "Carry it in the field",
-    body: "The margins for continuing and for turning back follow your manual entries.",
+    body: "During the walk, after the briefing. The margins for continuing and for turning back follow your manual entries.",
     act: "Type the elapsed time, then tick each arrival and departure.", terms: ["elapsed", "tick", "goOn", "goBack"] },
 ];
 

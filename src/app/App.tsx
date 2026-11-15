@@ -1,6 +1,6 @@
 // SI-assisted: drafted with Claude Code (Claude Opus 5.5); guided flow and the "Bureau" redesign on design/sharpwalk-ui-ux
 // (UI-01, UI-11..UI-13, MOT-03), human Design review pending.
-// Shell: Welcome, then six steps (Setup, Planner, Map, HUD, Assess, Brief). Mission state lives here and in the engine
+// Shell: Welcome, then six steps (Setup, Planner, Map, Assess, Brief, HUD; UI-17). Mission state lives here and in the engine
 // worker, so it survives every step change. The AREA sheet stays mounted and laid out on every step, so the map view,
 // its layers and the briefing snapshot never reset; the field view and the briefing card stay mounted for their state.
 // The engine worker is the only writer of MissionPlan; the console sends it Commands and shows the copies it returns.
