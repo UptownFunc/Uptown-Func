@@ -2,11 +2,31 @@
 // Elevation profile of the whole walk (plan 9.2 charts, 9.4 margin ticks, UX-06 two-way scrub). Distance is the
 // engine's cumulative 3D length on the grid path (model-derived); elevation is D1 on the F6 grid (directly measured,
 // vertical reference unverified). The margin shown on hover is the slow-bound planned margin, an estimate.
-import type { PlanOutput } from "../engine/planner";
+import { useMemo } from "react";
+import type { PlanOutput, ProfileSample } from "../engine/planner";
+import type { Quantity } from "../contracts";
 import { estRange } from "./format";
 import { stopProfilePositions } from "./profile";
 
 const W = 1000, H = 120, PAD = 6;
+
+/** 3D-06: grade along the route at sample i, from D1 heights over about 8 grid steps either side (model-derived; not
+ *  the terrain slope across the path). s is the 3D length along the path, so the horizontal run is sqrt(ds^2 - dz^2). */
+function gradeAt(prof: readonly ProfileSample[], i: number): Quantity {
+  const a = prof[Math.max(0, i - 8)]!, b = prof[Math.min(prof.length - 1, i + 8)]!, dz = b.z_m - a.z_m, ds = b.s_m - a.s_m;
+  const v = ds > 0 ? (Math.atan2(Math.abs(dz), Math.sqrt(Math.max(ds * ds - dz * dz, 1e-9))) * 180) / Math.PI : 0;
+  return { value: v, unit: "deg", valueClass: "model_derived", methodId: "profile:grade-d1-16-steps", assumptionIds: [], sourceIds: ["D1"] };
+}
+
+/** The grade band as runs of one 5-degree bin each (a few dozen rects, not one per sample), built once per profile. */
+function gradeRuns(prof: readonly ProfileSample[]): { s0: number; s1: number; bin: number }[] {
+  const runs: { s0: number; s1: number; bin: number }[] = [];
+  for (let i = 0; i < prof.length - 1; i++) {
+    const bin = Math.min(4, Math.floor(gradeAt(prof, i).value! / 5)), last = runs[runs.length - 1];
+    if (last && last.bin === bin) last.s1 = prof[i + 1]!.s_m; else runs.push({ s0: prof[i]!.s_m, s1: prof[i + 1]!.s_m, bin });
+  }
+  return runs;
+}
 
 export interface RouteProfileProps {
   readonly output: PlanOutput | null;
@@ -16,6 +36,7 @@ export interface RouteProfileProps {
 
 export function RouteProfile({ output, hoverIndex, onHoverIndex }: RouteProfileProps) {
   const prof = output?.geometry.profile ?? [];
+  const runs = useMemo(() => gradeRuns(prof), [prof]);
   if (prof.length < 2) {
     return <div className="profile empty" aria-label="Elevation profile">Elevation profile: add a reachable stop to see the walk.</div>;
   }
@@ -33,13 +54,7 @@ export function RouteProfile({ output, hoverIndex, onHoverIndex }: RouteProfileP
   const stops = output!.plan.stops.map((s, i) => (stopS[i] === null ? null : { letter: s.letter, s: stopS[i]! }))
     .filter((v): v is { letter: string; s: number } => v !== null);
   const h = hoverIndex !== null ? prof[hoverIndex] : undefined;
-  // 3D-06: grade along the route, from D1 heights over about 8 grid steps either side (model-derived; not the terrain
-  // slope across the path). s is the 3D length along the path, so the horizontal run is sqrt(ds^2 - dz^2).
-  const grade = (i: number) => {
-    const a = prof[Math.max(0, i - 8)]!, b = prof[Math.min(prof.length - 1, i + 8)]!, dz = b.z_m - a.z_m, ds = b.s_m - a.s_m;
-    return ds > 0 ? (Math.atan2(Math.abs(dz), Math.sqrt(Math.max(ds * ds - dz * dz, 1e-9))) * 180) / Math.PI : 0;
-  };
-  const band = prof.slice(0, -1).map((p, i) => ({ x: x(p.s_m), w: x(prof[i + 1]!.s_m) - x(p.s_m), g: grade(i) }));
+  const g = h ? gradeAt(prof, hoverIndex!) : null;
 
   const onMove = (e: React.MouseEvent<SVGSVGElement>) => {
     const r = e.currentTarget.getBoundingClientRect();
@@ -62,7 +77,7 @@ export function RouteProfile({ output, hoverIndex, onHoverIndex }: RouteProfileP
                     <polygon className="profile-fill" points={`0,${H} ${pts(0, prof.length - 1)} ${W},${H}`} />
           <polyline className="profile-line" points={pts(0, overAt >= 0 ? overAt : prof.length - 1)} />
           {overAt >= 0 && <polyline className="profile-line over" points={pts(overAt, prof.length - 1)} />}
-          {band.map((b, i) => <rect key={i} className="profile-grade" data-bin={Math.min(4, Math.floor(b.g / 5))} x={b.x} y={H - 5} width={b.w + 0.3} height={5} />)}
+          {runs.map((r, i) => <rect key={i} className="profile-grade" data-bin={r.bin} x={x(r.s0)} y={H - 5} width={x(r.s1) - x(r.s0) + 0.3} height={5} />)}
           {stops.map((s) => <line key={s.letter} className="profile-stop" x1={x(s.s)} x2={x(s.s)} y1={0} y2={H} />)}
           {ticks.map((t) => <line key={t.kind} className={`profile-tick ${t.kind}`} x1={x(t.s_m)} x2={x(t.s_m)} y1={0} y2={H} />)}
           {h && <line className="profile-marker" x1={x(h.s_m)} x2={x(h.s_m)} y1={0} y2={H} />}
@@ -79,7 +94,7 @@ export function RouteProfile({ output, hoverIndex, onHoverIndex }: RouteProfileP
           <>
             <span>s {Math.round(h.s_m)} m</span>
             <span>elev {h.z_m.toFixed(1)} m</span>
-            <span data-testid="profile-grade">grade {grade(hoverIndex!).toFixed(1)}°</span>
+            <span data-testid="profile-grade" title="grade along the route, model-derived from D1">grade {g!.value!.toFixed(1)}°</span>
             <span>planned margin {h.margin_min === null ? <span className="unknown">unknown</span> : <span className="est">{estRange(h.margin_min * 60, (h.marginHigh_min ?? h.margin_min) * 60)}</span>}</span>
           </>
         ) : <span className="why">Hover the profile or the route to scrub the walk.</span>}

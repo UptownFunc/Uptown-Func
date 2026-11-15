@@ -1339,7 +1339,7 @@ Measurements (local vite preview, software WebGL, 1440 x 900): first load JavaSc
 Known limitations: 3D-08 (coverage is the sheet only; D1 vertical reference unverified; AC-15 control points not
   recorded; D2 colour as published, not calibrated); grazing-angle texel stretch near the horizon with the mouse tilt;
   only Chromium with software WebGL tested here; no real GPU, no other browser.
-Review status: /code-review to follow on the PR diff (R-31). Playwright note: 95/95 = app project 86/86 (full run) + 3D project 9/9 (rerun after a 1 % tolerance fix to the reset test)
+Review status: /code-review high (R-31): 7 findings, all fixed in the review commit; Playwright 95/95 after them. Note: 95/95 = app project 86/86 (full run) + 3D project 9/9 (rerun after a 1 % tolerance fix to the reset test)
 Commit SHA: 0112e90 (D2 colour), d8241c0 (vendor and budget), 9de97b6 (3D view), plus the logs commit
 Next part / blocker owner: the team approves (or not) the 3D pull request (MERGE-07); Data and Science: 3D-03, 3D-04
 ```

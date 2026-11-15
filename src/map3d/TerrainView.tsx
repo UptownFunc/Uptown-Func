@@ -38,7 +38,6 @@ interface Scene3d {
 }
 interface Readout3d { lat: string; lon: string; elev: Quantity; cls: number | null }
 
-const reducedMotion = () => typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 /** Adds an imagery layer (at the bottom when `bottom`) and returns it. */
 const put = (t: Scene3d, l: CesiumNS.ImageryLayer, bottom?: number) => { t.w.imageryLayers.add(l, bottom); return l; };
 /** Image credit (USGS Astrogeology asks to credit the D2 authors). */
@@ -52,6 +51,8 @@ export default function TerrainView(props: TerrainViewProps) {
   const p = useRef(props); p.current = props;
   const [ready, setReady] = useState(false), [tiles, setTiles] = useState(false);
   const [notes, setNotes] = useState<string[]>([]);
+  /** Bumped when a plan has been drawn, so the scrub marker is placed on the drawn profile, not the previous one. */
+  const [drawnN, setDrawnN] = useState(0);
   const [readout, setReadout] = useState<Readout3d | null>(null);
   const note = (n: string) => setNotes((v) => (v.includes(n) ? v : [...v, n]));
 
@@ -115,7 +116,7 @@ export default function TerrainView(props: TerrainViewProps) {
       const blank = document.createElement("canvas"); blank.width = blank.height = 2;
       const bx = blank.getContext("2d")!; bx.fillStyle = "#2a1a10"; bx.fillRect(0, 0, 2, 2);
       put(s.current, canvasLayer(C, sphere, blank, C.Rectangle.MAX_VALUE, "Beyond the D1/D2 window: no data shown"), 0);
-      goHome(false);
+      goHome();
       g.tileLoadProgressEvent.addEventListener((n: number) => { if (n === 0 && g.tilesLoaded) { setTiles(true); publish(); } else if (n > 0) setTiles(false); });
       sc.camera.moveEnd.addEventListener(publish);
       sc.renderError.addEventListener((_: unknown, e: unknown) => fail(new Error(`the 3D view stopped: ${e instanceof Error ? e.message : String(e)}`)));
@@ -155,6 +156,8 @@ export default function TerrainView(props: TerrainViewProps) {
           }).finally(() => { asking = false; });
         });
       }, C.ScreenSpaceEventType.MOUSE_MOVE);
+      // Leaving the view clears its readout and lets go of the shared scrub (as the 2D sheet does).
+      sc.canvas.addEventListener("pointerleave", () => { last = null; setReadout(null); if (p.current.hoverIndex !== null) p.current.onHoverIndex(null); });
       h.setInputAction((e: { position: CesiumNS.Cartesian2 }) => {
         // A click within 16 px of a stop's marker selects that stop (the markers are always drawn on top, so their
         // screen position is what the user aims at; a pick could hit the scrub marker on the route instead).
@@ -171,13 +174,13 @@ export default function TerrainView(props: TerrainViewProps) {
     return () => { dead = true; s.current = null; widget?.destroy(); };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  /** Back to the starting view: the whole sheet. Glides unless the user asked for reduced motion. */
-  const goHome = (glide = true) => {
+  /** Back to the starting view: the whole sheet. */
+  const goHome = () => {
     const t = s.current;
     if (!t) return;
     const off = new t.C.HeadingPitchRange(-0.45, -0.66, t.home.radius * 2.35);
-    if (glide && !reducedMotion()) t.w.camera.flyToBoundingSphere(t.home, { offset: off, duration: 0.8 });
-    else { t.w.camera.viewBoundingSphere(t.home, off); t.w.camera.lookAtTransform(t.C.Matrix4.IDENTITY); }
+    // It jumps: Motion owns the app's timelines (CLAUDE.md), so the camera adds none of its own.
+    t.w.camera.viewBoundingSphere(t.home, off); t.w.camera.lookAtTransform(t.C.Matrix4.IDENTITY);
     render(); publish();
   };
   /** Orbit, tilt or zoom about the ground at the centre of the view (or the sheet centre if the view holds no ground). */
@@ -219,6 +222,7 @@ export default function TerrainView(props: TerrainViewProps) {
           if (want === "relief") { try { const c = await baseTexture(t.urls.d2, null); if (live && !t.base.plain) t.base.plain = put(t, canvasLayer(t.C, t.sphere, c, t.rect, credit(t)), 1); } catch { /* noted above */ } }
         }
       }
+      if (!live) return; // a newer switch setting decides what shows
       const shown = t.base[want] ?? t.base.plain;
       for (const l of [t.base.relief, t.base.plain]) if (l) l.show = l === shown;
       render();
@@ -242,8 +246,8 @@ export default function TerrainView(props: TerrainViewProps) {
     const t = s.current;
     if (!ready || !t) return;
     let live = true;
-    void drawPlan3d(t.C, t.lines, t.marks, props.output, t.grid, props.sampler, props.selectedStop).then((d) => {
-      if (live && s.current) { s.current.drawn = d; render(); publish(); }
+    void drawPlan3d(t.C, t.lines, t.marks, props.output, t.grid, props.sampler, props.selectedStop, () => live).then((d) => {
+      if (d && live && s.current) { s.current.drawn = d; setDrawnN((n) => n + 1); render(); publish(); }
     });
     return () => { live = false; };
   }, [ready, props.output, props.selectedStop]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -258,7 +262,7 @@ export default function TerrainView(props: TerrainViewProps) {
     const v = at && t.C.SceneTransforms.worldToWindowCoordinates(t.w.scene, at);
     host.current!.dataset.hover = v ? `${Math.round(v.x)} ${Math.round(v.y)}` : "";
     render();
-  }, [ready, props.hoverIndex, props.output]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [ready, props.hoverIndex, drawnN]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const k = (label: string, kind: Parameters<typeof move>[0], icon: React.ReactNode) =>
     <button type="button" title={label} aria-label={label} disabled={!ready} onClick={() => move(kind)}>{icon}</button>;

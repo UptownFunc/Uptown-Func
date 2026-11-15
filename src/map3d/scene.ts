@@ -102,12 +102,15 @@ export interface Drawn { marks: { id: string; at: CesiumNS.Cartesian3 }[]; profi
 /** Draws the plan: the route on the 2 m grid path at D1 height + 3 m (the line the margins use, not smoothed; red after
  *  the OVER mark, as in 2D), the habitat and the stops at their D1 heights + 3 m, markers always on top. */
 export async function drawPlan3d(C: C, lines: CesiumNS.PolylineCollection, marks: CesiumNS.BillboardCollection, out: PlanOutput | null,
-  grid: GridDef, sampler: Sampler, selected: string | null): Promise<Drawn> {
-  lines.removeAll(); marks.removeAll();
-  if (!out) return { marks: [], profile: [] };
+  grid: GridDef, sampler: Sampler, selected: string | null, current: () => boolean): Promise<Drawn | null> {
+  if (!out) { lines.removeAll(); marks.removeAll(); return { marks: [], profile: [] }; }
   const g = planFeatures(out, grid), prof = out.geometry.profile;
   const pts = [g.habitat.at, ...g.stops.map((s) => s.at), ...g.lines.flatMap((l) => (l.kind === "leg" ? l.points : []))];
   const z = await sampler.sample(pts.map((p) => ({ lat: p.lat, lon: p.lon })));
+  // A newer plan arrived while the heights were fetched: draw nothing (clearing here, after the wait, means two quick
+  // changes can never both draw).
+  if (!current()) return null;
+  lines.removeAll(); marks.removeAll();
   const lift = (p: F1Point, h: number | null | undefined) => toF5(C, f1(p.lat, p.lon, (h ?? 0) + 3));
   // Profile points carry the engine's own D1 height per cell; legs without a profile use the sampled heights.
   const profile = prof.map((s) => { const c = { r: Math.floor(s.cell / grid.cols), c: s.cell % grid.cols }; return { c, z: s.z_m }; });
