@@ -55,7 +55,7 @@ export default function TerrainView(props: TerrainViewProps) {
   const host = useRef<HTMLDivElement>(null), credits = useRef<HTMLDivElement>(null);
   const s = useRef<Scene3d | null>(null);
   const p = useRef(props); p.current = props;
-  const [ready, setReady] = useState(false), [tiles, setTiles] = useState(false), [lit, setLit] = useState(litKept), [canLight, setCanLight] = useState(true);
+  const [ready, setReady] = useState(false), [tiles, setTiles] = useState(false), [lit, setLit] = useState(litKept), [canLight, setCanLight] = useState(true), [litShown, setLitShown] = useState(false);
   const [notes, setNotes] = useState<string[]>([]);
   /** Bumped when a plan has been drawn, so the scrub marker is placed on the drawn profile, not the previous one. */
   const [drawnN, setDrawnN] = useState(0);
@@ -82,7 +82,8 @@ export default function TerrainView(props: TerrainViewProps) {
       const gl = probe.getContext("webgl2") ?? probe.getContext("webgl");
       if (!gl) throw new Error("this browser has no WebGL");
       // 3D-09: the relief material needs fragment derivatives (WebGL 2 has them; WebGL 1 through an extension).
-      if (!(gl instanceof WebGL2RenderingContext || gl.getExtension("OES_standard_derivatives"))) { setCanLight(false); setLit(false); }
+      if (!("texStorage2D" in gl || gl.getExtension("OES_standard_derivatives"))) { litKept = false; setCanLight(false); setLit(false); }
+      gl.getExtension("WEBGL_lose_context")?.loseContext(); // the probe's context is not needed any more
       const base = new URL(p.current.areaUrl, document.baseURI).href;
       const get = (f: string) => fetch(base + f).then((r) => (r.ok ? r.json() : Promise.reject(new Error(`${f} could not be loaded (${r.status})`))));
       const [C, meta, report, colour] = await Promise.all([loadCesium(), get("layers.json"), get("build_report.json"), get("d2_colour.json").catch(() => null)]);
@@ -230,7 +231,7 @@ export default function TerrainView(props: TerrainViewProps) {
           t.base[want] = put(t, canvasLayer(t.C, t.sphere, c, t.rect, credit(t) + (want === "relief" ? "; D1 hillshade (USGS)" : "")), 1);
         } catch (e) {
           // No imagery is drawn rather than any stand-in: the terrain stays, in its plain base colour.
-          note(`${e instanceof Error ? e.message : String(e)}: the terrain is shown without ${want === "relief" ? "relief shading" : lit ? "relief lighting" : "imagery"}`);
+          note(`${e instanceof Error ? e.message : String(e)}: the terrain is shown without ${want === "relief" ? "relief shading" : lit && t.base.relief ? "relief lighting" : "imagery"}`);
           if (want === "relief") { try { const c = await baseTexture(t.urls.d2, null); if (live && !t.base.plain) t.base.plain = put(t, canvasLayer(t.C, t.sphere, c, t.rect, credit(t)), 1); } catch { /* noted above */ } }
         }
       }
@@ -240,6 +241,7 @@ export default function TerrainView(props: TerrainViewProps) {
       for (const l of [t.base.relief, t.base.plain]) if (l) l.show = l === shown;
       // Set with the base image, in the same frame, so the two reliefs are never drawn together.
       t.w.scene.globe.material = light ? (t.lighting ??= reliefMaterial(t.C, t.grid.origin)) : undefined;
+      setLitShown(light);
       render();
     };
     const ensureClasses = async () => {
@@ -298,14 +300,14 @@ export default function TerrainView(props: TerrainViewProps) {
         {k("Tilt towards overhead", "down", <ChevronDown size={18} strokeWidth={2} aria-hidden="true" />)}
         <button type="button" title="Reset the view" aria-label="Reset the view" disabled={!ready} onClick={() => goHome()}><Scan size={18} strokeWidth={1.75} aria-hidden="true" /></button>
         <button type="button" title="Relief lighting: light the terrain from the north-west, 45° up, as the hillshade (it replaces the hillshade image in 3D)"
-          aria-label="Relief lighting" aria-pressed={lit} disabled={!ready || !canLight} onClick={() => setLit((v) => (litKept = !v))}><Mountain size={18} strokeWidth={1.75} aria-hidden="true" /></button>
+          aria-label="Relief lighting" aria-pressed={lit} disabled={!ready || !canLight} onClick={() => { litKept = !lit; setLit(litKept); }}><Mountain size={18} strokeWidth={1.75} aria-hidden="true" /></button>
       </div>
       <div className="status status-3d" data-testid="status-line-3d">
         {readout ? <>
           <span><span className="label">lat </span>{readout.lat}</span><span><span className="label">lon </span>{readout.lon} E</span>
           <span><span className="label">elev </span>{fmtQ(readout.elev)}</span>
           <span className="label">D1 between 2 m cells; vertical reference unverified{ground ? ` · ${ground.text.split(" · ")[0]}` : ""}</span>
-        </> : <span className="label">3D: D1 heights at true scale (no exaggeration) under the D2 orthophoto.{lit
+        </> : <span className="label">3D: D1 heights at true scale (no exaggeration) under the D2 orthophoto.{litShown
           ? " Lit from the north-west, 45° up, as the hillshade (its image is off while lit); not the sun." : ""} Point at the ground for coordinates.</span>}
       </div>
     </div>
