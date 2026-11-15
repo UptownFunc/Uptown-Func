@@ -426,6 +426,14 @@ Rules as the team plan records them (section 19.3: the Project Submission Guide 
 - Add an invented value without a row in the CLAUDE.md register.
 - Change attribution without the team's written decision on G-07.
 
+## Detail of the decisions branch (Sun 15 Nov 2026, 01:04-01:20 Asia/Manila): W-01 decided on a separate branch
+
+- **Branch:** `yujin/w-01-slow-bound`, on top of `yujin/reg-02-verification` (PR #21). Commit `4be709c` plus a log commit. **Not merged.**
+- **What it does:** the slow walking bound goes from 0.64 to 0.56 m/s (DECISIONS W-01). The slope factors stay 1 (K-01 reaffirmed). Yujin delegated both choices to the SI session ("choose what is best").
+- **Why it is separate:** PR #21 changes no value. This one changes a value the plan fixes (plan 19.5), so **the other members must confirm it before it is merged.** If they reject it, close this PR; PR #21 does not depend on it.
+- **Effect:** demo stop end margin est. 77.6 to 127.2 min, OK (was est. 92.3 to 127.2 min). Time-to-habitat contours move in.
+- **Checks:** vitest 290/290; tsc clean; build ~249.95 of 250 KB (about 50 bytes left); Playwright: 50/50 with `--workers=1`.
+
 ## Detail of the first part of that session (Sun 15 Nov 2026, 00:02-00:35 Asia/Manila): REG-02, every value and citation checked
 
 **Read this first; the two older sections below are otherwise still valid.**

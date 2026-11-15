@@ -19,7 +19,7 @@ export function LayerToggles({ showContours, onShowContours, showSky, onShowSky,
     <div className="toggles">
       <label className="check">
         <input type="checkbox" checked={showContours} onChange={(e) => onShowContours(e.target.checked)} />
-        <span>Time to habitat, 5-minute contour lines (est., slow bound 0.64 m/s, 2 m grid path; unknown and excluded ground not crossed){busy && " · computing…"}</span>
+        <span>Time to habitat, 5-minute contour lines (est., slow bound {CONSTANTS.walkSpeedRange.low} m/s, 2 m grid path; unknown and excluded ground not crossed){busy && " · computing…"}</span>
       </label>
       {skyAvailable && <label className="check">
         <input type="checkbox" checked={showSky} onChange={(e) => onShowSky(e.target.checked)} />

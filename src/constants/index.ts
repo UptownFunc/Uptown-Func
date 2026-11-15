@@ -3,6 +3,8 @@
 // A location marked UNRESOLVED means this session could not read the page; it must be filled before release.
 // REG-02 (Sun 15 Nov 2026, docs/data/reg-02-verification.md): every citation below was re-read in its source at
 // Yujin's direction. Changed: walkSpeedRange wording and pages, drillWarningDefault documents, skyObstructionM12 page.
+// W-01/W-02 (Sun 15 Nov 2026): walkSpeedRange slow bound 0.64 -> 0.56 m/s, re-read in EVA-EXP-0042 Rev B p. 40 and
+// NASA/TP-2010-216125 p. 70 (DECISIONS W-02).
 // skyObstructionM12: Yujin opened Ehresmann et al. 2021 on the publisher's page (free access) and supplied its text;
 // 0.37 pi is in sections 2.2 and 4. No constant is UNRESOLVED now.
 import type { ValueClass } from "../contracts";
@@ -45,9 +47,9 @@ export const CONSTANTS = {
     limitation: "Planning value for suited walking; not validated at Mars gravity on natural terrain. Speeds are along the surface (treadmill belt speed), so edge time divides the 3D edge length by speed (plan 19.11, weakness 58).",
   },
   walkSpeedRange: {
-    id: "walkSpeedRange", value: 0.83, low: 0.64, high: 0.97, unit: "m/s", valueClass: "estimated",
-    citation: { source: "NASA/TM-2010-216138, IST-1 treadmill speeds, 2.3-3.5 km/h (plan 19.5)", location: "Table 4, p. 13" },
-    limitation: "A lunar-gravity treadmill speed window, not a measured range on terrain. Incline tests (NASA/TP-2010-216125, pp. 2, 5, 10, 70): 0.12-0.32 g, six male subjects, one 121 kg MKIII suit, speed fixed by protocol, no downhill data. No suited Mars-gravity data exists. The 15-20 deg bin is beyond tested grades. Speeds are along the surface (plan 19.11, weakness 58).",
+    id: "walkSpeedRange", value: 0.83, low: 0.56, high: 0.97, unit: "m/s", valueClass: "estimated",
+    citation: { source: "Fast: NASA/TM-2010-216138, IST-1 treadmill speeds, 2.3-3.5 km/h. Slow: 2 km/h, EVA-EXP-0042 Rev B (W-01)", location: "Table 4, p. 13; 4.2.1.3.1.1, p. 40" },
+    limitation: "A lunar-gravity treadmill speed window, not a measured range on terrain. Incline tests (NASA/TP-2010-216125, pp. 2, 5, 10, 70): 0.12-0.32 g, six male subjects, one 121 kg MKIII suit, speed fixed by protocol, no downhill data. No suited Mars-gravity data exists. The 15-20 deg bin is beyond tested grades. Speeds are along the surface (plan 19.11, weakness 58). Slow bound (W-01, W-02): 0.56 m/s is both the 2 km/h planning pace on level regolith and the lowest speed in the incline tests (\"0.56 to 0.97 m/s\", NASA/TP-2010-216125, p. 70). Apollo 14 uphill legs were slower, 1.42-1.71 km/h (0.39-0.48 m/s; NASA SP-368, ch. 4, Table 4, p. 125) while the whole traverse averaged about 2.5 km/h; with slope factors kept at 1 (V-06), climbs may still be optimistic.",
   },
   slopeLimit: {
     id: "slopeLimit", value: 20, unit: "deg", valueClass: "assumed",
