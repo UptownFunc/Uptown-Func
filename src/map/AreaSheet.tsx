@@ -21,7 +21,8 @@ import { Stroke, Style } from "ol/style";
 import RegularShape from "ol/style/RegularShape";
 import { cellCentreF1, type GridDef } from "../geo/grid";
 import type { LatLon, PlanOutput } from "../engine/planner";
-import { createContourLayer, createMarkerLayer, createPlanLayer, drawContours, drawMarker, drawPlan, type ContourDisplay } from "./planLayer";
+import { createContourLayer, createMarkerLayer, createPlanLayer, createProgressLayer, drawContours, drawMarker, drawPlan, drawProgress, type ContourDisplay } from "./planLayer";
+import { progressText, type Progress } from "../field/progress";
 import { snapshotMap, type MapSnapshot } from "./snapshot";
 import { F7_PROJECTION } from "./f7";
 import { FIT_PADDING, MAX_RESOLUTION_F7, fitResolution, formatView } from "./view";
@@ -111,11 +112,13 @@ export interface AreaSheetProps {
   /** MAP-02: which display layers are shown and how strong the overlays are (the console owns it). */
   readonly layers?: MapLayers;
   readonly onLayers?: (l: MapLayers) => void;
+  /** HUD-01: the crew's progress from the HUD's manual ticks (null: not shown). */
+  readonly progress?: Progress | null;
 }
 
 const cursorStyle = new Style({ image: new RegularShape({ points: 4, radius: 11, radius2: 0, angle: 0, stroke: new Stroke({ color: "#f3eee4", width: 2 }) }) });
 
-export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hoverIndex = null, onHoverIndex, onDatasets, onCursor, contours = null, showSky = false, onSky, tools, hint, onSelectStop, selectedStop = null, popover = null, cursorHint = false, terrainClasses = null, layers = DEFAULT_LAYERS, onLayers }: AreaSheetProps) {
+export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hoverIndex = null, onHoverIndex, onDatasets, onCursor, contours = null, showSky = false, onSky, tools, hint, onSelectStop, selectedStop = null, popover = null, cursorHint = false, terrainClasses = null, layers = DEFAULT_LAYERS, onLayers, progress = null }: AreaSheetProps) {
   const [layersOpen, setLayersOpen] = useState(false);
   const layersBtn = useRef<HTMLButtonElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
@@ -164,6 +167,10 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
   contoursRef.current = contours;
   const markerLayerRef = useRef<ReturnType<typeof createMarkerLayer> | null>(null);
   markerLayerRef.current ??= createMarkerLayer();
+  const progressLayer = useRef<ReturnType<typeof createProgressLayer> | null>(null);
+  progressLayer.current ??= createProgressLayer("layer-progress");
+  const progressLabels = useRef<ReturnType<typeof createProgressLayer> | null>(null);
+  progressLabels.current ??= createProgressLayer("layer-progress-label");
   const hoverRef = useRef(onHoverIndex);
   hoverRef.current = onHoverIndex;
   /** F7 x, y of each profile sample, for nearest-sample lookup on pointer move. */
@@ -270,7 +277,7 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
       const el = target.current;
       map = new OlMap({
         target: el,
-        layers: [image("d2", "layer-d2"), relief, ...(skyLayer.current ? [skyLayer.current] : []), terrainLayer, elevationLayer.current!, coverageLayer.current!, contourLayer.current!, planLayer.current, markerLayerRef.current!, cursorLayer.current!],
+        layers: [image("d2", "layer-d2"), relief, ...(skyLayer.current ? [skyLayer.current] : []), terrainLayer, elevationLayer.current!, coverageLayer.current!, contourLayer.current!, progressLayer.current!, planLayer.current, progressLabels.current!, markerLayerRef.current!, cursorLayer.current!],
         // The zoom keys are the sheet's own (MAP-06); wheel and double-click zoom jump under reduced motion.
         controls: [new ScaleLine({ units: "metric" })],
         interactions: defaultInteractions({ zoomDuration: reducedMotion() ? 0 : 250 }),
@@ -384,6 +391,13 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
     const prof = plan?.geometry.profile;
     if (area.current) drawMarker(markerLayerRef.current!, hoverIndex !== null && prof?.[hoverIndex] ? prof[hoverIndex].cell : null, area.current.grid);
   }, [hoverIndex, plan]);
+
+  // HUD-01: redrawn on every tick; the sheet publishes what it drew (read-only) for the e2e checks.
+  useEffect(() => {
+    if (!area.current || !target.current) return;
+    drawProgress(progressLayer.current!, progressLabels.current!, progress, area.current.grid);
+    target.current.dataset.progress = progress ? `${progress.kind} ${progress.letter} ${progress.cells.length}` : "";
+  }, [progress, ready]);
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     const a = area.current, m = mapRef.current;
@@ -534,6 +548,8 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
             <div><dt><span className="k-route" /></dt><dd>Route on the 2 m grid path; the chevrons show each leg's direction</dd></div>
             <div><dt><span className="k-habitat">H</span></dt><dd>Habitat (an Assumed scenario input)</dd></div>
             <div><dt><span className="k-stop">A</span></dt><dd>Stop; click one to edit it</dd></div>
+            <div data-testid="key-progress"><dt><span className="k-progress" /></dt><dd>Crew progress on the HUD step, from its manual ticks (not GPS): a ring at the stop
+              last reached, or a band over the leg being walked{progress && <strong>. Now: {progressText(progress)}</strong>}</dd></div>
             <div><dt><span className="k-tick" /></dt><dd>Margin marks: 10 % of the EVA left (amber), none left (red)</dd></div>
             <div><dt><span className="k-sym" style={{ backgroundImage: SWATCH.steep }} /></dt><dd>Steep but under the Assumed limit</dd></div>
             <div><dt><span className="k-sym" style={{ backgroundImage: SWATCH.excluded }} /></dt><dd>Excluded: steeper than the Assumed limit</dd></div>

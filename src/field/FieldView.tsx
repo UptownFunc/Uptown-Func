@@ -12,12 +12,17 @@ import { MarginState } from "../app/MarginState";
 import { QuantityText } from "../app/QuantityText";
 import { formatLength } from "../app/format";
 import { addTick, fieldMarginAssumptionIds, fieldMarginRanges, newExecution, nextEvent, type Range } from "./execution";
+import { progressOf, progressText } from "./progress";
 
 const SPEED_RATIO = CONSTANTS.walkSpeedRange.low / CONSTANTS.walkSpeedRange.high;
 
-export function FieldView({ output, hidden = false, briefed = false, next, toMap }: { output: PlanOutput | null; hidden?: boolean; briefed?: boolean; next?: ReactNode;
-  /** UX-24: the way out of the empty state (a key to the Map step). */ toMap?: ReactNode }) {
-  const [exec, setExec] = useState<MissionExecution | null>(null);
+export function FieldView({ output, hidden = false, briefed = false, next, toMap, onExec }: { output: PlanOutput | null; hidden?: boolean; briefed?: boolean; next?: ReactNode;
+  /** UX-24: the way out of the empty state (a key to the Map step). */ toMap?: ReactNode;
+  /** HUD-01: a read-only copy of every execution this component writes, so the map can show the crew's progress
+   *  (progressOf drops ticks of an older plan). This component stays the only writer of MissionExecution. */
+  onExec?: (e: MissionExecution | null) => void }) {
+  const [exec, setExecState] = useState<MissionExecution | null>(null);
+  const setExec = (x: MissionExecution | null) => { setExecState(x); onExec?.(x); };
   const [minutes, setMinutes] = useState("");
   const [error, setError] = useState<string | null>(null);
   if (!output) return <section className="side field" aria-label="Field view" hidden={hidden}><div className="side-scroll"><h1 className="hud-next">Field HUD</h1><p>Loading the route engine…</p></div></section>;
@@ -91,6 +96,7 @@ export function FieldView({ output, hidden = false, briefed = false, next, toMap
         <p className="field-note" data-testid="field-provenance">
           From manual entries{last ? `, last tick at ${last.enteredAt.slice(11, 16)} UTC (${last.kind} ${stopOf(last.stopId)?.letter}, elapsed ${last.elapsed_min} min)` : "; no tick yet"}.
           Estimates under stated assumptions; the planned margin is unchanged. Suit life support not modelled.
+          {" "}<span data-testid="field-map-progress">On the map: {(() => { const p = progressOf(output, e); return p ? `${progressText(p)}.` : "the amber crew mark appears with the first tick."; })()}</span>
         </p>
       </>}
       </div>

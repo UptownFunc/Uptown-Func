@@ -1,12 +1,14 @@
 // SI-assisted: drafted with Claude Code (Claude Opus 5.5), rewritten on Motion with Claude Fable 5.2 on
 // design/sharpwalk-ui-ux (MOT-04); human Design review pending.
-// Motion 14.11.1 owns the timelines: the CRT power-on, the orientation spotlight, the margin-meter needle and the
+// Motion 14.11.1 owns the timelines: the CRT power-on, the orientation spotlight, the margin-meter needle, the ladder trace and the
 // rubber stamp. They use Motion's small `animate` (motion/mini), which runs on the browser's Web Animations API, so no
 // second animation library is installed (CLAUDE.md). Motion also owns enter and exit (motion.tsx); CSS owns hover and
 // press states. One owner per element. Every timeline collapses to its end state under prefers-reduced-motion.
 import { animate } from "motion/mini";
 
-export const reduced = (): boolean => typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+/** The one definition of the reduced-motion preference (the ladder trace also listens to it changing). */
+export const REDUCE = "(prefers-reduced-motion: reduce)";
+export const reduced = (): boolean => typeof matchMedia === "function" && matchMedia(REDUCE).matches;
 
 /**
  * True when nothing should be animated on this element: the user asked for reduced motion, or the element is not
@@ -83,4 +85,17 @@ export function stampSlam(el: HTMLElement): void {
   void play(el, { opacity: [0, rest] }, { duration: 0.3, ease: "easeIn" });
   void play(el, { transform: ["scale(2.4) rotate(-28deg)", "scale(0.94) rotate(-12deg)", "scale(1) rotate(-12deg)"] },
     { duration: 0.56, times: [0, 0.54, 1], ease: ["easeIn", BACK_OUT] });
+}
+
+/**
+ * ASSESS-01: a pen traces the traverse ladder from the habitat back to the habitat, in the order the assessment adds
+ * each walk and stop to the margin, then fades and starts again. An illustration of the method, never a live run: it
+ * loops on a fixed timing whatever the engine does. Returns the running animation (paused and played by its owner as
+ * the ladder leaves and enters the view), or null when nothing should move: the element then stays at its stylesheet
+ * state, which hides it, so reduced motion shows the ladder as it was.
+ */
+export function traceLadder(el: HTMLElement): ReturnType<typeof animate> | null {
+  if (still(el)) return null;
+  return animate(el, { transform: ["scaleY(0)", "scaleY(1)", "scaleY(1)", "scaleY(1)", "scaleY(1)"], opacity: [1, 1, 1, 0, 0] },
+    { duration: 4.6, times: [0, 0.56, 0.74, 0.88, 1], ease: [[0.65, 0, 0.35, 1], "linear", "easeIn", "linear"], repeat: Infinity } as Parameters<typeof animate>[2]);
 }

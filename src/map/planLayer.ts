@@ -12,8 +12,9 @@ import CircleStyle from "ol/style/Circle";
 import { f1ToF7, type F1Point } from "../geo";
 import { cellCentreF1, type GridDef } from "../geo/grid";
 import type { PlanOutput } from "../engine/planner";
-import { planFeatures } from "./planGeometry";
+import { cellF1, planFeatures } from "./planGeometry";
 import type { ContourLevel } from "../engine/contours";
+import type { Progress } from "../field/progress";
 
 // UI-07: the route is a white line on a dark casing (reads on any terrain); stops carry the oxide accent (plan
 // features, interaction); status colours stay status (OVER red dashed, NEAR LIMIT amber).
@@ -111,6 +112,36 @@ export function drawMarker(layer: VectorLayer<VectorSource>, cell: number | null
   const f = new Feature({ geometry: new Point([p.x, p.y]) });
   f.setStyle(markerStyle);
   src.addFeature(f);
+}
+
+// HUD-01: the crew's progress from the HUD's manual ticks, in amber phosphor (the machine's voice, never a status
+// colour). The ring and the band are on a layer under the plan, so the route line and the stops stay on top and readable;
+// the label is on a layer over the plan, so the route never cuts through its words. The styles are in screen pixels, so
+// the mark keeps its size at every zoom.
+const AMBER = "#ffb347";
+const ring = (color: string, width: number) => new Style({ image: new CircleStyle({ radius: 21, stroke: new Stroke({ color, width }) }) });
+const progressAtStyle = [ring(INK, 7), ring(AMBER, 3.5)];
+const progressLegStyle = new Style({ stroke: new Stroke({ color: "rgba(255, 179, 71, 0.55)", width: 18, lineCap: "round", lineJoin: "round" }) });
+
+/** "layer-progress" (ring and band, under the plan) or "layer-progress-label" (the words, over it). */
+export function createProgressLayer(className: string): VectorLayer<VectorSource> {
+  return new VectorLayer({ source: new VectorSource(), className });
+}
+
+/** "at": a ring on the stop. "leg": the whole leg as a band, labelled at its middle: the ticks give no point on it. */
+export function drawProgress(marks: VectorLayer<VectorSource>, labels: VectorLayer<VectorSource>, p: Progress | null, grid: GridDef): void {
+  marks.getSource()!.clear();
+  labels.getSource()!.clear();
+  if (!p || p.cells.length === 0 || (p.kind === "leg" && p.cells.length < 2)) return;
+  const xy = (cell: number) => toF7(cellF1(cell, grid));
+  const at = p.kind === "at";
+  const mark = new Feature({ geometry: at ? new Point(xy(p.cells[0]!)) : new LineString(p.cells.map(xy)), kind: `progress-${p.kind}` });
+  mark.setStyle(at ? progressAtStyle : progressLegStyle);
+  const label = new Feature({ geometry: new Point(xy(p.cells[at ? 0 : Math.floor(p.cells.length / 2)]!)), kind: "progress-label" });
+  label.setStyle(new Style({ text: new Text({ text: at ? `CREW AT ${p.letter} · ${p.elapsed_min} MIN` : `CREW ON THIS LEG · LEFT ${p.letter} ${p.elapsed_min} MIN\nPOSITION ON THE LEG NOT TRACKED`,
+    offsetY: at ? -38 : -34, font: "18px VT323, monospace", fill: new Fill({ color: AMBER }), backgroundFill: new Fill({ color: INK }), padding: [2, 5, 0, 5] }) }));
+  marks.getSource()!.addFeature(mark);
+  labels.getSource()!.addFeature(label);
 }
 
 // Tier 2 time-to-habitat contours (plan 9.2: labelled lines, never filled) and the simulated drill line (plan 6.9).
