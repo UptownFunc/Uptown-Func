@@ -275,9 +275,8 @@ export function App() {
       ...(has("T_EVA") && has("t_ops") && has("t_cont") && has("stop_duration") ? ["budget"] : []),
       ...(plan && plan.stops.length > 0 ? ["map"] : []),
       ...(plan && plan.endMargin.valueClass !== "unknown" ? ["route"] : []),
-      ...(version && confirmed === version ? ["brief"] : []),
     ]);
-  }, [plan, version, confirmed]);
+  }, [plan]);
   const pickedStop = plan?.stops.find((s) => s.id === picked) ?? null;
   const movingStop = plan?.stops.find((s) => s.id === moving) ?? null;
   // A map click: move the stop waiting to move, else add a stop (the engine refuses ground that is not slope-screened).
@@ -311,7 +310,7 @@ export function App() {
         </div>
         <span className="progress" aria-hidden="true" />
       </header>
-      {step === "welcome" && <Welcome onStart={(t, custom) => { if (!custom && !presetEnabled(location.search)) applyPreset(); go(custom ? "planner" : "map"); setTour(t); }} ready={output ? true : engineFailed ? null : false} />}
+      {step === "welcome" && <Welcome onStart={(t, custom) => { if (!custom) applyPreset(); go(custom ? "planner" : "map"); setTour(t); }} ready={output ? true : engineFailed ? null : false} />}
       <main className="work" inert={step === "welcome"}>
         <div className="plate" inert={!onMap} aria-hidden={!onMap || undefined} data-tour="map"
           onPointerDown={(e) => { down.current = e.button === 0 && step === "map" && (e.target as HTMLElement).closest(".map") ? { x: e.clientX, y: e.clientY } : null; }}
@@ -359,7 +358,7 @@ export function App() {
             onSetTime={setTime} skyAt={showSky && skyState === "ok" ? skyAt : null} picked={picked} onPick={(id) => setPicked(id)}
             onMoveToCursor={cursor ? (stopId) => send("move_stop", { stopId, lat: cursor.lat, lon: cursor.lon }) : undefined} /></Appear>}
           {step === "assess" && <Appear key="assess" className="panel-host" enter={panelIn}><AssessPanel output={output} onOpenSource={openSource} drillMin={drillMin} onDrillMin={setDrillMin} busy={contourBusy}
-            next={next("hud", "Continue to the field HUD")} fix={next("map", "Back to the map: change the route")} toMap={toMap} /></Appear>}
+            next={next("hud", "Continue to the field HUD")} fix={next("planner", "Change the times or the route")} toMap={toMap} /></Appear>}
           {step === "setup" && <Appear key="setup" className="screen-host" enter={panelIn}><SetupScreen output={output} rems={rems} rover={rover} onSet={setTime} onOpenSource={openSource}
             preset={presetEnabled(location.search)} onApplyPreset={applyPreset} next={next("planner", "Continue to the time budget")} /></Appear>}
           {step === "planner" && <Appear key="planner" className="screen-host" enter={panelIn}><PlannerScreen output={output} onSet={setTime} next={next("map", "Continue to the map")} /></Appear>}

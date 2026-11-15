@@ -47,10 +47,15 @@ test("an infeasible plan is announced at once on Assess (no way on) and on the H
   await expect(bad).toContainText("Plan not feasible (the walk overruns the EVA at the slow speed)", { timeout: 20_000 });
   await expect(page.getByRole("button", { name: "Continue to the field HUD" })).toHaveCount(0);
   await page.screenshot({ path: "test-results/flow-01-assess-infeasible.png" });
-  await expect(page.getByRole("button", { name: "Back to the map: change the route" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Change the times or the route" })).toBeVisible();
   await goStep(page, "HUD"); // the step index still opens it: the HUD says the same, and what to do
   await expect(page.getByTestId("hud-infeasible")).toContainText("Plan not feasible (the walk overruns the EVA at the slow speed). Turn back now.");
   await page.screenshot({ path: "test-results/flow-01-hud-infeasible.png" });
+  // R-37: the way out of an infeasible plan reaches the times (and from there the map), not only the route.
+  await goStep(page, "Assess");
+  await page.getByRole("button", { name: "Change the times or the route" }).click();
+  await expect(page).toHaveURL(/#planner$/);
+  await expect(page.getByRole("button", { name: /Continue to the map/ })).toBeVisible();
 });
 
 test("on the HUD, a tick that leaves no margin to carry on says turn back now", async ({ page }) => {

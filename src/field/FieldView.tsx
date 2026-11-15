@@ -53,7 +53,7 @@ export function FieldView({ output, hidden = false, next, toMap, onExec }: { out
   };
 
   const state = (r: Range | undefined) => (m && tEva && r ? <MarginState state={marginState(r.low, tEva)} /> : null);
-  const bad = m && tEva && marginState(m.continue_s.low, tEva) === "OVER" ? "carrying on overruns the EVA at the slow speed" : infeasible(output);
+  const bad = !m ? infeasible(output) : next0 && tEva && marginState(m.continue_s.low, tEva) === "OVER" ? "carrying on overruns the EVA at the slow speed" : null;
   const nothing = <span className="unknown">{last ? "unknown (plan times or durations not set)" : "no tick yet"}</span>;
   return (
     <section className="side field" aria-label="Field view" hidden={hidden} data-testid="field-view">

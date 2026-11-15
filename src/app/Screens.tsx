@@ -42,8 +42,8 @@ export function Welcome({ onStart, ready }: { onStart: (tour: boolean, custom: b
                 <button type="button" className="key big primary" onClick={() => setTour(true)}>Begin orientation<ArrowRight {...ICON} aria-hidden="true" /></button>
                 <button type="button" className="key big" onClick={() => setTour(false)}>Go</button>
               </> : <>
-                <button type="button" className="key big primary" onClick={() => onStart(tour, false)}>NASA-sourced preset<ArrowRight {...ICON} aria-hidden="true" /></button>
-                <button type="button" className="key big" onClick={() => onStart(tour, true)}>Custom times</button>
+                <button type="button" className="key big primary" autoFocus disabled={ready === false} onClick={() => onStart(tour, false)}>NASA-sourced preset<ArrowRight {...ICON} aria-hidden="true" /></button>
+                <button type="button" className="key big" disabled={ready === false} onClick={() => onStart(tour, true)}>Custom times</button>
               </>}
             </div>
             {tour !== null && <p className="crt-lede">Preset: times cited from NASA EVA documents, all Assumed. Custom: your own.</p>}

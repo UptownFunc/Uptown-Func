@@ -458,6 +458,7 @@ details[open] > summary::before { transform: rotate(90deg); }
 /* FLOW-01: the plan is not feasible: said first, in the OVER word, shape and colour. */
 .infeasible { margin: 0 0 var(--s4); padding: 10px 12px; border: 2px solid var(--over-ink); border-radius: 8px; background: #ffe3dc; color: var(--over-ink); font: 600 var(--t-sm)/1.4 var(--ui); }
 .infeasible strong { text-transform: uppercase; letter-spacing: 0.04em; }
+.infeasible > strong:first-child::before { content: "OVER · "; }
 /* The OVER shape (octagon) in CSS, so the banner adds no second margin-state badge to the page. */
 .infeasible::before { content: ""; display: inline-block; width: 15px; height: 15px; margin-right: 7px; vertical-align: -2px; background: var(--over);
   clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%); }
