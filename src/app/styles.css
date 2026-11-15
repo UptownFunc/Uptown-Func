@@ -890,3 +890,38 @@ p.sheet-msg { grid-auto-flow: column; align-content: center; }
   .profile:not(.empty) { display: flex; flex-direction: column; }
   .profile:not(.empty) .profile-plot { flex: 1 1 auto; height: auto; min-height: 36px; }
 }
+
+/* ---------- 3D view (3D-05): the same plate, keys and chrome as the 2D sheet ---------- */
+.view-switch { position: absolute; z-index: 4; top: 12px; right: 134px; display: flex; height: 38px; padding: 3px; gap: 3px; border-radius: 8px;
+  background: rgba(16, 9, 4, 0.92); border: 1px solid var(--amber-line); box-shadow: 0 8px 18px rgba(0, 0, 0, 0.5); }
+.view-switch button { min-width: 40px; padding: 0 10px; border: 0; border-radius: 6px; cursor: pointer; background: transparent; color: var(--amber);
+  font: 400 19px/1 var(--crt-font); letter-spacing: 0.06em; transition: background-color 140ms ease, color 140ms ease; }
+.view-switch button[aria-pressed="true"] { background: var(--amber); color: var(--crt); }
+.view-switch button:disabled { opacity: 0.45; cursor: not-allowed; }
+.view-switch button:focus-visible { outline: 3px solid var(--amber); outline-offset: 1px; }
+.app:not(:is([data-step="map"], [data-step="hud"], [data-step="assess"])) .view-switch { display: none; }
+.scene3d { position: absolute; z-index: 1; inset: 0; overflow: hidden; border-radius: 12px; background: #140b05; }
+.scene3d-canvas, .scene3d-canvas .cesium-widget { position: absolute; inset: 0; width: 100%; height: 100%; overflow: hidden; }
+.scene3d-canvas canvas { width: 100%; height: 100%; display: block; touch-action: none; }
+.scene3d-canvas:focus-visible { outline: 3px solid var(--amber); outline-offset: -3px; }
+.scene3d-attrib { position: absolute; z-index: 3; left: 12px; top: 54px; max-width: min(440px, calc(100% - 200px)); margin: 0; padding: 2px 7px; border-radius: 5px;
+  font: 500 10.5px/1.35 var(--ui); color: #e9d6b0; background: rgba(16, 9, 4, 0.66); pointer-events: none; }
+.scene3d-loading { pointer-events: none; background: rgba(20, 11, 5, 0.55); inset: auto 0 0 0; height: auto; padding: 12px; border-radius: 0; }
+.scene3d .layer-errors { top: 58px; }
+.scene3d .map-keys button:nth-child(3), .scene3d .map-keys button:nth-child(7) { margin-top: 6px; }
+.app[data-view="3d"] :is(.sheet .map-keys, .cursor-tag, .status:not(.status-3d)) { display: none; }
+/* Under the 3D view the 2D sheet stays mounted and laid out (its view, layers and the briefing snapshot are kept) but
+   draws nothing on screen: its multiply-blended hillshade could otherwise show through the WebGL canvas. */
+.app[data-view="3d"] .sheet .map { visibility: hidden; }
+.view-note { margin: 0 0 8px; font: 500 var(--t-xs)/1.4 var(--ui); }
+@media screen and (max-width: 800px) {
+  .view-switch { top: 58px; right: 12px; }
+  .scene3d-attrib { top: 100px; max-width: calc(100% - 70px); }
+}
+/* 3D-06: grade along the route, a band under the profile (light = gentle, dark = steep), the same in 2D and 3D. */
+.profile-grade[data-bin="0"], .grade-key i[data-bin="0"] { fill: #ead8b4; background: #ead8b4; }
+.profile-grade[data-bin="1"] { fill: #d9a75e; }
+.profile-grade[data-bin="2"], .grade-key i[data-bin="2"] { fill: #c07a2c; background: #c07a2c; }
+.profile-grade[data-bin="3"] { fill: #a8401a; }
+.profile-grade[data-bin="4"], .grade-key i[data-bin="4"] { fill: #5a1e06; background: #5a1e06; }
+.grade-key i { display: inline-block; width: 12px; height: 6px; margin: 0 3px 0 6px; vertical-align: middle; border-radius: 1px; }

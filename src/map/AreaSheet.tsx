@@ -248,7 +248,8 @@ export function AreaSheet({ dataUrl, plan = null, onPick, onSnapshotReady, hover
       const image = (id: string, className: string) => {
         const L = a.display.layers.find((l) => l.id === id)!;
         // interpolate: false keeps source pixels crisp past native size (plan 7.8, honest zoom).
-        const source = new Static({ url: dataUrl + L.path!, imageExtent: extent, projection: F7_PROJECTION, interpolate: false });
+        // crossOrigin as the 3D view and the terrain masks ask, so a 3D image that reuses this file comes from the cache.
+        const source = new Static({ url: dataUrl + L.path!, imageExtent: extent, projection: F7_PROJECTION, interpolate: false, crossOrigin: "anonymous" });
         source.on("imageloaderror", () => fail(L));
         return new ImageLayer({ className, source });
       };
