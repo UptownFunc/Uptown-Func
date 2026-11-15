@@ -818,4 +818,4 @@ Next owner: the team (register session, G-07); any member with a laptop (latency
 - Rotation target: approximately every five hours, or sooner if the Claude Pro account reaches its usage limit.
 - GitHub and these files are the source of continuity; prior chat messages are not.
 - Use a separate branch per owner/workstream. Share commits before handoff, not uncommitted local state alone.
-- No one, human or AI, merges a PR until it meets the completeness checklist in `CLAUDE.md` step 6.
+- No one, human or SI, merges a PR until it meets the completeness checklist in `CLAUDE.md` step 6.
