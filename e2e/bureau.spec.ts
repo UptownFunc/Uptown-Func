@@ -5,21 +5,16 @@
 import { expect, test } from "@playwright/test";
 import { EXCLUDED, STOP, clickAt, openStep, pixelAt } from "./helpers";
 
-test("orientation: eight cards walk the real screens, keyboard works, Escape closes and it is remembered", async ({ page }) => {
+test("orientation (FLOW-01): five cards walk the real screens, keyboard works, Escape closes and it is remembered", async ({ page }) => {
   await page.goto("/?preset=none");
   await expect(page.getByText("Terrain and route engine ready")).toBeVisible({ timeout: 20_000 });
   await page.getByRole("button", { name: /Begin orientation/ }).click();
-  await expect(page).toHaveURL(/#setup$/);
-  const card = page.getByRole("dialog", { name: "Pick a scenario" });
-  await expect(card).toBeVisible();
-  await expect(card.getByLabel("Card 1 of 8")).toBeVisible();
-  await expect(page.locator(".tour-ring")).toHaveCount(1); // the spotlight found its target
-  // The app stays usable under the tour: the step keys still answer.
-  await card.getByRole("button", { name: /Next/ }).click();
-  await expect(page.getByRole("dialog", { name: "Check the conditions" })).toBeVisible();
-  await page.getByRole("dialog", { name: "Check the conditions" }).getByRole("button", { name: /Next/ }).click();
+  await page.getByRole("button", { name: "Custom times" }).click();
   await expect(page).toHaveURL(/#planner$/);
-  await expect(page.getByRole("dialog", { name: "Set the time budget" })).toBeVisible();
+  const card = page.getByRole("dialog", { name: "Set the time budget" });
+  await expect(card).toBeVisible();
+  await expect(card.getByLabel("Card 1 of 5")).toBeVisible();
+  await expect(page.locator(".tour-ring")).toHaveCount(1); // the spotlight found its target
   await page.keyboard.press("ArrowRight");
   await expect(page).toHaveURL(/#map$/);
   await expect(page.getByRole("dialog", { name: "Point and click to place stops" })).toBeVisible();
@@ -32,9 +27,10 @@ test("orientation: eight cards walk the real screens, keyboard works, Escape clo
   // "Start over" goes back to the first card and its step.
   await page.getByRole("button", { name: "Orientation" }).click();
   await expect(page.getByRole("dialog", { name: "Set the time budget" })).toBeVisible();
+  await page.getByRole("button", { name: "Next" }).click();
   await page.getByRole("button", { name: "Start over" }).click();
-  await expect(page.getByRole("dialog", { name: "Pick a scenario" })).toBeVisible();
-  await expect(page).toHaveURL(/#setup$/);
+  await expect(page.getByRole("dialog", { name: "Set the time budget" })).toBeVisible();
+  await expect(page).toHaveURL(/#planner$/);
   await expect(page.getByRole("button", { name: "Start over" })).toHaveCount(0); // nothing to start over from card 1
   await page.getByRole("button", { name: "Close orientation" }).click();
   await expect(page.locator(".tour")).toHaveCount(0);

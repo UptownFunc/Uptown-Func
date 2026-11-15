@@ -57,11 +57,12 @@ const errText = (e: unknown) => (e instanceof Error ? e.message : String(e));
 export function App() {
   const engine = useRef<EngineClient | null>(null);
   const [output, setOutput] = useState<PlanOutput | null>(null);
-  const [message, setMessage] = useState<{ text: string; n: number } | null>(null);
+  /** UNDO-01: a stop just added carries an Undo key in its message (one click undoes an accidental click on the map). */
+  const [message, setMessage] = useState<{ text: string; n: number; undo?: { id: string; letter: string } | undefined } | null>(null);
   /** The latest engine message for assistive technology: one live region that stays mounted (a toast that remounts
    *  for every message is not announced reliably). */
   const [announce, setAnnounce] = useState("");
-  const say = (text: string) => { setMessage((m) => ({ text, n: (m?.n ?? 0) + 1 })); setAnnounce(text); };
+  const say = (text: string, undo?: { id: string; letter: string }) => { setMessage((m) => ({ text, n: (m?.n ?? 0) + 1, undo })); setAnnounce(undo ? `${text} Undo stop ${undo.letter}: Ctrl+Z, or the key in the message.` : text); };
   /** A message answers one action. The next action (or step) clears it, except a failed engine start, which concerns
    *  every action; `refusalsOnly` clears only a refusal (the map's click, before the engine has the pick). */
   const clearActionMessage = useCallback((refusalsOnly = false) => setMessage((m) => {
@@ -71,9 +72,18 @@ export function App() {
   // A success clears itself; a refusal or an error explains why nothing changed, so it stays until the next message.
   useEffect(() => {
     if (!message?.text.startsWith("Plan updated")) return;
-    const timer = setTimeout(() => setMessage((m) => (m?.n === message.n ? null : m)), 4000);
-    return () => clearTimeout(timer);
-  }, [message]);
+    // UNDO-01: while the pointer or keyboard focus is on the message (its Undo key), it waits; Ctrl+Z (Cmd+Z) outside a
+    // text field takes back the stop just added, so the key is not pointer-only.
+    let timer = 0;
+    const wait = () => { timer = window.setTimeout(() => (document.querySelector(".toast:is(:hover, :focus-within)") ? wait()
+      : setMessage((m) => (m?.n === message.n ? null : m))), message.undo ? 6000 : 4000); };
+    wait();
+    const key = (e: KeyboardEvent) => {
+      if (message.undo && (e.ctrlKey || e.metaKey) && e.key === "z" && !(e.target as Element).closest("input, textarea")) { e.preventDefault(); send("delete_stop", { stopId: message.undo.id }); }
+    };
+    addEventListener("keydown", key);
+    return () => { clearTimeout(timer); removeEventListener("keydown", key); };
+  }, [message]); // eslint-disable-line react-hooks/exhaustive-deps -- send is stable
   const [pending, setPending] = useState(0);
   const [engineFailed, setEngineFailed] = useState(false);
   const [hover, setHover] = useState<number | null>(null);
@@ -238,7 +248,8 @@ export function App() {
         });
         outputRef.current = next;
         setOutput(next);
-        say(result.ok ? `Plan updated in ${Math.round(elapsed_ms)} ms.` : `Not changed: ${result.reason}.`);
+        say(result.ok ? `Plan updated in ${Math.round(elapsed_ms)} ms.` : `Not changed: ${result.reason}.`,
+          type === "add_stop" && result.ok ? (({ id, letter }) => ({ id, letter }))(next.plan.stops.at(-1)!) : undefined); // add_stop appends
       } catch (err: unknown) {
         say(`Engine error: ${errText(err)}`);
       } finally { setPending((n) => n - 1); }
@@ -264,9 +275,8 @@ export function App() {
       ...(has("T_EVA") && has("t_ops") && has("t_cont") && has("stop_duration") ? ["budget"] : []),
       ...(plan && plan.stops.length > 0 ? ["map"] : []),
       ...(plan && plan.endMargin.valueClass !== "unknown" ? ["route"] : []),
-      ...(version && confirmed === version ? ["brief"] : []),
     ]);
-  }, [plan, version, confirmed]);
+  }, [plan]);
   const pickedStop = plan?.stops.find((s) => s.id === picked) ?? null;
   const movingStop = plan?.stops.find((s) => s.id === moving) ?? null;
   // A map click: move the stop waiting to move, else add a stop (the engine refuses ground that is not slope-screened).
@@ -300,7 +310,7 @@ export function App() {
         </div>
         <span className="progress" aria-hidden="true" />
       </header>
-      {step === "welcome" && <Welcome onBegin={() => { go("setup"); setTour(true); }} onSkip={() => go("setup")} ready={output ? true : engineFailed ? null : false} />}
+      {step === "welcome" && <Welcome onStart={(t, custom) => { if (!custom) applyPreset(); go(custom ? "planner" : "map"); setTour(t); }} ready={output ? true : engineFailed ? null : false} />}
       <main className="work" inert={step === "welcome"}>
         <div className="plate" inert={!onMap} aria-hidden={!onMap || undefined} data-tour="map"
           onPointerDown={(e) => { down.current = e.button === 0 && step === "map" && (e.target as HTMLElement).closest(".map") ? { x: e.clientX, y: e.clientY } : null; }}
@@ -348,7 +358,7 @@ export function App() {
             onSetTime={setTime} skyAt={showSky && skyState === "ok" ? skyAt : null} picked={picked} onPick={(id) => setPicked(id)}
             onMoveToCursor={cursor ? (stopId) => send("move_stop", { stopId, lat: cursor.lat, lon: cursor.lon }) : undefined} /></Appear>}
           {step === "assess" && <Appear key="assess" className="panel-host" enter={panelIn}><AssessPanel output={output} onOpenSource={openSource} drillMin={drillMin} onDrillMin={setDrillMin} busy={contourBusy}
-            next={next("brief", "Continue to the briefing")} toMap={toMap} /></Appear>}
+            next={next("hud", "Continue to the field HUD")} fix={next("planner", "Change the times or the route")} toMap={toMap} /></Appear>}
           {step === "setup" && <Appear key="setup" className="screen-host" enter={panelIn}><SetupScreen output={output} rems={rems} rover={rover} onSet={setTime} onOpenSource={openSource}
             preset={presetEnabled(location.search)} onApplyPreset={applyPreset} next={next("planner", "Continue to the time budget")} /></Appear>}
           {step === "planner" && <Appear key="planner" className="screen-host" enter={panelIn}><PlannerScreen output={output} onSet={setTime} next={next("map", "Continue to the map")} /></Appear>}
@@ -356,10 +366,11 @@ export function App() {
         <BriefingView output={output} snapshot={snapshot} hidden={step !== "brief"} rover={rover}
           confirmed={confirmed} onConfirm={setConfirmed} next={next("hud", "Open the field HUD")} />
         {/* Kept mounted: the field view alone holds MissionExecution, so ticks survive step changes. */}
-        <FieldView output={output} hidden={step !== "hud"} briefed={!!version && confirmed === version} toMap={toMap} onExec={setFieldExec} />
+        <FieldView output={output} hidden={step !== "hud"} toMap={toMap} onExec={setFieldExec} />
         <AnimatePresence>
-          {message && <Appear as="p" key={message.n} className="toast" data-kind={message.text.startsWith("Plan updated") ? "ok" : "hold"} aria-hidden="true" data-testid="engine-message"
-            enter={{ opacity: [0, 1], transform: ["translateY(-10px) scale(0.97)", "translateY(0px) scale(1)"] }} exit={{ opacity: [1, 0] }}>{message.text}</Appear>}
+          {message && <Appear as="p" key={message.n} className="toast" data-kind={message.text.startsWith("Plan updated") ? "ok" : "hold"} data-testid="engine-message"
+            enter={{ opacity: [0, 1], transform: ["translateY(-10px) scale(0.97)", "translateY(0px) scale(1)"] }} exit={{ opacity: [1, 0] }}><span aria-hidden="true">{message.text}</span>
+            {message.undo && <button type="button" className="textbtn" onClick={(e) => { e.currentTarget.disabled = true; send("delete_stop", { stopId: message.undo!.id }); }}>Undo stop {message.undo.letter}</button>}</Appear>}
         </AnimatePresence>
         <p className="sr-only" role="status" data-testid="engine-announce">{announce}</p>
         {/* Always mounted (inert and hidden while closed) so the datasets-in-view list stays current. */}

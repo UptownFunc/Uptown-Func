@@ -455,8 +455,13 @@ details[open] > summary::before { transform: rotate(90deg); }
 
 /* ---------- Field HUD (UX-12): arm's length ---------- */
 .field { font-size: var(--t-md); }
-.hud-brief { display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px; border-radius: 6px; font: 700 14px var(--ui); letter-spacing: 0.04em; background: var(--cream-2); color: var(--ink-2); }
-.hud-brief.ok { background: #d9efcf; color: var(--ok-ink); }
+/* FLOW-01: the plan is not feasible: said first, in the OVER word, shape and colour. */
+.infeasible { margin: 0 0 var(--s4); padding: 10px 12px; border: 2px solid var(--over-ink); border-radius: 8px; background: #ffe3dc; color: var(--over-ink); font: 600 var(--t-sm)/1.4 var(--ui); }
+.infeasible strong { text-transform: uppercase; letter-spacing: 0.04em; }
+.infeasible > strong:first-child::before { content: "OVER · "; }
+/* The OVER shape (octagon) in CSS, so the banner adds no second margin-state badge to the page. */
+.infeasible::before { content: ""; display: inline-block; width: 15px; height: 15px; margin-right: 7px; vertical-align: -2px; background: var(--over);
+  clip-path: polygon(30% 0, 70% 0, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0 70%, 0 30%); }
 .field-label { display: block; margin-bottom: 6px; font: 700 14px/1 var(--ui); letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); }
 .hud-next { margin: 16px 0; font: 800 32px/1.08 var(--display); font-variation-settings: "SOFT" 100, "WONK" 1; color: var(--ink); }
 .hud-leg, .hud-box { padding: 14px 16px; border-radius: 12px; background: var(--crt); color: var(--amber); border: 6px solid #1a0f09; }
@@ -643,6 +648,7 @@ details[open] > summary::before { transform: rotate(90deg); }
 .src-value :is(.unknown, .why) { color: var(--amber-dim); }
 .toast { position: fixed; z-index: 40; left: 50%; top: calc(var(--top) + 64px); translate: -50% 0; margin: 0; max-width: min(560px, calc(100% - 2 * var(--gap))); padding: 8px 14px;
   font: 400 20px/1.1 var(--crt-font); pointer-events: none; }
+.toast button { pointer-events: auto; margin-left: 12px; } /* UNDO-01: the one key a message carries */
 .toast[data-kind="hold"] { color: #ffc0a8; border-color: rgba(255, 90, 70, 0.6); }
 .app:is([data-step="map"], [data-step="assess"]) .toast { left: calc(50% + (var(--panel) + 2 * var(--gap)) / 2); }
 .app[data-step="hud"] .toast { left: calc(50% + (480px + 2 * var(--gap)) / 2); }
@@ -784,7 +790,7 @@ details[open] > summary::before { transform: rotate(90deg); }
 /* ---------- B2 fit fixes ---------- */
 .legs caption.section-title { display: table-caption; caption-side: top; text-align: left; }
 .legs caption.section-title::after { display: none; }
-.hud-brief { margin-bottom: 14px; }
+
 .card-head .meta { max-width: 62%; }
 /* The readout leaves the bottom-right corner to the scale bar and the zoom keys. */
 .status { max-width: calc(100% - 236px); }

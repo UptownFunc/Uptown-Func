@@ -30,14 +30,8 @@ export interface TourCard {
 
 /** Short, one idea per card, each with one thing to try. The words keep the plan's honesty rules (Assumed, estimate). */
 export const TOUR: readonly TourCard[] = [
-  { step: "setup", target: "scenario", title: "Pick a scenario",
-    body: "Demonstration loads cited plan times, each marked Assumed and editable. Blank starts empty.",
-    act: "Choose a scenario.", terms: ["EVA", "assumed"] },
-  { step: "setup", target: "conditions", title: "Check the conditions",
-    body: "The walk's date and time set the sun angle (Mars24, model-derived).",
-    act: "Change the time here if you need to, with a reason.", terms: ["lmst", "sun", "ls"] },
   { step: "planner", target: "budget", title: "Set the time budget",
-    body: "Walking gets what the EVA leaves after tasks, contingency and stops. The margin stays unknown until every time is set.",
+    body: "Walking gets what the EVA leaves after tasks, contingency and stops, each Assumed.",
     act: "Enter each time with a one-line reason.", terms: ["T_EVA", "t_ops", "t_cont", "stop"] },
   { step: "map", target: "map", title: "Point and click to place stops",
     body: "The tag under the cursor says whether the ground takes a stop before you click. Steeper ground is refused.",
@@ -47,12 +41,9 @@ export const TOUR: readonly TourCard[] = [
     act: "Check the end margin after each stop.", terms: ["leg", "est", "margin"] },
   { step: "assess", target: "gauge", title: "Judge the return margin",
     body: "OK, NEAR LIMIT or OVER, read at the slow walking speed. An estimate, never a guarantee.",
-    act: "Check the state before you brief.", terms: ["states", "slow"] },
-  { step: "brief", target: "brief", title: "Brief and confirm",
-    body: "The card is built from the current plan. Any later change marks it STALE.",
-    act: "Generate the card, tick the three checks and confirm.", terms: ["stale"] },
+    act: "Check the state before the walk.", terms: ["states", "slow"] },
   { step: "hud", target: "hud", title: "Carry it in the field",
-    body: "During the walk, after the briefing. The margins for continuing and for turning back follow your manual entries.",
+    body: "During the walk. The margins for continuing and for turning back follow your manual entries.",
     act: "Type the elapsed time, then tick each arrival and departure.", terms: ["elapsed", "tick", "goOn", "goBack"] },
 ];
 

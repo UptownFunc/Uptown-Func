@@ -13,10 +13,11 @@ import { QuantityText } from "../app/QuantityText";
 import { formatLength } from "../app/format";
 import { addTick, fieldMarginAssumptionIds, fieldMarginRanges, newExecution, nextEvent, type Range } from "./execution";
 import { progressOf, progressText } from "./progress";
+import { infeasible } from "../app/feasible";
 
 const SPEED_RATIO = CONSTANTS.walkSpeedRange.low / CONSTANTS.walkSpeedRange.high;
 
-export function FieldView({ output, hidden = false, briefed = false, next, toMap, onExec }: { output: PlanOutput | null; hidden?: boolean; briefed?: boolean; next?: ReactNode;
+export function FieldView({ output, hidden = false, next, toMap, onExec }: { output: PlanOutput | null; hidden?: boolean; next?: ReactNode;
   /** UX-24: the way out of the empty state (a key to the Map step). */ toMap?: ReactNode;
   /** HUD-01: a read-only copy of every execution this component writes, so the map can show the crew's progress
    *  (progressOf drops ticks of an older plan). This component stays the only writer of MissionExecution. */
@@ -52,17 +53,19 @@ export function FieldView({ output, hidden = false, briefed = false, next, toMap
   };
 
   const state = (r: Range | undefined) => (m && tEva && r ? <MarginState state={marginState(r.low, tEva)} /> : null);
+  const bad = !m ? infeasible(output) : next0 && tEva && marginState(m.continue_s.low, tEva) === "OVER" ? "carrying on overruns the EVA at the slow speed" : null;
   const nothing = <span className="unknown">{last ? "unknown (plan times or durations not set)" : "no tick yet"}</span>;
   return (
     <section className="side field" aria-label="Field view" hidden={hidden} data-testid="field-view">
       <div className="side-scroll" data-tour="hud">
-      <span className={briefed ? "hud-brief ok" : "hud-brief"}>{briefed ? "Briefing confirmed for this plan" : "Rehearsal: briefing not confirmed yet"}</span>
       {stale && (
         <p className="field-warning" role="alert">
           The plan changed after ticks were entered; those ticks belong to plan {exec!.planVersion}.{" "}
           <button type="button" className="textbtn" onClick={() => setExec(null)}>Start ticks for the current plan</button>
         </p>
       )}
+      {bad && <p className="infeasible" role="alert" data-testid="hud-infeasible"><strong>Plan not feasible</strong> ({bad}).
+        <strong> Turn back now.</strong> Estimate under stated assumptions.</p>}
       {plan.stops.length === 0 ? <div className="empty-lead"><h1 className="hud-next">No stops in the plan yet.</h1>
         <p className="note">The HUD walks the planned stops in order. Place at least one stop on the map first.</p>{toMap}</div> : <>
         <div data-testid="field-next"><span className="field-label">Next</span><h1 className="hud-next">

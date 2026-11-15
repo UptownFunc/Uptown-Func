@@ -1557,3 +1557,41 @@ Results: tsc clean; vitest 340/340 (37 files); /code-review low: 1 finding (this
 Next part / blocker owner: the other three members confirm the account; the team states whether SI was used while
   forming the concept or writing the plan, and the brainstorm date if known
 ```
+
+```text
+Part: UNDO-01, V-15 - Undo for a stop placed by a click on the map; upper limit on typed times
+Owner: Yujin (team member), on his own computer (Personal PC); SI-assisted (Claude Code, Claude Opus 5.5)
+Status: VERIFIED (branch yujin/stop-undo-time-limits from main 3df441b; commits 4e4b90c, 3b09c32)
+Scope completed: src/app/App.tsx (Undo key, Ctrl+Z, pause on hover/focus), src/app/styles.css, src/app/PlanTimes.tsx,
+  src/engine/assumptions.ts (TIME_LIMIT_MIN), src/engine/planner.ts, src/field/execution.ts, unit tests in
+  src/engine/planner.test.ts and src/field/execution.test.ts, e2e/undo-limits.spec.ts (new); CLAUDE.md register row
+  V-15; DECISIONS UNDO-01, V-15, R-33, B-04, MERGE-08 record, MERGE-09
+Checks run: npx tsc --noEmit; npx vitest run; rm -rf dist && npm run build && node scripts/bundle-size.mjs;
+  npx playwright test --trace off --workers=1 (full); --project=3d --no-deps; the reduced-motion tour spec
+  --repeat-each=3; /code-review high (R-33)
+Results: tsc clean; vitest 340/340; AC-12 249,880 B of 250,000 (120 B left); Playwright app 90/91, 3D 9/9; the one
+  failure is the tour's reduced-motion timing at 40.9 ms on a 40 ms limit (frame timing on this machine; it passed
+  3/3 when rerun alone, and main fails the same class here); new spec 2/2 (Undo by double click sends one delete,
+  Ctrl+Z, the key clears itself, 1,000,000 min refused in the Planner and the HUD); screenshots inspected
+After merging main eca1720 (PRs #40-#42; only log files conflicted, both sides kept): tsc clean; vitest 353/353;
+  AC-12 249,904 B (96 B left); Playwright app 90/91 (desktop tour timing 120.4 ms on 120) and 3D 10/10
+Next part / blocker owner: the team confirms the 24 h figure (V-15); Design reviews the Undo key (UNDO-01); any new
+  app code needs savings first (B-04)
+```
+
+```text
+Part: FLOW-01 - streamlined flow (start, data choice, Map, Assess, HUD) and infeasible plans announced at once
+Owner: Yujin (team member), on his own computer (Personal PC); SI-assisted (Claude Code, Claude Opus 5.5)
+Status: VERIFIED (branch yujin/streamlined-flow on top of yujin/stop-undo-time-limits = PR #39; commits b2413fa,
+  b4da2a4, R-37 fixes)
+Scope completed: src/app/{steps.ts,Screens.tsx,App.tsx,AssessPanel.tsx,Tutorial.tsx,feasible.ts,styles.css},
+  src/field/FieldView.tsx; unit tests steps, tour, mapFinal, feasible; e2e flow-01 (new) and the specs that followed
+  the old flow (a11y, audit, bureau, flow, fonts, map-final, phone, tour-timing, helpers.goStep); DECISIONS FLOW-01..03,
+  B-05, E2E-09, R-37, TIME-01, MERGE-11
+Checks run: npx tsc --noEmit; npx vitest run; rm -rf dist && npm run build && node scripts/bundle-size.mjs;
+  npx playwright test --trace off --workers=1; --project=3d --no-deps; /code-review medium (R-37)
+Results: tsc clean; vitest 356/356; AC-12 249,963 B of 250,000 (37 B left); Playwright: see the PR (final run after
+  R-37); tour-timing misses on this machine recorded as TIME-01
+Next part / blocker owner: Design reviews the new start and the banners; the team confirms what "not feasible" means
+  (FLOW-02)
+```

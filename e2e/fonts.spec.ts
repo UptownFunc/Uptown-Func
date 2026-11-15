@@ -66,9 +66,9 @@ test("if the font files cannot load, the console falls back to system fonts and 
   // Text is still shown and the console still works: move between steps with the keyboard and back.
   await expect(page.getByText("Independent student project; not affiliated with or endorsed by NASA.")).toBeVisible();
   const steps = page.getByRole("navigation", { name: "Mission steps" });
-  await steps.getByRole("button", { name: "Brief", exact: true }).focus();
+  await steps.getByRole("button", { name: "Assess", exact: true }).focus();
   await page.keyboard.press("Enter");
-  await expect(steps.getByRole("button", { name: "Brief", exact: true })).toHaveAttribute("aria-current", "step");
+  await expect(steps.getByRole("button", { name: "Assess", exact: true })).toHaveAttribute("aria-current", "step");
   await goStep(page, "Map");
   await expect(page.getByLabel("Plan", { exact: true })).toContainText("No stops yet.");
   expect(errors).toEqual([]);

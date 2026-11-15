@@ -5,6 +5,7 @@
 // F-01 (DECISIONS): plan 6.6 does not split t_ops into egress and ingress, so t_ops,remaining charges all of t_ops,
 // the same conservative choice the planned margin makes.
 import { MissionExecution, type MissionPlan, type Tick } from "../contracts";
+import { TIME_LIMIT_MIN } from "../engine/assumptions";
 
 export const ENTERED_BY = "field view (manual entry)";
 
@@ -30,7 +31,8 @@ export function nextEvent(plan: MissionPlan, e: MissionExecution): { stopId: str
 export function addTick(plan: MissionPlan, e: MissionExecution, entry: { elapsed_min: number; enteredAt: string },
   stopReturn_s: Record<string, number> | null = null, speedRatio = 1): MissionExecution {
   if (e.planVersion !== plan.versionHash) throw new RangeError(`ticks belong to plan version ${e.planVersion}, not ${plan.versionHash}`);
-  if (!Number.isFinite(entry.elapsed_min) || entry.elapsed_min < 0) throw new RangeError("elapsed time must be a finite, non-negative number of minutes");
+  if (!Number.isFinite(entry.elapsed_min) || entry.elapsed_min < 0 || entry.elapsed_min > 2 * TIME_LIMIT_MIN) throw new RangeError(`elapsed time must be a finite, non-negative number of minutes, at most ${2 * TIME_LIMIT_MIN}`);
+  // V-15: twice the longest plan time, so a crew over even the longest T_EVA can still record the overrun.
   const next = nextEvent(plan, e);
   if (!next) throw new RangeError("the plan has no further stops to tick");
   const last = e.ticks[e.ticks.length - 1];

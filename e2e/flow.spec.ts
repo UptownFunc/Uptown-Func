@@ -4,7 +4,7 @@
 import { expect, test } from "@playwright/test";
 import { EXCLUDED, STOP, clickAt, goStep, settle } from "./helpers";
 
-test("the whole journey with clicks: every screen, the plan kept between steps, the briefing confirmed", async ({ page }) => {
+test("the whole journey with clicks (FLOW-01): go, custom times, map, assess, HUD; Setup and Brief by link", async ({ page }) => {
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto("/");
@@ -13,13 +13,15 @@ test("the whole journey with clicks: every screen, the plan kept between steps, 
   await expect(page.getByText("Slope-screened, not rock-free.")).toBeVisible();
   await expect(page.getByText("Independent student project; not affiliated with or endorsed by NASA.")).toBeVisible();
   await expect(page.getByText("Terrain and route engine ready")).toBeVisible({ timeout: 20_000 });
-  await page.getByRole("button", { name: /Skip to mission setup/ }).click();
+  await page.getByRole("button", { name: "Go", exact: true }).click();
+  await page.getByRole("button", { name: "Custom times" }).click();
   await settle(page);
-  await expect(page).toHaveURL(/#setup$/);
-
-  // Setup: the demonstration scenario is in force; its scenario time is an Assumed input.
+  await expect(page).toHaveURL(/#planner$/);
+  // FLOW-01: the step index holds Map, Assess and HUD; Setup is off it, reached by its link.
   const steps = page.getByRole("navigation", { name: "Mission steps" });
-  await expect(steps.getByRole("button", { name: "Setup", exact: true })).toHaveAttribute("aria-current", "step");
+  await expect(steps.getByRole("button")).toHaveText([/Map/, /Assess/, /HUD/]);
+  await goStep(page, "Setup");
+  // Setup: the demonstration scenario is in force; its scenario time is an Assumed input.
   await expect(page.getByRole("button", { name: /Demonstration scenario/ })).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByTestId("current-scenario")).toHaveText("2026-11-15 12:00 UTC · assumed");
   await page.getByRole("button", { name: /Continue to the time budget/ }).click();
@@ -53,10 +55,20 @@ test("the whole journey with clicks: every screen, the plan kept between steps, 
   await expect(page.getByTestId("assess-margin")).toContainText(/est\. -?\d+\.\d to -?\d+\.\d min/);
   await expect(page.getByTestId("assess-margin").getByTestId("margin-state")).toHaveText(/^(OK|NEAR LIMIT|OVER)$/);
   await expect(page.getByRole("list", { name: "Traverse, leg by leg" })).toContainText("Stop S1");
-  await page.getByRole("button", { name: /Continue to the briefing/ }).click();
+  await page.getByRole("button", { name: /Continue to the field HUD/ }).click();
   await settle(page);
 
-  // Brief: confirmation needs a card and every acknowledgement; the stamp lands on the card.
+  // HUD, last: used during the walk. The next event; no step after it; no briefing in the way (FLOW-01).
+  await expect(page).toHaveURL(/#hud$/);
+  await expect(page.getByTestId("field-next")).toContainText("Arrive at A");
+  await expect(page.getByTestId("field-view").getByRole("button", { name: /Continue to/ })).toHaveCount(0);
+  // Back goes to the previous step; the plan is still there.
+  await page.goBack();
+  await settle(page);
+  await expect(page).toHaveURL(/#assess$/);
+
+  // Brief, by its link (off the main flow): confirmation needs a card and every acknowledgement; the stamp lands.
+  await goStep(page, "Brief");
   const confirm = page.getByRole("button", { name: "Confirm briefing" });
   await expect(confirm).toBeDisabled();
   await page.getByRole("button", { name: "Generate card from current plan" }).click();
@@ -68,20 +80,6 @@ test("the whole journey with clicks: every screen, the plan kept between steps, 
   await confirm.click();
   await expect(page.getByRole("button", { name: "Briefing confirmed" })).toBeDisabled();
   await expect(page.locator(".briefed")).toBeVisible();
-  await page.getByRole("button", { name: /Open the field HUD/ }).click();
-  await settle(page);
-
-  // HUD, last: used during the walk, after the briefing. The next event and the confirmed briefing; no step after it.
-  await expect(page).toHaveURL(/#hud$/);
-  await expect(page.getByTestId("field-next")).toContainText("Arrive at A");
-  await expect(page.getByText("Briefing confirmed for this plan")).toBeVisible();
-  await expect(page.getByTestId("field-view").getByRole("button", { name: /Continue to/ })).toHaveCount(0);
-
-  // Back goes to the previous step; the plan and the confirmation are still there.
-  await page.goBack();
-  await settle(page);
-  await expect(page).toHaveURL(/#brief$/);
-  await expect(page.getByTestId("card-version")).toHaveText(`Plan ${version}`);
   await expect(page.getByText(`Confirmed for plan ${version}.`)).toBeVisible();
 
   // A plan change lapses the confirmation and marks the card STALE.
@@ -92,7 +90,6 @@ test("the whole journey with clicks: every screen, the plan kept between steps, 
   await expect(page.getByTestId("stale")).toBeVisible();
   await expect(page.getByText("An earlier confirmation lapsed: the plan changed since.")).toBeVisible();
   await goStep(page, "HUD");
-  await expect(page.getByText("Rehearsal: briefing not confirmed yet")).toBeVisible();
   await expect(page.locator("body")).not.toContainText(/\bSAFE\b/);
   expect(errors).toEqual([]);
 });
@@ -121,8 +118,10 @@ test("clicks on the plate add stops only on the Map step", async ({ page }) => {
 test("reduced motion: the flow still works with every animation off", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/?preset=none");
-  await page.getByRole("button", { name: /Skip to mission setup/ }).click();
-  await expect(page).toHaveURL(/#setup$/);
+  await page.getByRole("button", { name: "Go", exact: true }).click();
+  await page.getByRole("button", { name: "Custom times" }).click();
+  await expect(page).toHaveURL(/#planner$/);
+  await goStep(page, "Setup");
   const duration = await page.getByRole("heading", { name: "Choose the scenario" }).evaluate((el) => parseFloat(getComputedStyle(el).animationDuration));
   expect(duration).toBeLessThan(0.01);
   await goStep(page, "Map");

@@ -13,6 +13,7 @@ import { DrillPanel } from "./DrillPanel";
 import { MarginState } from "./MarginState";
 import { AssumedNote } from "./PlanPanel";
 import { QuantityText } from "./QuantityText";
+import { infeasible } from "./feasible";
 
 const RANGE = CONSTANTS.walkSpeedRange;
 const ZONE_WORD = { OVER: "OVER", NEAR_LIMIT: "NEAR LIMIT", OK: "OK" } as const;
@@ -58,9 +59,10 @@ function Trace() {
   return <li ref={ref} className="ladder-trace" aria-hidden="true" data-testid="ladder-trace" />;
 }
 
-export function AssessPanel({ output, onOpenSource, drillMin, onDrillMin, busy, next, toMap }: {
+export function AssessPanel({ output, onOpenSource, drillMin, onDrillMin, busy, next, toMap, fix }: {
   output: PlanOutput | null; onOpenSource: (q: Quantity) => void; drillMin: number | null; onDrillMin: (m: number | null) => void;
   busy: boolean; next: ReactNode; /** UX-24: the way out of the empty state. */ toMap?: ReactNode;
+  /** FLOW-01: shown instead of `next` when the plan is not feasible (back to the map). */ fix?: ReactNode;
 }) {
   if (!output) return <aside className="side" aria-label="Assessment"><div className="side-scroll"><header className="side-head"><h1>Return margin</h1><p className="unknown">Loading the route engine…</p></header></div></aside>;
   const { plan, geometry } = output;
@@ -69,6 +71,7 @@ export function AssessPanel({ output, onOpenSource, drillMin, onDrillMin, busy, 
   const stopOf = (id: string) => plan.stops.find((s) => s.id === id);
   const tEva = plan.assumptions.find((a) => a.id === "A-T_EVA")?.value ?? null;
   const low = plan.endMargin.valueClass === "unknown" ? null : plan.endMargin.low ?? plan.endMargin.value;
+  const bad = infeasible(output);
   return (
     <aside className="side assess" aria-label="Assessment">
       <div className="side-scroll">
@@ -76,6 +79,7 @@ export function AssessPanel({ output, onOpenSource, drillMin, onDrillMin, busy, 
           <h1>Return margin</h1>
           <p>What the walk leaves of the EVA, with the route as planned.</p>
         </header>
+        {bad && <p className="infeasible" role="alert" data-testid="assess-infeasible"><strong>Plan not feasible</strong> ({bad}). Estimate under stated assumptions.</p>}
         <div className="verdict-block" data-testid="assess-margin" data-tour="gauge">
           <Meter angle={needleAngle(low, tEva)} live={low !== null && tEva !== null} />
           <span className="k"><Term k="margin">Planned return margin</Term></span>
@@ -87,7 +91,7 @@ export function AssessPanel({ output, onOpenSource, drillMin, onDrillMin, busy, 
         </div>
         <AssumedNote output={output} />
         <p className="section-title">Traverse</p>
-        {plan.legs.length > 0 && <p className="note trace-note">The moving line shows the order the margin is added up: each walk and stop, habitat to habitat. An illustration, not a live run.</p>}
+        {plan.legs.length > 0 && <p className="note trace-note">The moving line shows the order the margin adds up. An illustration, not a live run.</p>}
         {plan.legs.length === 0 ? <div className="empty-state"><strong>No route yet</strong><span>Add stops on the Map step.</span>{toMap}</div> : (
           <ol className="ladder" aria-label="Traverse, leg by leg">
             <Trace />
@@ -106,7 +110,7 @@ export function AssessPanel({ output, onOpenSource, drillMin, onDrillMin, busy, 
         <p className="section-title"><Term k="toHab" /></p>
         <DrillPanel output={output} drillMin={drillMin} onDrillMin={onDrillMin} busy={busy} />
       </div>
-      <div className="side-foot">{next}</div>
+      <div className="side-foot">{bad ? fix : next}</div>
     </aside>
   );
 }

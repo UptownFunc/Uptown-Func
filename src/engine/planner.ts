@@ -10,7 +10,7 @@ import { f1 } from "../geo";
 import { f1ToPlanetographic, type PlanetographicPoint } from "../geo/planetographic";
 import { marsSun, ttMinusUtc_s } from "./sun";
 import { cellCentreF1, f1ToCell, type GridDef } from "../geo/grid";
-import { KV_ASSUMED, MARS_CLOCK_UNIT, SCENARIO_ID, SCENARIO_UNIT, SLOPE_LIMIT_ASSUMPTION, STOP_LIMITS } from "./assumptions";
+import { KV_ASSUMED, MARS_CLOCK_UNIT, SCENARIO_ID, SCENARIO_UNIT, SLOPE_LIMIT_ASSUMPTION, STOP_LIMITS, TIME_LIMIT_MIN } from "./assumptions";
 import { legMetrics, type SpeedRange } from "./leg";
 import { plannedMarginProfile } from "./margin";
 import { CLASS, edgeCost, routeAStar, timeField, type RouteGrid } from "./route";
@@ -239,6 +239,7 @@ export class Planner {
         const v = p.value_s;
         if (!num(v) || v < 0 || (PLAN_TIME_IDS[id].min === "positive" && v === 0))
           return { ok: false, reason: `${id} must be a finite ${PLAN_TIME_IDS[id].min === "positive" ? "positive" : "non-negative"} number of seconds` };
+        if (v > TIME_LIMIT_MIN * 60) return { ok: false, reason: `${id} must be at most ${TIME_LIMIT_MIN} min (24 h)` }; // V-15
         if (!str(p.rationale) || !p.rationale.trim()) return { ok: false, reason: "every Assumed value needs a one-line rationale" };
         if (p.stopId !== undefined) {
           if (id !== "stop_duration") return { ok: false, reason: "only stop_duration can be set per stop" };

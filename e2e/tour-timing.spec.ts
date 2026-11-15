@@ -57,7 +57,8 @@ async function beginTour(page: Page) {
   await page.goto("/?preset=none");
   await expect(page.getByText("Terrain and route engine ready")).toBeVisible({ timeout: 20_000 });
   await page.getByRole("button", { name: /Begin orientation/ }).click();
-  await expect(page.getByRole("dialog", { name: "Pick a scenario" })).toBeVisible();
+  await page.getByRole("button", { name: "Custom times" }).click(); // FLOW-01: the tour starts on the Planner's card
+  await expect(page.getByRole("dialog", { name: "Set the time budget" })).toBeVisible();
   await expect(page.locator(".tour-ring")).toHaveCount(1);
   await expect.poll(() => page.locator(".tour-hole").evaluate((e) => e.getAnimations().length)).toBe(0);
 }
@@ -67,7 +68,7 @@ for (const size of [{ name: "desktop", width: 1440, height: 900 }, { name: "lapt
     await page.setViewportSize({ width: size.width, height: size.height });
     await beginTour(page);
     const turns: Turn[] = [];
-    for (let k = 0; k < 7; k++) turns.push(await press(page, "Next"));
+    for (let k = 0; k < 4; k++) turns.push(await press(page, "Next"));
     turns.push(await press(page, "Back"));
     for (const t of turns) {
       expect(t.titleAt, `${t.title}: the words change in the frame of the press`).toBeGreaterThanOrEqual(0);
@@ -81,7 +82,8 @@ for (const size of [{ name: "desktop", width: 1440, height: 900 }, { name: "lapt
     // Beside, below or above the spotlight on a wide window; docked to the other edge on a narrow one. Only where no
     // such place exists (a control that fills the window) may the card cover it.
     for (const t of turns) if (!t.huge) expect(t.overlap, `${t.title}: the card does not cover the spotlight`).toBeLessThan(0.05);
-    expect(turns.filter((t) => !t.huge).length, "most cards are checked for overlap").toBeGreaterThanOrEqual(5);
+    // FLOW-01: five cards; on a phone most spotlights fill the window, so at least one card is checked there.
+    expect(turns.filter((t) => !t.huge).length, "cards are checked for overlap").toBeGreaterThanOrEqual(size.width > 800 ? 3 : 1);
     // Every card, with its list of terms, fits inside the window.
     const fits = await page.locator(".tour-card").evaluate((e) => { const r = e.getBoundingClientRect(); return r.top >= 0 && r.bottom <= innerHeight + 1; });
     expect(fits, "the last card fits inside the window").toBe(true);
@@ -95,7 +97,7 @@ for (const size of [{ name: "desktop", width: 1440, height: 900 }, { name: "lapt
 test("reduced motion: the spotlight is on the new control in the first frame and nothing animates", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await beginTour(page);
-  for (let k = 0; k < 7; k++) {
+  for (let k = 0; k < 4; k++) {
     const t = await press(page, "Next");
     expect(t.landedAt, `${t.title}: on target`).not.toBeNull();
     expect(t.landedAt!, `${t.title}: on target at once`).toBeLessThan(40);
@@ -103,19 +105,19 @@ test("reduced motion: the spotlight is on the new control in the first frame and
   }
 });
 
-test("keyboard: Enter walks all eight cards on one key, Back never strands focus, and Finish closes the tour", async ({ page }) => {
+test("keyboard: Enter walks all five cards on one key, Back never strands focus, and Finish closes the tour", async ({ page }) => {
   await beginTour(page);
   const main = page.locator(".tour-card .key.primary");
   await main.focus();
   await page.keyboard.press("Enter");
-  await expect(page.getByRole("dialog", { name: "Check the conditions" })).toBeVisible();
+  await expect(page.getByRole("dialog", { name: "Point and click to place stops" })).toBeVisible();
   // Screen readers hear the new card from a region that stays mounted.
-  await expect(page.getByTestId("tour-announce")).toHaveText(/^Card 2 of 8\. Check the conditions\./);
+  await expect(page.getByTestId("tour-announce")).toHaveText(/^Card 2 of 5\. Point and click to place stops\./);
   await page.locator(".tour-card").getByRole("button", { name: "Back" }).focus();
   await page.keyboard.press("Enter"); // back to the first card: Back turns disabled, focus moves to the main key
-  await expect(page.getByRole("dialog", { name: "Pick a scenario" })).toBeVisible();
+  await expect(page.getByRole("dialog", { name: "Set the time budget" })).toBeVisible();
   await expect(main).toBeFocused();
-  for (let k = 2; k <= 8; k++) {
+  for (let k = 2; k <= 5; k++) {
     await page.keyboard.press("Enter");
     await expect(page.locator(".tour-card")).toHaveAttribute("data-card", String(k));
     await expect(main).toBeFocused();
@@ -128,7 +130,7 @@ test("keyboard: Enter walks all eight cards on one key, Back never strands focus
 
 test("the tour answers the user: placing a stop on the map card marks its try-it line Done", async ({ page }) => {
   await beginTour(page);
-  for (let k = 0; k < 3; k++) await page.locator(".tour-card .key.primary").click();
+  await page.locator(".tour-card .key.primary").click();
   await expect(page.getByRole("dialog", { name: "Point and click to place stops" })).toBeVisible();
   const act = page.getByTestId("tour-act");
   await expect(act).not.toHaveAttribute("data-done", "true");
@@ -160,8 +162,7 @@ test("a refusal does not outlive the next action, and the cursor tag keeps its w
 
 test("every variable explains itself: card terms, field meanings, tap-to-explain labels and the glossary (UX-22)", async ({ page }) => {
   await beginTour(page);
-  for (let k = 0; k < 2; k++) await page.locator(".tour-card .key.primary").click();
-  const card = page.getByRole("dialog", { name: "Set the time budget" });
+  const card = page.getByRole("dialog", { name: "Set the time budget" }); // card 1 (FLOW-01)
   await expect(card.locator(".tour-terms dt")).toHaveText(["T_EVA", "t_ops", "t_cont", "Stop time"]);
   await expect(card.locator(".tour-terms dd").first()).toHaveText("the whole EVA, egress to ingress");
   await expect(page.getByTestId("tour-announce")).toContainText("Terms: EVA duration (T_EVA), the whole EVA, egress to ingress");
@@ -190,7 +191,7 @@ test("every variable explains itself: card terms, field meanings, tap-to-explain
 test("on a laptop the card's terms start folded, and opening them keeps the card inside the window", async ({ page }) => {
   await page.setViewportSize({ width: 1366, height: 768 });
   await beginTour(page);
-  for (let k = 0; k < 7; k++) await page.locator(".tour-card .key.primary").click();
+  for (let k = 0; k < 4; k++) await page.locator(".tour-card .key.primary").click();
   const card = page.getByRole("dialog", { name: "Carry it in the field" });
   const terms = card.locator(".tour-terms");
   await expect(terms).not.toHaveAttribute("open");
