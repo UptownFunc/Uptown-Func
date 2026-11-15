@@ -2,6 +2,14 @@
 
 This file is the handoff between team members and Claude sessions. Keep it factual and current. A new session must read this file before touching code.
 
+## MERGED (Sun 15 Nov 2026, about 18:00 Asia/Manila): PR #31 (MERGE-05). Start here
+
+- **`main` = `be056b7`** (PR #31): HUD last in the flow (UI-17), planned vs field margin cross-check (LOGIC-01), slow walking bound **0.56 m/s** (W-01, re-checked in W-02, `docs/data/w-02-walking-speed.md`). PR #22 closed as superseded.
+- **Live site:** serves `assets/index-BahgxpwT.js` and `engine-worker.js`, byte-identical to a local build of `be056b7`; Playwright against the live URL 75/76 on the first run, the one failure (map slow to load) passed 3/3 on rerun.
+- **PR #30** (Midori-404, map and tour): not merged from this session (incomplete at the time); its own session then merged `main` into it, reran its checks and merged it as `d97ff38` (MERGE-06, section below). **`main` is now `d97ff38`.**
+- **For the team:** the other two members confirm W-01/W-02 and UI-17 in `DECISIONS.md`; decide the elapsed-time label (LOGIC-01). Everything in the 15:10 handoff section 3 still stands.
+- Checks at `be056b7`: tsc clean; vitest 320/320; Playwright 76/76 locally; JS 242,912 B of 250,000. For `d97ff38` see MERGE-06 below. **Checked at about 18:20:** the live site serves `assets/index-YVIcYmuh.js` and `engine-worker.js`, byte-identical to a local build of `d97ff38`; on `d97ff38` tsc clean, vitest 331/331, JS 245,896 B of 250,000 (about 4.1 kB left); Playwright against the live URL **86/86**.
+
 ## Final 2D map baseline (Sun 15 Nov 2026, from 17:09 Asia/Manila): branch `claude/practical-johnson-hbw41e`, PR #30, approved and being merged (MERGE-06)
 
 - **What:** the final 2D map that the 3D upgrade will branch from (DECISIONS MAP-01..MAP-08, TOUR-01, UX-24, UX-25, R-30). The load view now shows the whole sheet, with the habitat (before, the habitat was off screen). The sheet has its own keys (zoom, fit the route, whole sheet). The Layers panel has switches, a strength slider and a key. The sheet shows its own loading and error states, with Try again. The tour opens on the current step and follows the user's navigation. Empty HUD and Assess lead to the Map. **No 3D code**; no engine, contract, constant, dataset or value change.
@@ -9,7 +17,8 @@ This file is the handoff between team members and Claude sessions. Keep it factu
 - **Checks at `ab0ff2b`:** vitest 327/327; tsc clean; JS 245,635 B of 250,000 (**about 4.4 kB left**); Playwright 86/86; pytest 82 + 2 skipped; licences current. /code-review high R-30: 7 findings, all fixed.
 - **Approval and merge:** the operator confirmed the team's approval (MERGE-06). `main` had moved to `be056b7` (PR #31: HUD last, slow bound 0.56 m/s); it was merged into the branch and every check rerun: tsc clean, vitest 331/331, JS 245,896 B, Playwright 86/86. Then PR #30 was merged with a merge commit; the SHA and the live-site check are in the follow-up record. Live-site check: `curl -sS https://uptown-func.vercel.app/ | grep -o 'assets/index-[^"]*\.js'` against a local build of the merge commit (this container's network may refuse the site; a person may need to run it).
 - **Open for people:** a Design review of the map and tour changes; everything in the 15:10 handoff, section 3, below.
-## BRANCH (Sun 15 Nov 2026, about 17:55 Asia/Manila): HUD after the briefing, margin logic cross-checked. Not merged
+
+## BRANCH (Sun 15 Nov 2026, about 17:55 Asia/Manila): HUD after the briefing, margin logic cross-checked (merged at 18:00 as part of PR #31)
 
 - **Branch `claude/eager-hypatia-3w23ko`** (from `main` `c60d37e`). Step order is now Setup -> Planner -> Map -> Assess -> Brief -> HUD (DECISIONS UI-17), because the HUD is used during the walk. New test `src/field/consistency.test.ts` shows the HUD reproduces the planned margins when the crew is on plan (LOGIC-01).
 - **Checks:** tsc clean; vitest 318/318; Playwright 76/76; JS 242,650 B of 250,000; /code-review low: 0 findings.

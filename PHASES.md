@@ -1359,3 +1359,23 @@ Results: tsc clean; vitest 320/320; Playwright 76/76; JS 242,912 B of 250,000; r
 Known limitations: lunar sources, not Mars-validated; climbs may still be optimistic (k_v = 1)
 Next part / blocker owner: merge to main (this operator's instruction); the other two members confirm W-01/W-02
 ```
+
+```text
+Part: MERGE-05 - PR #31 merged into main; PR #22 closed as superseded; live-site check
+Owner: this cloud session's operator ("merge to main also resolve any other merges"); SI-assisted (Claude Code,
+  Claude Opus 5.5)
+Status: VERIFIED
+Merge: PR #31 merged as be056b7 (Sun 15 Nov 2026 about 18:00 Asia/Manila); main was c60d37e and had not moved; GitHub
+  clean; Vercel status success. PR #22 closed with a comment. PR #30 not merged (incomplete by its own description);
+  comment left on #30 about the UI-17 conflicts.
+Checks: local build of be056b7 -> assets/index-BahgxpwT.js; the live site served it; cmp of the live index-BahgxpwT.js
+  and engine-worker.js with the local build: identical. Playwright against https://uptown-func.vercel.app (temporary
+  config, deleted, --workers=1): 75 passed / 1 failed on the first run (tour-timing "a refusal does not outlive the
+  next action": the map canvas did not appear within 20 s over the network); that test alone, --repeat-each=3: 3/3
+  passed. Recorded as a load-time flake, not a code failure.
+Later: PR #30's own session merged main into it and merged it as d97ff38 (MERGE-06). Checked on d97ff38 (about
+  18:20): tsc clean; vitest 331/331; JS 245,896 B; live index-YVIcYmuh.js and engine-worker.js identical to a local
+  build (cmp); Playwright against the live URL 86/86 (--workers=1, --retries=0). UI-17 order and the 0.56 m/s bound
+  survived the MERGE-06 merge.
+Next part / blocker owner: the other two members confirm W-01/W-02 and UI-17
+```
