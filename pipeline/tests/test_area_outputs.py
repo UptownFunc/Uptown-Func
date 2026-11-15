@@ -71,3 +71,20 @@ def test_contours_match_their_checksum_and_the_sheet_spec():
         assert e % 10.0 == 0.0 and f["properties"]["index"] == (e % 50.0 == 0.0)
         for lon, lat in f["geometry"]["coordinates"]:
             assert x0 / k - 1e-7 <= lon <= x1 / k + 1e-7 and y0 / k - 1e-7 <= lat <= y1 / k + 1e-7
+
+
+
+def test_d2_colour_is_the_registered_file_on_the_display_grid():
+    """3D-04: the 3D view's D2 colour image is the file its manifest names (sha256), on exactly the 2D display window
+    and pixel grid (layers.json extentF7 and pixel_m), with the three published channels."""
+    import rasterio
+    man = json.loads((AREA / "d2_colour.json").read_text())
+    layers = json.loads((AREA / "layers.json").read_text())
+    assert _sha(AREA / man["path"]) == man["sha256"]
+    assert man["extentF7"] == layers["extentF7"] and man["pixel_m"] == layers["pixel_m"] and man["source"] == "D2"
+    # The display JPEGs carry no georeference of their own (as the 2D layers); the manifest's extent is the record,
+    # and the pixel count must be that extent at pixel_m.
+    x0, y0, x1, y1 = layers["extentF7"]
+    assert man["size"] == [round((x1 - x0) / man["pixel_m"]), round((y1 - y0) / man["pixel_m"])]
+    with rasterio.open(AREA / man["path"]) as f:
+        assert (f.count, f.width, f.height) == (3, *man["size"])

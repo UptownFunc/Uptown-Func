@@ -14,6 +14,12 @@ export default defineConfig({
   // E2E runs against the production build (vite preview), not the dev server: the dev server's dependency optimiser
   // reloads the page on a cold cache (first run after npm ci), which failed the first specs; and the preview serves
   // exactly what is deployed, worker chunk and public/area included.
+  // 3D-07: the 3D specs render on the container's software WebGL and take most of a CPU each; they run after the
+  // rest, so the timing specs (the tour's frame timings) never share the machine with them.
+  projects: [
+    { name: "app", testIgnore: /map-3d\.spec\.ts/ },
+    { name: "3d", testMatch: /map-3d\.spec\.ts/, dependencies: ["app"] },
+  ],
   webServer: { command: "npm run build && npx vite preview --port 5173 --strictPort", url: "http://localhost:5173",
     reuseExistingServer: false, timeout: 120_000 },
 });

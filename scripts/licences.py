@@ -34,7 +34,7 @@ def npm_rows():
         if not installed.exists():
             note = "not installed on this platform (optional)" if p.get("optional") else "NOT INSTALLED"
         rows.append(("development" if p.get("dev") else "production", name, p.get("version", "?"), lic, note))
-    return sorted(set(rows), key=lambda r: (r[0] != "production", r[1].lower()))
+    return sorted(set(rows), key=lambda r: (r[0] != "production", r[1].lower(), r))  # full tuple: nested same-name packages sort the same every run
 
 
 def pip_rows():

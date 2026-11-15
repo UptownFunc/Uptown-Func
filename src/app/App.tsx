@@ -4,7 +4,7 @@
 // worker, so it survives every step change. The AREA sheet stays mounted and laid out on every step, so the map view,
 // its layers and the briefing snapshot never reset; the field view and the briefing card stay mounted for their state.
 // The engine worker is the only writer of MissionPlan; the console sends it Commands and shows the copies it returns.
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AreaSheet } from "../map/AreaSheet";
 import type { SkySampler } from "../map/skySample";
 import { createEngine, type EngineClient } from "../engine/client";
@@ -31,6 +31,14 @@ import { Tutorial, orientationDone } from "./Tutorial";
 import { StopPopover } from "./StopPopover";
 import { GlossaryList } from "./Term";
 import { DEFAULT_LAYERS, type MapLayers } from "../map/layers";
+import type { Sampler } from "../map3d/scene";
+
+type View3d = typeof import("../map3d/TerrainView").default;
+/** 3D-05: the 3D view is its own chunk, fetched only when the user opens 3D (CesiumJS is loaded by it). A chunk that
+ *  cannot be downloaded hands back to 2D instead of breaking the page; the next attempt fetches it again. */
+const lazy3d = () => lazy(() => import("../map3d/TerrainView").catch((e: unknown) => ({
+  default: ((p: { onFail: (why: string) => void }) => { useEffect(() => p.onFail(`the 3D view could not be downloaded (${errText(e)})`), []); return null; }) as unknown as View3d,
+})));
 
 const AREA_URL = "area/";
 /** H-01 (DECISIONS.md, pending team confirmation): the slope-screened cell nearest the plan 19.2 suggestion
@@ -79,6 +87,15 @@ export function App() {
   const [showSky, setShowSky] = useState(false);
   /** MAP-02: the display layers shown on the sheet (console state; a later 3D view reads the same object). */
   const [mapLayers, setMapLayers] = useState<MapLayers>(DEFAULT_LAYERS);
+  /** 3D-05: which view the map plate shows. The 2D sheet stays mounted under the 3D view, so nothing resets. */
+  const [view, setView] = useState<"2d" | "3d">("2d");
+  const [tries3d, setTries3d] = useState(0);
+  const TerrainView = useMemo(lazy3d, [tries3d]); // eslint-disable-line react-hooks/exhaustive-deps
+  /** The 3D view reads D1 heights from the engine worker (one copy of the grid, read only). */
+  const sampler = useMemo<Sampler>(() => ({
+    heights: (b, w, h) => engine.current ? engine.current.api.heights(b, w, h) : Promise.reject(new Error("engine not running")),
+    sample: (pts) => engine.current ? engine.current.api.sample(pts) : Promise.reject(new Error("engine not running")),
+  }), []);
   const [skyState, setSkyState] = useState<"none" | "ok" | "failed">("none");
   const [skyAt, setSkyAt] = useState<SkySampler | null>(null);
   const [drillMin, setDrillMin] = useState<number | null>(null);
@@ -255,7 +272,7 @@ export function App() {
   };
 
   return (
-    <div className="app" data-step={step} data-busy={pending > 0 || (!output && !engineFailed) || contourBusy} data-moving={!!moving}>
+    <div className="app" data-step={step} data-busy={pending > 0 || (!output && !engineFailed) || contourBusy} data-moving={!!moving} data-view={view}>
       <div className="ambient" aria-hidden="true" />
       <header className="masthead" inert={step === "welcome"}>
         <button type="button" className="wordmark" onClick={() => go("welcome")}>
@@ -298,10 +315,22 @@ export function App() {
             cursorHint={step === "map" ? (movingStop ? `Click to move stop ${movingStop.letter} here · Esc to cancel` : true) : false}
             onSnapshotReady={(fn) => setSnapshot(() => fn)} hoverIndex={hover} onHoverIndex={setHover} onDatasets={setLayerDatasets} onCursor={setCursor}
             contours={contourDisplay} showSky={showSky} onSky={(st, f) => { setSkyState(st); if (f) setSkyAt(() => f); }}
-            tools={<LayerToggles showContours={showContours} onShowContours={setShowContours} showSky={showSky} onShowSky={setShowSky} skyAvailable={skyState !== "none"} busy={contourBusy} />}
+            tools={<>{view === "3d" && <p className="muted view-note">In 3D: elevation contours, time-to-habitat lines and the sky layer are drawn on the 2D sheet only.</p>}
+              <LayerToggles showContours={showContours} onShowContours={setShowContours} showSky={showSky} onShowSky={setShowSky} skyAvailable={skyState !== "none"} busy={contourBusy} /></>}
             hint={step === "map" ? (movingStop ? `Moving stop ${movingStop.letter}: click its new place` : "Click ground to add a stop · click a stop to edit it") : "View only · edit the route on the Map step"} />
           {ping && <span key={ping.n} className="ping" style={{ left: ping.x, top: ping.y }} aria-hidden="true" />}
           {/* Recalculation feedback: shown while a Command is with the engine (route search, margins). */}
+          {/* 3D-05: one switch for the plate; 3D needs the engine (its heights come from the engine's grid). */}
+          <div className="view-switch" role="group" aria-label="Map view: 2D or 3D">
+            <button type="button" aria-pressed={view === "2d"} onClick={() => setView("2d")}>2D</button>
+            <button type="button" aria-pressed={view === "3d"} disabled={!output} title={output ? "Show the terrain in 3D" : engineFailed ? "3D needs the route engine, which could not start" : "3D opens when the engine is ready"}
+              onClick={() => setView("3d")}>3D</button>
+          </div>
+          {view === "3d" && <Suspense fallback={<p className="sheet-msg scene3d-loading" role="status">Loading the 3D view…</p>}>
+            <TerrainView areaUrl={AREA_URL} output={output} sampler={sampler} layers={mapLayers} hoverIndex={hover} onHoverIndex={setHover}
+              selectedStop={picked} onPick={step === "map" ? onPick : undefined} onSelectStop={step === "map" ? (id) => { setPicked(id); setMoving(null); } : undefined}
+              onFail={(why) => { setView("2d"); setTries3d((n) => n + 1); say(`3D view unavailable: ${why}. Showing the 2D sheet.`); }} />
+          </Suspense>}
           <p className="recalc" data-on={recalculating} aria-hidden={!recalculating}>
             <LoaderCircle {...ICON} aria-hidden="true" />Engine updating the plan
           </p>
