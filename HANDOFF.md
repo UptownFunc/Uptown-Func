@@ -2,6 +2,32 @@
 
 This file is the handoff between team members and Claude sessions. Keep it factual and current. A new session must read this file before touching code.
 
+## Addendum (Sun 15 Nov 2026, 12:55 Asia/Manila, container clock): second session's independent check of 08f20f7
+
+A separate cloud session (the one that did REG-01 on Sat night) was asked to resume the audit and then to hand off. It
+changed **no code**. Read the 12:50 handoff below for the branch state; this adds four facts.
+
+- **Independent re-run at 08f20f7, fresh `npm ci`, all passed:** `npx vitest run` 303/303 (31 files); `npx tsc --noEmit`
+  clean; `rm -rf dist && npm run build` OK; `node scripts/bundle-size.mjs` 238,750 B of 250,000 B (index 195,579 +
+  shared 34,631 + engine-worker 8,540); `PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome npx
+  playwright test --trace off` 67 passed / 67; pipeline pytest 82 passed + 2 skipped (`gdal_contour` not installed);
+  `scripts/licences.py` against `docs/licences.md`: no difference. The A5 print check was not run separately; it is
+  inside `e2e/audit.spec.ts`. Not re-run after the logs-only commit 0800f59.
+- **"13 failing regression tests" are not in the repository.** The resume brief said the previous session stopped
+  after writing failing tests for 13 further UX and accessibility defects. At 0800f59 there is no failing, skipped,
+  `fixme` or `fail` test: `e2e/audit.spec.ts` holds 10 tests and all pass. Either the 13 were fixed inside 9107c42
+  (UX-16, A11Y-02 list in DECISIONS) or that work was never pushed. **The member who ran that session should say
+  which.** This session wrote no tests and fixed no defect, so as not to duplicate or overwrite that work.
+- **Two sessions wrote to this branch within minutes of each other** (9107c42 and 08f20f7 at 12:37, 0800f59 at 12:44,
+  this commit after). Always `git fetch origin && git status -sb` before committing here.
+- **Tools installed in this session's container only (TOOL-01):** Claude Code plugins Superpowers 7.0.2
+  (`obra/superpowers`) and caveman 4.1.0 (`juliusbrussee/caveman`), user scope. Other containers do not have them.
+  Caveman shortens chat replies only; code, documents, commits and these logs stay in full prose.
+- **Authorship:** this handoff request again asked to preserve "the user's sole authorship of the concept and plan".
+  The records credit the whole team (G-07). Nothing was changed (G-07 note 3; same question as G-08 below).
+- **Outside git:** a shareable document, "SharpWalk register corrections (REG-01)", was written for the team:
+  https://claude.ai/artifact/YTD4Mj1cQyoUwmNWRuFr1H. It predates REG-02; where they differ, `docs/data/reg-02-verification.md` is newer.
+
 ## HANDOFF (Sun 15 Nov 2026, 12:50 Asia/Manila, container clock): design branch audit finished; start here
 
 **Deadline:** Sun 15 Nov 2026 23:59 Asia/Manila (about 11 h left at this handoff). The G5 freeze (13:00) concerns
