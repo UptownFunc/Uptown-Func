@@ -1344,6 +1344,22 @@ Commit SHA: 0112e90 (D2 colour), d8241c0 (vendor and budget), 9de97b6 (3D view),
 Next part / blocker owner: the team approves (or not) the 3D pull request (MERGE-07); Data and Science: 3D-03, 3D-04
 ```
 
+```text
+Part: MERGE-07 - PR #36 (3D view) merged into main; live-site check
+Owner: session operator, confirming the team's approval ("Team approved: merge now"); SI-assisted (Claude Code, Claude Opus 5.5)
+Status: VERIFIED
+Merge: main had moved to 6c147f3 (PRs #34, #35, Markdown only); merged into the branch (1a4b7e6), then PR #36 merged as
+  158ece1 (parents 6c147f3, 1a4b7e6). No squash, no force push. origin/main^{tree} == 1a4b7e6^{tree}.
+Checks on main 158ece1 (fresh npm ci, worktree): npx tsc --noEmit clean; npx vitest run 336/336; build OK;
+  node scripts/bundle-size.mjs: app 248,267 B of 250,000, 3D chunk 6,738 B of 10,000, Cesium 2,112,862 B of 2,120,000
+  (unmodified); pytest 83 passed, 2 skipped; Playwright app project 85 passed + 1 timing flake (tour frame timing 44.8 ms
+  vs 40 ms; passed 27/27 on --repeat-each=3), 3D project 9/9.
+Live site: assets/index-DIhEGVs4.js, engine-worker.js, the 3D chunk, cesium-1.147.0/Cesium.js and area/d2_colour.jpg
+  byte-identical to the local build; full suite against https://uptown-func.vercel.app (temporary config, deleted,
+  --workers=2): 95/95.
+Next part / blocker owner: Data and Science confirm 3D-03 and 3D-04; Design reviews the 3D look; the team's submission
+```
+
 ## Phase-part completion record
 
 Copy this block for every phase part and update its table row above:

@@ -2,7 +2,14 @@
 
 This file is the handoff between team members and Claude sessions. Keep it factual and current. A new session must read this file before touching code.
 
-## 3D view (Sun 15 Nov 2026, from about 18:15 Asia/Manila): branch `claude/practical-johnson-hbw41e`, NOT merged yet. Start here
+## MERGED (Sun 15 Nov 2026, about 19:35 Asia/Manila): 3D view (MERGE-07). Start here
+
+- **`main` = `158ece1`** (PR #36), plus this record. Its tree is identical to the approved branch. The live site serves `assets/index-DIhEGVs4.js`, and the entry bundle, worker, 3D chunk, Cesium.js and D2 colour image are byte-identical to a local build. Playwright passed **95/95 against the live URL**.
+- **Checks on `main`:** vitest 336/336; tsc clean; app JS 248,267 B of 250,000 (**about 1.7 kB left** for anything loaded without 3D); 3D chunk 6,738 of 10,000; Cesium vendor within its ceiling; pytest 83 + 2 skipped.
+- **Known flake:** the tour's frame-timing spec can miss its 40 ms or 120 ms limits by a few ms on a loaded machine. Rerun it alone (`npx playwright test e2e/tour-timing.spec.ts`).
+- **For people:** Data and Science confirm 3D-03 (the globe is the F1 sphere; D1's vertical reference is unverified) and 3D-04 (the D2 colour step); Design reviews the 3D look; and the submission tasks in the SUB-01 section below.
+
+## Detail: 3D view (Sun 15 Nov 2026, from about 18:15 Asia/Manila): branch `claude/practical-johnson-hbw41e`, PR #36 (merged as `158ece1`)
 
 - **What:** a 3D view of the AREA sheet, opened with the 2D/3D switch on the plate (DECISIONS 3D-01..3D-08, B-02). Terrain is D1 from the engine's grid, at true scale. The image is D2 in its published colour, with the D1 hillshade. The view shows the route, the habitat and the stops, uses the same layer switches, keys and readout, and shares the profile scrub with 2D. The 2D sheet is unchanged underneath and is where the app goes back to if 3D fails.
 - **Budget (operator's decisions B-02, B-02 amended):** AC-12 (250,000 B) checks everything loaded without opening 3D: **248,118 B**. The 3D view's chunk is checked at **6,756 B of 10,000**, and Cesium's unmodified files at **2,112,862 B of 2,120,000**. `npm run build && node scripts/bundle-size.mjs` checks all three.
