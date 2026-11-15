@@ -2,6 +2,38 @@
 
 This file is the handoff between team members and Claude sessions. Keep it factual and current. A new session must read this file before touching code.
 
+## Handoff: backend audit session (Sun 15 Nov 2026, 11:22-11:45 Asia/Manila), AUD-01
+
+**Read this section first, then Yujin's section below (still current for everything not listed here).**
+
+- **Session:** cloud session, branch `claude/pensive-mayer-2n8nqj` (from `main` `ca2504a`). Operator not stated (the account does not name a team member, G-05). Claude Code with Claude Fable 5.2 (the operator's session setting; CLAUDE.md names Opus 5.5 as primary). **Superpowers and Caveman are not installed here and were not used;** the same steps were done by hand.
+- **Request:** audit the "backend", fix verified issues, verify, log. **SharpWalk has no backend server** (static app, CLAUDE.md architecture): no API endpoint, no database, no secret. The audit covered what does that job: the engine worker, contracts, field execution, the data loaders, the Python pipeline and its committed outputs, and the Vercel configuration. No server was added.
+- **Branch state:** one code commit `6f21aeb` plus this log commit, pushed. **No PR opened** (not asked for). `main` is unchanged, so the live site is unchanged.
+
+### Audit result (AUD-01)
+
+| Area | Finding | Action |
+|---|---|---|
+| API endpoints | None exist, by design. The only interface is the Comlink worker API (`init`, `current`, `apply`, `contours`). `apply` parses every Command with Zod, refuses a stale plan version, and returns copies (`structuredClone`). | None needed |
+| Frontend integration | Console sends Commands only; engine errors and refusals reach the status line; e2e covers add, refuse, edit, margins, field ticks, offline and missing files (50 specs). | None needed |
+| Data flow and state | Engine is the only writer of `MissionPlan`; field view the only writer of `MissionExecution`; ticks against a changed plan are flagged stale. **Nothing is persisted:** a page reload loses the plan and the ticks (no storage API is used). | Limitation recorded, not changed (new feature, and the bundle has no room) |
+| Validation | **Bug found and fixed:** `loadPlannerGrid` accepted a `build_report.json` with a missing or non-numeric elevation scale or offset, or a zero cell size. Every height became NaN and every leg read "unreachable" with no error. | Fixed in `6f21aeb`, tests first (3 failing, then passing) |
+| Security | No secret in the tree (grep). No `innerHTML`, `eval` or storage use. The app makes no request to another host at run time (fonts and data are local). `npm audit`: 0 vulnerabilities. `pip-audit` on the pipeline pins: none known. Live response headers: HSTS and `nosniff` only. | **Not changed:** a Content-Security-Policy would be reasonable (`default-src 'self'` should fit), but it could be tested here only in Chromium, and a wrong policy would break the live site on submission day. Team to decide after submission |
+| Source maps | `build.sourcemap: true` serves a 3.8 MB map. The source is MIT and public, so nothing is exposed. | None |
+| NASA/USGS data and provenance | pytest 82 passed, 2 skipped (output checksums, headers, provenance, REMS, rover images). Values and citations were verified in REG-02 and not re-read here. Raw D1/D2/D12 files are not in the container, so the pipeline jobs (AC-07, AC-08, rebuild) were **not** re-run. | None |
+| Licences | `scripts/licences.py --check` passes on a clean Python 3.11 venv (the item Yujin's handoff left for a cloud container). Native-library licences inside the wheels and the D12 terms remain unverified (B-5 list). | None |
+| Route bench | Run here (4-core container, not the laptop): longest route 354-436 ms (target < 500), time field 434-463 ms (target < 3000). **The laptop measurement is still owed.** | Recorded |
+| Deployment | `vercel.json` unchanged. Live site serves `assets/index-D6_LSyTq.js`, the same file name this container builds from `main`. | None |
+
+### Checks at `6f21aeb`
+
+`npm ci`; `npx vitest run` 292/292 (28 files); `npx tsc --noEmit` clean; `npm run build` OK, main 208.35 kB + worker 41,562 B gzip = **249,912 of 250,000 B** (88 left); `PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome npx playwright test --trace off --workers=2` 50/50 (without `PW_CHROMIUM` all 50 fail at browser launch: this container has Chromium 1243, the pinned Playwright wants 1254); `(cd pipeline && ../.venv/bin/python -m pytest)` 82 passed, 2 skipped; `npm audit` 0; `/code-review low origin/main...HEAD` 0 findings.
+
+### Next
+
+1. A member decides whether to open and merge a PR for `claude/pensive-mayer-2n8nqj` (a bug fix, allowed after the 13:00 freeze). After a merge the bundle name changes: check the live site and record the merge SHA.
+2. Everything in Yujin's section 3 still stands: PR #22 team decision, video, README concept account (team only), two-machine check, FortiGuard, submission, deadline confirmed on the portal.
+
 ## Handoff: Yujin's session (Sun 15 Nov 2026, 00:02-01:55 Asia/Manila)
 
 **Read this section first.** It replaces the two short "latest session" notes below it, which keep the detail.

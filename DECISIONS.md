@@ -312,6 +312,18 @@ Evidence for every row: `docs/data/reg-02-verification.md` (documents, checksums
 | X-03 | Model and workflow skill in this session | Claude Code with **Claude Fable 5.2** on a team member's own computer (not the cloud container). The work was a source audit of science values, which CLAUDE.md lists as Fable's remit. Superpowers was not installed and not used; the three tests were written first and shown failing by hand. Node 24.16.0 was used; the repo pins 22.x. | Recorded |
 | B-01 | Bundle budget (update) | Main 208.36 kB + worker 41,546 B gzipped = **~249.9 of 250 KB** after REG-02 (+0.07 KB; about 94 bytes left). | **Watch - any new app code needs savings first** |
 
+## Session Sun 15 Nov 11:22-11:45 (claude/pensive-mayer-2n8nqj): backend audit AUD-01
+
+Operator instruction: audit the backend, fix verified issues without scope expansion, verify, log. Detail: `HANDOFF.md`, first section.
+
+| ID | Topic | Decision / finding | Status |
+|---|---|---|---|
+| AUD-01 | Engine grid load | A `build_report.json` with a non-finite elevation scale or offset, or a cell size not above zero, is refused with an error naming the report. Before, heights decoded to NaN and legs read "unreachable" silently. No contract in `src/contracts` changed; no displayed value changed. | Done, `6f21aeb` |
+| AUD-02 | "Backend" scope | The project has no server by design (CLAUDE.md architecture). None was added; the audit covered the engine, contracts, field execution, loaders, pipeline and deploy configuration. | Recorded |
+| AUD-03 | Content-Security-Policy | Not added. The app loads nothing from other hosts, so a strict policy should fit, but only Chromium could be tested here and a wrong policy would break the live site before submission. | **Open: team, after submission** |
+| AUD-04 | Persistence | Plan and field ticks live in memory only; a reload loses them. Not changed: it would be a new feature after the freeze, and the bundle has 88 bytes left. | Limitation recorded |
+| B-01 | Bundle budget (update) | Main 208.35 kB + worker 41,562 B gzip = **249,912 of 250,000 B** after AUD-01 (+32 B). | Watch: 88 B left |
+
 ## Fixed technical / presentation constraints
 
 - `MissionPlan` is written only by the engine; `MissionExecution` only by the field view. Console changes the plan by Commands.
