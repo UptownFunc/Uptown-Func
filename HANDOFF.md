@@ -25,6 +25,10 @@ This file is the handoff between team members and Claude sessions. Keep it factu
 - **For people:** team approval to merge (MERGE-07); Data and Science to confirm 3D-03 (the F1 sphere as the globe, D-05 still open) and 3D-04 (the D2 colour step); Design to review the look.
 - **Not done / limits:** nothing beyond the 3 x 3 km sheet; contours, time lines and the sky layer stay 2D-only; only headless Chromium with software WebGL tested here.
 
+## Concept origin (Sun 15 Nov 2026, about 19:15 Asia/Manila): ORIGIN-01
+
+- The team's concept-origin account is now in `SI_LOG.md` and at the top of the README's SI use section; the member's original wording is kept in DECISIONS ORIGIN-01. **The other three members confirm it**, and the team states whether SI was used while forming the concept or writing the plan.
+
 ## Submission links (Sun 15 Nov 2026, about 19:00 Asia/Manila): SUB-01. Start here
 
 - The 2026 Project Submission Guide (dated 13 Nov 2026) allows a website **or** a code repository as the Project link. Judges see SI indicators only inside the project, and the live app shows none, so the recommended Project link is **https://github.com/UptownFunc/Uptown-Func**. The README now opens with the live app URL, an SI pointer and a References pointer (DECISIONS SUB-01).
