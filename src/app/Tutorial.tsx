@@ -40,15 +40,15 @@ export const TOUR: readonly TourCard[] = [
   { step: "map", target: "route", title: "Read the route",
     body: "Each leg shows an estimated walking time range. The end margin updates after every change.",
     act: "Check the end margin after each stop.", terms: ["leg", "est", "margin"] },
-  { step: "hud", target: "hud", title: "Carry it in the field",
-    body: "The margins for continuing and for turning back follow your manual entries.",
-    act: "Type the elapsed time, then tick each arrival and departure.", terms: ["elapsed", "tick", "goOn", "goBack"] },
   { step: "assess", target: "gauge", title: "Judge the return margin",
     body: "OK, NEAR LIMIT or OVER, read at the slow walking speed. An estimate, never a guarantee.",
     act: "Check the state before you brief.", terms: ["states", "slow"] },
   { step: "brief", target: "brief", title: "Brief and confirm",
     body: "The card is built from the current plan. Any later change marks it STALE.",
     act: "Generate the card, tick the three checks and confirm.", terms: ["stale"] },
+  { step: "hud", target: "hud", title: "Carry it in the field",
+    body: "The margins for continuing and for turning back follow your manual entries.",
+    act: "Type the elapsed time, then tick each arrival and departure.", terms: ["elapsed", "tick", "goOn", "goBack"] },
 ];
 
 const STORE = "sharpwalk.orientation.done";

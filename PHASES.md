@@ -1266,3 +1266,20 @@ Review status:
 Commit SHA:
 Next part / blocker owner:
 ```
+
+```text
+Part: UI-17 + LOGIC-01 - HUD moved after the briefing; planned vs field margin cross-check
+Owner: this cloud session's operator (a team member: "lets do A but first check if our logic is correct"); SI-assisted
+  (Claude Code, Claude Opus 5.5)
+Status: VERIFIED on branch claude/eager-hypatia-3w23ko (not merged; after the G5 freeze, the team decides)
+Scope completed: new test src/field/consistency.test.ts (LOGIC-01); step order Setup -> Planner -> Map -> Assess ->
+  Brief -> HUD (src/app/steps.ts, App.tsx continue keys, Tutorial.tsx card order); tests updated (steps.test.ts,
+  e2e/flow.spec.ts, tour-timing.spec.ts, phone.spec.ts, helpers.ts)
+Checks run: npx tsc --noEmit; npx vitest run; PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome
+  npx playwright test --trace off --workers=2; node scripts/bundle-size.mjs; /code-review low on the diff
+Results: tsc clean; vitest 318/318 (316 + 2 new); Playwright 76/76; JS 242,650 B gzip of 250,000 (AC-12 within
+  budget); review 0 findings. Mutation check: removing the stop time from "continue" fails consistency.test.ts.
+Known limitations: the elapsed-time convention question in DECISIONS LOGIC-01 (no code change)
+Commit SHA: see git log of claude/eager-hypatia-3w23ko
+Next part / blocker owner: the team: approve UI-17, then merge (checks above) and verify the live site
+```

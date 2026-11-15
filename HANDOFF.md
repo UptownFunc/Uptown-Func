@@ -2,6 +2,12 @@
 
 This file is the handoff between team members and Claude sessions. Keep it factual and current. A new session must read this file before touching code.
 
+## BRANCH (Sun 15 Nov 2026, about 17:55 Asia/Manila): HUD after the briefing, margin logic cross-checked. Not merged
+
+- **Branch `claude/eager-hypatia-3w23ko`** (from `main` `c60d37e`). Step order is now Setup -> Planner -> Map -> Assess -> Brief -> HUD (DECISIONS UI-17), because the HUD is used during the walk. New test `src/field/consistency.test.ts` shows the HUD reproduces the planned margins when the crew is on plan (LOGIC-01).
+- **Checks:** tsc clean; vitest 318/318; Playwright 76/76; JS 242,650 B of 250,000; /code-review low: 0 findings.
+- **For the team:** approve UI-17 and merge (after the freeze); decide the elapsed-time label (LOGIC-01: from leaving the habitat, or from egress?).
+
 ## MERGED (Sun 15 Nov 2026, 15:57 Asia/Manila): every variable explained (MERGE-04). Start here, then read the 15:10 handoff below
 
 - **`main` = `f1fd37f`** (PR #28) plus this record. The live site serves `assets/index-3s757jEt.js` and `engine-worker.js`, byte-identical to a local build of `f1fd37f`; Playwright **76/76 against the live URL** (15:57-16:02).

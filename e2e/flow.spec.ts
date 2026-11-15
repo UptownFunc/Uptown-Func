@@ -1,5 +1,5 @@
 // SI-assisted: drafted with Claude Code (Claude Opus 5.5) on design/sharpwalk-ui-ux (UI-01); human Design review pending.
-// The guided flow with real input only: Welcome -> Setup -> Planner -> Map -> HUD -> Assess -> Brief, the state carried
+// The guided flow with real input only: Welcome -> Setup -> Planner -> Map -> Assess -> Brief -> HUD, the state carried
 // across every step, the browser's Back button, click feedback on the plate, and the briefing confirmation.
 import { expect, test } from "@playwright/test";
 import { EXCLUDED, STOP, clickAt, goStep, settle } from "./helpers";
@@ -46,12 +46,6 @@ test("the whole journey with clicks: every screen, the plan kept between steps, 
   await expect(page.getByTestId("legs")).toBeVisible({ timeout: 20_000 });
   await expect(page.getByTestId("end-margin")).toContainText(/est\. -?\d+\.\d to -?\d+\.\d min/);
   const version = (await page.getByText(/^Plan [0-9a-f]{16} ·/).textContent())!.match(/Plan ([0-9a-f]{16})/)![1]!;
-  await page.getByRole("button", { name: /Continue to the field HUD/ }).click();
-  await settle(page);
-
-  // HUD: the next event, the leg and both field margins; not yet briefed, so it says rehearsal.
-  await expect(page.getByTestId("field-next")).toContainText("Arrive at A");
-  await expect(page.getByText("Rehearsal: briefing not confirmed yet")).toBeVisible();
   await page.getByRole("button", { name: /Continue to the assessment/ }).click();
   await settle(page);
 
@@ -76,7 +70,12 @@ test("the whole journey with clicks: every screen, the plan kept between steps, 
   await expect(page.locator(".briefed")).toBeVisible();
   await page.getByRole("button", { name: /Open the field HUD/ }).click();
   await settle(page);
+
+  // HUD, last: used during the walk, after the briefing. The next event and the confirmed briefing; no step after it.
+  await expect(page).toHaveURL(/#hud$/);
+  await expect(page.getByTestId("field-next")).toContainText("Arrive at A");
   await expect(page.getByText("Briefing confirmed for this plan")).toBeVisible();
+  await expect(page.getByTestId("field-view").getByRole("button", { name: /Continue to/ })).toHaveCount(0);
 
   // Back goes to the previous step; the plan and the confirmation are still there.
   await page.goBack();

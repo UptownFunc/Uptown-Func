@@ -39,7 +39,7 @@ export async function settle(page: Page): Promise<void> {
 }
 
 /** Moves to a step with a real click on the masthead's step index, as a user does. */
-export async function goStep(page: Page, name: "Setup" | "Planner" | "Map" | "HUD" | "Assess" | "Brief"): Promise<void> {
+export async function goStep(page: Page, name: "Setup" | "Planner" | "Map" | "Assess" | "Brief" | "HUD"): Promise<void> {
   await page.getByRole("navigation", { name: "Mission steps" }).getByRole("button", { name, exact: true }).click();
   await settle(page);
 }

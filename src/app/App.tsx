@@ -303,7 +303,7 @@ export function App() {
         </div>
         <RouteProfile output={output} hoverIndex={hover} onHoverIndex={setHover} />
         {/* Step panels enter with Motion and leave at once, so a click right after a step change reaches the new step. */}
-          {step === "map" && <Appear key="map" className="panel-host" enter={panelIn}><PlanPanel output={output} onOpenSource={openSource} next={next("hud", "Continue to the field HUD")}
+          {step === "map" && <Appear key="map" className="panel-host" enter={panelIn}><PlanPanel output={output} onOpenSource={openSource} next={next("assess", "Continue to the assessment")}
             onDeleteStop={(id) => send("delete_stop", { stopId: id })} onEditStop={(stopId, name, tasks) => send("edit_stop", { stopId, name, tasks })}
             onSetTime={setTime} skyAt={showSky && skyState === "ok" ? skyAt : null} picked={picked} onPick={(id) => setPicked(id)}
             onMoveToCursor={cursor ? (stopId) => send("move_stop", { stopId, lat: cursor.lat, lon: cursor.lon }) : undefined} /></Appear>}
@@ -316,7 +316,7 @@ export function App() {
         <BriefingView output={output} snapshot={snapshot} hidden={step !== "brief"} rover={rover}
           confirmed={confirmed} onConfirm={setConfirmed} next={next("hud", "Open the field HUD")} />
         {/* Kept mounted: the field view alone holds MissionExecution, so ticks survive step changes. */}
-        <FieldView output={output} hidden={step !== "hud"} briefed={!!version && confirmed === version} next={next("assess", "Continue to the assessment")} />
+        <FieldView output={output} hidden={step !== "hud"} briefed={!!version && confirmed === version} />
         <AnimatePresence>
           {message && <Appear as="p" key={message.n} className="toast" data-kind={message.text.startsWith("Plan updated") ? "ok" : "hold"} aria-hidden="true" data-testid="engine-message"
             enter={{ opacity: [0, 1], transform: ["translateY(-10px) scale(0.97)", "translateY(0px) scale(1)"] }} exit={{ opacity: [1, 0] }}>{message.text}</Appear>}
