@@ -2,7 +2,41 @@
 
 This file is the handoff between team members and Claude sessions. Keep it factual and current. A new session must read this file before touching code.
 
-## Merge preparation, audit session (Sun 15 Nov 2026, 12:55 Asia/Manila, container clock): READY, NOT MERGED; read this first
+## MERGED INTO MAIN (Sun 15 Nov 2026, 13:27 Asia/Manila, container clock): start here
+
+- **`main` = merge commit `b0896ad`** (parents `ca2504a` = previous `main`, `52965ae` = `design/sharpwalk-ui-ux`), plus
+  the logs commit that records this. Merge commit, no squash, no force push; `git ls-remote origin refs/heads/main`
+  answered `b0896ad13f11451084d9f16f89675a6450ec4561` right after the push. The merged tree is byte-identical to the
+  tested branch tree (`git diff b0896ad 52965ae` is empty).
+- **Why now:** the operator (parcilla13's account) answered "Merge now" to the question of MERGE-01; attribution
+  "Leave as is" (DECISIONS MERGE-02). The merge is after the G5 freeze time (13:00), as an exception at the operator's
+  instruction.
+- **Commits brought to `main` (15):** 2b5f515, dbfdd6d, 0f153e5, 46218f4, 0a00683, 6380209, 62fa3bd (the three
+  redesigns and their review fixes), 9107c42 (audit), 08f20f7, 0800f59, 63c8b82, c28bc24, 79c9c56, 7d3982b, 52965ae
+  (review R-27 fixes and records).
+- **Checks at `52965ae`, fresh `npm ci`, all passed:** `npx vitest run` 31 files, 302/302; `npx tsc --noEmit` exit 0;
+  `rm -rf dist && npm run build` OK; `node scripts/bundle-size.mjs` 238,771 B of 250,000 B;
+  `PW_CHROMIUM=/opt/pw-browsers/chromium-1243/chrome-linux64/chrome npx playwright test --trace off` 67/67;
+  `(cd pipeline && ../.venv/bin/python -m pytest)` 82 passed, 2 skipped; licences current. Rerun on the merge commit
+  itself: tsc exit 0, vitest 302/302, build OK, bundle 238,771 B.
+- **Deployment: NOT VERIFIED from this session.** Vercel builds `main` for Production, but this container's network
+  policy refuses `uptown-func.vercel.app` (proxy 403). Evidence short of that: Vercel built the branch preview at
+  08f20f7 and reported "Ready" on pull request #24. **A person must check the live site now:**
+
+  ```bash
+  curl -sS https://uptown-func.vercel.app/ | grep -o 'assets/index-[^"]*\.js'      # expect assets/index-CuLWKMki.js
+  curl -sS -o /dev/null -w '%{http_code}\n' https://uptown-func.vercel.app/engine-worker.js   # expect 200
+  ```
+
+  Then open the site, wait for "Terrain and route engine ready", add a stop on Map and generate the card.
+- **If the live site is wrong:** in Vercel, promote the previous production deployment (instant), then on a branch
+  `git revert -m 1 b0896ad` and open a pull request. Do not force-push `main`.
+- **Still open for people:** the other members' written review of the redesign (UI-01 to UI-16, MOT-04); BUILD-01
+  (worker build layout); authorship wording (G-08 to G-10, unchanged: whole team); EL-01; pull request #22 (W-01); the
+  team's confirmation of REG-01; G5 two-machine demo on the new interface; the card on paper; the video and the
+  submission.
+
+## Earlier: merge preparation, audit session (Sun 15 Nov 2026, 12:55 Asia/Manila, container clock): superseded by the merge above
 
 Two sessions received the merge request at the same time and both stopped before the merge, for the same reasons.
 This section is the audit session's; the next section is the second session's (MERGE-01).
