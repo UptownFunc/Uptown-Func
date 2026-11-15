@@ -5,6 +5,11 @@ assumptions, and shows the estimated time margins. It does **not** certify a saf
 under stated assumptions, the route is slope-screened (not rock-free or validated), and suit life support is not
 modelled.
 
+- **Live app:** https://uptown-func.vercel.app (runs in the browser; no login or install)
+- **SI use:** code, data processing and documentation were drafted with SI tools (mainly Claude Code) under the
+  team's direction; see [SI use](#si-use) and [`SI_LOG.md`](SI_LOG.md)
+- **Sources:** every dataset, document, package and font is listed under [References](#references)
+
 Independent student project; not affiliated with or endorsed by NASA.
 
 ## Team
